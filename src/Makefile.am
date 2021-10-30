@@ -65,6 +65,7 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
+                   hy_md5sum.c \
                    hy_sort.c \
                    hy_fifo.c
 
