@@ -83,6 +83,14 @@ endif
 if COMPILE_LIBCJSON
 _include_com    += $(CJSON_INCS)
 _ldadd_com      += $(CJSON_LIBS)
+
+bin_PROGRAMS                += hy_cjson_test
+hy_cjson_test_SOURCES       = $(_sources_com) hy_cjson_test.c
+hy_cjson_test_CPPFLAGS      = $(_cppflags_com)
+hy_cjson_test_CFLAGS        = $(_cflags_com)
+hy_cjson_test_CXXFLAGS      = $(_cxxflags_com)
+hy_cjson_test_LDFLAGS       = $(_ldflags_com)
+hy_cjson_test_LDADD         = $(_ldadd_com)
 endif
 
 bin_PROGRAMS                += hy_fifo_test

@@ -88,6 +88,7 @@ _include_com    += $(HY_HAL_INCS)
 endif
 
 if COMPILE_LIBCJSON
+_sources_com    += hy_cjson.c
 _include_com    += $(CJSON_INCS)
 endif
 

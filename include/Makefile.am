@@ -55,6 +55,7 @@ _no_install_headers_com +=
 
 _install_headers_com    +=                  \
                            hy_bit.h         \
+                           hy_cjson.h       \
                            hy_fifo.h        \
                            hy_list.h        \
                            hy_math.h        \
