@@ -53,6 +53,11 @@ _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
+if COMPILE_LIBHY_HAL
+_include_com    += $(HY_HAL_INCS)
+_ldadd_com      += $(HY_HAL_LIBS)
+endif
+
 bin_PROGRAMS    += main
 main_SOURCES    = $(_sources_com) main.c
 main_CPPFLAGS   = $(_cppflags_com)
