@@ -83,5 +83,6 @@ doxygen/
 *.la
 
 hy_utils.pc
+example/hy_*_test
 example/main
 
