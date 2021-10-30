@@ -32,8 +32,8 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
-                           hy_timer.h \
-                           hy_net_wired.h
+                           hy_net_wired.h \
+                           hy_timer.h
 
 # ------------------
 # make install files

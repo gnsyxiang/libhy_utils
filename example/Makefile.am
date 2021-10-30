@@ -80,21 +80,21 @@ _include_com    += $(HY_HAL_INCS)
 _ldadd_com      += $(HY_HAL_LIBS)
 endif
 
-bin_PROGRAMS                += hy_template_test
-hy_template_test_SOURCES    = $(_sources_com) hy_template_test.c
-hy_template_test_CPPFLAGS   = $(_cppflags_com)
-hy_template_test_CFLAGS     = $(_cflags_com)
-hy_template_test_CXXFLAGS   = $(_cxxflags_com)
-hy_template_test_LDFLAGS    = $(_ldflags_com)
-hy_template_test_LDADD      = $(_ldadd_com)
+bin_PROGRAMS                += hy_fifo_test
+hy_fifo_test_SOURCES        = $(_sources_com) hy_fifo_test.c
+hy_fifo_test_CPPFLAGS       = $(_cppflags_com)
+hy_fifo_test_CFLAGS         = $(_cflags_com)
+hy_fifo_test_CXXFLAGS       = $(_cxxflags_com)
+hy_fifo_test_LDFLAGS        = $(_ldflags_com)
+hy_fifo_test_LDADD          = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_utils_test
-hy_utils_test_SOURCES       = $(_sources_com) hy_utils_test.c
-hy_utils_test_CPPFLAGS      = $(_cppflags_com)
-hy_utils_test_CFLAGS        = $(_cflags_com)
-hy_utils_test_CXXFLAGS      = $(_cxxflags_com)
-hy_utils_test_LDFLAGS       = $(_ldflags_com)
-hy_utils_test_LDADD         = $(_ldadd_com)
+bin_PROGRAMS                += hy_list_test
+hy_list_test_SOURCES        = $(_sources_com) hy_list_test.c
+hy_list_test_CPPFLAGS       = $(_cppflags_com)
+hy_list_test_CFLAGS         = $(_cflags_com)
+hy_list_test_CXXFLAGS       = $(_cxxflags_com)
+hy_list_test_LDFLAGS        = $(_ldflags_com)
+hy_list_test_LDADD          = $(_ldadd_com)
 
 bin_PROGRAMS                += hy_md5sum_test
 hy_md5sum_test_SOURCES      = $(_sources_com) hy_md5sum_test.c
@@ -112,21 +112,21 @@ hy_sort_test_CXXFLAGS       = $(_cxxflags_com)
 hy_sort_test_LDFLAGS        = $(_ldflags_com)
 hy_sort_test_LDADD          = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_fifo_test
-hy_fifo_test_SOURCES        = $(_sources_com) hy_fifo_test.c
-hy_fifo_test_CPPFLAGS       = $(_cppflags_com)
-hy_fifo_test_CFLAGS         = $(_cflags_com)
-hy_fifo_test_CXXFLAGS       = $(_cxxflags_com)
-hy_fifo_test_LDFLAGS        = $(_ldflags_com)
-hy_fifo_test_LDADD          = $(_ldadd_com)
+bin_PROGRAMS                += hy_template_test
+hy_template_test_SOURCES    = $(_sources_com) hy_template_test.c
+hy_template_test_CPPFLAGS   = $(_cppflags_com)
+hy_template_test_CFLAGS     = $(_cflags_com)
+hy_template_test_CXXFLAGS   = $(_cxxflags_com)
+hy_template_test_LDFLAGS    = $(_ldflags_com)
+hy_template_test_LDADD      = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_list_test
-hy_list_test_SOURCES        = $(_sources_com) hy_list_test.c
-hy_list_test_CPPFLAGS       = $(_cppflags_com)
-hy_list_test_CFLAGS         = $(_cflags_com)
-hy_list_test_CXXFLAGS       = $(_cxxflags_com)
-hy_list_test_LDFLAGS        = $(_ldflags_com)
-hy_list_test_LDADD          = $(_ldadd_com)
+bin_PROGRAMS                += hy_utils_test
+hy_utils_test_SOURCES       = $(_sources_com) hy_utils_test.c
+hy_utils_test_CPPFLAGS      = $(_cppflags_com)
+hy_utils_test_CFLAGS        = $(_cflags_com)
+hy_utils_test_CXXFLAGS      = $(_cxxflags_com)
+hy_utils_test_LDFLAGS       = $(_ldflags_com)
+hy_utils_test_LDADD         = $(_ldadd_com)
 
 bin_PROGRAMS                += main
 main_SOURCES                = $(_sources_com) main.c
@@ -135,4 +135,3 @@ main_CFLAGS                 = $(_cflags_com)
 main_CXXFLAGS               = $(_cxxflags_com)
 main_LDFLAGS                = $(_ldflags_com)
 main_LDADD                  = $(_ldadd_com)
-

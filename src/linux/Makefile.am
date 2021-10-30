@@ -36,7 +36,7 @@ _ldadd_com      =
 # ---------------------
 # add necessary content
 # ---------------------
-_no_error_com   += -Wno-error=address
+_no_error_com   +=
 
 _define_com     +=
 
@@ -45,8 +45,8 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_timer.c \
-                   hy_net_wired.c
+                   hy_net_wired.c \
+                   hy_timer.c
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
 

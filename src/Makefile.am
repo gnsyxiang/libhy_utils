@@ -58,7 +58,7 @@ _ldadd_com      =
 # ---------------------
 # add necessary content
 # ---------------------
-_no_error_com   += -Wno-error=address
+_no_error_com   +=
 
 _define_com     +=
 
@@ -66,10 +66,10 @@ _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
                    hy_bit.c \
-                   hy_utils.c \
+                   hy_fifo.c \
                    hy_md5sum.c \
                    hy_sort.c \
-                   hy_fifo.c
+                   hy_utils.c
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
 

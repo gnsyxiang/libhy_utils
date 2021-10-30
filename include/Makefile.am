@@ -55,12 +55,12 @@ _no_install_headers_com +=
 
 _install_headers_com    += \
                            hy_bit.h \
+                           hy_fifo.h \
+                           hy_list.h \
                            hy_math.h \
                            hy_md5sum.h \
                            hy_sort.h \
-                           hy_fifo.h \
-                           hy_utils.h \
-                           hy_list.h
+                           hy_utils.h
 
 # ------------------
 # make install files
