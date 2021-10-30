@@ -36,7 +36,7 @@ _ldadd_com      =
 # ---------------------
 # add necessary content
 # ---------------------
-_no_error_com   +=
+_no_error_com   += -Wno-error=address
 
 _define_com     +=
 
@@ -58,6 +58,10 @@ _ldadd_com      +=
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
+endif
+
+if COMPILE_SELECT_TARGET_OS_LINUX
+_sources_com    += hy_net_wired.c
 endif
 
 lib@project_name@_la_SOURCES    = $(_sources_com)

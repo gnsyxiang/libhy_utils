@@ -36,6 +36,11 @@ _install_headers_com    += \
                            hy_utils.h \
                            hy_list.h
 
+if COMPILE_SELECT_TARGET_OS_LINUX
+_install_headers_com    += \
+                           hy_net_wired.h
+endif
+
 # ------------------
 # make install files
 # ------------------
