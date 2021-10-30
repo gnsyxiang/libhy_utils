@@ -40,13 +40,13 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    += \
-                   -I$(top_srcdir)/include/linux \
+_include_com    +=                                  \
+                   -I$(top_srcdir)/include/linux    \
                    -I$(top_srcdir)/include
 
-_sources_com    += \
-                   hy_hash.c \
-                   hy_net_wired.c \
+_sources_com    +=                      \
+                   hy_hash.c            \
+                   hy_net_wired.c       \
                    hy_timer.c
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)

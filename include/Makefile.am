@@ -53,13 +53,13 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    += \
-                           hy_bit.h \
-                           hy_fifo.h \
-                           hy_list.h \
-                           hy_math.h \
-                           hy_md5sum.h \
-                           hy_sort.h \
+_install_headers_com    +=                  \
+                           hy_bit.h         \
+                           hy_fifo.h        \
+                           hy_list.h        \
+                           hy_math.h        \
+                           hy_md5sum.h      \
+                           hy_sort.h        \
                            hy_utils.h
 
 # ------------------

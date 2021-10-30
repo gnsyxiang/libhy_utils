@@ -39,8 +39,8 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    += \
-                   -I$(top_srcdir)/include/mac \
+_include_com    +=                              \
+                   -I$(top_srcdir)/include/mac  \
                    -I$(top_srcdir)/include
 
 _sources_com    +=

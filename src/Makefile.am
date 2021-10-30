@@ -64,11 +64,11 @@ _define_com     +=
 
 _include_com    += -I$(top_srcdir)/include
 
-_sources_com    += \
-                   hy_bit.c \
-                   hy_fifo.c \
-                   hy_md5sum.c \
-                   hy_sort.c \
+_sources_com    +=                  \
+                   hy_bit.c         \
+                   hy_fifo.c        \
+                   hy_md5sum.c      \
+                   hy_sort.c        \
                    hy_utils.c
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
@@ -77,8 +77,8 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    += \
-                   -export-symbols-regex 'Hy*' \
+_ldflags_com    +=                                              \
+                   -export-symbols-regex 'Hy*'                  \
                    -version-info @current@:@revision@:@age@
 
 _ldadd_com      += $(top_builddir)/src/$(select_target_os)/libhy_utils_os.la

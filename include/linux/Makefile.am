@@ -31,9 +31,9 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    += \
-                           hy_hash.h \
-                           hy_net_wired.h \
+_install_headers_com    +=                  \
+                           hy_hash.h        \
+                           hy_net_wired.h   \
                            hy_timer.h
 
 # ------------------
