@@ -80,6 +80,11 @@ _include_com    += $(HY_HAL_INCS)
 _ldadd_com      += $(HY_HAL_LIBS)
 endif
 
+if COMPILE_LIBCJSON
+_include_com    += $(CJSON_INCS)
+_ldadd_com      += $(CJSON_LIBS)
+endif
+
 bin_PROGRAMS                += hy_fifo_test
 hy_fifo_test_SOURCES        = $(_sources_com) hy_fifo_test.c
 hy_fifo_test_CPPFLAGS       = $(_cppflags_com)

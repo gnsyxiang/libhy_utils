@@ -87,6 +87,10 @@ if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 endif
 
+if COMPILE_LIBCJSON
+_include_com    += $(CJSON_INCS)
+endif
+
 lib@project_name@_la_SOURCES    = $(_sources_com)
 lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)
 lib@project_name@_la_CFLAGS     = $(_cflags_com)
