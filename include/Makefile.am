@@ -54,6 +54,7 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+                           hy_sort.h \
                            hy_fifo.h \
                            hy_utils.h \
                            hy_list.h
