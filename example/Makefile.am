@@ -18,6 +18,28 @@
 #     last modified: 05/03 2021 10:38
 # ===============================================================
 
+if COMPILE_SELECT_TARGET_OS_LINUX
+select_target_os = linux
+endif
+
+if COMPILE_SELECT_TARGET_OS_MAC
+select_target_os = mac
+endif
+
+if COMPILE_SELECT_TARGET_OS_WINDOW
+select_target_os = window
+endif
+
+if COMPILE_SELECT_TARGET_OS_RTOS
+select_target_os = rtos
+endif
+
+if COMPILE_SELECT_TARGET_OS_MCU
+select_target_os = mcu
+endif
+
+SUBDIRS = $(select_target_os)
+
 # ------------------
 # defining variables
 # ------------------
@@ -56,16 +78,6 @@ _ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 _ldadd_com      += $(HY_HAL_LIBS)
-endif
-
-if COMPILE_SELECT_TARGET_OS_LINUX
-bin_PROGRAMS                += hy_net_wired_test
-hy_net_wired_test_SOURCES   = $(_sources_com) hy_net_wired_test.c
-hy_net_wired_test_CPPFLAGS  = $(_cppflags_com)
-hy_net_wired_test_CFLAGS    = $(_cflags_com)
-hy_net_wired_test_CXXFLAGS  = $(_cxxflags_com)
-hy_net_wired_test_LDFLAGS   = $(_ldflags_com)
-hy_net_wired_test_LDADD     = $(_ldadd_com)
 endif
 
 bin_PROGRAMS                += hy_template_test

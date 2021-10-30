@@ -84,5 +84,10 @@ doxygen/
 
 hy_utils.pc
 example/hy_*_test
+example/linux/hy_*_test
+example/mac/hy_*_test
+example/mcu/hy_*_test
+example/rtos/hy_*_test
+example/window/hy_*_test
 example/main
 

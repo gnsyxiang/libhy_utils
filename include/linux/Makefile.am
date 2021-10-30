@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    05/03 2021 10:35
+# @date    30/10 2021 11:42
 # @version v0.0.1
 # 
 # @since    note
@@ -13,32 +13,10 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        05/03 2021      create the file
+#     00      zhenquan.qiu        30/10 2021      create the file
 # 
-#     last modified: 05/03 2021 10:35
+#     last modified: 30/10 2021 11:42
 # ===============================================================
-
-if COMPILE_SELECT_TARGET_OS_LINUX
-select_target_os = linux
-endif
-
-if COMPILE_SELECT_TARGET_OS_MAC
-select_target_os = mac
-endif
-
-if COMPILE_SELECT_TARGET_OS_WINDOW
-select_target_os = window
-endif
-
-if COMPILE_SELECT_TARGET_OS_RTOS
-select_target_os = rtos
-endif
-
-if COMPILE_SELECT_TARGET_OS_MCU
-select_target_os = mcu
-endif
-
-SUBDIRS = $(select_target_os)
 
 # ------------------
 # defining variables
@@ -54,9 +32,7 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
-                           hy_fifo.h \
-                           hy_utils.h \
-                           hy_list.h
+                           hy_net_wired.h
 
 # ------------------
 # make install files

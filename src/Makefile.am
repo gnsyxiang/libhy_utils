@@ -18,6 +18,28 @@
 #     last modified: 05/03 2021 10:35
 # ===============================================================
 
+if COMPILE_SELECT_TARGET_OS_LINUX
+select_target_os = linux
+endif
+
+if COMPILE_SELECT_TARGET_OS_MAC
+select_target_os = mac
+endif
+
+if COMPILE_SELECT_TARGET_OS_WINDOW
+select_target_os = window
+endif
+
+if COMPILE_SELECT_TARGET_OS_RTOS
+select_target_os = rtos
+endif
+
+if COMPILE_SELECT_TARGET_OS_MCU
+select_target_os = mcu
+endif
+
+SUBDIRS = $(select_target_os)
+
 lib_LTLIBRARIES = lib@project_name@.la
 
 # ------------------
@@ -54,14 +76,10 @@ _ldflags_com    += \
                    -export-symbols-regex 'Hy*' \
                    -version-info @current@:@revision@:@age@
 
-_ldadd_com      +=
+_ldadd_com      += $(top_builddir)/src/$(select_target_os)/libhy_utils_os.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
-endif
-
-if COMPILE_SELECT_TARGET_OS_LINUX
-_sources_com    += hy_net_wired.c
 endif
 
 lib@project_name@_la_SOURCES    = $(_sources_com)
