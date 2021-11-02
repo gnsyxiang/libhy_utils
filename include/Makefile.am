@@ -53,7 +53,7 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    +=                  \
+_install_headers_com    += \
                            hy_bit.h         \
                            hy_cjson.h       \
                            hy_fifo.h        \

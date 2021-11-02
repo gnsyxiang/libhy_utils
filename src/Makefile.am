@@ -64,7 +64,7 @@ _define_com     +=
 
 _include_com    += -I$(top_srcdir)/include
 
-_sources_com    +=                  \
+_sources_com    += \
                    hy_bit.c         \
                    hy_fifo.c        \
                    hy_md5sum.c      \
@@ -77,7 +77,7 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    +=                                              \
+_ldflags_com    += \
                    -export-symbols-regex 'Hy*'                  \
                    -version-info @current@:@revision@:@age@
 

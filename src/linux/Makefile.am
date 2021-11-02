@@ -40,11 +40,11 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    +=                                  \
+_include_com    += \
                    -I$(top_srcdir)/include/linux    \
                    -I$(top_srcdir)/include
 
-_sources_com    +=                      \
+_sources_com    += \
                    hy_hash.c            \
                    hy_net_wired.c       \
                    hy_timer.c

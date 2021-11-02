@@ -40,7 +40,7 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    +=                              \
+_include_com    += \
                    -I$(top_srcdir)/include/rtos \
                    -I$(top_srcdir)/include
 
