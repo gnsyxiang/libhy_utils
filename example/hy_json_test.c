@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_cjson_test.c
+ * @file    hy_json_test.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 19:38
@@ -22,7 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "hy_cjson.h"
+#include "hy_json.h"
 
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
@@ -113,41 +113,43 @@ static _main_context_t *_module_create(void)
     return context;
 }
 
-#if (HY_CJSON_USE_TYPE == 1)
-static void _test_cjson(cJSON *root)
+#if (HY_JSON_USE_TYPE == 1)
+static void _test_json(HyJson_t *root)
 {
-    int height = HyCjsonGetItemInt(-1, root, "image", "thumbnail", "height");
+    int height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
     LOGD("Height: %d \n", height);
 
-    double d = HyCjsonGetItemDouble(5.5, root, "image", "double", 1);
+    double d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
     LOGD("d: %f \n", d);
 
-    const char *buf = HyCjsonGetItemStr("haha", root, "image", "title");
+    const char *buf = HyJsonGetItemStr("haha", root, "image", "title");
     LOGD("buf: %s \n", buf);
 }
 #endif
 
-#if (HY_CJSON_USE_TYPE == 2)
-static void _test_cjson(cJSON *root)
+#if (HY_JSON_USE_TYPE == 2)
+static void _test_json(HyJson_t *root)
 {
-    int height = HyCjsonGetItemInt2(-1, root, "image.thumbnail.height", HY_STRLEN("image.thumbnail.height"));
+    int height = HyJsonGetItemInt2(-1, root, "image.thumbnail.height", HY_STRLEN("image.thumbnail.height"));
     LOGD("Height: %d \n", height);
 
-    double d = HyCjsonGetItemDouble2(5.5, root, "image.double[1]", HY_STRLEN("image.double[1]"));
+    double d = HyJsonGetItemReal2(5.5, root, "image.double[1]", HY_STRLEN("image.double[1]"));
     LOGD("d: %f \n", d);
 
-    const char *buf = HyCjsonGetItemStr2("haha", root, "image.title", HY_STRLEN("image.title"));
+    const char *buf = HyJsonGetItemStr2("haha", root, "image.title", HY_STRLEN("image.title"));
     LOGD("buf: %s \n", buf);
 }
 #endif
 
-static void _test_cjson_file(void)
+static void _test_json_file(void)
 {
-    cJSON *root = HyCjsonFileParseCreate("../res/hy_utils/cjson.rc");
+    HyJson_t *root = HyJsonFileCreate("../res/hy_utils/json.rc");
 
-    _test_cjson(root);
+    if (root) {
+        _test_json(root);
 
-    HyCjsonFileParseDestroy(root);
+        HyJsonFileDestroy(root);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -176,11 +178,11 @@ int main(int argc, char *argv[])
         }\n\
     }";
 
-    cJSON *root = cJSON_Parse(text_json);
-    _test_cjson(root);
-    cJSON_Delete(root);
+    HyJson_t *root = HyJsonCreate(text_json);
+    _test_json(root);
+    HyJsonDestroy(root);
 
-    _test_cjson_file();
+    _test_json_file();
 
     while (!context->exit_flag) {
         sleep(1);

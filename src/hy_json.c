@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_cjson.c
+ * @file    hy_json.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 19:39
@@ -24,7 +24,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "hy_cjson.h"
+#include "hy_json.h"
+#include "hy_cjson_impl.h"
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
@@ -33,7 +34,7 @@
 
 #define ALONE_DEBUG 1
 
-#if (HY_CJSON_USE_TYPE == 1)
+#if (HY_JSON_USE_TYPE == 1)
 
 #define _get_a_item(root, n, item, _type)           \
     do {                                            \
@@ -48,25 +49,27 @@
         item = _get_item_va_list(root, n, list);    \
         va_end(list);                               \
         \
-        if (_type != item->type) {                  \
+        if (_type != json_impl.item_typeof(item)) { \
             item = NULL;                            \
         }                                           \
     } while (0);
 
-static cJSON *_get_item_va_list(cJSON *root, int n, va_list list)
+static HyJson_t *_get_item_va_list(HyJson_t *root, int n, va_list list)
 {
-    cJSON *item = root;
+    HyJson_t *item = root;
+    HyJsonType_t type;
 
     for (int i = 0; i < n; i++) {
         int index;
         const char *str;
+        type = json_impl.item_typeof(item);
 
-        if (item->type == cJSON_Array) {
+        if (type == HY_JSON_ARRAY) {
             index = va_arg(list, int);
-            item = cJSON_GetArrayItem(item, index);
+            item = json_impl.item_array_get(item, index);
         } else {
             str = va_arg(list, const char *);
-            item = cJSON_GetObjectItem(item, str);
+            item = json_impl.item_get(item, str);
         }
 
         if (item == NULL) {
@@ -77,32 +80,32 @@ static cJSON *_get_item_va_list(cJSON *root, int n, va_list list)
     return item;
 }
 
-int HyCjsonGetItemInt_va(int error_val, cJSON *root, int n, ...)
+int HyJsonGetItemInt_va(int error_val, HyJson_t *root, int n, ...)
 {
-    cJSON *item;
-    _get_a_item(root, n, item, cJSON_Number);
+    HyJson_t *item;
+    _get_a_item(root, n, item, HY_JSON_REAL);
 
-    return (item != NULL) ? item->valueint : error_val;
+    return (item != NULL) ? json_impl.item_to_int(item) : error_val;
 }
 
-double HyCjsonGetItemDouble_va(double error_val, cJSON *root, int n, ...)
+double HyJsonGetItemReal_va(double error_val, HyJson_t *root, int n, ...)
 {
-    cJSON *item;
-    _get_a_item(root, n, item, cJSON_Number);
+    HyJson_t *item;
+    _get_a_item(root, n, item, HY_JSON_REAL);
 
-    return (item != NULL) ? item->valuedouble : error_val;
+    return (item != NULL) ? json_impl.item_to_real(item) : error_val;
 }
 
-const char *HyCjsonGetItemStr_va(const char *error_val, cJSON *root, int n, ...)
+const char *HyJsonGetItemStr_va(const char *error_val, HyJson_t *root, int n, ...)
 {
-    cJSON *item;
-    _get_a_item(root, n, item, cJSON_String);
+    HyJson_t *item;
+    _get_a_item(root, n, item, HY_JSON_STR);
 
-    return (item != NULL) ? item->valuestring : error_val;
+    return (item != NULL) ? json_impl.item_to_str(item) : error_val;
 }
 #endif
 
-#if (HY_CJSON_USE_TYPE == 2)
+#if (HY_JSON_USE_TYPE == 2)
 
 static int32_t _get_index(char *fmt)
 {
@@ -124,13 +127,13 @@ static int32_t _get_index(char *fmt)
     return -1;
 }
 
-static cJSON *_get_item(cJSON *root, char *fmt, size_t fmt_len)
+static HyJson_t *_get_item(HyJson_t *root, char *fmt, size_t fmt_len)
 {
     size_t i;
     size_t offset = 0;
     int32_t index = 0;
-    cJSON *child = NULL;
-    cJSON *parent = root;
+    HyJson_t *child = NULL;
+    HyJson_t *parent = root;
     int32_t fmt_len_tmp = (int32_t)fmt_len;
 
     for (i = 0; i < fmt_len; ++i) {
@@ -143,13 +146,13 @@ static cJSON *_get_item(cJSON *root, char *fmt, size_t fmt_len)
         offset = HY_STRLEN(fmt) + 1;
         index = _get_index(fmt);
 
-        child = cJSON_GetObjectItem(parent, fmt);
+        child = json_impl.item_get(parent, fmt);
         if (!child) {
             break;
         }
 
         if (index >= 0) {
-            child = cJSON_GetArrayItem(child, index);
+            child = json_impl.item_array_get(child, index);
             if (!child) {
                 break;
             }
@@ -163,9 +166,9 @@ static cJSON *_get_item(cJSON *root, char *fmt, size_t fmt_len)
     return child;
 }
 
-static cJSON *_get_item_com(cJSON *root, const char *fmt, size_t fmt_len)
+static HyJson_t *_get_item_com(HyJson_t *root, const char *fmt, size_t fmt_len)
 {
-    cJSON *item = NULL;
+    HyJson_t *item = NULL;
     char *cp_fmt, *cp_fmt_tmp;
     size_t len;
 
@@ -183,27 +186,27 @@ static cJSON *_get_item_com(cJSON *root, const char *fmt, size_t fmt_len)
     return item;
 }
 
-int HyCjsonGetItemInt2(int error_val, cJSON *root, char *fmt, size_t fmt_len)
+int HyJsonGetItemInt2(int error_val, HyJson_t *root, char *fmt, size_t fmt_len)
 {
-    cJSON *item = _get_item_com(root, fmt, fmt_len);
+    HyJson_t *item = _get_item_com(root, fmt, fmt_len);
 
-    return (item != NULL) ? item->valueint : error_val;
+    return (item != NULL) ? json_impl.item_to_int(item) : error_val;
 }
 
-double HyCjsonGetItemDouble2(double error_val,
-        cJSON *root, char *fmt, size_t fmt_len)
+double HyJsonGetItemReal2(double error_val,
+        HyJson_t *root, char *fmt, size_t fmt_len)
 {
-    cJSON *item = _get_item_com(root, fmt, fmt_len);
+    HyJson_t *item = _get_item_com(root, fmt, fmt_len);
 
-    return (item != NULL) ? item->valuedouble : error_val;
+    return (item != NULL) ? json_impl.item_to_real(item) : error_val;
 }
 
-const char *HyCjsonGetItemStr2(const char *error_val,
-        cJSON *root, char *fmt, size_t fmt_len)
+const char *HyJsonGetItemStr2(const char *error_val,
+        HyJson_t *root, char *fmt, size_t fmt_len)
 {
-    cJSON *item = _get_item_com(root, fmt, fmt_len);
+    HyJson_t *item = _get_item_com(root, fmt, fmt_len);
 
-    return (item != NULL) ? item->valuestring : error_val;
+    return (item != NULL) ? json_impl.item_to_str(item) : error_val;
 }
 
 #endif
@@ -213,11 +216,10 @@ static inline void _file_content_destroy(char **buf)
     HY_MEM_FREE_PP(buf);
 }
 
-static char *_file_content_create(const char *name)
+static size_t _file_content_create(const char *name, char **buf)
 {
     int fd;
     off_t offset = 0;
-    char *buf = NULL;
 
     do {
         if (0 != access(name, 0)) {
@@ -234,35 +236,67 @@ static char *_file_content_create(const char *name)
         offset = lseek(fd, 0, SEEK_END);
         lseek(fd, 0, SEEK_SET);
 
-        buf = HY_MEM_MALLOC_BREAK(char *, offset + 1);
+        *buf = HY_MEM_MALLOC_BREAK(char *, offset + 1);
 
-        if (offset != read(fd, buf, offset)) {
+        if (offset != read(fd, *buf, offset)) {
             LOGE("read len failed \n");
             break;
         }
 
         close(fd);
 
-        return buf;
+        return offset;
     } while (0);
 
-    _file_content_destroy((char **)&buf);
-    return NULL;
+    _file_content_destroy(buf);
+    return 0;
 }
 
-void HyCjsonFileParseDestroy(cJSON *root)
+void HyJsonFileDestroy(HyJson_t *root)
 {
-    cJSON_Delete(root);
+    HY_ASSERT_VAL_RET(!root);
+    json_impl.item_destroy(root);
 }
 
-cJSON *HyCjsonFileParseCreate(const char *name)
+HyJson_t *HyJsonFileCreate(const char *name)
 {
+    HY_ASSERT_VAL_RET_VAL(!name, NULL);
+
+    size_t len;
     char *buf = NULL;
-    cJSON *root = NULL;
+    HyJson_t *root = NULL;
 
-    buf = _file_content_create(name);
-    root = cJSON_Parse(buf);
-    _file_content_destroy((char **)&buf);
+    len = _file_content_create(name, &buf);
+    if (len > 0) {
+        root = json_impl.item_create(buf, len);
+        _file_content_destroy((char **)&buf);
+    }
+
+    return root;
+}
+
+void HyJsonDump(HyJson_t *root)
+{
+    HY_ASSERT_VAL_RET(!root);
+
+    LOGI("%s \n", json_impl.item_print_str(root));
+}
+
+void HyJsonDestroy(HyJson_t *root)
+{
+    HY_ASSERT_VAL_RET(!root);
+
+    json_impl.item_destroy(root);
+}
+
+HyJson_t *HyJsonCreate(const char *buf)
+{
+    HY_ASSERT_VAL_RET_VAL(!buf, NULL);
+
+    HyJson_t *root = json_impl.item_create(buf, 0);
+    if (!root) {
+        LOGE("create json failed \n");
+    }
 
     return root;
 }

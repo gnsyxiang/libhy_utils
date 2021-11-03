@@ -55,13 +55,20 @@ _no_install_headers_com +=
 
 _install_headers_com    += \
                            hy_bit.h         \
-                           hy_cjson.h       \
                            hy_fifo.h        \
                            hy_list.h        \
                            hy_math.h        \
                            hy_md5sum.h      \
                            hy_sort.h        \
                            hy_utils.h
+
+if COMPILE_LIBCJSON
+_no_install_headers_com += \
+                           hy_cjson_impl.h  \
+                           hy_json_impl.h
+
+_install_headers_com    += hy_json.h
+endif
 
 # ------------------
 # make install files

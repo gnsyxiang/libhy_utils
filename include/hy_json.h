@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_cjson.h
+ * @file    hy_json.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 19:39
@@ -17,42 +17,67 @@
  * 
  *     last modified: 30/10 2021 19:39
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_CJSON_H_
-#define __LIBHY_UTILS_INCLUDE_HY_CJSON_H_
+#ifndef __LIBHY_UTILS_INCLUDE_HY_JSON_H_
+#define __LIBHY_UTILS_INCLUDE_HY_JSON_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <cjson/cJSON.h>
+#include <stdio.h>
+
+#define HyJson_t void
 
 /**
- * @brief 提供两种解析cjson的方法
+ * @brief 提供两种解析json的方法
  *
  * 方法1: 优点: 解析速度快，缺点: 提供的参数需要一个一个指定
  * 方法2: 优点: 参数一次性提供，缺点: 速度稍微慢一点并且会有堆空间的开辟与释放
  *
  * note: 优先选择方法1
  */
-#define HY_CJSON_USE_TYPE   (1)
+#define HY_JSON_USE_TYPE   (1)
 
 /**
- * @brief 从文件中创建cjson
+ * @brief 从buf中创建json
+ *
+ * @param buf json字符串
+ *
+ * @return 成功返回root节点，失败返回NULL
+ */
+HyJson_t *HyJsonCreate(const char *buf);
+
+/**
+ * @brief 销毁从buf中创建的json
+ *
+ * @param root root根节点
+ */
+void HyJsonDestroy(HyJson_t *root);
+
+/**
+ * @brief 打印root中的信息
+ *
+ * @param root root根节点
+ */
+void HyJsonDump(HyJson_t *root);
+
+/**
+ * @brief 从文件中创建json
  *
  * @param name 文件路径
  *
  * @return 成功返回root节点，失败返回NULL
  */
-cJSON *HyCjsonFileParseCreate(const char *name);
+HyJson_t *HyJsonFileCreate(const char *name);
 
 /**
- * @brief 销毁从文件中创建cjson
+ * @brief 销毁从文件中创建json
  *
  * @param root root根节点
  */
-void HyCjsonFileParseDestroy(cJSON *root);
+void HyJsonFileDestroy(HyJson_t *root);
 
-#if (HY_CJSON_USE_TYPE == 1)
+#if (HY_JSON_USE_TYPE == 1)
 #if 1
 /**
  * @brief 计算参数的个数
@@ -89,98 +114,98 @@ void HyCjsonFileParseDestroy(cJSON *root);
  * @brief 根据可变参数获取int值
  *
  * @param error_val 用户指定出错的返回值
- * @param root cjson根节点
+ * @param root json根节点
  * @param n 参数个数
  * @param ... 可变参数
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-int HyCjsonGetItemInt_va(int error_val, cJSON *root, int n, ...);
+int HyJsonGetItemInt_va(int error_val, HyJson_t *root, int n, ...);
 
 /**
  * @brief 根据可变参数获取double值
  *
  * @param error_val 用户指定出错的返回值
- * @param root cjson根节点
+ * @param root json根节点
  * @param n 参数个数
  * @param ... 可变参数
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-double HyCjsonGetItemDouble_va(double error_val, cJSON *root, int n, ...);
+double HyJsonGetItemReal_va(double error_val, HyJson_t *root, int n, ...);
 
 /**
  * @brief 根据可变参数获取char *值
  *
  * @param error_val 用户指定出错的返回值
- * @param root cjson根节点
+ * @param root json根节点
  * @param n 参数个数
  * @param ... 可变参数
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-const char *HyCjsonGetItemStr_va(const char *error_val, cJSON *root, int n, ...);
+const char *HyJsonGetItemStr_va(const char *error_val, HyJson_t *root, int n, ...);
 #endif
 
 /**
- * @brief 获取item中的int值，详见HyCjsonGetItemInt_va
+ * @brief 获取item中的int值，详见HyJsonGetItemInt_va
  */
-#define HyCjsonGetItemInt(error_val, root, x...) \
-    HyCjsonGetItemInt_va(error_val, root, comac_argc(x), x)
+#define HyJsonGetItemInt(error_val, root, x...) \
+    HyJsonGetItemInt_va(error_val, root, comac_argc(x), x)
 
 /**
- * @brief 获取item中的double值，详见HyCjsonGetItemDouble_va
+ * @brief 获取item中的double值，详见HyJsonGetItemReal_va
  */
-#define HyCjsonGetItemDouble(error_val, root, x...) \
-    HyCjsonGetItemDouble_va(error_val, root, comac_argc(x), x)
+#define HyJsonGetItemReal(error_val, root, x...) \
+    HyJsonGetItemReal_va(error_val, root, comac_argc(x), x)
 
 /**
- * @brief 获取item中的char *值，详见HyCjsonGetItemStr_va
+ * @brief 获取item中的char *值，详见HyJsonGetItemStr_va
  */
-#define HyCjsonGetItemStr(error_val, root, x...) \
-    HyCjsonGetItemStr_va(error_val, root, comac_argc(x), x)
+#define HyJsonGetItemStr(error_val, root, x...) \
+    HyJsonGetItemStr_va(error_val, root, comac_argc(x), x)
 
 #endif
 
-#if (HY_CJSON_USE_TYPE == 2)
+#if (HY_JSON_USE_TYPE == 2)
 
 /**
  * @brief 获取item中的int值
  *
  * @param err_val 用户指定出错的返回值
- * @param root cjson根节点
+ * @param root json根节点
  * @param fmt 获取指定内容的字符串
  * @param fmt_len 字符串的长度
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-int HyCjsonGetItemInt2(int err_val, cJSON *root, char *fmt, size_t fmt_len);
+int HyJsonGetItemInt2(int err_val, HyJson_t *root, char *fmt, size_t fmt_len);
 
 /**
  * @brief 根据可变参数获取double值
  *
  * @param error_val 用户指定出错的返回值
- * @param root cjson根节点
+ * @param root json根节点
  * @param fmt 获取指定内容的字符串
  * @param fmt_len 字符串的长度
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-double HyCjsonGetItemDouble2(double err_val,
-        cJSON *root, char *fmt, size_t fmt_len);
+double HyJsonGetItemReal2(double err_val,
+        HyJson_t *root, char *fmt, size_t fmt_len);
 
 /**
  * @brief 根据可变参数获取char *值
  *
  * @param error_val 用户指定出错的返回值
- * @param root cjson根节点
+ * @param root json根节点
  * @param fmt 获取指定内容的字符串
  * @param fmt_len 字符串的长度
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-const char *HyCjsonGetItemStr2(const char *err_val,
-        cJSON *root, char *fmt, size_t fmt_len);
+const char *HyJsonGetItemStr2(const char *err_val,
+        HyJson_t *root, char *fmt, size_t fmt_len);
 
 #endif
 

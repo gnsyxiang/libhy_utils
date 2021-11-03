@@ -29,13 +29,13 @@ resdir          = $(prefix)/res/@project_name@
 # make install files
 # ------------------
 res_DATA        = \
-                  cjson.rc
+                  json.rc
 
 # ---------------
 # make dist files
 # ---------------
 _dist_file_com  += \
-                   cjson.rc             \
+                   json.rc              \
                    Doxyfile             \
                    get_project_info.sh
 EXTRA_DIST      = $(_dist_file_com)
