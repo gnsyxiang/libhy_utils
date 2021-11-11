@@ -197,7 +197,7 @@ void HyFifoGetInfo(void *handle, HyFifoInfoType_t type, void *val)
             *((size_t *)val) = context->use_cnt;
             break;
         case HY_FIFO_INFO_FREE_LEN:
-            *((size_t *)val) = context->size - (context->in + context->out);
+            *((size_t *)val) = context->size - context->use_cnt;
             break;
         default:
             LOGE("the type is ERROR, type: %d \n", type);
