@@ -227,6 +227,7 @@ void HyFifoClean(void *handle)
 
     memset(context->buf, '\0', context->size);
     context->in = context->out = 0;
+    context->use_cnt = 0;
 }
 
 void HyFifoDestroy(void **handle)
