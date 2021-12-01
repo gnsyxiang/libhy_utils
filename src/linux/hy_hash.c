@@ -36,7 +36,7 @@ typedef struct {
     void                *val;
     size_t              val_len;
 
-    struct hlist_node   list;
+    struct hy_hlist_node    list;
 } _item_t;
 
 typedef void (*handle_item_cb_t)(_item_t *pos, HyHashItem_t *h_item);
@@ -84,14 +84,14 @@ static hy_s32_t _find_item_from_list(_hash_context_t *context,
         HyHashItem_t *h_item, handle_item_cb_t handle_item_cb, hy_u32_t index)
 {
     _item_t *pos;
-    struct hlist_node *n;
+    struct hy_hlist_node *n;
     hy_s32_t find_flag = -1;
     hy_u32_t key_hash = 0; 
 
     key_hash = HyHashGet(h_item->key);
 
     pthread_mutex_lock(&context->bucket_mutex[index]);
-    hlist_for_each_entry_safe(pos, n, &context->bucket_head[index], list) {
+    hy_hlist_for_each_entry_safe(pos, n, &context->bucket_head[index], list) {
         if (pos->key_hash == key_hash) {
             find_flag = 0;
 
@@ -139,7 +139,7 @@ static void _add_item_to_list(_hash_context_t *context, HyHashItem_t *h_item)
     _item_t *item  = _item_init(h_item);
 
     pthread_mutex_lock(&context->bucket_mutex[index]);
-    hlist_add_head(&item->list, &context->bucket_head[index]);
+    hy_hlist_add_head(&item->list, &context->bucket_head[index]);
     pthread_mutex_unlock(&context->bucket_mutex[index]);
 }
 
@@ -161,7 +161,7 @@ static void _del_item_from_list(_item_t *pos, HyHashItem_t *h_item)
 {
     LOGD("del item \n");
 
-    hlist_del(&pos->list);
+    hy_hlist_del(&pos->list);
     _item_destroy(pos);
 }
 
@@ -218,10 +218,10 @@ static void _traverse_item_list(_hash_context_t *context, hy_u32_t index,
         hy_s32_t type, HyHashDumpItemCb_t dump_item_cb, void *args)
 {
     _item_t *pos;
-    struct hlist_node *n;
+    struct hy_hlist_node *n;
 
     pthread_mutex_lock(&context->bucket_mutex[index]);
-    hlist_for_each_entry_safe(pos, n, &context->bucket_head[index], list) {
+    hy_hlist_for_each_entry_safe(pos, n, &context->bucket_head[index], list) {
         if (dump_item_cb) {
             if (type) {
                 dump_item_cb(pos->val, args);
@@ -292,7 +292,7 @@ void *HyHashCreate(HyHashConfig_t *config)
                 goto _ERR_CREATE_1;
             }
 
-            INIT_HLIST_HEAD(&context->bucket_head[i]);
+            HY_INIT_HLIST_HEAD(&context->bucket_head[i]);
         }
 
         LOGI("hash create successful \n");

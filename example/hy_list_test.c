@@ -56,7 +56,7 @@ static void _dump_list(struct hy_list_head *list, const char *tag)
     LOGD("%s: \n", tag);
 
     _student_t *pos;
-    list_for_each_entry(pos, list, list) {
+    hy_list_for_each_entry(pos, list, list) {
         LOGI("name: %s, id: %d \n", pos->name, pos->id);
     }
 }
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
     // list_for_each_entry
     // list_for_each_entry_safe
 
-    INIT_LIST_HEAD(&context->list);
+    HY_INIT_LIST_HEAD(&context->list);
 
     int32_t i;
     #define STUDENT_CNT (5)
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
         student[i].id = id[i];
 
         context->list_cnt++;
-        list_add_tail(&st->list, &context->list);
+        hy_list_add_tail(&st->list, &context->list);
     }
 
     _quick_sort(context);
@@ -233,10 +233,10 @@ int main(int argc, char *argv[])
     }
 
     _student_t *pos, *n;
-    list_for_each_entry_safe(pos, n, &context->list, list) {
+    hy_list_for_each_entry_safe(pos, n, &context->list, list) {
         LOGI("name: %s, id: %d \n", pos->name, pos->id);
 
-        list_del(&pos->list);
+        hy_list_del(&pos->list);
     }
 
     _module_destroy(&context);

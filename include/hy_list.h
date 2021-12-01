@@ -8,11 +8,11 @@ struct hy_list_head {
 };
 
 struct hy_hlist_head {
-    struct hlist_node *first;
+    struct hy_hlist_node *first;
 };
 
-struct hlist_node {
-    struct hlist_node *next, **pprev;
+struct hy_hlist_node {
+    struct hy_hlist_node *next, **pprev;
 };
 
 // import from include/linux/poison.h
@@ -23,9 +23,9 @@ struct hlist_node {
  * that is also not mappable by user-space exploits:
  */
 #ifdef CONFIG_ILLEGAL_POINTER_VALUE
-# define POISON_POINTER_DELTA _AC(CONFIG_ILLEGAL_POINTER_VALUE, UL)
+# define HY_POISON_POINTER_DELTA _AC(CONFIG_ILLEGAL_POINTER_VALUE, UL)
 #else
-# define POISON_POINTER_DELTA (0)
+# define HY_POISON_POINTER_DELTA (0)
 #endif
 
 /*
@@ -33,28 +33,28 @@ struct hlist_node {
  * under normal circumstances, used to verify that nobody uses
  * non-initialized list entries.
  */
-#define LIST_POISON1  (((void *) (0x00100100 + POISON_POINTER_DELTA)))
-#define LIST_POISON2  (((void *) (0x00200200 + POISON_POINTER_DELTA)))
+#define HY_LIST_POISON1  (((void *) (0x00100100 + HY_POISON_POINTER_DELTA)))
+#define HY_LIST_POISON2  (((void *) (0x00200200 + HY_POISON_POINTER_DELTA)))
 
 // import from include/linux/stddef.h
-#undef offsetof
+#undef hy_offsetof
 #ifdef __compiler_offsetof
-#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
+#define hy_offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
 #else
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define hy_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 #endif
 
 // import from include/linux/kernel.h
 /**
-* container_of - cast a member of a structure out to the containing structure
+* hy_container_of - cast a member of a structure out to the containing structure
 * @ptr:        the pointer to the member.
 * @type:       the type of the container struct this is embedded in.
 * @member:     the name of the member within the struct.
 *
 */
-#define container_of(ptr, type, member) ({                      \
+#define hy_container_of(ptr, type, member) ({                      \
         const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-        (type *)( (char *)__mptr - offsetof(type,member) );})
+        (type *)( (char *)__mptr - hy_offsetof(type,member) );})
 
 /*
  * Simple doubly linked list implementation.
@@ -71,7 +71,7 @@ struct hlist_node {
 #define HY_LIST_HEAD(name) \
     struct hy_list_head name = HY_LIST_HEAD_INIT(name)
 
-static inline void INIT_LIST_HEAD(struct hy_list_head *list) {
+static inline void HY_INIT_LIST_HEAD(struct hy_list_head *list) {
     list->next = list;
     list->prev = list;
 }
@@ -83,7 +83,7 @@ static inline void INIT_LIST_HEAD(struct hy_list_head *list) {
  * the prev/next entries already!
  */
 #ifndef CONFIG_DEBUG_LIST
-static inline void __list_add(struct hy_list_head *new,
+static inline void __hy_list_add(struct hy_list_head *new,
     struct hy_list_head *prev,
     struct hy_list_head *next) {
     next->prev = new;
@@ -92,33 +92,33 @@ static inline void __list_add(struct hy_list_head *new,
     prev->next = new;
 }
 #else
-extern void __list_add(struct hy_list_head *new,
+extern void __hy_list_add(struct hy_list_head *new,
 			      struct hy_list_head *prev,
 			      struct hy_list_head *next);
 #endif
 
 /**
- * list_add - add a new entry
+ * hy_list_add - add a new entry
  * @new: new entry to be added
  * @head: list head to add it after
  *
  * Insert a new entry after the specified head.
  * This is good for implementing stacks.
  */
-static inline void list_add(struct hy_list_head *new, struct hy_list_head *head) {
-    __list_add(new, head, head->next);
+static inline void hy_list_add(struct hy_list_head *new, struct hy_list_head *head) {
+    __hy_list_add(new, head, head->next);
 }
 
 /**
- * list_add_tail - add a new entry
+ * hy_list_add_tail - add a new entry
  * @new: new entry to be added
  * @head: list head to add it before
  *
  * Insert a new entry before the specified head.
  * This is useful for implementing queues.
  */
-static inline void list_add_tail(struct hy_list_head *new, struct hy_list_head *head) {
-    __list_add(new, head->prev, head);
+static inline void hy_list_add_tail(struct hy_list_head *new, struct hy_list_head *head) {
+    __hy_list_add(new, head->prev, head);
 }
 
 /*
@@ -128,42 +128,42 @@ static inline void list_add_tail(struct hy_list_head *new, struct hy_list_head *
  * This is only for internal list manipulation where we know
  * the prev/next entries already!
  */
-static inline void __list_del(struct hy_list_head *prev, struct hy_list_head *next) {
+static inline void __hy_list_del(struct hy_list_head *prev, struct hy_list_head *next) {
     next->prev = prev;
     prev->next = next;
 }
 
 /**
- * list_del - deletes entry from list.
+ * hy_list_del - deletes entry from list.
  * @entry: the element to delete from the list.
  * Note: list_empty() on entry does not return true after this, the entry is
  * in an undefined state.
  */
 #ifndef CONFIG_DEBUG_LIST
 
-static inline void __list_del_entry(struct hy_list_head *entry) {
-    __list_del(entry->prev, entry->next);
+static inline void __hy_list_del_entry(struct hy_list_head *entry) {
+    __hy_list_del(entry->prev, entry->next);
 }
 
-static inline void list_del(struct hy_list_head *entry) {
-    __list_del(entry->prev, entry->next);
-    entry->next = LIST_POISON1;
-    entry->prev = LIST_POISON2;
+static inline void hy_list_del(struct hy_list_head *entry) {
+    __hy_list_del(entry->prev, entry->next);
+    entry->next = HY_LIST_POISON1;
+    entry->prev = HY_LIST_POISON2;
 }
 
 #else
-extern void __list_del_entry(struct hy_list_head *entry);
-extern void list_del(struct hy_list_head *entry);
+extern void __hy_list_del_entry(struct hy_list_head *entry);
+extern void hy_list_del(struct hy_list_head *entry);
 #endif
 
 /**
- * list_replace - replace old entry by new one
+ * hy_list_replace - replace old entry by new one
  * @old : the element to be replaced
  * @new : the new element to insert
  *
  * If @old was empty, it will be overwritten.
  */
-static inline void list_replace(struct hy_list_head *old,
+static inline void hy_list_replace(struct hy_list_head *old,
         struct hy_list_head *new) {
     new->next = old->next;
     new->next->prev = new;
@@ -171,48 +171,48 @@ static inline void list_replace(struct hy_list_head *old,
     new->prev->next = new;
 }
 
-static inline void list_replace_init(struct hy_list_head *old,
+static inline void hy_list_replace_init(struct hy_list_head *old,
         struct hy_list_head *new) {
-    list_replace(old, new);
-    INIT_LIST_HEAD(old);
+    hy_list_replace(old, new);
+    HY_INIT_LIST_HEAD(old);
 }
 
 /**
- * list_del_init - deletes entry from list and reinitialize it.
+ * hy_list_del_init - deletes entry from list and reinitialize it.
  * @entry: the element to delete from the list.
  */
-static inline void list_del_init(struct hy_list_head *entry) {
-    __list_del_entry(entry);
-    INIT_LIST_HEAD(entry);
+static inline void hy_list_del_init(struct hy_list_head *entry) {
+    __hy_list_del_entry(entry);
+    HY_INIT_LIST_HEAD(entry);
 }
 
 /**
- * list_move - delete from one list and add as another's head
+ * hy_list_move - delete from one list and add as another's head
  * @list: the entry to move
  * @head: the head that will precede our entry
  */
-static inline void list_move(struct hy_list_head *list, struct hy_list_head *head) {
-    __list_del_entry(list);
-    list_add(list, head);
+static inline void hy_list_move(struct hy_list_head *list, struct hy_list_head *head) {
+    __hy_list_del_entry(list);
+    hy_list_add(list, head);
 }
 
 /**
- * list_move_tail - delete from one list and add as another's tail
+ * hy_list_move_tail - delete from one list and add as another's tail
  * @list: the entry to move
  * @head: the head that will follow our entry
  */
-static inline void list_move_tail(struct hy_list_head *list,
+static inline void hy_list_move_tail(struct hy_list_head *list,
         struct hy_list_head *head) {
-    __list_del_entry(list);
-    list_add_tail(list, head);
+    __hy_list_del_entry(list);
+    hy_list_add_tail(list, head);
 }
 
 /**
- * list_is_last - tests whether @list is the last entry in list @head
+ * hy_list_is_last - tests whether @list is the last entry in list @head
  * @list: the entry to test
  * @head: the head of the list
  */
-static inline int list_is_last(const struct hy_list_head *list,
+static inline int hy_list_is_last(const struct hy_list_head *list,
         const struct hy_list_head *head) {
     return list->next == head;
 }
@@ -221,7 +221,7 @@ static inline int list_is_last(const struct hy_list_head *list,
  * list_empty - tests whether a list is empty
  * @head: the list to test.
  */
-static inline int list_empty(const struct hy_list_head *head) {
+static inline int hy_list_empty(const struct hy_list_head *head) {
     return head->next == head;
 }
 
@@ -238,7 +238,7 @@ static inline int list_empty(const struct hy_list_head *head) {
  * to the list entry is list_del_init(). Eg. it cannot be used
  * if another CPU could re-list_add() it.
  */
-static inline int list_empty_careful(const struct hy_list_head *head) {
+static inline int hy_list_empty_careful(const struct hy_list_head *head) {
     struct hy_list_head *next = head->next;
     return (next == head) && (next == head->prev);
 }
@@ -247,12 +247,12 @@ static inline int list_empty_careful(const struct hy_list_head *head) {
  * list_rotate_left - rotate the list to the left
  * @head: the head of the list
  */
-static inline void list_rotate_left(struct hy_list_head *head) {
+static inline void hy_list_rotate_left(struct hy_list_head *head) {
     struct hy_list_head *first;
 
-    if (!list_empty(head)) {
+    if (!hy_list_empty(head)) {
         first = head->next;
-        list_move_tail(first, head);
+        hy_list_move_tail(first, head);
     }
 }
 
@@ -260,11 +260,11 @@ static inline void list_rotate_left(struct hy_list_head *head) {
  * list_is_singular - tests whether a list has just one entry.
  * @head: the list to test.
  */
-static inline int list_is_singular(const struct hy_list_head *head) {
-    return !list_empty(head) && (head->next == head->prev);
+static inline int hy_list_is_singular(const struct hy_list_head *head) {
+    return !hy_list_empty(head) && (head->next == head->prev);
 }
 
-static inline void __list_cut_position(struct hy_list_head *list,
+static inline void __hy_list_cut_position(struct hy_list_head *list,
         struct hy_list_head *head, struct hy_list_head *entry) {
     struct hy_list_head *new_first = entry->next;
     list->next = head->next;
@@ -289,23 +289,23 @@ static inline void __list_cut_position(struct hy_list_head *list,
  * losing its data.
  *
  */
-static inline void list_cut_position(struct hy_list_head *list,
+static inline void hy_list_cut_position(struct hy_list_head *list,
         struct hy_list_head *head, struct hy_list_head *entry) {
-    if (list_empty(head)) {
+    if (hy_list_empty(head)) {
         return;
     }
-    if (list_is_singular(head) &&
+    if (hy_list_is_singular(head) &&
             (head->next != entry && head != entry)) {
         return;
     }
     if (entry == head) {
-        INIT_LIST_HEAD(list);
+        HY_INIT_LIST_HEAD(list);
     } else {
-        __list_cut_position(list, head, entry);
+        __hy_list_cut_position(list, head, entry);
     }
 }
 
-static inline void __list_splice(const struct hy_list_head *list,
+static inline void __hy_list_splice(const struct hy_list_head *list,
         struct hy_list_head *prev,
         struct hy_list_head *next) {
     struct hy_list_head *first = list->next;
@@ -323,10 +323,10 @@ static inline void __list_splice(const struct hy_list_head *list,
  * @list: the new list to add.
  * @head: the place to add it in the first list.
  */
-static inline void list_splice(const struct hy_list_head *list,
+static inline void hy_list_splice(const struct hy_list_head *list,
         struct hy_list_head *head) {
-    if (!list_empty(list)) {
-        __list_splice(list, head, head->next);
+    if (!hy_list_empty(list)) {
+        __hy_list_splice(list, head, head->next);
     }
 }
 
@@ -335,10 +335,10 @@ static inline void list_splice(const struct hy_list_head *list,
  * @list: the new list to add.
  * @head: the place to add it in the first list.
  */
-static inline void list_splice_tail(struct hy_list_head *list,
+static inline void hy_list_splice_tail(struct hy_list_head *list,
         struct hy_list_head *head) {
-    if (!list_empty(list)) {
-        __list_splice(list, head->prev, head);
+    if (!hy_list_empty(list)) {
+        __hy_list_splice(list, head->prev, head);
     }
 }
 
@@ -349,11 +349,11 @@ static inline void list_splice_tail(struct hy_list_head *list,
  *
  * The list at @list is reinitialised
  */
-static inline void list_splice_init(struct hy_list_head *list,
+static inline void hy_list_splice_init(struct hy_list_head *list,
         struct hy_list_head *head) {
-    if (!list_empty(list)) {
-        __list_splice(list, head, head->next);
-        INIT_LIST_HEAD(list);
+    if (!hy_list_empty(list)) {
+        __hy_list_splice(list, head, head->next);
+        HY_INIT_LIST_HEAD(list);
     }
 }
 
@@ -365,11 +365,11 @@ static inline void list_splice_init(struct hy_list_head *list,
  * Each of the lists is a queue.
  * The list at @list is reinitialised
  */
-static inline void list_splice_tail_init(struct hy_list_head *list,
+static inline void hy_list_splice_tail_init(struct hy_list_head *list,
         struct hy_list_head *head) {
-    if (!list_empty(list)) {
-        __list_splice(list, head->prev, head);
-        INIT_LIST_HEAD(list);
+    if (!hy_list_empty(list)) {
+        __hy_list_splice(list, head->prev, head);
+        HY_INIT_LIST_HEAD(list);
     }
 }
 
@@ -379,8 +379,8 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @type:	the type of the struct this is embedded in.
  * @member:	the name of the list_head within the struct.
  */
-#define list_entry(ptr, type, member) \
-    container_of(ptr, type, member)
+#define hy_list_entry(ptr, type, member) \
+    hy_container_of(ptr, type, member)
 
 /**
  * list_first_entry - get the first element from a list
@@ -390,8 +390,8 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  *
  * Note, that list is expected to be not empty.
  */
-#define list_first_entry(ptr, type, member) \
-    list_entry((ptr)->next, type, member)
+#define hy_list_first_entry(ptr, type, member) \
+    hy_list_entry((ptr)->next, type, member)
 
 /**
  * list_last_entry - get the last element from a list
@@ -401,8 +401,8 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  *
  * Note, that list is expected to be not empty.
  */
-#define list_last_entry(ptr, type, member) \
-    list_entry((ptr)->prev, type, member)
+#define hy_list_last_entry(ptr, type, member) \
+    hy_list_entry((ptr)->prev, type, member)
 
 /**
  * list_first_entry_or_null - get the first element from a list
@@ -412,31 +412,31 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  *
  * Note that if the list is empty, it returns NULL.
  */
-#define list_first_entry_or_null(ptr, type, member) \
-    (!list_empty(ptr) ? list_first_entry(ptr, type, member) : NULL)
+#define hy_list_first_entry_or_null(ptr, type, member) \
+    (!hy_list_empty(ptr) ? hy_list_first_entry(ptr, type, member) : NULL)
 
 /**
  * list_next_entry - get the next element in list
  * @pos:	the type * to cursor
  * @member:	the name of the list_head within the struct.
  */
-#define list_next_entry(pos, member) \
-    list_entry((pos)->member.next, typeof(*(pos)), member)
+#define hy_list_next_entry(pos, member) \
+    hy_list_entry((pos)->member.next, typeof(*(pos)), member)
 
 /**
  * list_prev_entry - get the prev element in list
  * @pos:	the type * to cursor
  * @member:	the name of the list_head within the struct.
  */
-#define list_prev_entry(pos, member) \
-    list_entry((pos)->member.prev, typeof(*(pos)), member)
+#define hy_list_prev_entry(pos, member) \
+    hy_list_entry((pos)->member.prev, typeof(*(pos)), member)
 
 /**
  * list_for_each	-	iterate over a list
  * @pos:	the &struct hy_list_head to use as a loop cursor.
  * @head:	the head for your list.
  */
-#define list_for_each(pos, head) \
+#define hy_list_for_each(pos, head) \
     for (pos = (head)->next; pos != (head); pos = pos->next)
 
 /**
@@ -444,7 +444,7 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @pos:	the &struct hy_list_head to use as a loop cursor.
  * @head:	the head for your list.
  */
-#define list_for_each_prev(pos, head) \
+#define hy_list_for_each_prev(pos, head) \
     for (pos = (head)->prev; pos != (head); pos = pos->prev)
 
 /**
@@ -453,7 +453,7 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @n:		another &struct hy_list_head to use as temporary storage
  * @head:	the head for your list.
  */
-#define list_for_each_safe(pos, n, head) \
+#define hy_list_for_each_safe(pos, n, head) \
     for (pos = (head)->next, n = pos->next; pos != (head); \
         pos = n, n = pos->next)
 
@@ -463,7 +463,7 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @n:		another &struct hy_list_head to use as temporary storage
  * @head:	the head for your list.
  */
-#define list_for_each_prev_safe(pos, n, head) \
+#define hy_list_for_each_prev_safe(pos, n, head) \
     for (pos = (head)->prev, n = pos->prev; \
          pos != (head); \
          pos = n, n = pos->prev)
@@ -474,10 +474,10 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @head:	the head for your list.
  * @member:	the name of the list_head within the struct.
  */
-#define list_for_each_entry(pos, head, member)                \
-    for (pos = list_first_entry(head, typeof(*pos), member);    \
+#define hy_list_for_each_entry(pos, head, member)                \
+    for (pos = hy_list_first_entry(head, typeof(*pos), member);    \
          &pos->member != (head);                    \
-         pos = list_next_entry(pos, member))
+         pos = hy_list_next_entry(pos, member))
 
 /**
  * list_for_each_entry_reverse - iterate backwards over list of given type.
@@ -485,10 +485,10 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @head:	the head for your list.
  * @member:	the name of the list_head within the struct.
  */
-#define list_for_each_entry_reverse(pos, head, member)            \
-    for (pos = list_last_entry(head, typeof(*pos), member);        \
+#define hy_list_for_each_entry_reverse(pos, head, member)            \
+    for (pos = hy_list_last_entry(head, typeof(*pos), member);        \
          &pos->member != (head);                    \
-         pos = list_prev_entry(pos, member))
+         pos = hy_list_prev_entry(pos, member))
 
 /**
  * list_prepare_entry - prepare a pos entry for use in list_for_each_entry_continue()
@@ -498,8 +498,8 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  *
  * Prepares a pos entry for use as a start point in list_for_each_entry_continue().
  */
-#define list_prepare_entry(pos, head, member) \
-    ((pos) ? : list_entry(head, typeof(*pos), member))
+#define hy_list_prepare_entry(pos, head, member) \
+    ((pos) ? : hy_list_entry(head, typeof(*pos), member))
 
 /**
  * list_for_each_entry_continue - continue iteration over list of given type
@@ -510,10 +510,10 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * Continue to iterate over list of given type, continuing after
  * the current position.
  */
-#define list_for_each_entry_continue(pos, head, member)        \
-    for (pos = list_next_entry(pos, member);            \
+#define hy_list_for_each_entry_continue(pos, head, member)        \
+    for (pos = hy_list_next_entry(pos, member);            \
          &pos->member != (head);                    \
-         pos = list_next_entry(pos, member))
+         pos = hy_list_next_entry(pos, member))
 
 /**
  * list_for_each_entry_continue_reverse - iterate backwards from the given point
@@ -524,10 +524,10 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * Start to iterate over list of given type backwards, continuing after
  * the current position.
  */
-#define list_for_each_entry_continue_reverse(pos, head, member)        \
-    for (pos = list_prev_entry(pos, member);            \
+#define hy_list_for_each_entry_continue_reverse(pos, head, member)        \
+    for (pos = hy_list_prev_entry(pos, member);            \
          &pos->member != (head);                    \
-         pos = list_prev_entry(pos, member))
+         pos = hy_list_prev_entry(pos, member))
 
 /**
  * list_for_each_entry_from - iterate over list of given type from the current point
@@ -537,9 +537,9 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  *
  * Iterate over list of given type, continuing from current position.
  */
-#define list_for_each_entry_from(pos, head, member)            \
+#define hy_list_for_each_entry_from(pos, head, member)            \
     for (; &pos->member != (head);                    \
-         pos = list_next_entry(pos, member))
+         pos = hy_list_next_entry(pos, member))
 
 /**
  * list_for_each_entry_safe - iterate over list of given type safe against removal of list entry
@@ -548,11 +548,11 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * @head:	the head for your list.
  * @member:	the name of the list_head within the struct.
  */
-#define list_for_each_entry_safe(pos, n, head, member)            \
-    for (pos = list_first_entry(head, typeof(*pos), member),    \
-        n = list_next_entry(pos, member);            \
+#define hy_list_for_each_entry_safe(pos, n, head, member)            \
+    for (pos = hy_list_first_entry(head, typeof(*pos), member),    \
+        n = hy_list_next_entry(pos, member);            \
          &pos->member != (head);                    \
-         pos = n, n = list_next_entry(n, member))
+         pos = n, n = hy_list_next_entry(n, member))
 
 /**
  * list_for_each_entry_safe_continue - continue list iteration safe against removal
@@ -564,11 +564,11 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * Iterate over list of given type, continuing after current point,
  * safe against removal of list entry.
  */
-#define list_for_each_entry_safe_continue(pos, n, head, member)        \
-    for (pos = list_next_entry(pos, member),                \
-        n = list_next_entry(pos, member);                \
+#define hy_list_for_each_entry_safe_continue(pos, n, head, member)        \
+    for (pos = hy_list_next_entry(pos, member),                \
+        n = hy_list_next_entry(pos, member);                \
          &pos->member != (head);                        \
-         pos = n, n = list_next_entry(n, member))
+         pos = n, n = hy_list_next_entry(n, member))
 
 /**
  * list_for_each_entry_safe_from - iterate over list from current point safe against removal
@@ -580,10 +580,10 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * Iterate over list of given type from current point, safe against
  * removal of list entry.
  */
-#define list_for_each_entry_safe_from(pos, n, head, member)            \
-    for (n = list_next_entry(pos, member);                    \
+#define hy_list_for_each_entry_safe_from(pos, n, head, member)            \
+    for (n = hy_list_next_entry(pos, member);                    \
          &pos->member != (head);                        \
-         pos = n, n = list_next_entry(n, member))
+         pos = n, n = hy_list_next_entry(n, member))
 
 /**
  * list_for_each_entry_safe_reverse - iterate backwards over list safe against removal
@@ -595,11 +595,11 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * Iterate backwards over list of given type, safe against removal
  * of list entry.
  */
-#define list_for_each_entry_safe_reverse(pos, n, head, member)        \
-    for (pos = list_last_entry(head, typeof(*pos), member),        \
-        n = list_prev_entry(pos, member);            \
+#define hy_list_for_each_entry_safe_reverse(pos, n, head, member)        \
+    for (pos = hy_list_last_entry(head, typeof(*pos), member),        \
+        n = hy_list_prev_entry(pos, member);            \
          &pos->member != (head);                    \
-         pos = n, n = list_prev_entry(n, member))
+         pos = n, n = hy_list_prev_entry(n, member))
 
 /**
  * list_safe_reset_next - reset a stale list_for_each_entry_safe loop
@@ -613,8 +613,8 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * and list_safe_reset_next is called after re-taking the lock and before
  * completing the current iteration of the loop body.
  */
-#define list_safe_reset_next(pos, n, member)                \
-    n = list_next_entry(pos, member)
+#define hy_list_safe_reset_next(pos, n, member)                \
+    n = hy_list_next_entry(pos, member)
 
 /*
  * Double linked lists with a single pointer list head.
@@ -623,46 +623,46 @@ static inline void list_splice_tail_init(struct hy_list_head *list,
  * You lose the ability to access the tail in O(1).
  */
 
-#define HLIST_HEAD_INIT { .first = NULL }
-#define HLIST_HEAD(name) struct hy_hlist_head name = {  .first = NULL }
-#define INIT_HLIST_HEAD(ptr) ((ptr)->first = NULL)
+#define HY_HLIST_HEAD_INIT { .first = NULL }
+#define HY_HLIST_HEAD(name) struct hy_hlist_head name = {  .first = NULL }
+#define HY_INIT_HLIST_HEAD(ptr) ((ptr)->first = NULL)
 
-static inline void INIT_HLIST_NODE(struct hlist_node *h) {
+static inline void HY_INIT_HLIST_NODE(struct hy_hlist_node *h) {
     h->next = NULL;
     h->pprev = NULL;
 }
 
-static inline int hlist_unhashed(const struct hlist_node *h) {
+static inline int hy_hlist_unhashed(const struct hy_hlist_node *h) {
     return !h->pprev;
 }
 
-static inline int hlist_empty(const struct hy_hlist_head *h) {
+static inline int hy_hlist_empty(const struct hy_hlist_head *h) {
     return !h->first;
 }
 
-static inline void __hlist_del(struct hlist_node *n) {
-    struct hlist_node *next = n->next;
-    struct hlist_node **pprev = n->pprev;
+static inline void __hy_hlist_del(struct hy_hlist_node *n) {
+    struct hy_hlist_node *next = n->next;
+    struct hy_hlist_node **pprev = n->pprev;
     *pprev = next;
     if (next)
         next->pprev = pprev;
 }
 
-static inline void hlist_del(struct hlist_node *n) {
-    __hlist_del(n);
-    n->next = LIST_POISON1;
-    n->pprev = LIST_POISON2;
+static inline void hy_hlist_del(struct hy_hlist_node *n) {
+    __hy_hlist_del(n);
+    n->next = HY_LIST_POISON1;
+    n->pprev = HY_LIST_POISON2;
 }
 
-static inline void hlist_del_init(struct hlist_node *n) {
-    if (!hlist_unhashed(n)) {
-        __hlist_del(n);
-        INIT_HLIST_NODE(n);
+static inline void hy_hlist_del_init(struct hy_hlist_node *n) {
+    if (!hy_hlist_unhashed(n)) {
+        __hy_hlist_del(n);
+        HY_INIT_HLIST_NODE(n);
     }
 }
 
-static inline void hlist_add_head(struct hlist_node *n, struct hy_hlist_head *h) {
-    struct hlist_node *first = h->first;
+static inline void hy_hlist_add_head(struct hy_hlist_node *n, struct hy_hlist_head *h) {
+    struct hy_hlist_node *first = h->first;
     n->next = first;
     if (first) {
         first->pprev = &n->next;
@@ -672,16 +672,16 @@ static inline void hlist_add_head(struct hlist_node *n, struct hy_hlist_head *h)
 }
 
 /* next must be != NULL */
-static inline void hlist_add_before(struct hlist_node *n,
-        struct hlist_node *next) {
+static inline void hy_hlist_add_before(struct hy_hlist_node *n,
+        struct hy_hlist_node *next) {
     n->pprev = next->pprev;
     n->next = next;
     next->pprev = &n->next;
     *(n->pprev) = n;
 }
 
-static inline void hlist_add_behind(struct hlist_node *n,
-        struct hlist_node *prev) {
+static inline void hy_hlist_add_behind(struct hy_hlist_node *n,
+        struct hy_hlist_node *prev) {
     n->next = prev->next;
     prev->next = n;
     n->pprev = &prev->next;
@@ -692,7 +692,7 @@ static inline void hlist_add_behind(struct hlist_node *n,
 }
 
 /* after that we'll appear to be on some hlist and hlist_del will work */
-static inline void hlist_add_fake(struct hlist_node *n) {
+static inline void hy_hlist_add_fake(struct hy_hlist_node *n) {
     n->pprev = &n->next;
 }
 
@@ -700,7 +700,7 @@ static inline void hlist_add_fake(struct hlist_node *n) {
  * Move a list from one list head to another. Fixup the pprev
  * reference of the first entry if it exists.
  */
-static inline void hlist_move_list(struct hy_hlist_head *old,
+static inline void hy_hlist_move_list(struct hy_hlist_head *old,
         struct hy_hlist_head *new) {
     new->first = old->first;
     if (new->first) {
@@ -709,18 +709,18 @@ static inline void hlist_move_list(struct hy_hlist_head *old,
     old->first = NULL;
 }
 
-#define hlist_entry(ptr, type, member) container_of(ptr,type,member)
+#define hy_hlist_entry(ptr, type, member) hy_container_of(ptr,type,member)
 
-#define hlist_for_each(pos, head) \
+#define hy_hlist_for_each(pos, head) \
     for (pos = (head)->first; pos ; pos = pos->next)
 
-#define hlist_for_each_safe(pos, n, head) \
+#define hy_hlist_for_each_safe(pos, n, head) \
     for (pos = (head)->first; pos && ({ n = pos->next; 1; }); \
          pos = n)
 
-#define hlist_entry_safe(ptr, type, member) \
+#define hy_hlist_entry_safe(ptr, type, member) \
     ({ typeof(ptr) ____ptr = (ptr); \
-       ____ptr ? hlist_entry(____ptr, type, member) : NULL; \
+       ____ptr ? hy_hlist_entry(____ptr, type, member) : NULL; \
     })
 
 /**
@@ -729,41 +729,41 @@ static inline void hlist_move_list(struct hy_hlist_head *old,
  * @head:	the head for your list.
  * @member:	the name of the hlist_node within the struct.
  */
-#define hlist_for_each_entry(pos, head, member)                \
-    for (pos = hlist_entry_safe((head)->first, typeof(*(pos)), member);\
+#define hy_hlist_for_each_entry(pos, head, member)                \
+    for (pos = hy_hlist_entry_safe((head)->first, typeof(*(pos)), member);\
          pos;                            \
-         pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+         pos = hy_hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
 
 /**
  * hlist_for_each_entry_continue - iterate over a hlist continuing after current point
  * @pos:	the type * to use as a loop cursor.
  * @member:	the name of the hlist_node within the struct.
  */
-#define hlist_for_each_entry_continue(pos, member)            \
-    for (pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member);\
+#define hy_hlist_for_each_entry_continue(pos, member)            \
+    for (pos = hy_hlist_entry_safe((pos)->member.next, typeof(*(pos)), member);\
          pos;                            \
-         pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+         pos = hy_hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
 
 /**
  * hlist_for_each_entry_from - iterate over a hlist continuing from current point
  * @pos:	the type * to use as a loop cursor.
  * @member:	the name of the hlist_node within the struct.
  */
-#define hlist_for_each_entry_from(pos, member)                \
+#define hy_hlist_for_each_entry_from(pos, member)                \
     for (; pos;                            \
-         pos = hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
+         pos = hy_hlist_entry_safe((pos)->member.next, typeof(*(pos)), member))
 
 /**
  * hlist_for_each_entry_safe - iterate over list of given type safe against removal of list entry
  * @pos:	the type * to use as a loop cursor.
- * @n:		another &struct hlist_node to use as temporary storage
+ * @n:		another &struct hy_hlist_node to use as temporary storage
  * @head:	the head for your list.
  * @member:	the name of the hlist_node within the struct.
  */
-#define hlist_for_each_entry_safe(pos, n, head, member)        \
-    for (pos = hlist_entry_safe((head)->first, typeof(*pos), member);\
+#define hy_hlist_for_each_entry_safe(pos, n, head, member)        \
+    for (pos = hy_hlist_entry_safe((head)->first, typeof(*pos), member);\
          pos && ({ n = pos->member.next; 1; });            \
-         pos = hlist_entry_safe(n, typeof(*pos), member))
+         pos = hy_hlist_entry_safe(n, typeof(*pos), member))
 
 
 //---------------------------------------------------------------
@@ -778,10 +778,10 @@ static inline void hlist_move_list(struct hy_hlist_head *old,
      })
 
 #define HY_LIST_GET_NODE_DATA(list, index, type, member) \
-    ((list_entry(HY_LIST_GET_NODE_PTR(list, index), type, list))->member)
+    ((hy_list_entry(HY_LIST_GET_NODE_PTR(list, index), type, list))->member)
 
 #define HY_LIST_SET_NODE_DATA(list, index, type, member, val) \
-    (((list_entry(HY_LIST_GET_NODE_PTR(list, index), type, list))->member) = val)
+    (((hy_list_entry(HY_LIST_GET_NODE_PTR(list, index), type, list))->member) = val)
 
 static inline void list_swap_node_ptr(struct hy_list_head *list, int index_a, int index_b)
 {
@@ -789,12 +789,12 @@ static inline void list_swap_node_ptr(struct hy_list_head *list, int index_a, in
     struct hy_list_head *tmp_a = HY_LIST_GET_NODE_PTR(list, index_a);
     struct hy_list_head *tmp_b = HY_LIST_GET_NODE_PTR(list, index_b);
 
-    list_add_tail(&tmp, tmp_a);
-    list_del(tmp_a);
-    list_add_tail(tmp_a, tmp_b);
-    list_del(tmp_b);
-    list_add_tail(tmp_b, &tmp);
-    list_del(&tmp);
+    hy_list_add_tail(&tmp, tmp_a);
+    hy_list_del(tmp_a);
+    hy_list_add_tail(tmp_a, tmp_b);
+    hy_list_del(tmp_b);
+    hy_list_add_tail(tmp_b, &tmp);
+    hy_list_del(&tmp);
 }
 
 #endif // _LINUX_LIST_H

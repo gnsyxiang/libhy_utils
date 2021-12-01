@@ -66,7 +66,7 @@ void *HyTimerAdd(HyTimerConfig_t *timer_config)
     timer->rotation = timer_config->expires / context->save_config.slot_num;
     size_t slot     = timer_config->expires % context->save_config.slot_num;
 
-    list_add_tail(&timer->list, &context->list_head[slot]);
+    hy_list_add_tail(&timer->list, &context->list_head[slot]);
 
     return timer;
 }
@@ -79,9 +79,9 @@ void HyTimerDel(void **timer_handle)
     uint32_t i;
 
     for (i = 0; i < context->save_config.slot_num; ++i) {
-        list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
+        hy_list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
             if (*timer_handle == pos) {
-                list_del(&pos->list);
+                hy_list_del(&pos->list);
 
                 pthread_mutex_lock(&context->mutex);
                 HY_MEM_FREE_PP(&pos);
@@ -116,7 +116,7 @@ static void *_timer_loop_cb(void *args)
             err = select(0, NULL, NULL, NULL, &tv);
         } while(err < 0 && errno == EINTR);
 
-        list_for_each_entry_safe(pos, n, &context->list_head[context->cur_slot], list) {
+        hy_list_for_each_entry_safe(pos, n, &context->list_head[context->cur_slot], list) {
             if (pos->rotation > 0) {
                 pos->rotation--;
             } else {
@@ -128,7 +128,7 @@ static void *_timer_loop_cb(void *args)
                 }
                 pthread_mutex_unlock(&context->mutex);
 
-                list_del(&pos->list);
+                hy_list_del(&pos->list);
 
                 if (pos->timer_config.repeat_flag == HY_TIMER_MODE_REPEAT) {
                     pos->rotation = timer_config->expires / context->save_config.slot_num;
@@ -136,7 +136,7 @@ static void *_timer_loop_cb(void *args)
                     slot += context->cur_slot;
                     slot %= context->save_config.slot_num;
 
-                    list_add_tail(&pos->list, &context->list_head[slot]);
+                    hy_list_add_tail(&pos->list, &context->list_head[slot]);
                 } else {
                     HY_MEM_FREE_PP(&pos);
                 }
@@ -157,8 +157,8 @@ void HyTimerDestroy(void **handle)
 
     _timer_t *pos, *n;
     for (uint32_t i = 0; i < context->save_config.slot_num; ++i) {
-        list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
-            list_del(&pos->list);
+        hy_list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
+            hy_list_del(&pos->list);
 
             HY_MEM_FREE_PP(&pos);
         }
@@ -185,7 +185,7 @@ void *HyTimerCreate(HyTimerServiceConfig_t *config)
                 sizeof(struct hy_list_head) * config->save_config.slot_num);
 
         for (uint32_t i = 0; i < config->save_config.slot_num; ++i) {
-            INIT_LIST_HEAD(&context->list_head[i]);
+            HY_INIT_LIST_HEAD(&context->list_head[i]);
         }
 
         pthread_mutex_init(&context->mutex, NULL);
