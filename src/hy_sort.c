@@ -70,10 +70,8 @@ static hy_s32_t _partition(void *array, hy_s32_t low, hy_s32_t high,
     #define _ARRAY_LOW ((char *)array + low * item_len)
     #define _ARRAY_HIGHT ((char *)array + high * item_len)
 
-    size_t haha = item_len;
-
-    void *tmp = HY_MEM_MALLOC_RET_VAL(void *, haha, -1);
-    void *swap_tmp = HY_MEM_MALLOC_RET_VAL(void *, haha, -1);
+    void *tmp = HY_MEM_MALLOC_RET_VAL(void *, item_len, -1);
+    void *swap_tmp = HY_MEM_MALLOC_RET_VAL(void *, item_len, -1);
 
     HY_MEMCPY(tmp, _ARRAY_LOW, item_len);
 
