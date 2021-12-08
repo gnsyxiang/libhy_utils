@@ -46,6 +46,7 @@ _include_com    += \
 
 _sources_com    += \
                    hy_hash.c            \
+                   hy_log.c             \
                    hy_net_wired.c       \
                    hy_timer.c
 
