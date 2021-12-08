@@ -26,7 +26,6 @@
 #include "hy_utils.h"
 
 #include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_log.h"
@@ -70,7 +69,7 @@ static inline void _print_content(_fifo_context_t *context)
     LOGI("cnt: %d, in: %d, out: %d \n", fifo_len, context->in, context->out);
 
     #define out_index (context->out & (context->size - 1))
-    uint32_t len_tmp = HyUtilsMinMacro(fifo_len, context->size- out_index);
+    uint32_t len_tmp = HY_UTILS_MIN(fifo_len, context->size- out_index);
 
     _print_hex_ascii(context->buf + out_index, len_tmp);
     _print_hex_ascii(context->buf, fifo_len - len_tmp);
@@ -91,13 +90,13 @@ static uint32_t _get_data_com(_fifo_context_t *context, const char *buf, uint32_
     uint32_t head_tmp = context->head;
 
     // 比较获取的数据长度和实际fifo中存在的数据长度
-    len = HyUtilsMinMacro(len, head_tmp - context->tail);
+    len = HY_UTILS_MIN(len, head_tmp - context->tail);
 #endif
 
-    len = HyUtilsMinMacro(len, context->in - context->out);
+    len = HY_UTILS_MIN(len, context->in - context->out);
 
     #define out_index (context->out & (context->size - 1))
-    uint32_t len_tmp = HyUtilsMinMacro(len, context->size - out_index);
+    uint32_t len_tmp = HY_UTILS_MIN(len, context->size - out_index);
 
     memcpy((void *)buf, context->buf + out_index, len_tmp);
     memcpy((void *)(buf + len_tmp), context->buf, len - len_tmp);
@@ -127,12 +126,12 @@ size_t HyFifoPut(void *handle, void *buf, size_t len)
     uint32_t tail_tmp = context->tail;
 
     // 比较存取的数据长度和实际fifo中可被存入的数据长度
-    len = HyUtilsMinMacro(len, context->len - context->head + tail_tmp);
+    len = HY_UTILS_MIN(len, context->len - context->head + tail_tmp);
 #endif
-    len = HyUtilsMinMacro(len, context->size - context->in + context->out);
+    len = HY_UTILS_MIN(len, context->size - context->in + context->out);
 
     #define in_index (context->in & (context->size - 1))
-    size_t len_tmp = HyUtilsMinMacro(len, context->size - in_index);
+    size_t len_tmp = HY_UTILS_MIN(len, context->size - in_index);
 
     memcpy(context->buf + in_index, buf, len_tmp);
     memcpy(context->buf, (char *)buf + len_tmp, len - len_tmp);

@@ -30,6 +30,17 @@ extern "C" {
 #define IP_INT_DOT_LEN (4)
 #define IP_STR_DOT_LEN (16)
 
+#define HY_UTILS_MIN(x, y)              ((x) < (y) ? (x) : (y))                             ///< 求最小值
+#define HY_UTILS_MAX(x, y)              ((x) > (y) ? (x) : (y))                             ///< 求最大值
+
+#define HY_UTILS_ROUND_UP(x, size)      ((((x) + size - 1) / size ) * size)                 ///< 对size向上取整
+
+#define HY_UTILS_UPCASE(c)              (((c) >= 'a' && (c) <= 'z') ? ((c) - 0x20) : (c))   ///< 将一个字母转换为大写
+
+#define HY_UTILS_ARRAY_CNT(array)       (uint32_t)(sizeof((array)) / sizeof((array)[0]))    ///< 求数组元素的个数
+
+#define HyUtilsIsPowerOf2(x)            ((x) != 0 && (((x) & ((x) - 1)) == 0))
+
 /**
  * @brief 把IP字符串转化为整数
  *
@@ -86,10 +97,6 @@ uint32_t HyUtilsBitStr2Dec(char *binary_str, size_t len);
  * @param str_len bit数组长度
  */
 void HyUtilsDec2BitStr(uint32_t num, size_t num_len, char *bit_str, size_t str_len);
-
-#define HyUtilsMinMacro(x, y) ((x) < (y) ? (x) : (y))
-
-#define HyUtilsIsPowerOf2(x) ((x) != 0 && (((x) & ((x) - 1)) == 0))
 
 #ifdef __cplusplus
 }
