@@ -26,259 +26,274 @@
 #include "hy_utils.h"
 
 #include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_type.h"
+#include "hy_hal/hy_barrier.h"
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
 #define ALONE_DEBUG 1
 
+/**
+ * @brief 内存屏障
+ *
+ * 解决两个问题:
+ * 1, 解决内存可见性问题
+ * 2, 解决cpu重排的问题，cpu优化
+ */
+#define USE_MB
+
+#define _FIFO_USED_LEN(context)     (context->write_pos - context->read_pos)
+#define _FIFO_FREE_LEN(context)     (context->save_config.len - (_FIFO_USED_LEN(context)))
+#define _FIFO_WRITE_POS(context)    (context->write_pos & (context->save_config.len - 1))   // 优化 context->write_pos % context->save_config.len
+#define _FIFO_READ_POS(context)     (context->read_pos & (context->save_config.len - 1))    // 优化 context->read_pos % context->save_config.len
+#define _FIFO_IS_EMPTY(context)     (context->read_pos == context->write_pos)
+
 typedef struct {
-    char    *buf;
+    HyFifoSaveConfig_t  save_config;
+    char                *buf;
 
-    size_t  size;
-    size_t  use_cnt;
-
-    size_t  in;
-    size_t  out;
+    hy_u32_t            read_pos;
+    hy_u32_t            write_pos;
 } _fifo_context_t;
 
-static inline void _print_hex_ascii(char *buf, uint32_t len)
+hy_u32_t HyFifoWrite(void *handle, void *buf, hy_u32_t len)
 {
-    for (uint32_t i = 0; i < len; i++) {
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+
+    _fifo_context_t *context = handle;
+    hy_u32_t len_tmp = 0;
+
+    if (len > _FIFO_FREE_LEN(context)) {
+        LOGE("write failed, len: %u, free_len: %u \n",
+                len, _FIFO_FREE_LEN(context));
+        return 0;
+    }
+
+#ifdef USE_MB
+    // 确保其他线程对write_pos的可见性
+    HY_SMP_MB();
+#endif
+
+    len_tmp = HY_UTILS_MIN(len, context->save_config.len - _FIFO_WRITE_POS(context));
+    memcpy(context->buf + _FIFO_WRITE_POS(context), buf, len_tmp);
+    memcpy(context->buf, buf + len_tmp, len - len_tmp);
+
+#ifdef USE_MB
+    // 确保write_pos不会优化到上面去
+    HY_SMP_WMB();
+#endif
+
+    context->write_pos += len;
+    return len;
+}
+
+static hy_s32_t _fifo_read_com(void *handle,
+        void *buf, hy_u32_t len, hy_s32_t flag)
+{
+    hy_u32_t len_tmp = 0;
+    _fifo_context_t *context = handle;
+
+    if (_FIFO_IS_EMPTY(context)) {
+        LOGE("read failed, fifo is empty \n");
+        return 0;
+    }
+
+    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(context));
+
+#ifdef USE_MB
+    // 确保其他线程对read_pos的可见性
+    HY_SMP_WMB();
+#endif
+
+    len_tmp = HY_UTILS_MIN(len, context->save_config.len - _FIFO_READ_POS(context));
+
+    memcpy(buf, context->buf + _FIFO_READ_POS(context), len_tmp);
+    memcpy(buf + len_tmp, context->buf, len - len_tmp);
+
+#ifdef USE_MB
+    // 确保read_pos不会优化到上面去
+    HY_SMP_MB();
+#endif
+
+    if (flag) {
+        context->read_pos += len;
+    }
+
+    return len;
+}
+
+hy_u32_t HyFifoRead(void *handle, void *buf, hy_u32_t len)
+{
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+
+    return _fifo_read_com(handle, buf, len, 1);
+}
+
+hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len)
+{
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+
+    return _fifo_read_com(handle, buf, len, 0);
+}
+
+void HyFifoClean(void *handle)
+{
+    LOGT("\n");
+    HY_ASSERT_VAL_RET(!handle);
+
+    _fifo_context_t *context = handle;
+
+    context->write_pos = context->read_pos = 0;
+    HY_MEMSET(context->buf, context->save_config.len);
+}
+
+hy_u32_t HyFifoUpdateOut(void *handle, hy_u32_t len)
+{
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle, 0);
+
+    _fifo_context_t *context = handle;
+
+    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(context));
+    context->read_pos += len;
+
+    return len;
+}
+
+static void _dump_hex_ascii(char *buf, hy_u32_t len)
+{
+    for (hy_u32_t i = 0; i < len; i++) {
         if (buf[i] == 0x0d || buf[i] == 0x0a || buf[i] < 32 || buf[i] >= 127) {
-            printf("%02x[ ]  ", (uint8_t)buf[i]);
+            printf("%02x[ ]  ", (hy_u8_t)buf[i]);
         } else {
-            printf("%02x[%c]  ", (uint8_t)buf[i], (uint8_t)buf[i]);
+            printf("%02x[%c]  ", (hy_u8_t)buf[i], (hy_u8_t)buf[i]);
         }
     }
 }
 
-#ifdef FIFO_PRINT_ALL
-static inline void _print_all_buf(_fifo_context_t *context)
+static void _dump_all(_fifo_context_t *context)
 {
-    LOGE("len: %d \n", context->size);
-    _print_hex_ascii(context->buf, context->size);
+    LOGD("len: %d \n", context->save_config.len);
+    _dump_hex_ascii(context->buf, context->save_config.len);
     printf("\n");
 }
-#endif
 
-static inline void _print_content(_fifo_context_t *context)
+static void _dump_content(_fifo_context_t *context)
 {
-    uint32_t fifo_len = context->in - context->out;
+    LOGD("used len: %u, write_pos: %u, read_pos: %u \n",
+            _FIFO_USED_LEN(context), context->write_pos, context->read_pos);
 
-    LOGI("cnt: %d, in: %d, out: %d \n", fifo_len, context->in, context->out);
+    hy_u32_t len_tmp;
+    len_tmp = HY_UTILS_MIN(_FIFO_USED_LEN(context), _FIFO_READ_POS(context));
 
-    #define out_index (context->out & (context->size - 1))
-    uint32_t len_tmp = HY_UTILS_MIN(fifo_len, context->size- out_index);
-
-    _print_hex_ascii(context->buf + out_index, len_tmp);
-    _print_hex_ascii(context->buf, fifo_len - len_tmp);
+    _dump_hex_ascii(context->buf + _FIFO_READ_POS(context), len_tmp);
+    _dump_hex_ascii(context->buf, _FIFO_USED_LEN(context) - len_tmp);
 
     printf("\n");
 }
 
-static uint32_t _get_data_com(_fifo_context_t *context, const char *buf, uint32_t len)
+void HyFifoDump(void *handle, HyFifoDumpType_t type)
 {
-#if 0
-    /**
-     * @brief 保存tail副本
-     *
-     * @note: 1, 避免下面宏两次读取tail变量，造成多线程引起的错误
-     *        2，如果使用的是函数，就不需要保存tail副本，函数此时最好加上inline提高效率
-     *        3，即使tail变量被其他线程更新也不会出现程序错误，最多就是少处理一点点数据，但数据还在fifo中
-     */
-    uint32_t head_tmp = context->head;
+    LOGT("\n");
+    HY_ASSERT_VAL_RET(!handle);
 
-    // 比较获取的数据长度和实际fifo中存在的数据长度
-    len = HY_UTILS_MIN(len, head_tmp - context->tail);
-#endif
-
-    len = HY_UTILS_MIN(len, context->in - context->out);
-
-    #define out_index (context->out & (context->size - 1))
-    uint32_t len_tmp = HY_UTILS_MIN(len, context->size - out_index);
-
-    memcpy((void *)buf, context->buf + out_index, len_tmp);
-    memcpy((void *)(buf + len_tmp), context->buf, len - len_tmp);
-
-    return len;
-}
-
-//---------------------------------------------------------------------------
-
-size_t HyFifoPut(void *handle, void *buf, size_t len)
-{
-    // assert(handle || buf || len);
-    // if (!handle || !buf || 0 == len) {
-        // LOGE("the param is NULL, handle: %p, buf: %p, len: %d \n", handle, buf, len);
-        // return 0;
-    // }
     _fifo_context_t *context = handle;
-
-#if 0
-    /**
-     * @brief 保存tail副本
-     *
-     * @note: 1, 避免下面宏两次读取tail变量，造成多线程引起的错误
-     *        2，如果使用的是函数，就不需要保存tail副本，函数此时最好加上inline提高效率
-     *        3，即使tail变量被其他线程更新也不会出现程序错误，最多就是少处理一点点数据，但数据还在fifo中
-     */
-    uint32_t tail_tmp = context->tail;
-
-    // 比较存取的数据长度和实际fifo中可被存入的数据长度
-    len = HY_UTILS_MIN(len, context->len - context->head + tail_tmp);
-#endif
-    len = HY_UTILS_MIN(len, context->size - context->in + context->out);
-
-    #define in_index (context->in & (context->size - 1))
-    size_t len_tmp = HY_UTILS_MIN(len, context->size - in_index);
-
-    memcpy(context->buf + in_index, buf, len_tmp);
-    memcpy(context->buf, (char *)buf + len_tmp, len - len_tmp);
-    context->in += len;
-    context->use_cnt += len;
-
-    return len;
-}
-
-size_t HyFifoGet(void *handle, void *buf, size_t len)
-{
-    if (!handle || !buf || 0 == len) {
-        LOGE("the param is NULL, handle: %p, buf: %p, len: %d \n", handle, buf, len);
-        return 0;
+    switch (type) {
+        case HY_FIFO_DUMP_ALL:
+            _dump_all(context);
+            break;
+        case HY_FIFO_DUMP_CONTENT:
+            _dump_content(context);
+            break;
+        default:
+            LOGE("error type: %d \n", type);
     }
-    _fifo_context_t *context = handle;
-    len = _get_data_com(context, buf, len);
-    context->out += len;
-    context->use_cnt -= len;
-
-    return len;
 }
 
-size_t HyFifoPeek(void *handle, void *buf, size_t len)
+hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type)
 {
-    if (!handle || !buf || 0 == len) {
-        LOGE("the param is NULL, handle: %p, buf: %p, len: %d \n", handle, buf, len);
-        return 0;
-    }
-    _fifo_context_t *context = handle;
-    len = _get_data_com(context, buf, len);
-
-    return len;
-}
-
-size_t HyFifoUpdateOut(void *handle, size_t len)
-{
-    if (!handle || 0 == len) {
-        LOGE("the param is NULL, handle: %p, len: %d \n", handle, len);
-        return 0;
-    }
-    _fifo_context_t *context = handle;
-
-    char buf[1024] = {0};
-    len = _get_data_com(context, buf, len);
-    context->out += len;
-
-    return len;
-}
-
-void HyFifoGetInfo(void *handle, HyFifoInfoType_t type, void *val)
-{
-    HY_ASSERT_VAL_RET(!handle || !val);
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle, 0);
 
     _fifo_context_t *context = handle;
+    hy_u32_t val = 0;
 
     switch (type) {
         case HY_FIFO_INFO_TOTAL_LEN:
-            *((size_t *)val) = context->size;
+            val = context->save_config.len;
             break;
         case HY_FIFO_INFO_USED_LEN:
-            *((size_t *)val) = context->use_cnt;
+            val = _FIFO_USED_LEN(context);
             break;
         case HY_FIFO_INFO_FREE_LEN:
-            *((size_t *)val) = context->size - context->use_cnt;
+            val = context->save_config.len - _FIFO_USED_LEN(context);
             break;
         default:
             LOGE("the type is ERROR, type: %d \n", type);
             break;
     }
+
+    return val;
 }
 
-void HyFifoDump(void *handle)
+hy_s32_t HyFifoIsEmpty(void *handle)
 {
-    if (!handle) {
-        LOGE("the param is NULL, handle: %p \n", handle);
-        return;
-    }
-    _fifo_context_t *context = handle;
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle, 0);
 
-#ifdef FIFO_PRINT_ALL
-    _print_all_buf(context);
-#endif
-    _print_content(context);
+    _fifo_context_t *context = handle;
+    return _FIFO_IS_EMPTY(context);
 }
 
-void HyFifoClean(void *handle)
+hy_s32_t HyFifoIsFull(void *handle)
 {
-    HY_ASSERT_VAL_RET(!handle);
+    LOGT("\n");
+    HY_ASSERT_VAL_RET_VAL(!handle, 0);
 
     _fifo_context_t *context = handle;
-
-    memset(context->buf, '\0', context->size);
-    context->in = context->out = 0;
-    context->use_cnt = 0;
+    return context->save_config.len == _FIFO_USED_LEN(context);
 }
 
 void HyFifoDestroy(void **handle)
 {
+    LOGT("\n");
     HY_ASSERT_VAL_RET(!handle || !*handle);
 
     _fifo_context_t *context = *handle;
 
-    if (context->buf) {
-        HY_MEM_FREE_PP(&context->buf);
-    }
+    HY_MEM_FREE_P(context->buf);
 
+    LOGI("fifo destroy, handle: %p \n", context);
     HY_MEM_FREE_PP(handle);
-
-    LOGI("fifo destroy successful \n");
-}
-
-static uint32_t _HyUtilsNumTo2N2(uint32_t num)
-{
-    uint32_t i = 1;
-    uint32_t num_tmp = num;
-
-    while (num >>= 1) {
-        i <<= 1;
-    }
-
-    return (i < num_tmp) ? i << 1 : i;
 }
 
 void *HyFifoCreate(HyFifoConfig_t *config)
 {
+    LOGT("\n");
     HY_ASSERT_VAL_RET_VAL(!config, NULL);
 
     _fifo_context_t *context = NULL;
     do {
-        size_t size = config->save_config.size;
-
-        if (!HyUtilsIsPowerOf2(size) || size > 0x80000000) {
-            size = _HyUtilsNumTo2N2(size);
-            LOGE("size must be power of 2, new size: %d \n", size);
-        }
-
         context = HY_MEM_MALLOC_BREAK(_fifo_context_t *, sizeof(*context));
-        context->buf = HY_MEM_MALLOC_BREAK(char *, size);
 
-        context->size = size;
+        if (!HY_UTILS_IS_POWER_OF_2(config->save_config.len)) {
+            config->save_config.len = HyUtilsNumTo2N(config->save_config.len);
 
-        LOGI("fifo create successful \n");
+            LOGW("size must be power of 2, new size: %d \n",
+                    config->save_config.len);
+        }
+        context->buf = HY_MEM_MALLOC_BREAK(char *, config->save_config.len);
+
+        HY_MEMCPY(&context->save_config, &config->save_config, sizeof(config->save_config));
+        context->write_pos = context->read_pos = 0;
+
+        LOGI("fifo create, handle: %p \n", context);
         return context;
     } while (0);
 
     HyFifoDestroy((void **)&context);
     return NULL;
 }
-

@@ -44,17 +44,17 @@ typedef struct {
     hy_s32_t exit_flag;
 } _main_context_t;
 
-static int32_t _get_fifo_loop_cb(void *args)
+static hy_s32_t _get_fifo_loop_cb(void *args)
 {
     _main_context_t *context = args;
 
-    size_t len;
+    hy_u32_t len;
     char c;
     while (!context->exit_flag) {
-        HyFifoGetInfo(context->fifo_handle, HY_FIFO_INFO_USED_LEN, &len);
+        len = HyFifoGetInfo(context->fifo_handle, HY_FIFO_INFO_USED_LEN);
         if (len > 0) {
-            HyFifoGet(context->fifo_handle, &c, 1);
-            LOGE("c: %c \n", c);
+            HyFifoRead(context->fifo_handle, &c, 1);
+            LOGD("c: %c \n", c);
         }
 
         sleep(1);
@@ -102,15 +102,15 @@ static _main_context_t *_module_create(void)
 
     HyLogConfig_t log_config;
     log_config.save_config.buf_len      = 512;
-    log_config.save_config.level        = HY_LOG_LEVEL_TRACE;
+    log_config.save_config.level        = HY_LOG_LEVEL_DEBUG;
     log_config.save_config.color_output = HY_TYPE_FLAG_ENABLE;
 
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
         SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
     };
 
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
     };
 
@@ -125,7 +125,7 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.args          = context;
 
     HyFifoConfig_t fifo_config;
-    fifo_config.save_config.size = 16;
+    fifo_config.save_config.len = 15;
 
     HyThreadConfig_t thread_config;
     thread_config.save_config.thread_loop_cb    = _get_fifo_loop_cb;
@@ -156,19 +156,30 @@ int main(int argc, char *argv[])
 
     LOGI("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
+    size_t cnt = 0;
     char c = 'a';
+    hy_u32_t ret = 0;
     while (!context->exit_flag) {
-        HyFifoPut(context->fifo_handle, &c, 1);
-        c += 1;
+        ret = HyFifoWrite(context->fifo_handle, &c, 1);
+        while (!context->exit_flag && ret == 0) {
+            usleep(500 * 1000);
+            ret = HyFifoWrite(context->fifo_handle, &c, 1);
+        }
+        cnt += 1;
 
+        LOGD("c: %c, cnt: %d \n", c, cnt);
+
+        c += 1;
         if (c - 'a' >= 26) {
             c = 'a';
         }
 
-        sleep(1);
+        usleep(500 * 1000);
     }
 
-    HyFifoDump(context->fifo_handle);
+    HyFifoDump(context->fifo_handle, HY_FIFO_DUMP_CONTENT);
+
+    HyFifoDump(context->fifo_handle, HY_FIFO_DUMP_ALL);
 
     _module_destroy(&context);
 

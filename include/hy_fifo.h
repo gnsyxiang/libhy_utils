@@ -27,6 +27,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 
+#include "hy_hal/hy_type.h"
+
 /**
  * @brief 获取FIFO相关信息
  */
@@ -39,10 +41,20 @@ typedef enum {
 } HyFifoInfoType_t;
 
 /**
+ * @brief 打印fifo相关信息
+ */
+typedef enum {
+    HY_FIFO_DUMP_ALL,                   ///< 打印fifo全部信息
+    HY_FIFO_DUMP_CONTENT,               ///< 打印fifo里面的内容
+
+    HY_FIFO_DUMP_MAX,
+} HyFifoDumpType_t;
+
+/**
  * @brief 模块配置参数
  */
 typedef struct {
-    size_t size;                        ///< fifo数据空间长度
+    hy_u32_t len;                       ///< fifo数据空间长度
 } HyFifoSaveConfig_t;
 
 /**
@@ -57,9 +69,11 @@ typedef struct {
  *
  * @param config 配置参数，详见HyFifoConfig_t
  *
- * @return fifo句柄
+ * @return 成功返回fifo句柄，失败返回NULL
  *
- * @note 如果读取速度很慢且空间开辟的很小，则会丢弃数据
+ * @note 
+ * 1, 该fifo里面没有使用锁，只能使用在一读和一写线程当中，多线程需要外部加锁
+ * 2, 如果读取速度很慢且空间开辟的很小，则会丢弃数据
  */
 void *HyFifoCreate(HyFifoConfig_t *config);
 
@@ -78,6 +92,16 @@ void HyFifoDestroy(void **handle);
 void HyFifoClean(void *handle);
 
 /**
+ * @brief 从fifo中删除数据
+ *
+ * @param handle 操作fifo句柄
+ * @param len 删除数据的长度
+ *
+ * @return 返回删除的字节数
+ */
+hy_u32_t HyFifoUpdateOut(void *handle, hy_u32_t len);
+
+/**
  * @brief 向fifo中插入数据
  *
  * @param handle 操作fifo句柄
@@ -86,7 +110,7 @@ void HyFifoClean(void *handle);
  *
  * @return 返回成功插入的字节数
  */
-size_t HyFifoPut(void *handle, void *buf, size_t len);
+hy_u32_t HyFifoWrite(void *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 从fifo中获取数据
@@ -97,7 +121,7 @@ size_t HyFifoPut(void *handle, void *buf, size_t len);
  *
  * @return 返回成功取出的数据
  */
-size_t HyFifoGet(void *handle, void *buf, size_t len);
+hy_u32_t HyFifoRead(void *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 从fifo中获取数据
@@ -110,37 +134,45 @@ size_t HyFifoGet(void *handle, void *buf, size_t len);
  *
  * note 该操作不会删除数据
  */
-size_t HyFifoPeek(void *handle, void *buf, size_t len);
-
-/**
- * @brief 从fifo中删除数据
- *
- * @param handle 操作fifo句柄
- * @param len 删除数据的长度
- *
- * @return 返回删除的字节数
- */
-size_t HyFifoUpdateOut(void *handle, size_t len);
-
-/**
- * @brief 获取FIFO相关信息
- *
- * @param handle 操作fifo句柄
- * @param type 操作类型，详见HyFifoInfoType_t
- * @param val 返回值
- */
-void HyFifoGetInfo(void *handle, HyFifoInfoType_t type, void *val);
+hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 打印fifo
  *
  * @param handle 操作fifo句柄
  */
-void HyFifoDump(void *handle);
+void HyFifoDump(void *handle, HyFifoDumpType_t type);
+
+/**
+ * @brief 获取FIFO相关信息
+ *
+ * @param handle 操作fifo句柄
+ * @param type 操作类型，详见HyFifoInfoType_t
+ *
+ * @return 成功返回对应的值，失败有失败打印，且值为0
+ */
+hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type);
+
+/**
+ * @brief fifo是否满
+ *
+ * @param handle 操作fifo句柄
+ *
+ * @return 满返回1，否则返回0
+ */
+int32_t HyFifoIsFull(void *handle);
+
+/**
+ * @brief fifo是否为空
+ *
+ * @param handle 操作fifo句柄
+ *
+ * @return 空返回1，否则返回0
+ */
+int32_t HyFifoIsEmpty(void *handle);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

@@ -39,7 +39,26 @@ extern "C" {
 
 #define HY_UTILS_ARRAY_CNT(array)       (uint32_t)(sizeof((array)) / sizeof((array)[0]))    ///< 求数组元素的个数
 
-#define HyUtilsIsPowerOf2(x)            ((x) != 0 && (((x) & ((x) - 1)) == 0))
+#define HY_UTILS_IS_POWER_OF_2(x)       ((x) != 0 && (((x) & ((x) - 1)) == 0))              ///< 判断x是否为2^n，是返回1，否返回0
+
+/**
+ * @brief 把num转成2^n幂
+ *
+ * @param num 数字
+ *
+ * @return 对齐到2^n幂的数字
+ */
+static inline uint32_t HyUtilsNumTo2N(uint32_t num)
+{
+    uint32_t i = 1;
+    uint32_t num_tmp = num;
+
+    while (num >>= 1) {
+        i <<= 1;
+    }
+
+    return (i < num_tmp) ? i << 1U : i;
+}
 
 /**
  * @brief 把IP字符串转化为整数

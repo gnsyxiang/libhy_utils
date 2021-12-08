@@ -119,7 +119,7 @@ void HyNetWiredSetLed(hy_s32_t led, hy_s32_t mode)
     led_mode.led = led;
     led_mode.mode = mode;
 
-    HyFifoPut(context->led_fifo_handle, &led_mode, sizeof(led_mode));
+    HyFifoWrite(context->led_fifo_handle, &led_mode, sizeof(led_mode));
 }
 
 static hy_s32_t _led_loop_cb(void *args)
@@ -136,7 +136,7 @@ static hy_s32_t _led_loop_cb(void *args)
     while (!context->exit_flag) {
         val = 0;
         while (0 == val) {
-            HyFifoGetInfo(context->led_fifo_handle, HY_FIFO_INFO_USED_LEN, &val);
+            val = HyFifoGetInfo(context->led_fifo_handle, HY_FIFO_INFO_USED_LEN);
             usleep(100 * 1000);
 
             for (i = 0; i < HY_NET_WIRED_LED_MAX; ++i) {
@@ -158,7 +158,7 @@ static hy_s32_t _led_loop_cb(void *args)
             }
         }
 
-        HyFifoGet(context->led_fifo_handle, &led_mode, sizeof(led_mode));
+        HyFifoRead(context->led_fifo_handle, &led_mode, sizeof(led_mode));
 
         for (i = 0; i < HY_NET_WIRED_LED_MAX; ++i) {
             if (led_mode.led == i) {
@@ -198,7 +198,7 @@ void *HyNetWiredCreate(HyNetWiredConfig_t *config)
         HY_MEMCPY(&context->save_config, &config->save_config, sizeof(config->save_config));
 
         HyFifoConfig_t led_fifo_config;
-        led_fifo_config.save_config.size = sizeof(_led_mode_t) * 6;
+        led_fifo_config.save_config.len = sizeof(_led_mode_t) * 6;
         context->led_fifo_handle = HyFifoCreate(&led_fifo_config);
         if (!context->led_fifo_handle) {
             LOGE("HyFifoCreate failed \n");
