@@ -51,10 +51,19 @@ typedef enum {
 } HyFifoDumpType_t;
 
 /**
+ * @brief 锁状态
+ */
+typedef enum {
+    HY_FIFO_MUTEX_UNLOCK,               ///< 不加锁
+    HY_FIFO_MUTEX_LOCK,                 ///< 加锁
+} HyFifoMutexFlag_t;
+
+/**
  * @brief 模块配置参数
  */
 typedef struct {
     hy_u32_t len;                       ///< fifo数据空间长度
+    hy_s32_t mutex_flag;                ///< 是否加锁，详见HyFifoMutexFlag_t
 } HyFifoSaveConfig_t;
 
 /**

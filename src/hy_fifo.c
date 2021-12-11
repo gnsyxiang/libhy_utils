@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "hy_fifo.h"
 
@@ -54,6 +55,8 @@ typedef struct {
 
     hy_u32_t            read_pos;
     hy_u32_t            write_pos;
+
+    pthread_mutex_t     mutex;
 } _fifo_context_t;
 
 hy_u32_t HyFifoWrite(void *handle, void *buf, hy_u32_t len)
@@ -76,6 +79,11 @@ hy_u32_t HyFifoWrite(void *handle, void *buf, hy_u32_t len)
 #endif
 
     len_tmp = HY_UTILS_MIN(len, context->save_config.len - _FIFO_WRITE_POS(context));
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_lock(&context->mutex);
+    }
+
     memcpy(context->buf + _FIFO_WRITE_POS(context), buf, len_tmp);
     memcpy(context->buf, buf + len_tmp, len - len_tmp);
 
@@ -85,11 +93,15 @@ hy_u32_t HyFifoWrite(void *handle, void *buf, hy_u32_t len)
 #endif
 
     context->write_pos += len;
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_unlock(&context->mutex);
+    }
+
     return len;
 }
 
-static hy_s32_t _fifo_read_com(void *handle,
-        void *buf, hy_u32_t len, hy_s32_t flag)
+static hy_s32_t _fifo_read_com(void *handle, void *buf, hy_u32_t len)
 {
     hy_u32_t len_tmp = 0;
     _fifo_context_t *context = handle;
@@ -116,10 +128,6 @@ static hy_s32_t _fifo_read_com(void *handle,
     HY_SMP_MB();
 #endif
 
-    if (flag) {
-        context->read_pos += len;
-    }
-
     return len;
 }
 
@@ -127,8 +135,21 @@ hy_u32_t HyFifoRead(void *handle, void *buf, hy_u32_t len)
 {
     LOGT("\n");
     HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+    _fifo_context_t *context = handle;
 
-    return _fifo_read_com(handle, buf, len, 1);
+    len = _fifo_read_com(handle, buf, len);
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_lock(&context->mutex);
+    }
+
+    context->read_pos += len;
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_unlock(&context->mutex);
+    }
+
+    return len;
 }
 
 hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len)
@@ -136,7 +157,7 @@ hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len)
     LOGT("\n");
     HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
 
-    return _fifo_read_com(handle, buf, len, 0);
+    return _fifo_read_com(handle, buf, len);
 }
 
 void HyFifoClean(void *handle)
@@ -146,8 +167,16 @@ void HyFifoClean(void *handle)
 
     _fifo_context_t *context = handle;
 
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_lock(&context->mutex);
+    }
+
     context->write_pos = context->read_pos = 0;
     HY_MEMSET(context->buf, context->save_config.len);
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_unlock(&context->mutex);
+    }
 }
 
 hy_u32_t HyFifoUpdateOut(void *handle, hy_u32_t len)
@@ -158,7 +187,16 @@ hy_u32_t HyFifoUpdateOut(void *handle, hy_u32_t len)
     _fifo_context_t *context = handle;
 
     len = HY_UTILS_MIN(len, _FIFO_USED_LEN(context));
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_lock(&context->mutex);
+    }
+
     context->read_pos += len;
+
+    if (context->save_config.mutex_flag) {
+        pthread_mutex_unlock(&context->mutex);
+    }
 
     return len;
 }
@@ -266,6 +304,8 @@ void HyFifoDestroy(void **handle)
 
     HY_MEM_FREE_P(context->buf);
 
+    pthread_mutex_destroy(&context->mutex);
+
     LOGI("fifo destroy, handle: %p \n", context);
     HY_MEM_FREE_PP(handle);
 }
@@ -289,6 +329,8 @@ void *HyFifoCreate(HyFifoConfig_t *config)
 
         HY_MEMCPY(&context->save_config, &config->save_config, sizeof(config->save_config));
         context->write_pos = context->read_pos = 0;
+
+        pthread_mutex_init(&context->mutex, NULL);
 
         LOGI("fifo create, handle: %p \n", context);
         return context;
