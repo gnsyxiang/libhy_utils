@@ -22,11 +22,15 @@
 #include <string.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include "hy_log.h"
 
+#include "log_fifo.h"
+
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
+#include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 
@@ -67,10 +71,16 @@
 // printf("\033[字背景颜色;字体颜色m字符串\033[0m" );
 
 typedef struct {
-    HyLogSaveConfig_t save_config;
+    HyLogSaveConfig_t   save_config;
 
-    char *buf;
-    size_t cur_len;
+    char                *buf;
+    size_t              cur_len;
+
+    void                *fifo_handle;
+
+    hy_s32_t            init_flag;
+    hy_s32_t            exit_flag;
+    void                *thread_handle;
 } _log_context_t;
 
 static _log_context_t *context = NULL;
@@ -160,17 +170,53 @@ void HyLogWrite(int level, const char *file, const char *func,
             _output_reset_color(level, &ret);
         }
 
-        printf("%s", (char *)context->buf);
+        // @fixme 可以优化，提高效率
+        if (context->init_flag) {
+            log_fifo_write(context->fifo_handle, context->buf, ret);
+        }
     }
+}
+
+static hy_s32_t _log_loop_cb(void *args)
+{
+    _log_context_t *context = args;
+    #define _LOG_BUF_LEN_MAX (1024 * 10)
+    char *buf = HY_MEM_MALLOC_RET_VAL(char *, _LOG_BUF_LEN_MAX, -1);
+    hy_u32_t len;
+
+    while (!context->exit_flag) {
+        if (log_fifo_is_empty(context->fifo_handle)) {
+            usleep(10 * 1000);
+            continue;
+        }
+
+        HY_MEMSET(buf, _LOG_BUF_LEN_MAX);
+        len = log_fifo_read(context->fifo_handle, buf, _LOG_BUF_LEN_MAX);
+        printf("%s", buf);
+    }
+
+    if (buf) {
+        free(buf);
+    }
+
+    return -1;
 }
 
 void HyLogDestroy(void **handle)
 {
     if (context) {
+        context->init_flag = 0;
+        context->exit_flag = 1;
+
+        HyThreadDestroy(&context->thread_handle);
+
+        log_fifo_destroy(&context->fifo_handle);
+
         if (context->buf) {
             HY_MEM_FREE_PP(&context->buf);
         }
 
+        printf("log destroy, handle: %p \n", context);
         HY_MEM_FREE_PP(&context);
     }
 }
@@ -185,10 +231,31 @@ void *HyLogCreate(HyLogConfig_t *config)
 
         HY_MEMCPY(&context->save_config, &config->save_config, sizeof(config->save_config));
 
+        context->fifo_handle = log_fifo_create(config->save_config.buf_len);
+        if (!context->fifo_handle) {
+            LOGE("failed \n");
+            break;
+        }
+
+        HyThreadConfig_t thread_config;
+        HY_MEMSET(&thread_config, sizeof(thread_config));
+        thread_config.save_config.thread_loop_cb    = _log_loop_cb;
+        thread_config.save_config.args              = context;
+        #define _THREAD_NAME "_log"
+        HY_STRNCPY(thread_config.save_config.name,
+                HY_THREAD_NAME_LEN_MAX, _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
+        context->thread_handle = HyThreadCreate(&thread_config);
+        if (!context->thread_handle) {
+            LOGE("failed \n");
+            break;
+        }
+
+        context->init_flag = 1;
+
+        printf("log create, handle: %p \n", context);
         return context;
     } while (0);
 
     HyLogDestroy((void **)&context);
     return NULL;
 }
-

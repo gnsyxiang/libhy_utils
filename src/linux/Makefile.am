@@ -52,7 +52,7 @@ _sources_com    += \
 if COMPILE_LIBLOG4CPLUS
 _sources_com    += hy_log4cplus.cpp
 else
-_sources_com    += hy_log.c
+_sources_com    += hy_log.c log_fifo.c
 endif
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
