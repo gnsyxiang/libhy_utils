@@ -201,9 +201,13 @@ hy_u32_t HyFifoUpdateOut(void *handle, hy_u32_t len)
     return len;
 }
 
-static void _dump_hex_ascii(char *buf, hy_u32_t len)
+static void _dump_hex_ascii(char *buf, hy_s32_t len)
 {
-    for (hy_u32_t i = 0; i < len; i++) {
+    if (len <= 0) {
+        return;
+    }
+
+    for (hy_s32_t i = 0; i < len; i++) {
         if (buf[i] == 0x0d || buf[i] == 0x0a || buf[i] < 32 || buf[i] >= 127) {
             printf("%02x[ ]  ", (hy_u8_t)buf[i]);
         } else {
@@ -225,7 +229,8 @@ static void _dump_content(_fifo_context_t *context)
             _FIFO_USED_LEN(context), context->write_pos, context->read_pos);
 
     hy_u32_t len_tmp;
-    len_tmp = HY_UTILS_MIN(_FIFO_USED_LEN(context), _FIFO_READ_POS(context));
+    len_tmp = context->save_config.len - _FIFO_READ_POS(context);
+    len_tmp = HY_UTILS_MIN(len_tmp, _FIFO_USED_LEN(context));
 
     _dump_hex_ascii(context->buf + _FIFO_READ_POS(context), len_tmp);
     _dump_hex_ascii(context->buf, _FIFO_USED_LEN(context) - len_tmp);
