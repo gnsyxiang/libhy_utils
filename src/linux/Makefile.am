@@ -46,9 +46,14 @@ _include_com    += \
 
 _sources_com    += \
                    hy_hash.c            \
-                   hy_log.c             \
                    hy_net_wired.c       \
                    hy_timer.c
+
+if COMPILE_LIBLOG4CPLUS
+_sources_com    += hy_log4cplus.cpp
+else
+_sources_com    += hy_log.c
+endif
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
 

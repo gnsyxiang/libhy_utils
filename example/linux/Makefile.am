@@ -65,6 +65,11 @@ _include_com    += $(CJSON_INCS)
 _ldadd_com      += $(CJSON_LIBS)
 endif
 
+if COMPILE_LIBLOG4CPLUS
+_include_com    += $(LOG4CPLUS_INCS)
+_ldadd_com      += $(LOG4CPLUS_LIBS)
+endif
+
 bin_PROGRAMS                += hy_hash_test
 hy_hash_test_SOURCES        = $(_sources_com) hy_hash_test.c
 hy_hash_test_CPPFLAGS       = $(_cppflags_com)
