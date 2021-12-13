@@ -26,14 +26,6 @@ extern "C" {
 
 #include "hy_hal/hy_type.h"
 
-/**
- * @brief 锁状态
- */
-typedef enum {
-    LOG_FIFO_MUTEX_UNLOCK,               ///< 不加锁
-    LOG_FIFO_MUTEX_LOCK,                 ///< 加锁
-} log_fifo_mutex_flag_t;
-
 void *log_fifo_create(hy_u32_t len);
 void log_fifo_destroy(void **handle);
 hy_s32_t log_fifo_is_empty(void *handle);

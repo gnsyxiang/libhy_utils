@@ -18,8 +18,6 @@
  *     last modified: 30/10 2021 10:52
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <pthread.h>
 
 #include "log_fifo.h"
@@ -60,7 +58,6 @@ hy_u32_t log_fifo_write(void *handle, void *buf, hy_u32_t len)
     if (!handle || !buf || len == 0) {
         return 0;
     }
-
     _fifo_context_t *context = handle;
     hy_u32_t len_tmp = 0;
 
@@ -137,8 +134,8 @@ hy_s32_t log_fifo_is_empty(void *handle)
     if (!handle) {
         return 0;
     }
-
     _fifo_context_t *context = handle;
+
     return _FIFO_IS_EMPTY(context);
 }
 
@@ -147,14 +144,11 @@ void log_fifo_destroy(void **handle)
     if (!handle || !*handle) {
         return;
     }
-
     _fifo_context_t *context = *handle;
-
-    HY_MEM_FREE_P(context->buf);
 
     pthread_mutex_destroy(&context->mutex);
 
-    printf("fifo destroy, handle: %p \n", context);
+    HY_MEM_FREE_P(context->buf);
     HY_MEM_FREE_PP(handle);
 }
 
@@ -179,13 +173,13 @@ void *log_fifo_create(hy_u32_t len)
             printf("malloc failed \n");
             break;
         }
+        HY_MEMSET(context->buf, len);
 
         context->len = len;
         context->write_pos = context->read_pos = 0;
 
         pthread_mutex_init(&context->mutex, NULL);
 
-        printf("fifo create, handle: %p \n", context);
         return context;
     } while (0);
 
