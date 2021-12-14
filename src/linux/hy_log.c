@@ -190,6 +190,12 @@ static hy_s32_t _log_loop_cb(void *args)
         printf("%s", buf);
     }
 
+    while (!log_fifo_is_empty(context->fifo_handle)) {
+        HY_MEMSET(buf, _LOG_BUF_LEN_MAX);
+        log_fifo_read(context->fifo_handle, buf, _LOG_BUF_LEN_MAX);
+        printf("%s", buf);
+    }
+
     HY_MEM_FREE_PP(&buf);
 
     return -1;
