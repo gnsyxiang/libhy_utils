@@ -72,9 +72,9 @@ hy_u32_t log_fifo_write(void *handle, void *buf, hy_u32_t len)
     HY_SMP_MB();
 #endif
 
-    len_tmp = HY_UTILS_MIN(len, context->len - _FIFO_WRITE_POS(context));
-
     pthread_mutex_lock(&context->mutex);
+
+    len_tmp = HY_UTILS_MIN(len, context->len - _FIFO_WRITE_POS(context));
 
     memcpy(context->buf + _FIFO_WRITE_POS(context), buf, len_tmp);
     memcpy(context->buf, buf + len_tmp, len - len_tmp);

@@ -48,7 +48,7 @@ typedef enum {
  */
 typedef struct {
     int32_t level;                  ///< 打印等级，详见HyLogLevel_t
-    size_t  buf_len;                ///< 打印buf长度
+    size_t  buf_len;                ///< fifo缓存长度，不建议太短，看需要输出的log信息数量及长度
     int32_t color_output;           ///< 是否颜色输出
 } HyLogSaveConfig_t;
 

@@ -140,8 +140,7 @@ void HyLogWrite(int level, const char *file, const char *func,
         uint32_t line, char *fmt, ...)
 {
     if (context && context->save_config.level >= level) {
-        #define _SHORT_FILE_LEN_MAX (32)
-        char short_file[_SHORT_FILE_LEN_MAX] = {0};
+        char short_file[32] = {0};
         hy_u32_t ret = 0;
         size_t buf_len = context->save_config.buf_len;
 
@@ -152,7 +151,7 @@ void HyLogWrite(int level, const char *file, const char *func,
         }
 
         // 0x5c == \, 去除windows分界符
-        HyStrCopyRight2(file, short_file, _SHORT_FILE_LEN_MAX, '/', 0x5c);
+        HyStrCopyRight2(file, short_file, sizeof(short_file), '/', 0x5c);
         ret += snprintf(context->buf + ret,
                 buf_len - ret, "[%s:%"PRId32"][%s] ",
                 short_file, line, func); 
