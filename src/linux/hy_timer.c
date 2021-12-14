@@ -28,45 +28,58 @@
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_type.h"
+#include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
 #define ALONE_DEBUG 1
 
-typedef struct {
-    HyTimerConfig_t timer_config;
+/**
+ * @brief 链表实现的定时器
+ */
 
-    size_t rotation;
+typedef struct {
+    HyTimerConfig_t     timer_config;
+
+    size_t              rotation;           ///< 旋转的圈数，类比分针走一圈
 
     struct hy_list_head list;
 } _timer_t;
 
 typedef struct {
-    HyTimerServiceSaveConfig_t save_config;
+    HyTimerServiceSaveConfig_t  save_config;
 
-    uint32_t cur_slot;
-    pthread_mutex_t mutex;
+    uint32_t                    cur_slot;
+    pthread_mutex_t             mutex;
 
-    pthread_t id;
-    int exit_flag;
+    pthread_t                   id;
+    int                         exit_flag;
+    void                        *thread_handle;
 
-    struct hy_list_head *list_head;
+    struct hy_list_head         *list_head;
 } _timer_context_t;
 
 static _timer_context_t *context = NULL;
 
 void *HyTimerAdd(HyTimerConfig_t *timer_config)
 {
+    LOGT("\n");
     HY_ASSERT_VAL_RET_VAL(!timer_config, NULL);
 
     _timer_t *timer = HY_MEM_MALLOC_RET_VAL(_timer_t *, sizeof(*timer), NULL);
 
     HY_MEMCPY(&timer->timer_config, timer_config, sizeof(*timer_config));
 
-    timer->rotation = timer_config->expires / context->save_config.slot_num;
-    size_t slot     = timer_config->expires % context->save_config.slot_num;
+    hy_u32_t slot_num = context->save_config.slot_num;
+    timer->rotation = timer_config->expires / slot_num;     // 圈数
+    size_t slot     = timer_config->expires % slot_num;     // 落在哪个格子
 
+    LOGD("rotation: %d, slot: %d \n", timer->rotation, slot);
+
+    pthread_mutex_lock(&context->mutex);
     hy_list_add_tail(&timer->list, &context->list_head[slot]);
+    pthread_mutex_unlock(&context->mutex);
 
     return timer;
 }
@@ -79,31 +92,35 @@ void HyTimerDel(void **timer_handle)
     uint32_t i;
 
     for (i = 0; i < context->save_config.slot_num; ++i) {
+        pthread_mutex_lock(&context->mutex);
+
         hy_list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
             if (*timer_handle == pos) {
                 hy_list_del(&pos->list);
 
-                pthread_mutex_lock(&context->mutex);
                 HY_MEM_FREE_PP(&pos);
                 *timer_handle = NULL;
-                pthread_mutex_unlock(&context->mutex);
 
+                pthread_mutex_unlock(&context->mutex);
                 goto DEL_ERR_1;
             }
         }
+
+        pthread_mutex_unlock(&context->mutex);
     }
 
 DEL_ERR_1:
     return;
 }
 
-static void *_timer_loop_cb(void *args)
+static hy_s32_t _timer_loop_cb(void *args)
 {
     struct timeval tv;
     int err;
     _timer_t *pos, *n;
     time_t sec, usec;
     HyTimerConfig_t *timer_config = NULL;
+    hy_u32_t slot_num = context->save_config.slot_num;
 
     sec = context->save_config.slot_interval_ms / 1000;
     usec = (context->save_config.slot_interval_ms % 1000) * 1000;
@@ -116,25 +133,24 @@ static void *_timer_loop_cb(void *args)
             err = select(0, NULL, NULL, NULL, &tv);
         } while(err < 0 && errno == EINTR);
 
+        pthread_mutex_lock(&context->mutex);
         hy_list_for_each_entry_safe(pos, n, &context->list_head[context->cur_slot], list) {
             if (pos->rotation > 0) {
                 pos->rotation--;
             } else {
                 timer_config = &pos->timer_config;
 
-                pthread_mutex_lock(&context->mutex);
                 if (timer_config->timer_cb) {
                     timer_config->timer_cb(timer_config->args);
                 }
-                pthread_mutex_unlock(&context->mutex);
 
                 hy_list_del(&pos->list);
 
                 if (pos->timer_config.repeat_flag == HY_TIMER_MODE_REPEAT) {
-                    pos->rotation = timer_config->expires / context->save_config.slot_num;
-                    size_t slot     = timer_config->expires % context->save_config.slot_num;
+                    pos->rotation = timer_config->expires / slot_num;
+                    size_t slot     = timer_config->expires % slot_num;
                     slot += context->cur_slot;
-                    slot %= context->save_config.slot_num;
+                    slot %= slot_num;
 
                     hy_list_add_tail(&pos->list, &context->list_head[slot]);
                 } else {
@@ -142,35 +158,41 @@ static void *_timer_loop_cb(void *args)
                 }
             }
         }
+        pthread_mutex_unlock(&context->mutex);
 
         context->cur_slot++;
-        context->cur_slot %= context->save_config.slot_num;
+        context->cur_slot %= slot_num;
     }
 
-    return NULL;
+    return -1;
 }
 
 void HyTimerDestroy(void **handle)
 {
+    HY_ASSERT_VAL_RET(!handle || !*handle);
+
     context->exit_flag = 1;
-    pthread_join(context->id, NULL);
+    HyThreadDestroy(&context->thread_handle);
 
     _timer_t *pos, *n;
     for (uint32_t i = 0; i < context->save_config.slot_num; ++i) {
+        pthread_mutex_lock(&context->mutex);
+
         hy_list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
             hy_list_del(&pos->list);
 
             HY_MEM_FREE_PP(&pos);
         }
+
+        pthread_mutex_unlock(&context->mutex);
     }
 
     pthread_mutex_destroy(&context->mutex);
 
     HY_MEM_FREE_PP(&context->list_head);
 
+    LOGI("timer destroy, handle: %p \n", context);
     HY_MEM_FREE_PP(&context);
-
-    LOGI("timer destroy successful \n");
 }
 
 void *HyTimerCreate(HyTimerServiceConfig_t *config)
@@ -190,9 +212,13 @@ void *HyTimerCreate(HyTimerServiceConfig_t *config)
 
         pthread_mutex_init(&context->mutex, NULL);
 
-        pthread_create(&context->id, NULL, _timer_loop_cb, context);
+        context->thread_handle = HyThreadCreate_m("hy_timer", _timer_loop_cb, context);
+        if (!context->thread_handle) {
+            LOGE("failed \n");
+            break;
+        }
 
-        LOGI("timer create successful \n");
+        LOGI("timer create, handle: %p \n", context);
         return context;
     } while (0);
 

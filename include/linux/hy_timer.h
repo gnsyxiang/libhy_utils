@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <stdint.h>
+#include "hy_hal/hy_type.h"
 
 /**
  * @brief 定时器模式
@@ -41,19 +41,19 @@ typedef enum {
  * @brief 创建单个定时器结构体
  */
 typedef struct {
-    size_t  expires;                            ///< 超时时间ms = expires * slot_interval_ms
-    int32_t repeat_flag;                        ///< 是否重复，详见HY_TIMER_MODE_t
+    size_t      expires;                        ///< 超时时间ms
+    hy_s32_t    repeat_flag;                    ///< 是否重复，详见HY_TIMER_MODE_t
 
-    void    (*timer_cb)(void *args);            ///< 定时器回调函数
-    void    *args;                              ///< 定时器回调函数参数
+    void        (*timer_cb)(void *args);        ///< 定时器回调函数
+    void        *args;                          ///< 上层参数
 } HyTimerConfig_t;
 
 /**
  * @brief 配置结构体
  */
 typedef struct {
-    uint32_t slot_num;                          ///< 一格周期的总格子数
-    uint32_t slot_interval_ms;                  ///< 一格子定时的最小刻度
+    hy_u32_t    slot_num;                       ///< 一个周期的总格子数
+    hy_u32_t    slot_interval_ms;               ///< 一个格子定时的最小刻度
 } HyTimerServiceSaveConfig_t;
 
 /**
@@ -64,23 +64,23 @@ typedef struct {
 } HyTimerServiceConfig_t;
 
 /**
- * @brief 创建定时器服务模块
+ * @brief 创建定时器模块
  *
  * @param config 配置参数，详见HyTimerServiceConfig_t
  *
- * @return 返回定时器服务操作句柄
+ * @return 返回定时器操作句柄
  */
 void *HyTimerCreate(HyTimerServiceConfig_t *config);
 
 /**
- * @brief 销毁定时器服务模块
+ * @brief 销毁定时器模块
  *
- * @param handle 定时器服务句柄的地址
+ * @param handle 定时器句柄的地址
  */
 void HyTimerDestroy(void **handle);
 
 /**
- * @brief 增加一个定时器
+ * @brief 增加定时器
  *
  * @param timer_config 定时器配置参数，详见HyTimerConfig_t
  *
@@ -95,9 +95,44 @@ void *HyTimerAdd(HyTimerConfig_t *timer_config);
  */
 void HyTimerDel(void **timer_handle);
 
+/**
+ * @brief 增加定时器宏
+ *
+ * @param _expires 超时时间
+ * @param _repeat_flag 是否重复
+ * @param _timer_cb 回调函数
+ * @param _args 上层参数
+ *
+ * @return 返回定时器句柄
+ */
+#define HyTimerAdd_m(_expires, _repeat_flag, _timer_cb, _args)  \
+    ({                                                          \
+        HyTimerConfig_t config;                                 \
+        config.expires        = _expires;                       \
+        config.repeat_flag    = _repeat_flag;                   \
+        config.timer_cb       = _timer_cb;                      \
+        config.args           = _args;                          \
+        context->timer_handle = HyTimerAdd(&config);            \
+     })
+
+/**
+ * @brief 创建定时器模块宏
+ *
+ * @param _slot_interval_ms 一个格子定时的最小刻度
+ * @param _slot_num 一个周期的总格子数
+ *
+ * @return 
+ */
+#define HyTimerCreate_m(_slot_interval_ms, _slot_num)               \
+    ({                                                              \
+        HyTimerServiceConfig_t config;                              \
+        config.save_config.slot_interval_ms   = _slot_interval_ms;  \
+        config.save_config.slot_num           = _slot_num;          \
+        HyTimerCreate(&config);                                     \
+     })
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-
