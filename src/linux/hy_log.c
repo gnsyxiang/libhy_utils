@@ -231,13 +231,7 @@ void *HyLogCreate(HyLogConfig_t *config)
             break;
         }
 
-        HyThreadConfig_t thread_config;
-        HY_MEMSET(&thread_config, sizeof(thread_config));
-        thread_config.save_config.thread_loop_cb    = _log_loop_cb;
-        thread_config.save_config.args              = context;
-        HY_STRNCPY(thread_config.save_config.name,
-                HY_THREAD_NAME_LEN_MAX, "hy_log", HY_STRLEN("hy_log"));
-        context->thread_handle = HyThreadCreate(&thread_config);
+        context->thread_handle = HyThreadCreate_m("hy_log", _log_loop_cb, context);
         if (!context->thread_handle) {
             LOGE("failed \n");
             break;

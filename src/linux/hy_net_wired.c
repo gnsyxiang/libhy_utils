@@ -205,12 +205,7 @@ void *HyNetWiredCreate(HyNetWiredConfig_t *config)
             break;
         }
 
-        HyThreadConfig_t led_config;
-        led_config.save_config.thread_loop_cb    = _led_loop_cb;
-        led_config.save_config.args              = context;
-        #define _THREAD_NAME "net_led"
-        HY_STRNCPY(led_config.save_config.name, HY_THREAD_NAME_LEN_MAX, _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
-        context->led_thread_handle = HyThreadCreate(&led_config);
+        context->led_thread_handle = HyThreadCreate_m("net_led", _led_loop_cb, context);
         if (!context->led_thread_handle) {
             LOGE("HyThreadCreate failed \n");
             break;
