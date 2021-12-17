@@ -206,6 +206,10 @@ void HyLogDestroy(void **handle)
         context->init_flag = 0;
         context->exit_flag = 1;
 
+        while (1 != log_fifo_is_empty(context->fifo_handle)) {
+            usleep(10 * 1000);
+        }
+
         HyThreadDestroy(&context->thread_handle);
 
         log_fifo_destroy(&context->fifo_handle);
