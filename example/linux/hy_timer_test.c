@@ -45,7 +45,14 @@ typedef struct {
 
 static void _timer_cb(void *args)
 {
-    LOGD("------%p \n", args);
+    _main_context_t *context = args;
+
+    static int cnt = 0;
+    if (++cnt >= 5) {
+        context->exit_flag = 1;
+    }
+
+    LOGD("------cnt: %d \n", cnt);
 }
 
 static void _signal_error_cb(void *args)
@@ -142,6 +149,8 @@ int main(int argc, char *argv[])
     while (!context->exit_flag) {
         sleep(1);
     }
+
+    HyTimerDel(&context->timer_handle);
 
     _module_destroy(&context);
 
