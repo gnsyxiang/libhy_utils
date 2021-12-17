@@ -27,6 +27,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 
+#include "hy_hal/hy_type.h"
+
 #define IP_INT_DOT_LEN (4)
 #define IP_STR_DOT_LEN (16)
 
@@ -37,7 +39,7 @@ extern "C" {
 
 #define HY_UTILS_UPCASE(c)              (((c) >= 'a' && (c) <= 'z') ? ((c) - 0x20) : (c))   ///< 将一个字母转换为大写
 
-#define HY_UTILS_ARRAY_CNT(array)       (uint32_t)(sizeof((array)) / sizeof((array)[0]))    ///< 求数组元素的个数
+#define HY_UTILS_ARRAY_CNT(array)       (hy_u32_t)(sizeof((array)) / sizeof((array)[0]))    ///< 求数组元素的个数
 
 #define HY_UTILS_IS_POWER_OF_2(x)       ((x) != 0 && (((x) & ((x) - 1)) == 0))              ///< 判断x是否为2^n，是返回1，否返回0
 
@@ -48,10 +50,10 @@ extern "C" {
  *
  * @return 对齐到2^n幂的数字
  */
-static inline uint32_t HyUtilsNumTo2N(uint32_t num)
+static inline hy_u32_t HyUtilsNumTo2N(hy_u32_t num)
 {
-    uint32_t i = 1;
-    uint32_t num_tmp = num;
+    hy_u32_t i = 1;
+    hy_u32_t num_tmp = num;
 
     while (num >>= 1) {
         i <<= 1;
@@ -66,7 +68,7 @@ static inline uint32_t HyUtilsNumTo2N(uint32_t num)
  * @param ip_str ip字符串
  * @param ip_num ip整数
  */
-void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num);
+void HyUtilsIpStr2Int(const char *ip_str, hy_u32_t *ip_num);
 
 /**
  * @brief 把ip整数转化为ip字符串
@@ -75,7 +77,7 @@ void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num);
  * @param ip_str ip字符串
  * @param ip_str_len ip字符串的长度
  */
-void HyUtilsIpInt2Str(uint32_t ip_num, char *ip_str, size_t ip_str_len);
+void HyUtilsIpInt2Str(hy_u32_t ip_num, char *ip_str, size_t ip_str_len);
 
 /**
  * @brief hex转化成整数，然后再转化成字符串
@@ -105,7 +107,7 @@ void HyUtilsStr2Int2Hex(char *str, size_t str_len, char *addr, size_t addr_len);
  *
  * @return 返回整数
  */
-uint32_t HyUtilsBitStr2Dec(char *binary_str, size_t len);
+hy_u32_t HyUtilsBitStr2Dec(char *binary_str, size_t len);
 
 /**
  * @brief 把整数转化成bit数组
@@ -115,11 +117,10 @@ uint32_t HyUtilsBitStr2Dec(char *binary_str, size_t len);
  * @param bit_str bit数组地址
  * @param str_len bit数组长度
  */
-void HyUtilsDec2BitStr(uint32_t num, size_t num_len, char *bit_str, size_t str_len);
+void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len, char *bit_str, size_t str_len);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

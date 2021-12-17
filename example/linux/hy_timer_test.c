@@ -134,13 +134,7 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HyTimerConfig_t timer_config;
-    timer_config.expires        = 500;
-    timer_config.repeat_flag    = HY_TYPE_FLAG_DISABLE;
-    timer_config.timer_cb       = _timer_cb;
-    timer_config.args           = context;
-
-    context->timer_handle = HyTimerAdd(&timer_config);
+    context->timer_handle = HyTimerAdd_m(500, HY_TYPE_FLAG_ENABLE, _timer_cb, context);
     if (!context->timer_handle) {
         LOGE("HyTimerAdd failed \n");
     }
@@ -153,4 +147,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
