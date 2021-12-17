@@ -149,7 +149,7 @@ HyJsonType_t _cjson_item_typeof(const HyJson_t *item)
 
 char *_cjson_item_print_str(const HyJson_t *root)
 {
-    return cJSON_PrintUnformatted((cJSON*)root);
+    return cJSON_Print((cJSON*)root);
 }
 
 json_impl_t json_impl = {

@@ -279,7 +279,9 @@ void HyJsonDump(HyJson_t *root)
 {
     HY_ASSERT_VAL_RET(!root);
 
-    LOGI("%s \n", json_impl.item_print_str(root));
+    char *buf = json_impl.item_print_str(root);
+    LOGI("%s \n", buf);
+    free(buf);
 }
 
 void HyJsonDestroy(HyJson_t *root)
