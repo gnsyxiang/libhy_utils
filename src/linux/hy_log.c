@@ -29,7 +29,6 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_thread.h"
-#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 
 #define ALONE_DEBUG 1
@@ -81,13 +80,13 @@ typedef struct {
 
 static _log_context_t *context = NULL;
 
-void HyLogHex(const char *name, uint32_t line,
-        void *_buf, size_t len, int8_t flag)
+void HyLogHex(const char *name, hy_u32_t line,
+        void *_buf, size_t len, hy_s32_t flag)
 {
     if (len <= 0) {
         return;
     }
-    uint8_t *buf = (uint8_t *)_buf;
+    unsigned char *buf = (unsigned char *)_buf;
 
     hy_u8_t cnt = 0;
     printf("[%s %d]len: %zu \r\n", name, line, len);
@@ -136,8 +135,8 @@ static inline void _output_reset_color(HyLogLevel_t level, hy_u32_t *ret)
             PRINT_ATTR_RESET);
 }
 
-void HyLogWrite(int level, const char *file, const char *func,
-        uint32_t line, char *fmt, ...)
+void HyLogWrite(HyLogLevel_t level, const char *file, const char *func,
+        hy_u32_t line, char *fmt, ...)
 {
     if (context && context->save_config.level >= level) {
         char short_file[32] = {0};
@@ -235,7 +234,8 @@ void *HyLogCreate(HyLogConfig_t *config)
             break;
         }
 
-        context->thread_handle = HyThreadCreate_m("hy_log", _log_loop_cb, context);
+        context->thread_handle = HyThreadCreate_m("hy_log",
+                _log_loop_cb, context);
         if (!context->thread_handle) {
             LOGE("failed \n");
             break;

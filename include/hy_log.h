@@ -25,7 +25,9 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-#include <stdint.h>
+
+#include "hy_hal/hy_type.h"
+#include "hy_hal/hy_compile.h"
 
 /**
  * @brief 打印等级定义
@@ -33,12 +35,12 @@ extern "C" {
  * @note 数字越小越紧急
  */
 typedef enum {
-    HY_LOG_LEVEL_FATAL,             ///< 致命错误，立刻停止程序
-    HY_LOG_LEVEL_ERROR,             ///< 错误，停止程序
-    HY_LOG_LEVEL_WARN,              ///< 警告
-    HY_LOG_LEVEL_INFO,              ///< 追踪，记录程序运行到哪里
-    HY_LOG_LEVEL_DEBUG,             ///< 调试程序相关打印
-    HY_LOG_LEVEL_TRACE,             ///< 程序打点调试
+    HY_LOG_LEVEL_FATAL,                     ///< 致命错误，立刻停止程序
+    HY_LOG_LEVEL_ERROR,                     ///< 错误，停止程序
+    HY_LOG_LEVEL_WARN,                      ///< 警告
+    HY_LOG_LEVEL_INFO,                      ///< 追踪，记录程序运行到哪里
+    HY_LOG_LEVEL_DEBUG,                     ///< 调试程序相关打印
+    HY_LOG_LEVEL_TRACE,                     ///< 程序打点调试
 
     HY_LOG_LEVEL_MAX
 } HyLogLevel_t;
@@ -47,16 +49,16 @@ typedef enum {
  * @brief 模块配置参数
  */
 typedef struct {
-    int32_t level;                  ///< 打印等级，详见HyLogLevel_t
-    size_t  buf_len;                ///< fifo缓存长度，不建议太短，看需要输出的log信息数量及长度
-    int32_t color_output;           ///< 是否颜色输出
+    HyLogLevel_t        level;              ///< 打印等级，详见HyLogLevel_t
+    size_t              buf_len;            ///< fifo缓存长度，不建议太短，看需要输出的log信息数量及长度
+    hy_u32_t            color_output;       ///< 是否颜色输出
 } HyLogSaveConfig_t;
 
 /**
  * @brief 模块配置参数
  */
 typedef struct {
-    HyLogSaveConfig_t save_config;  ///< 参数，详见HyLogSaveConfig_t
+    HyLogSaveConfig_t   save_config;        ///< 参数，详见HyLogSaveConfig_t
 } HyLogConfig_t;
 
 /**
@@ -76,11 +78,11 @@ void *HyLogCreate(HyLogConfig_t *config);
 void HyLogDestroy(void **handle);
 
 #if 1
-void HyLogWrite(int32_t level, const char *file,  const char *func,
-        uint32_t line, char *fmt, ...);
+void HyLogWrite(HyLogLevel_t level, const char *file,  const char *func,
+        hy_u32_t line, char *fmt, ...) HY_CHECK_FMT_WITH_PRINTF(5, 6);
 
-void HyLogHex(const char *name, uint32_t line,
-       void *buf, size_t len, int8_t flag);
+void HyLogHex(const char *name, hy_u32_t line,
+       void *buf, size_t len, hy_s32_t flag);
 
 /**
  * @brief 输出log宏转义
@@ -114,4 +116,3 @@ void HyLogHex(const char *name, uint32_t line,
 #endif
 
 #endif
-
