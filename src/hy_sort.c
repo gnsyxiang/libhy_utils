@@ -29,8 +29,6 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 static inline void _mem_swap(void *dst, void *src,
         void *tmp, hy_u32_t item_len)
 {

@@ -38,8 +38,6 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 struct mii_data {
     hy_u16_t phy_id;
     hy_u16_t reg_num;

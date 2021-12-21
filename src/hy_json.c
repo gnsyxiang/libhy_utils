@@ -32,8 +32,6 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 #if (HY_JSON_USE_TYPE == 1)
 
 #define _get_a_item(root, n, item, _type)           \

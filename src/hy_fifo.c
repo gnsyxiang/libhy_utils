@@ -32,8 +32,6 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 /**
  * @brief 内存屏障
  *

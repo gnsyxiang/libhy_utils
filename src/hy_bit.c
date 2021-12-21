@@ -24,8 +24,6 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 void HyBitSet(char *byte, uint32_t index)
 {
     HY_ASSERT_VAL_RET(!byte);

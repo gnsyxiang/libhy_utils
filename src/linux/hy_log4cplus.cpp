@@ -38,8 +38,6 @@
 #include <log4cplus/helpers/socket.h>
 #include <log4cplus/loggingmacros.h>
 
-#define ALONE_DEBUG 1
-
 using namespace log4cplus;
 
 typedef struct {

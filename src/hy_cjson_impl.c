@@ -27,8 +27,6 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 HyJson_t *_cjson_item_create(const char *buf, size_t len)
 {
     return cJSON_Parse(buf);

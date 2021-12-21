@@ -29,8 +29,6 @@
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_assert.h"
 
-#define ALONE_DEBUG 1
-
 static hy_s32_t _get_cmd_ret(const char *cmd_buf)
 {
     FILE *stream;

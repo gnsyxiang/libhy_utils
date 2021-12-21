@@ -145,11 +145,3 @@ hy_utils_test_CFLAGS        = $(_cflags_com)
 hy_utils_test_CXXFLAGS      = $(_cxxflags_com)
 hy_utils_test_LDFLAGS       = $(_ldflags_com)
 hy_utils_test_LDADD         = $(_ldadd_com)
-
-bin_PROGRAMS                += main
-main_SOURCES                = $(_sources_com) main.c
-main_CPPFLAGS               = $(_cppflags_com)
-main_CFLAGS                 = $(_cflags_com)
-main_CXXFLAGS               = $(_cxxflags_com)
-main_LDFLAGS                = $(_ldflags_com)
-main_LDADD                  = $(_ldadd_com)

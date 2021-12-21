@@ -29,8 +29,6 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 typedef struct {
     hy_u32_t            key_hash;
     void                *val;

@@ -28,8 +28,6 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
 
-#define ALONE_DEBUG 1
-
 void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num)
 {
     HY_ASSERT_VAL_RET(!ip_str);
