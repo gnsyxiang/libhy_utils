@@ -26,7 +26,8 @@
 #include "hy_utils.h"
 
 #include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_log.h"
+
+#include "hy_log.h"
 
 void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num)
 {

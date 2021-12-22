@@ -21,13 +21,13 @@
 #include <pthread.h>
 
 #include "hy_hash.h"
-#include "hy_list.h"
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_log.h"
+
+#include "hy_list.h"
+#include "hy_log.h"
 
 typedef struct {
     hy_u32_t            key_hash;

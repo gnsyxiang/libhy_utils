@@ -25,7 +25,8 @@
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_log.h"
+
+#include "hy_log.h"
 
 HyJson_t *_cjson_item_create(const char *buf, size_t len)
 {

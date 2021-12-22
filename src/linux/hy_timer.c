@@ -24,14 +24,14 @@
 
 #include "hy_timer.h"
 
-#include "hy_list.h"
-
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_log.h"
+
+#include "hy_list.h"
+#include "hy_log.h"
 
 /**
  * @brief 链表实现的定时器

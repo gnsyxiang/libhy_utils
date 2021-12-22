@@ -27,7 +27,8 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_log.h"
+
+#include "hy_log.h"
 
 static inline void _mem_swap(void *dst, void *src,
         void *tmp, hy_u32_t item_len)

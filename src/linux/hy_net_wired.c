@@ -29,14 +29,15 @@
 #include <linux/types.h>
 
 #include "hy_net_wired.h"
-#include "hy_fifo.h"
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_log.h"
+
+#include "hy_log.h"
+#include "hy_fifo.h"
 
 struct mii_data {
     hy_u16_t phy_id;
