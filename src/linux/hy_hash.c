@@ -32,7 +32,7 @@
 typedef struct {
     hy_u32_t            key_hash;
     void                *val;
-    size_t              val_len;
+    hy_u32_t            val_len;
 
     struct hy_hlist_node    list;
 } _item_t;
@@ -171,7 +171,7 @@ static inline void _get_item_val(_item_t *pos, HyHashItem_t *h_item)
     HY_MEMCPY(h_item->val, pos->val, pos->val_len);
 }
 
-int32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item)
+hy_s32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item)
 {
     HY_ASSERT_VAL_RET_VAL(!handle || !h_item
             || !h_item->key || !h_item->val, -1);
@@ -190,7 +190,7 @@ int32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item)
     return 0;
 }
 
-int32_t HyHashItemDel(void *handle, HyHashItem_t *h_item)
+hy_s32_t HyHashItemDel(void *handle, HyHashItem_t *h_item)
 {
     HY_ASSERT_VAL_RET_VAL(!handle || !h_item, -1);
 
@@ -201,7 +201,7 @@ int32_t HyHashItemDel(void *handle, HyHashItem_t *h_item)
     return _find_item_from_list(context, h_item, _del_item_from_list, index);
 }
 
-int32_t HyHashItemGet(void *handle, HyHashItem_t *h_item)
+hy_s32_t HyHashItemGet(void *handle, HyHashItem_t *h_item)
 {
     HY_ASSERT_VAL_RET_VAL(!handle || !h_item, -1);
 
@@ -237,7 +237,7 @@ void HyHashDump(void *handle, HyHashDumpItemCb_t dump_item_cb, void *args)
 
     _hash_context_t *context = handle;
 
-    for (size_t i = 0; i < context->save_config.bucket_cnt; i++) {
+    for (hy_u32_t i = 0; i < context->save_config.bucket_cnt; i++) {
         LOGD("index: %d \n", i);
         _traverse_item_list(context, i, 1, dump_item_cb, args);
     }

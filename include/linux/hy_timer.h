@@ -24,7 +24,6 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
 #include "hy_hal/hy_type.h"
 
 /**
@@ -41,7 +40,7 @@ typedef enum {
  * @brief 创建单个定时器结构体
  */
 typedef struct {
-    size_t      expires;                        ///< 超时时间ms
+    hy_u32_t    expires;                        ///< 超时时间ms
     hy_s32_t    repeat_flag;                    ///< 是否重复，详见HY_TIMER_MODE_t
 
     void        (*timer_cb)(void *args);        ///< 定时器回调函数

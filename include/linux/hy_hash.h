@@ -24,8 +24,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
+#include "hy_hal/hy_type.h"
 
 typedef void (*HyHashDumpItemCb_t)(void *val, void *args);
 
@@ -33,27 +32,27 @@ typedef struct {
     const char  *key;
 
     void        *val;
-    size_t      val_len;
+    hy_u32_t    val_len;
 } HyHashItem_t;
 
 typedef struct {
-    size_t bucket_cnt;
+    hy_u32_t bucket_cnt;
 } HyHashSaveConfig_t;
 
 typedef struct {
     HyHashSaveConfig_t save_config;
 } HyHashConfig_t;
 
-uint32_t HyHashGet(const char *key);
+hy_u32_t HyHashGet(const char *key);
 
 void *HyHashCreate(HyHashConfig_t *config);
 void HyHashDestroy(void **handle);
 
 void HyHashDump(void *handle, HyHashDumpItemCb_t dump_item_cb, void *args);
 
-int32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item);
-int32_t HyHashItemDel(void *handle, HyHashItem_t *h_item);
-int32_t HyHashItemGet(void *handle, HyHashItem_t *h_item);
+hy_s32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item);
+hy_s32_t HyHashItemDel(void *handle, HyHashItem_t *h_item);
+hy_s32_t HyHashItemGet(void *handle, HyHashItem_t *h_item);
 
 #ifdef __cplusplus
 }

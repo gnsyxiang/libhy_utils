@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 
     LOGI("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    size_t cnt = 0;
+    hy_u32_t cnt = 0;
     char c = 'a';
     hy_u32_t ret = 0;
     while (!context->exit_flag) {

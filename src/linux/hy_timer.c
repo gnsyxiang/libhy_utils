@@ -40,7 +40,7 @@
 typedef struct {
     HyTimerConfig_t     timer_config;
 
-    size_t              rotation;           ///< 旋转的圈数，类比分针走一圈
+    hy_u32_t            rotation;           ///< 旋转的圈数，类比分针走一圈
 
     struct hy_list_head list;
 } _timer_t;
@@ -48,7 +48,7 @@ typedef struct {
 typedef struct {
     HyTimerServiceSaveConfig_t  save_config;
 
-    uint32_t                    cur_slot;
+    hy_u32_t                    cur_slot;
     pthread_mutex_t             mutex;
 
     pthread_t                   id;
@@ -71,7 +71,7 @@ void *HyTimerAdd(HyTimerConfig_t *timer_config)
 
     hy_u32_t slot_num = context->save_config.slot_num;
     timer->rotation = timer_config->expires / slot_num;     // 圈数
-    size_t slot     = timer_config->expires % slot_num;     // 落在哪个格子
+    hy_u32_t slot     = timer_config->expires % slot_num;     // 落在哪个格子
 
     LOGD("rotation: %d, slot: %d \n", timer->rotation, slot);
 
@@ -87,7 +87,7 @@ void HyTimerDel(void **timer_handle)
     HY_ASSERT_VAL_RET(!timer_handle || !*timer_handle);
 
     _timer_t *pos, *n;
-    uint32_t i;
+    hy_u32_t i;
 
     for (i = 0; i < context->save_config.slot_num; ++i) {
         pthread_mutex_lock(&context->mutex);
@@ -146,7 +146,7 @@ static hy_s32_t _timer_loop_cb(void *args)
 
                 if (pos->timer_config.repeat_flag == HY_TIMER_MODE_REPEAT) {
                     pos->rotation = timer_config->expires / slot_num;
-                    size_t slot     = timer_config->expires % slot_num;
+                    hy_u32_t slot     = timer_config->expires % slot_num;
                     slot += context->cur_slot;
                     slot %= slot_num;
 
@@ -173,7 +173,7 @@ void HyTimerDestroy(void **handle)
     HyThreadDestroy(&context->thread_handle);
 
     _timer_t *pos, *n;
-    for (uint32_t i = 0; i < context->save_config.slot_num; ++i) {
+    for (hy_u32_t i = 0; i < context->save_config.slot_num; ++i) {
         pthread_mutex_lock(&context->mutex);
 
         hy_list_for_each_entry_safe(pos, n, &context->list_head[i], list) {
@@ -204,7 +204,7 @@ void *HyTimerCreate(HyTimerServiceConfig_t *config)
         context->list_head = HY_MEM_MALLOC_BREAK(struct hy_list_head *,
                 sizeof(struct hy_list_head) * config->save_config.slot_num);
 
-        for (uint32_t i = 0; i < config->save_config.slot_num; ++i) {
+        for (hy_u32_t i = 0; i < config->save_config.slot_num; ++i) {
             HY_INIT_LIST_HEAD(&context->list_head[i]);
         }
 
