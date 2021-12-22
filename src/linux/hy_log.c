@@ -23,7 +23,6 @@
 #include <unistd.h>
 
 #include "hy_log.h"
-
 #include "log_fifo.h"
 
 #include "hy_hal/hy_assert.h"
@@ -133,7 +132,8 @@ static inline void _output_reset_color(HyLogLevel_t level, hy_u32_t *ret)
             PRINT_ATTR_RESET);
 }
 
-void HyLogWrite(HyLogLevel_t level, const char *file, const char *func,
+void HyLogWrite(HyLogLevel_t level, const char *err_str,
+        const char *file, const char *func,
         hy_u32_t line, char *fmt, ...)
 {
     if (context && context->save_config.level >= level) {
@@ -157,6 +157,12 @@ void HyLogWrite(HyLogLevel_t level, const char *file, const char *func,
         va_start(args, fmt);
         ret += vsnprintf(context->buf + ret, buf_len - ret, fmt, args);
         va_end(args);
+
+        if (err_str) {
+            // -1 是为了去除'\n', 在最后加上'\n'
+            ret += snprintf(context->buf + ret - 1,
+                    buf_len - ret + 1, ", error: %s \n", err_str);
+        }
 
         if (context->save_config.color_enable) {
             _output_reset_color(level, &ret);
