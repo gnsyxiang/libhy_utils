@@ -196,9 +196,8 @@ void *HyNetWiredCreate(HyNetWiredConfig_t *config)
         context = HY_MEM_MALLOC_BREAK(_net_wired_context_t *, sizeof(*context));
         HY_MEMCPY(&context->save_config, &config->save_config, sizeof(config->save_config));
 
-        HyFifoConfig_t led_fifo_config;
-        led_fifo_config.save_config.len = sizeof(_led_mode_t) * 6;
-        context->led_fifo_handle = HyFifoCreate(&led_fifo_config);
+        context->led_fifo_handle = HyFifoCreate_m(sizeof(_led_mode_t) * 6,
+                HY_FIFO_MUTEX_UNLOCK);
         if (!context->led_fifo_handle) {
             LOGE("HyFifoCreate failed \n");
             break;

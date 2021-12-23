@@ -180,6 +180,22 @@ int32_t HyFifoIsFull(void *handle);
  */
 int32_t HyFifoIsEmpty(void *handle);
 
+/**
+ * @brief 创建fifo模块宏
+ *
+ * @param _len fifo长度
+ * @param _mutex fifo是否加锁
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
+#define HyFifoCreate_m(_len, _mutex)                \
+    ({                                              \
+        HyFifoConfig_t config;                      \
+        config.save_config.len          = _len;     \
+        config.save_config.mutex_flag   = _mutex;   \
+        HyFifoCreate(&config);                      \
+     })
+
 #ifdef __cplusplus
 }
 #endif
