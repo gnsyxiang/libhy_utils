@@ -58,8 +58,25 @@ void HyJsonDestroy(HyJson_t *root);
  * @brief 打印root中的信息
  *
  * @param root root根节点
+ *
+ * @return 成功返回需要打印的内容，失败返回NULL
+ *
+ * @note 成功返回内容后，需要用户释放内容的空间
  */
-void HyJsonDump(HyJson_t *root);
+char *HyJsonDump(HyJson_t *root);
+
+/**
+ * @brief 打印root中信息的宏
+ *
+ * @param root root根节点
+ * @param log_level log打印函数，可以是printf, LOGD，LOGI等
+ */
+#define HyJsonDump_m(root, log_level)       \
+    do {                                    \
+        char *buf = HyJsonDump(root);       \
+        log_level("%s \n", buf);            \
+        free(buf);                          \
+    } while(0);
 
 /**
  * @brief 从文件中创建json

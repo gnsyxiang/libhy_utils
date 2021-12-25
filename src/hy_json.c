@@ -274,13 +274,11 @@ HyJson_t *HyJsonFileCreate(const char *name)
     return root;
 }
 
-void HyJsonDump(HyJson_t *root)
+char *HyJsonDump(HyJson_t *root)
 {
-    HY_ASSERT_VAL_RET(!root);
+    HY_ASSERT_VAL_RET_VAL(!root, NULL);
 
-    char *buf = json_impl.item_print_str(root);
-    LOGI("%s \n", buf);
-    free(buf);
+    return json_impl.item_print_str(root);
 }
 
 void HyJsonDestroy(HyJson_t *root)
