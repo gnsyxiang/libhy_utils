@@ -8,7 +8,7 @@ Version: @VERSION@
 URL: @PACKAGE_URL@
 Description: platform independent tool library（跟平台无关的工具库）
 
-Requires:
+Requires: hy_hal
 Requires.private:
 Conflicts:
 
