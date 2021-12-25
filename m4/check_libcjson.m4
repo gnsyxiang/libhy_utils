@@ -25,8 +25,8 @@ dnl ===============================================================
 AC_DEFUN([CHECK_LIBCJSON], [
 
     AC_ARG_ENABLE([cjson],
-        [AS_HELP_STRING([--disable-cjson], [disable support for cjson])],
-            [], [enable_cjson=yes])
+        [AS_HELP_STRING([--enable-cjson], [enable support for cjson])],
+            [], [enable_cjson=no])
 
     case "$enable_cjson" in
         yes)
