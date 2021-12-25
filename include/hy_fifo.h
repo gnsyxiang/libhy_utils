@@ -24,9 +24,6 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
-
 #include "hy_hal/hy_type.h"
 
 /**
@@ -169,7 +166,7 @@ hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type);
  *
  * @return 满返回1，否则返回0
  */
-int32_t HyFifoIsFull(void *handle);
+hy_s32_t HyFifoIsFull(void *handle);
 
 /**
  * @brief fifo是否为空
@@ -178,7 +175,7 @@ int32_t HyFifoIsFull(void *handle);
  *
  * @return 空返回1，否则返回0
  */
-int32_t HyFifoIsEmpty(void *handle);
+hy_s32_t HyFifoIsEmpty(void *handle);
 
 /**
  * @brief 创建fifo模块宏
