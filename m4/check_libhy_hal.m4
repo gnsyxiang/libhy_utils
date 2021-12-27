@@ -57,8 +57,8 @@ AC_DEFUN([CHECK_LIBHY_HAL], [
                     HY_HAL_LIBS=""
 
                     # clear cache
-                    unset ac_cv_search_HyUartCreate
-                    AC_SEARCH_LIBS([HyUartCreate], [hy_hal],
+                    unset ac_cv_search_HyLogCreate
+                    AC_SEARCH_LIBS([HyLogCreate], [hy_hal],
                             [have_hy_hal=yes
                                 HY_HAL_LIBS="$LIBS"],
                             [have_hy_hal=no],
@@ -69,7 +69,7 @@ AC_DEFUN([CHECK_LIBHY_HAL], [
 
             CPPFLAGS_SAVE=$CPPFLAGS
             CPPFLAGS="$CPPFLAGS $HY_HAL_INCS"
-            AC_CHECK_HEADERS([hy_hal/hy_uart.h], [], [have_hy_hal=no])
+            AC_CHECK_HEADERS([hy_hal/hy_log.h], [], [have_hy_hal=no])
 
             CPPFLAGS=$CPPFLAGS_SAVE
             AC_SUBST(HY_HAL_INCS)
