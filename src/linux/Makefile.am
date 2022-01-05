@@ -48,6 +48,7 @@ _sources_com    += \
                    hy_hash.c            \
                    hy_net.c             \
                    hy_net_wired.c       \
+                   hy_thread_pool.c     \
                    hy_timer.c
 
 if COMPILE_LIBLOG4CPLUS

@@ -35,6 +35,7 @@ _install_headers_com    += \
                            hy_hash.h        \
                            hy_net.h         \
                            hy_net_wired.h   \
+                           hy_thread_pool.h \
                            hy_timer.h
 
 # ------------------

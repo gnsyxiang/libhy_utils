@@ -86,6 +86,14 @@ hy_net_wired_test_CXXFLAGS  = $(_cxxflags_com)
 hy_net_wired_test_LDFLAGS   = $(_ldflags_com)
 hy_net_wired_test_LDADD     = $(_ldadd_com)
 
+bin_PROGRAMS                    += hy_thread_pool_test
+hy_thread_pool_test_SOURCES     = $(_sources_com) hy_thread_pool_test.c
+hy_thread_pool_test_CPPFLAGS    = $(_cppflags_com)
+hy_thread_pool_test_CFLAGS      = $(_cflags_com)
+hy_thread_pool_test_CXXFLAGS    = $(_cxxflags_com)
+hy_thread_pool_test_LDFLAGS     = $(_ldflags_com)
+hy_thread_pool_test_LDADD       = $(_ldadd_com)
+
 bin_PROGRAMS                += hy_timer_test
 hy_timer_test_SOURCES       = $(_sources_com) hy_timer_test.c
 hy_timer_test_CPPFLAGS      = $(_cppflags_com)
@@ -93,4 +101,3 @@ hy_timer_test_CFLAGS        = $(_cflags_com)
 hy_timer_test_CXXFLAGS      = $(_cxxflags_com)
 hy_timer_test_LDFLAGS       = $(_ldflags_com)
 hy_timer_test_LDADD         = $(_ldadd_com)
-
