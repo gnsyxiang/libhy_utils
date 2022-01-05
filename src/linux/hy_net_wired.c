@@ -203,7 +203,8 @@ void *HyNetWiredCreate(HyNetWiredConfig_t *config)
             break;
         }
 
-        context->led_thread_handle = HyThreadCreate_m("net_led", _led_loop_cb, context);
+        context->led_thread_handle = HyThreadCreate_m("net_led",
+                _led_loop_cb, HY_THREAD_DESTROY_GRACE, context);
         if (!context->led_thread_handle) {
             LOGE("HyThreadCreate failed \n");
             break;

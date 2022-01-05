@@ -210,7 +210,8 @@ void *HyTimerCreate(HyTimerServiceConfig_t *config)
 
         pthread_mutex_init(&context->mutex, NULL);
 
-        context->thread_handle = HyThreadCreate_m("hy_timer", _timer_loop_cb, context);
+        context->thread_handle = HyThreadCreate_m("hy_timer",
+                _timer_loop_cb, HY_THREAD_DESTROY_GRACE, context);
         if (!context->thread_handle) {
             LOGE("failed \n");
             break;

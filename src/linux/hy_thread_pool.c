@@ -24,6 +24,7 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_thread.h"
 
 #include "hy_utils/hy_log.h"
 #include "hy_utils/hy_utils.h"
@@ -43,7 +44,7 @@ typedef struct {
 
     hy_u32_t            thread_max_cnt;
     hy_u32_t            thread_live_cnt;
-    pthread_t           *threads;
+    void                **thread_handle;
 
     _task_t             *tasks;
     hy_u32_t            task_max_cnt;
@@ -101,7 +102,7 @@ hy_s32_t HyThreadPoolAdd(void *handle, HyThreadPoolTaskCb_t task_cb, void *args)
     return ret;
 }
 
-static void *_thread_pool_loop_cb(void *args)
+static hy_s32_t _thread_pool_loop_cb(void *args)
 {
     _thread_pool_context_t *context = args;
     _task_t task;
@@ -140,7 +141,7 @@ static void *_thread_pool_loop_cb(void *args)
     pthread_mutex_unlock(&context->mutex);
 
     LOGI("thread pool stop, handle: %p, id: %lx \n", context, pthread_self());
-    return NULL;
+    return -1;
 }
 
 void HyThreadPoolDestroy(void **handle)
@@ -161,14 +162,10 @@ void HyThreadPoolDestroy(void **handle)
     pthread_mutex_unlock(&context->mutex);
 
     for (hy_u32_t i = 0; i < context->thread_max_cnt; i++) {
-        LOGE("id: %lx \n", context->threads[i]);
-
-        if (0 != pthread_join(context->threads[i], NULL)) {
-            LOGE("pthread join failed, i: %d \n", i);
-        }
+        HyThreadDestroy(&context->thread_handle[i]);
     }
 
-    HY_MEM_FREE_PP(&context->threads);
+    HY_MEM_FREE_PP(&context->thread_handle);
     HY_MEM_FREE_PP(&context->tasks);
 
     pthread_mutex_destroy(&context->mutex);
@@ -213,13 +210,17 @@ void *HyThreadPoolCreate(HyThreadPoolConfig_t *config)
 
         context->thread_max_cnt = 0;
         context->thread_live_cnt = 0;
-        context->threads = HY_MEM_MALLOC_BREAK(pthread_t *,
-                sizeof(pthread_t) * config->thread_max_cnt);
+        context->thread_handle = HY_MEM_MALLOC_BREAK(void *,
+                sizeof(void *) * config->thread_max_cnt);
 
         for (hy_u32_t i = 0; i < config->thread_max_cnt; ++i) {
-            if (0 != pthread_create(&context->threads[i],
-                        NULL, _thread_pool_loop_cb, context)) {
-                LOGES("failed \n");
+            char thread_name[16] = {0};
+            snprintf(thread_name, sizeof(thread_name), "hy_thd_pool_%d", i);
+
+            context->thread_handle[i] = HyThreadCreate_m(thread_name,
+                    _thread_pool_loop_cb, HY_THREAD_DESTROY_GRACE, context);
+            if (!context->thread_handle[i]) {
+                LOGE("create thread failed \n");
                 goto _ERR_THREAD_POOL_CREATE_1;
             }
 

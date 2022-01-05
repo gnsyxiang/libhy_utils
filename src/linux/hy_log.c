@@ -240,7 +240,7 @@ void *HyLogCreate(HyLogConfig_t *config)
         }
 
         context->thread_handle = HyThreadCreate_m("hy_log",
-                _log_loop_cb, context);
+                _log_loop_cb, HY_THREAD_DESTROY_GRACE, context);
         if (!context->thread_handle) {
             LOGE("failed \n");
             break;
