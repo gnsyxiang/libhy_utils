@@ -19,11 +19,10 @@
  */
 #include <stdio.h>
 
-#include "hy_bit.h"
-
 #include "hy_hal/hy_assert.h"
+#include "hy_hal/hy_log.h"
 
-#include "hy_log.h"
+#include "hy_bit.h"
 
 void HyBitSet(char *byte, uint32_t index)
 {

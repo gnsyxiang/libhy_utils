@@ -22,8 +22,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "hy_fifo.h"
-
 #include "hy_hal/hy_module.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_signal.h"
@@ -31,8 +29,9 @@
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_thread.h"
+#include "hy_hal/hy_log.h"
 
-#include "hy_log.h"
+#include "hy_fifo.h"
 
 typedef struct {
     void *log_handle;
@@ -100,7 +99,8 @@ static _main_context_t *_module_create(void)
     _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
 
     HyLogConfig_t log_config;
-    log_config.save_config.buf_len      = 16 * 1024;
+    log_config.save_config.buf_len_min  = 512;
+    log_config.save_config.buf_len_max  = 512;
     log_config.save_config.level        = HY_LOG_LEVEL_DEBUG;
     log_config.save_config.color_enable = HY_TYPE_FLAG_ENABLE;
 

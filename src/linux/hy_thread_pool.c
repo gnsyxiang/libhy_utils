@@ -25,9 +25,9 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_thread.h"
+#include "hy_hal/hy_log.h"
 
-#include "hy_utils/hy_log.h"
-#include "hy_utils/hy_utils.h"
+#include "hy_utils.h"
 
 #include "hy_thread_pool.h"
 

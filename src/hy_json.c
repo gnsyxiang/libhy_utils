@@ -24,14 +24,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "hy_json.h"
-#include "hy_cjson_impl.h"
-
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_log.h"
 
-#include "hy_log.h"
+#include "hy_cjson_impl.h"
+
+#include "hy_json.h"
 
 #if (HY_JSON_USE_TYPE == 1)
 

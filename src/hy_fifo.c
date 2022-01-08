@@ -22,15 +22,15 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "hy_fifo.h"
-
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_barrier.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
+#include "hy_hal/hy_log.h"
 
 #include "hy_utils.h"
-#include "hy_log.h"
+
+#include "hy_fifo.h"
 
 /**
  * @brief 内存屏障

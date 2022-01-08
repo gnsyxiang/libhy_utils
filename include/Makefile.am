@@ -51,14 +51,12 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 # add necessary content
 # ---------------------
-_no_install_headers_com += \
-                           log_fifo.h
+_no_install_headers_com +=
 
 _install_headers_com    += \
                            hy_bit.h         \
                            hy_fifo.h        \
                            hy_list.h        \
-                           hy_log.h         \
                            hy_math.h        \
                            hy_md5sum.h      \
                            hy_sort.h        \
