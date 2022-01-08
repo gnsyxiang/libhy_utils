@@ -71,7 +71,10 @@ _sources_com    += \
                    hy_sort.c        \
                    hy_utils.c
 
-_cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
+_cppflags_com   += \
+                   $(_no_error_com) \
+                   $(_include_com)  \
+                   $(_define_com)
 
 _cflags_com     +=
 
@@ -100,4 +103,3 @@ lib@project_name@_la_CFLAGS     = $(_cflags_com)
 lib@project_name@_la_CXXFLAGS   = $(_cxxflags_com)
 lib@project_name@_la_LDFLAGS    = $(_ldflags_com)
 lib@project_name@_la_LIBADD     = $(_ldadd_com)
-

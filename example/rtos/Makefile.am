@@ -45,7 +45,10 @@ _include_com    += \
 
 _sources_com    +=
 
-_cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
+_cppflags_com   += \
+                   $(_no_error_com) \
+                   $(_include_com)  \
+                   $(_define_com)
 
 _cflags_com     +=
 
@@ -59,4 +62,3 @@ if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 _ldadd_com      += $(HY_HAL_LIBS)
 endif
-
