@@ -218,7 +218,7 @@ void *HyThreadPoolCreate(HyThreadPoolConfig_t *config)
             snprintf(thread_name, sizeof(thread_name), "hy_thd_pool_%d", i);
 
             context->thread_handle[i] = HyThreadCreate_m(thread_name,
-                    _thread_pool_loop_cb, HY_THREAD_DESTROY_GRACE, context);
+                    _thread_pool_loop_cb, context);
             if (!context->thread_handle[i]) {
                 LOGE("create thread failed \n");
                 goto _ERR_THREAD_POOL_CREATE_1;
