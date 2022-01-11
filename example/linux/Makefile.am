@@ -89,6 +89,11 @@ hy_net_wired_test_CXXFLAGS  = $(_cxxflags_com)
 hy_net_wired_test_LDFLAGS   = $(_ldflags_com)
 hy_net_wired_test_LDADD     = $(_ldadd_com)
 
+if COMPILE_LIBPROTOBUF_C
+_include_com    += $(LIBPROTOBUF_C_INCS)
+_ldadd_com      += $(LIBPROTOBUF_C_LIBS)
+endif
+
 bin_PROGRAMS                    += hy_thread_pool_test
 hy_thread_pool_test_SOURCES     = $(_sources_com) hy_thread_pool_test.c
 hy_thread_pool_test_CPPFLAGS    = $(_cppflags_com)
