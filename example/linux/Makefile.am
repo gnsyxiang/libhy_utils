@@ -31,6 +31,8 @@ _cxxflags_com   =
 _ldflags_com    =
 _ldadd_com      =
 bin_PROGRAMS    =
+BUILT_SOURCES   =
+CLEANFILES      =
 
 # ---------------------
 # add necessary content
@@ -92,6 +94,23 @@ hy_net_wired_test_LDADD     = $(_ldadd_com)
 if COMPILE_LIBPROTOBUF_C
 _include_com    += $(LIBPROTOBUF_C_INCS)
 _ldadd_com      += $(LIBPROTOBUF_C_LIBS)
+
+bin_PROGRAMS                += hy_protobuf-c_test
+hy_protobuf_c_test_SOURCES  = $(_sources_com) hy_protobuf-c_test.c address_book.pb-c.c
+hy_protobuf_c_test_CPPFLAGS = $(_cppflags_com)
+hy_protobuf_c_test_CFLAGS   = $(_cflags_com)
+hy_protobuf_c_test_CXXFLAGS = $(_cxxflags_com)
+hy_protobuf_c_test_LDFLAGS  = $(_ldflags_com)
+hy_protobuf_c_test_LDADD    = $(_ldadd_com)
+
+address_book.pb.c address_book.pb.h: @PROTOC_C@ address_book.proto
+	$(AM_V_GEN)@PROTOC_C@ --c_out=. address_book.proto
+
+BUILT_SOURCES += \
+                 address_book.pb.c \
+                 address_book.pb.h
+
+CLEANFILES += $(BUILT_SOURCES)
 endif
 
 bin_PROGRAMS                    += hy_thread_pool_test

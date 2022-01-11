@@ -90,4 +90,6 @@ example/mcu/hy_*_test
 example/rtos/hy_*_test
 example/window/hy_*_test
 example/main
+example/linux/*.pb-c.c
+example/linux/*.pb-c.h
 
