@@ -13,6 +13,7 @@ if [ $# -gt 3 -o $# -lt 2 ]; then
 fi
 
 data_disk_path=/opt/data
+cur_path=`pwd`
 
 _cppflags_com="-W -Wall -Werror"
 _cppflags_com="${_cppflags_com} -Wno-unused-parameter"
@@ -75,15 +76,15 @@ _ldflag_com="${_ldflag_com} -L${prefix_path}/lib"
 
 make distclean
 
-cd `pwd` && ./autogen.sh && cd -
+cd ${cur_path} && ./autogen.sh && cd -
 
 if [ $# = 3 ]; then
-    mkdir -p $3/${vender}
-    cd $3/${vender}
+    mkdir -p $3/${vender}/${2}
+    cd $3/${vender}/${2}
 fi
 
 export STRIP=${cross_gcc_path}strip
-`pwd`/configure                                             \
+${cur_path}/configure                                       \
     CC=${cross_gcc_path}gcc                                 \
     CXX=${cross_gcc_path}g++                                \
     CPPFLAGS="${_cppflags_com}"                             \
