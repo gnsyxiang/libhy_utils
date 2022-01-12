@@ -19,6 +19,16 @@ LT_INIT
 
 PKG_PROG_PKG_CONFIG([0.24])
 
+PKG_PROG_PKG_CONFIG
+if test -n "$PKG_CONFIG"; then
+    # Horrible hack for systems where the pkg-config install directory is simply wrong!
+    if $PKG_CONFIG --variable=pc_path pkg-config 2>/dev/null | grep -q /lib/; then
+        PKG_INSTALLDIR(['${prefix}/lib/pkgconfig'])
+        else
+            PKG_INSTALLDIR
+    fi
+fi
+
 # check m4 macro
 CHECK_PROJECT_INFO
 CHECK_VERSION_INFO
@@ -59,7 +69,8 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([memset socket])
 
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([
+                 Makefile
                  $project_name.pc
                  doc/Makefile
                  example/Makefile
@@ -80,5 +91,25 @@ AC_CONFIG_FILES([Makefile
                  src/mac/Makefile
                  src/mcu/Makefile
                  src/rtos/Makefile
-                 src/window/Makefile])
+                 src/window/Makefile
+                 ])
+
 AC_OUTPUT
+
+AC_MSG_RESULT([
+               $PACKAGE $VERSION
+
+               CC:                  ${CC}
+               CPPFLAGS:            ${CPPFLAGS}
+               CFLAGS:              ${CFLAGS}
+               CXX:                 ${CXX}
+               CXXFLAGS:            ${CXXFLAGS}
+               LDFLAGS:             ${LDFLAGS}
+               LIBS:                ${LIBS}
+
+               prefix:              ${prefix}
+               sysconfdir:          ${sysconfdir}
+               libdir:              ${libdir}
+               includedir:          ${includedir}
+               pkgconfigdir:        ${pkgconfigdir}
+               ])
