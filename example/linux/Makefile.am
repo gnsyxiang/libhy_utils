@@ -103,8 +103,8 @@ hy_protobuf_c_test_CXXFLAGS = $(_cxxflags_com)
 hy_protobuf_c_test_LDFLAGS  = $(_ldflags_com)
 hy_protobuf_c_test_LDADD    = $(_ldadd_com)
 
-address_book.pb.c address_book.pb.h: @PROTOC_C@ address_book.proto
-	$(AM_V_GEN)@PROTOC_C@ --c_out=. address_book.proto
+address_book.pb.c address_book.pb.h: $(abs_srcdir)/address_book.proto
+	$(AM_V_GEN)@PROTOC_C@ --c_out=. --proto_path=$(abs_srcdir) address_book.proto
 
 BUILT_SOURCES += \
                  address_book.pb.c \
