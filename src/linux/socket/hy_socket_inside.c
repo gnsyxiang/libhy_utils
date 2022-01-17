@@ -43,7 +43,7 @@ void hy_socket_socket_destroy(hy_socket_s **socket_pp)
     HY_MEM_FREE_PP(socket_pp);
 }
 
-hy_socket_s *hy_socket_socket_create(void)
+hy_socket_s *hy_socket_socket_create(const char *name)
 {
     hy_socket_s *socket = NULL;
     do {
@@ -54,7 +54,8 @@ hy_socket_s *hy_socket_socket_create(void)
             break;
         }
 
-        socket->fd = -1;
+        socket->fd   = -1;
+        socket->name = name;
 
         LOGI("socket socket create, handle: %p \n", socket);
         return socket;

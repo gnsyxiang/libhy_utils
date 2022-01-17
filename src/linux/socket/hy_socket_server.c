@@ -28,6 +28,44 @@
 
 #include "hy_socket_server.h"
 
+hy_s32_t hy_server_accept(hy_socket_context_s *context,
+        HySocketAcceptCb_t accept_cb, void *args)
+{
+    LOGT("handle: %p, accept_cb: %p \n", context, accept_cb);
+    HY_ASSERT_VAL_RET_VAL(!context || !accept_cb, -1);
+
+    hy_socket_s *socket = context->socket;
+    fd_set read_fs;
+    hy_s32_t fd;
+
+    if (listen(socket->fd, SOMAXCONN) < 0) {
+        LOGES("listen failed, fd: %d, name: %s \n", socket->fd, socket->name);
+        return -1;
+    }
+
+    while (!context->exit_flag) {
+        FD_ZERO(&read_fs);
+        FD_SET(socket->fd, &read_fs);
+
+        if (select(FD_SETSIZE, &read_fs, NULL, NULL, NULL) < 0) {
+            LOGES("select failed \n");
+            break;
+        }
+
+        if (FD_ISSET(socket->fd, &read_fs)) {
+            fd = accept(socket->fd, NULL, NULL);
+            if (fd < 0) {
+                LOGES("accept failed \n");
+                return -1;
+            }
+
+            accept_cb(fd, args);
+        }
+    }
+
+    return 0;
+}
+
 void hy_server_destroy(hy_socket_context_s **context_pp)
 {
     LOGT("handle: %p, *handle: %p \n", context_pp, *context_pp);
@@ -58,7 +96,7 @@ hy_s32_t hy_server_create(hy_socket_context_s *context)
     HySocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_socket_socket_create();
+        context->socket = hy_socket_socket_create(save_config->name);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;

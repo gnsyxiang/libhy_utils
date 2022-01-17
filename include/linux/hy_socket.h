@@ -28,34 +28,67 @@ extern "C" {
 
 #define HY_SOCKET_NAME_LEN_MAX  (32)
 
+/**
+ * @brief socket类型
+ */
 typedef enum {
-    HY_SOCKET_TYPE_CLIENT,
-    HY_SOCKET_TYPE_SERVER,
+    HY_SOCKET_TYPE_CLIENT,      ///< 客户端
+    HY_SOCKET_TYPE_SERVER,      ///< 服务端
 
     HY_SOCKET_TYPE_MAX,
 } HySocketType_e;
 
+/**
+ * @brief socket相关信息
+ */
 typedef enum {
-    HY_SOCKET_INFO_FD,
+    HY_SOCKET_INFO_FD,          ///< socket的fd
 
     HY_SOCKET_INFO_MAX,
 } HySocketInfo_e;
 
+/**
+ * @brief 接收客户端回调
+ *
+ * @param fd 客户端fd
+ * @param args 上层传递参数
+ */
+typedef void (*HySocketAcceptCb_t)(hy_s32_t fd, void *args);
+
+/**
+ * @brief 配置参数
+ */
 typedef struct {
-    char            name[HY_SOCKET_NAME_LEN_MAX];
-    HySocketType_e  type:2;
+    char            name[HY_SOCKET_NAME_LEN_MAX];   ///< socket名字
+    HySocketType_e  type:2;                         ///< socket类型
     HySocketType_e  reserved;
 } HySocketSaveConfig_s;
 
+/**
+ * @brief 配置参数
+ */
 typedef struct {
-    HySocketSaveConfig_s save_config;
+    HySocketSaveConfig_s save_config;               ///< 配置参数
 } HySocketConfig_s;
 
+/**
+ * @brief 创建socket
+ *
+ * @param config 配置参数
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
 void *HySocketCreate(HySocketConfig_s *config);
+
+/**
+ * @brief 销毁socket
+ *
+ * @param handle 句柄的地址
+ */
 void HySocketDestroy(void **handle);
 
-hy_s32_t HySocketConnectServer(void *handle);
-void HySocketWaitForConnect(void *handle);
+hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args);
+hy_s32_t HySocketConnect(void *handle);
 
 void HySocketRead(void *handle);
 void HySocketWrite(void *handle);

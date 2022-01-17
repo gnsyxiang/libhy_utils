@@ -119,6 +119,11 @@ static _main_context_t *_module_create(void)
     return context;
 }
 
+static void _accept_cb(hy_s32_t fd, void *args)
+{
+    LOGD("fd: %d \n", fd);
+}
+
 int main(int argc, char *argv[])
 {
     _main_context_t *context = _module_create();
@@ -129,9 +134,7 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+    HySocketAccept(context->socket_server_handle, _accept_cb, context);
 
     _module_destroy(&context);
 

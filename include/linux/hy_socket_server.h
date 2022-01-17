@@ -29,6 +29,9 @@ extern "C" {
 hy_s32_t hy_server_create(hy_socket_context_s *context);
 void hy_server_destroy(hy_socket_context_s **context);
 
+hy_s32_t hy_server_accept(hy_socket_context_s *context,
+        HySocketAcceptCb_t accept_cb, void *args);
+
 #ifdef __cplusplus
 }
 #endif

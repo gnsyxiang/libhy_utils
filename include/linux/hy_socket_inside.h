@@ -29,6 +29,7 @@ extern "C" {
 #include "hy_socket.h"
 
 typedef struct {
+    const char              *name;
     hy_s32_t                fd;
     pthread_mutex_t         mutex;
 } hy_socket_s;
@@ -36,9 +37,12 @@ typedef struct {
 typedef struct {
     HySocketSaveConfig_s    save_config;
     hy_socket_s             *socket;
+
+    hy_s32_t                exit_flag:1;
+    hy_s32_t                reserved;
 } hy_socket_context_s;
 
-hy_socket_s *hy_socket_socket_create(void);
+hy_socket_s *hy_socket_socket_create(const char *name);
 void hy_socket_socket_destroy(hy_socket_s **socket);
 
 #ifdef __cplusplus

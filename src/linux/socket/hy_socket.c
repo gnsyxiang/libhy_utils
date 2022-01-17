@@ -5,7 +5,7 @@
  * @file    hy_socket.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    17/01 2022 08:32
+ * @date    17/01 2022 15:54
  * @version v0.0.1
  * 
  * @since    note
@@ -15,7 +15,7 @@
  *     NO.     Author              Date            Modified
  *     00      zhenquan.qiu        17/01 2022      create the file
  * 
- *     last modified: 17/01 2022 08:32
+ *     last modified: 17/01 2022 15:54
  */
 #include <stdio.h>
 
@@ -27,6 +27,16 @@
 #include "hy_socket.h"
 #include "hy_socket_inside.h"
 #include "hy_socket_server.h"
+
+hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args)
+{
+    LOGT("handle: %p, accept_cb: %p \n", handle, accept_cb);
+    HY_ASSERT_VAL_RET_VAL(!handle || !accept_cb, -1);
+
+    hy_socket_context_s *context = handle;
+
+    return hy_server_accept(context, accept_cb, args);
+}
 
 void HySocketDestroy(void **handle)
 {
