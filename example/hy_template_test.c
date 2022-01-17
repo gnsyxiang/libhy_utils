@@ -88,7 +88,7 @@ static _main_context_t *_module_create(void)
     };
 
     HySignalConfig_t signal_config;
-    memset(&signal_config, 0, sizeof(signal_config));
+    HY_MEMSET(&signal_config, sizeof(signal_config));
     HY_MEMCPY(signal_config.error_num, signal_error_num, sizeof(signal_error_num));
     HY_MEMCPY(signal_config.user_num, signal_user_num, sizeof(signal_user_num));
     signal_config.save_config.app_name      = "template";
