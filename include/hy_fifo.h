@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+#include "hy_hal/hy_string.h"
 #include "hy_hal/hy_type.h"
 
 /**
@@ -188,6 +189,7 @@ hy_s32_t HyFifoIsEmpty(void *handle);
 #define HyFifoCreate_m(_len, _mutex)                \
     ({                                              \
         HyFifoConfig_t config;                      \
+        HY_MEMSET(&config, sizeof(config));         \
         config.save_config.len          = _len;     \
         config.save_config.mutex_flag   = _mutex;   \
         HyFifoCreate(&config);                      \
