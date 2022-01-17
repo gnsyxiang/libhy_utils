@@ -76,10 +76,6 @@ void hy_server_destroy(hy_socket_context_s **context_pp)
 
     close(socket->fd);
 
-    if (0 != pthread_mutex_destroy(&socket->mutex)) {
-        LOGES("pthread_mutex_destroy failed \n");
-    }
-
     LOGI("socket server destroy, handle: %p, fd: %d \n",
             context->socket, context->socket->fd);
     hy_socket_socket_destroy(&socket);
