@@ -38,6 +38,27 @@ hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args)
     return hy_server_accept(context, accept_cb, args);
 }
 
+static void _exec_socket_func(hy_socket_context_s *context,
+        HySocketType_e type, hy_s32_t op)
+{
+    struct {
+        const char *str;
+        hy_s32_t (*socket_create_cb)(hy_socket_context_s *context);
+        void (*socket_destroy_cb)(hy_socket_context_s **context_pp);
+    } socket_create[HY_SOCKET_TYPE_MAX] = {
+        {"client",  hy_client_create, hy_client_destroy},
+        {"server",  hy_server_create, hy_server_destroy},
+    };
+
+    if (op) {
+        if (0 != socket_create[type].socket_create_cb(context)) {
+            LOGE("%s create failed \n", socket_create[type].str);
+        }
+    } else {
+        socket_create[type].socket_destroy_cb(&context);
+    }
+}
+
 void HySocketDestroy(void **handle)
 {
     LOGT("handle: %p, *handle: %p \n", handle, *handle);
@@ -46,10 +67,7 @@ void HySocketDestroy(void **handle)
     hy_socket_context_s *context = *handle;
     HySocketSaveConfig_s *save_config = &context->save_config;
 
-    if (save_config->type == HY_SOCKET_TYPE_SERVER) {
-        hy_server_destroy(&context);
-    } else {
-    }
+    _exec_socket_func(context, save_config->type, 0);
 
     LOGI("socket destroy, handle: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -68,13 +86,7 @@ void *HySocketCreate(HySocketConfig_s *config)
         HySocketSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        if (save_config->type == HY_SOCKET_TYPE_SERVER) {
-            if (0 != hy_server_create(context)) {
-                LOGE("server create failed \n");
-                break;
-            }
-        } else {
-        }
+        _exec_socket_func(context, save_config->type, 1);
 
         LOGI("socket create, handle: %p \n", context);
         return context;
