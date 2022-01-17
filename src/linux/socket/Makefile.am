@@ -45,7 +45,8 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_socket.c
+                   hy_socket.c \
+                   hy_socket_inside.c
 
 if COMPILE_LIBLOG4CPLUS
 _sources_com    += hy_log4cplus.cpp

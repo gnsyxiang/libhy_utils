@@ -29,12 +29,15 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 # add necessary content
 # ---------------------
-_no_install_headers_com +=
+_no_install_headers_com += \
+                           hy_socket_inside.h   \
+                           hy_socket_server.h
 
 _install_headers_com    += \
                            hy_hash.h        \
                            hy_net.h         \
                            hy_net_wired.h   \
+                           hy_socket.h      \
                            hy_thread_pool.h \
                            hy_timer.h
 
