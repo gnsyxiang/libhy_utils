@@ -29,15 +29,17 @@
 
 void hy_socket_socket_destroy(hy_socket_s **socket_pp)
 {
-    hy_socket_s *socket = *socket_pp;
-
+    LOGT("handle: %p, *handle: %p, \n", socket_pp, *socket_pp);
     HY_ASSERT_VAL_RET(!socket_pp || !*socket_pp);
+
+    hy_socket_s *socket = *socket_pp;
 
     if (0 != pthread_mutex_destroy(&socket->mutex)) {
         LOGES("pthread_mutex_destroy failed \n");
         return;
     }
 
+    LOGI("socket scoket destroy, handle: %p \n", socket);
     HY_MEM_FREE_PP(socket_pp);
 }
 
@@ -54,6 +56,7 @@ hy_socket_s *hy_socket_socket_create(void)
 
         socket->fd = -1;
 
+        LOGI("socket socket create, handle: %p \n", socket);
         return socket;
     } while (0);
 

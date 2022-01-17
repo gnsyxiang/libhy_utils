@@ -30,6 +30,19 @@
 
 void HySocketDestroy(void **handle)
 {
+    LOGT("handle: %p, *handle: %p \n", handle, *handle);
+    HY_ASSERT_VAL_RET(!handle || !*handle);
+
+    hy_socket_context_s *context = *handle;
+    HySocketSaveConfig_s *save_config = &context->save_config;
+
+    if (save_config->type == HY_SOCKET_TYPE_SERVER) {
+        hy_server_destroy(&context);
+    } else {
+    }
+
+    LOGI("socket destroy, handle: %p \n", context);
+    HY_MEM_FREE_PP(handle);
 }
 
 void *HySocketCreate(HySocketConfig_s *config)
@@ -38,6 +51,7 @@ void *HySocketCreate(HySocketConfig_s *config)
     HY_ASSERT_VAL_RET_VAL(!config, NULL);
 
     hy_socket_context_s *context = NULL;
+
     do {
         context = HY_MEM_MALLOC_BREAK(hy_socket_context_s *, sizeof(*context));
 
@@ -45,11 +59,17 @@ void *HySocketCreate(HySocketConfig_s *config)
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
         if (save_config->type == HY_SOCKET_TYPE_SERVER) {
+            if (0 != hy_server_create(context)) {
+                LOGE("server create failed \n");
+                break;
+            }
         } else {
         }
 
+        LOGI("socket create, handle: %p \n", context);
         return context;
     } while (0);
 
+    HySocketDestroy((void **)&context);
     return NULL;
 }
