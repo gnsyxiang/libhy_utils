@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    30/10 2021 11:44
+# @date    17/01 2022 09:25
 # @version v0.0.1
 # 
 # @since    note
@@ -13,15 +13,12 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        30/10 2021      create the file
+#     00      zhenquan.qiu        17/01 2022      create the file
 # 
-#     last modified: 30/10 2021 11:44
+#     last modified: 17/01 2022 09:25
 # ===============================================================
 
-SUBDIRS = \
-          socket
-
-noinst_LTLIBRARIES = libhy_utils_os.la
+noinst_LTLIBRARIES = libhy_socket.la
 
 # ------------------
 # defining variables
@@ -48,11 +45,7 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_hash.c            \
-                   hy_net.c             \
-                   hy_net_wired.c       \
-                   hy_thread_pool.c     \
-                   hy_timer.c
+                   hy_socket.c
 
 if COMPILE_LIBLOG4CPLUS
 _sources_com    += hy_log4cplus.cpp
@@ -71,15 +64,15 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/linux/socket/libhy_socket.la
+_ldadd_com      +=
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 endif
 
-libhy_utils_os_la_SOURCES    = $(_sources_com)
-libhy_utils_os_la_CPPFLAGS   = $(_cppflags_com)
-libhy_utils_os_la_CFLAGS     = $(_cflags_com)
-libhy_utils_os_la_CXXFLAGS   = $(_cxxflags_com)
-libhy_utils_os_la_LDFLAGS    = $(_ldflags_com)
-libhy_utils_os_la_LIBADD     = $(_ldadd_com)
+libhy_socket_la_SOURCES     = $(_sources_com)
+libhy_socket_la_CPPFLAGS    = $(_cppflags_com)
+libhy_socket_la_CFLAGS      = $(_cflags_com)
+libhy_socket_la_CXXFLAGS    = $(_cxxflags_com)
+libhy_socket_la_LDFLAGS     = $(_ldflags_com)
+libhy_socket_la_LIBADD      = $(_ldadd_com)
