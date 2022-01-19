@@ -30,12 +30,12 @@ install_includedir      = $(includedir)/@project_name@
 # add necessary content
 # ---------------------
 _no_install_headers_com += \
-                           hy_socket_client.h   \
-                           hy_socket_inside.h   \
-                           hy_socket_server.h
+                           hy_ipc_socket_client.h   \
+                           hy_ipc_socket_inside.h   \
+                           hy_ipc_socket_server.h
 
 _install_headers_com    += \
-                           hy_socket.h
+                           hy_ipc_socket.h
 
 # ------------------
 # make install files

@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_socket.h
+ * @file    hy_ipc_socket.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 08:21
@@ -17,8 +17,8 @@
  * 
  *     last modified: 17/01 2022 08:21
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_SOCKET_H_
-#define __LIBHY_UTILS_INCLUDE_HY_SOCKET_H_
+#ifndef __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_H_
+#define __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,26 +26,26 @@ extern "C" {
 
 #include "hy_hal/hy_type.h"
 
-#define HY_SOCKET_NAME_LEN_MAX  (32)
+#define HY_IPC_SOCKET_NAME_LEN_MAX  (32)
 
 /**
  * @brief socket类型
  */
 typedef enum {
-    HY_SOCKET_TYPE_CLIENT,      ///< 客户端
-    HY_SOCKET_TYPE_SERVER,      ///< 服务端
+    HY_IPC_SOCKET_TYPE_CLIENT,      ///< 客户端
+    HY_IPC_SOCKET_TYPE_SERVER,      ///< 服务端
 
-    HY_SOCKET_TYPE_MAX,
-} HySocketType_e;
+    HY_IPC_SOCKET_TYPE_MAX,
+} HyIpcSocketType_e;
 
 /**
  * @brief socket相关信息
  */
 typedef enum {
-    HY_SOCKET_INFO_FD,          ///< socket的fd
+    HY_IPC_SOCKET_INFO_FD,          ///< socket的fd
 
-    HY_SOCKET_INFO_MAX,
-} HySocketInfo_e;
+    HY_IPC_SOCKET_INFO_MAX,
+} HyIpcSocketInfo_e;
 
 /**
  * @brief 接收客户端回调
@@ -53,23 +53,23 @@ typedef enum {
  * @param fd 客户端fd
  * @param args 上层传递参数
  */
-typedef void (*HySocketAcceptCb_t)(hy_s32_t fd, void *args);
+typedef void (*HyIpcSocketAcceptCb_t)(hy_s32_t fd, void *args);
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    char            name[HY_SOCKET_NAME_LEN_MAX];   ///< socket名字
-    HySocketType_e  type:2;                         ///< socket类型
-    HySocketType_e  reserved;
-} HySocketSaveConfig_s;
+    char                        name[HY_IPC_SOCKET_NAME_LEN_MAX];   ///< socket名字
+    HyIpcSocketType_e           type:2;                             ///< socket类型
+    HyIpcSocketType_e           reserved;
+} HyIpcSocketSaveConfig_s;
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    HySocketSaveConfig_s save_config;               ///< 配置参数
-} HySocketConfig_s;
+    HyIpcSocketSaveConfig_s     save_config;                        ///< 配置参数
+} HyIpcSocketConfig_s;
 
 /**
  * @brief 创建socket
@@ -78,14 +78,14 @@ typedef struct {
  *
  * @return 成功返回句柄，失败返回NULL
  */
-void *HySocketCreate(HySocketConfig_s *config);
+void *HyIpcSocketCreate(HyIpcSocketConfig_s *config);
 
 /**
  * @brief 销毁socket
  *
  * @param handle 句柄的地址
  */
-void HySocketDestroy(void **handle);
+void HyIpcSocketDestroy(void **handle);
 
 /**
  * @brief 服务端等待客户端连接
@@ -96,7 +96,7 @@ void HySocketDestroy(void **handle);
  *
  * @return 错误返回-1，退出返回0
  */
-hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args);
+hy_s32_t HyIpcSocketAccept(void *handle, HyIpcSocketAcceptCb_t accept_cb, void *args);
 
 /**
  * @brief 客户端连接服务器
@@ -106,12 +106,12 @@ hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args);
  *
  * @return 成功返回0，失败返回-1
  */
-hy_s32_t HySocketConnect(void *handle, hy_u32_t timeout_s);
+hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
 
-void HySocketRead(void *handle);
-void HySocketWrite(void *handle);
+void HyIpcSocketRead(void *handle);
+void HyIpcSocketWrite(void *handle);
 
-void HySocketGetInfo(void *handle);
+void HyIpcSocketGetInfo(void *handle);
 
 #ifdef __cplusplus
 }

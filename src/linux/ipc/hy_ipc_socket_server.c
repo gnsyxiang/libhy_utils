@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_socket_server.c
+ * @file    hy_ipc_socket_server.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 09:34
@@ -26,15 +26,15 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
 
-#include "hy_socket_server.h"
+#include "hy_ipc_socket_server.h"
 
-hy_s32_t hy_server_accept(hy_socket_context_s *context,
-        HySocketAcceptCb_t accept_cb, void *args)
+hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
+        HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
     LOGT("handle: %p, accept_cb: %p \n", context, accept_cb);
     HY_ASSERT_VAL_RET_VAL(!context || !accept_cb, -1);
 
-    hy_socket_s *socket = context->socket;
+    hy_ipc_socket_s *socket = context->socket;
     fd_set read_fs;
     hy_s32_t fd;
 
@@ -66,33 +66,33 @@ hy_s32_t hy_server_accept(hy_socket_context_s *context,
     return 0;
 }
 
-void hy_server_destroy(hy_socket_context_s **context_pp)
+void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 {
     LOGT("handle: %p, *handle: %p \n", context_pp, *context_pp);
     HY_ASSERT_VAL_RET(!context_pp || !*context_pp);
 
-    hy_socket_context_s *context = *context_pp;
-    hy_socket_s *socket = context->socket;
+    hy_ipc_socket_context_s *context = *context_pp;
+    hy_ipc_socket_s *socket = context->socket;
 
     close(socket->fd);
 
     LOGI("socket server destroy, handle: %p, fd: %d \n",
             context->socket, context->socket->fd);
-    hy_socket_socket_destroy(&socket);
+    hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_server_create(hy_socket_context_s *context)
+hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
 {
     LOGT("handle: %p \n", context);
     HY_ASSERT_VAL_RET_VAL(!context, -1);
 
     hy_s32_t fd;
-    struct sockaddr_un addr;
     hy_u32_t addr_len;
-    HySocketSaveConfig_s *save_config = &context->save_config;
+    struct sockaddr_un addr;
+    HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_socket_socket_create(save_config->name);
+        context->socket = hy_ipc_socket_socket_create(save_config->server_name);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;
@@ -106,12 +106,12 @@ hy_s32_t hy_server_create(hy_socket_context_s *context)
 
         context->socket->fd = fd;
 
-        unlink(save_config->name);
+        unlink(save_config->server_name);
 
         addr.sun_family = AF_UNIX;
-        strcpy(addr.sun_path, save_config->name);
+        strcpy(addr.sun_path, save_config->server_name);
 
-        addr_len = strlen(save_config->name)
+        addr_len = strlen(save_config->server_name)
             + offsetof(struct sockaddr_un, sun_path);
         if (bind(fd, (const struct sockaddr *)&addr, addr_len) < 0) {
             LOGES("bind failed \n");
@@ -122,6 +122,6 @@ hy_s32_t hy_server_create(hy_socket_context_s *context)
         return 0;
     } while (0);
 
-    hy_server_destroy(&context);
+    hy_ipc_server_destroy(&context);
     return -1;
 }

@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_socket_client.c
+ * @file    hy_ipc_socket_client.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 16:38
@@ -26,14 +26,15 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
 
-#include "hy_socket_client.h"
+#include "hy_ipc_socket_client.h"
 
-hy_s32_t hy_client_connect(hy_socket_context_s *context, hy_u32_t timeout_s)
+hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
+        hy_u32_t timeout_s)
 {
     LOGT("handle: %p, timeout_s: %d \n", context, timeout_s);
     HY_ASSERT_VAL_RET_VAL(!context, -1);
 
-    hy_socket_s *socket = context->socket;
+    hy_ipc_socket_s *socket = context->socket;
     hy_u32_t addr_len = 0;
     hy_s32_t ret = 0;
     hy_u32_t time_cnt = 0;
@@ -61,31 +62,31 @@ hy_s32_t hy_client_connect(hy_socket_context_s *context, hy_u32_t timeout_s)
     }
 }
 
-void hy_client_destroy(hy_socket_context_s **context_pp)
+void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
 {
     LOGT("handle: %p, *handle: %p \n", context_pp, *context_pp);
     HY_ASSERT_VAL_RET(!context_pp || !*context_pp);
 
-    hy_socket_context_s *context = *context_pp;
-    hy_socket_s *socket = context->socket;
+    hy_ipc_socket_context_s *context = *context_pp;
+    hy_ipc_socket_s *socket = context->socket;
 
     close(socket->fd);
 
     LOGI("socket client destroy, handle: %p, fd: %d \n",
             context->socket, context->socket->fd);
-    hy_socket_socket_destroy(&socket);
+    hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_client_create(hy_socket_context_s *context)
+hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context)
 {
     LOGT("handle: %p \n", context);
     HY_ASSERT_VAL_RET_VAL(!context, -1);
 
     hy_s32_t fd;
-    HySocketSaveConfig_s *save_config = &context->save_config;
+    HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_socket_socket_create(save_config->name);
+        context->socket = hy_ipc_socket_socket_create(save_config->server_name);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;

@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_socket_inside.c
+ * @file    hy_ipc_socket_inside.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 11:21
@@ -25,14 +25,14 @@
 #include "hy_hal/hy_log.h"
 #include "hy_hal/hy_assert.h"
 
-#include "hy_socket_inside.h"
+#include "hy_ipc_socket_inside.h"
 
-void hy_socket_socket_destroy(hy_socket_s **socket_pp)
+void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 {
     LOGT("handle: %p, *handle: %p, \n", socket_pp, *socket_pp);
     HY_ASSERT_VAL_RET(!socket_pp || !*socket_pp);
 
-    hy_socket_s *socket = *socket_pp;
+    hy_ipc_socket_s *socket = *socket_pp;
 
     if (0 != pthread_mutex_destroy(&socket->mutex)) {
         LOGES("pthread_mutex_destroy failed \n");
@@ -43,11 +43,11 @@ void hy_socket_socket_destroy(hy_socket_s **socket_pp)
     HY_MEM_FREE_PP(socket_pp);
 }
 
-hy_socket_s *hy_socket_socket_create(const char *name)
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *name)
 {
-    hy_socket_s *socket = NULL;
+    hy_ipc_socket_s *socket = NULL;
     do {
-        socket = HY_MEM_MALLOC_BREAK(hy_socket_s *, sizeof(*socket));
+        socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*socket));
 
         if (0 != pthread_mutex_init(&socket->mutex, NULL)) {
             LOGE("pthread_mutex_init failed \n");
@@ -61,6 +61,6 @@ hy_socket_s *hy_socket_socket_create(const char *name)
         return socket;
     } while (0);
 
-    hy_socket_socket_destroy(&socket);
+    hy_ipc_socket_socket_destroy(&socket);
     return NULL;
 }

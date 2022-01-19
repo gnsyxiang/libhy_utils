@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_socket_client_test.c
+ * @file    hy_ipc_socket_server_test.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    19/01 2022 08:45
+ * @date    17/01 2022 14:27
  * @version v0.0.1
  * 
  * @since    note
@@ -13,9 +13,9 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        19/01 2022      create the file
+ *     00      zhenquan.qiu        17/01 2022      create the file
  * 
- *     last modified: 19/01 2022 08:45
+ *     last modified: 17/01 2022 14:27
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,12 +30,16 @@
 #include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_log.h"
 
-#include "hy_socket.h"
+#include "hy_ipc_socket.h"
+
+#define _IPC_SOCKET_SERVER_NAME "hy_ipc_server"
+#define _IPC_SOCKET_TAG "server_1"
 
 typedef struct {
     void *log_handle;
     void *signal_handle;
-    void *socket_handle;
+
+    void *ipc_socket_handle;
 
     hy_s32_t exit_flag;
 } _main_context_t;
@@ -50,7 +54,7 @@ static void _signal_error_cb(void *args)
 
 static void _signal_user_cb(void *args)
 {
-    LOGI("------user cb\n");
+    LOGW("------user cb\n");
 
     _main_context_t *context = args;
     context->exit_flag = 1;
@@ -62,9 +66,9 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"socket client",   &context->socket_handle,    HySocketDestroy},
-        {"signal",          &context->signal_handle,    HySignalDestroy},
-        {"log",             &context->log_handle,       HyLogDestroy},
+        {"socket server",   &context->ipc_socket_handle,    HyIpcSocketDestroy},
+        {"signal",          &context->signal_handle,        HySignalDestroy},
+        {"log",             &context->log_handle,           HyLogDestroy},
     };
 
     RUN_DESTROY(module);
@@ -101,22 +105,28 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    HySocketConfig_s socket_config;
-    HY_MEMSET(&socket_config, sizeof(socket_config));
-    #define _SOCKET_NAME "hy_server"
-    HY_MEMCPY(socket_config.save_config.name, _SOCKET_NAME, HY_STRLEN(_SOCKET_NAME));
-    socket_config.save_config.type = HY_SOCKET_TYPE_CLIENT;
+    HyIpcSocketConfig_s ipc_socket_config;
+    HY_MEMSET(&ipc_socket_config, sizeof(ipc_socket_config));
+    HY_MEMCPY(ipc_socket_config.save_config.server_name, _IPC_SOCKET_SERVER_NAME, HY_STRLEN(_IPC_SOCKET_SERVER_NAME));
+    HY_MEMCPY(ipc_socket_config.save_config.tag, _IPC_SOCKET_TAG, HY_STRLEN(_IPC_SOCKET_TAG));
+    ipc_socket_config.save_config.type = HY_IPC_SOCKET_TYPE_CLIENT;
+    ipc_socket_config.save_config.type = HY_IPC_SOCKET_TYPE_SERVER;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
-        {"log",             &context->log_handle,           &log_config,        (create_t)HyLogCreate,      HyLogDestroy},
-        {"signal",          &context->signal_handle,        &signal_config,     (create_t)HySignalCreate,   HySignalDestroy},
-        {"socket client",   &context->socket_handle,        &socket_config,     (create_t)HySocketCreate,   HySocketDestroy},
+        {"log",             &context->log_handle,           &log_config,            (create_t)HyLogCreate,          HyLogDestroy},
+        {"signal",          &context->signal_handle,        &signal_config,         (create_t)HySignalCreate,       HySignalDestroy},
+        {"socket server",   &context->ipc_socket_handle,    &ipc_socket_config,     (create_t)HyIpcSocketCreate,    HyIpcSocketDestroy},
     };
 
     RUN_CREATE(module);
 
     return context;
+}
+
+static void _accept_cb(hy_s32_t fd, void *args)
+{
+    LOGD("fd: %d \n", fd);
 }
 
 int main(int argc, char *argv[])
@@ -129,14 +139,9 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HySocketConnect(context->socket_handle, 10);
-
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+    HyIpcSocketAccept(context->ipc_socket_handle, _accept_cb, context);
 
     _module_destroy(&context);
 
     return 0;
 }
-

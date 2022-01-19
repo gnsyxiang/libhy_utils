@@ -46,16 +46,10 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_socket.c          \
-                   hy_socket_client.c   \
-                   hy_socket_inside.c   \
-                   hy_socket_server.c
-
-if COMPILE_LIBLOG4CPLUS
-_sources_com    += hy_log4cplus.cpp
-else
-_sources_com    +=
-endif
+                   hy_ipc_socket.c          \
+                   hy_ipc_socket_client.c   \
+                   hy_ipc_socket_inside.c   \
+                   hy_ipc_socket_server.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
