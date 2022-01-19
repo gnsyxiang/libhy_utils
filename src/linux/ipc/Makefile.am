@@ -18,7 +18,7 @@
 #     last modified: 17/01 2022 09:25
 # ===============================================================
 
-noinst_LTLIBRARIES = libhy_socket.la
+noinst_LTLIBRARIES = libhy_ipc.la
 
 # ------------------
 # defining variables
@@ -41,7 +41,8 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux    \
+                   -I$(top_srcdir)/include/linux/ipc    \
+                   -I$(top_srcdir)/include/linux        \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
@@ -73,9 +74,9 @@ if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 endif
 
-libhy_socket_la_SOURCES     = $(_sources_com)
-libhy_socket_la_CPPFLAGS    = $(_cppflags_com)
-libhy_socket_la_CFLAGS      = $(_cflags_com)
-libhy_socket_la_CXXFLAGS    = $(_cxxflags_com)
-libhy_socket_la_LDFLAGS     = $(_ldflags_com)
-libhy_socket_la_LIBADD      = $(_ldadd_com)
+libhy_ipc_la_SOURCES     = $(_sources_com)
+libhy_ipc_la_CPPFLAGS    = $(_cppflags_com)
+libhy_ipc_la_CFLAGS      = $(_cflags_com)
+libhy_ipc_la_CXXFLAGS    = $(_cxxflags_com)
+libhy_ipc_la_LDFLAGS     = $(_ldflags_com)
+libhy_ipc_la_LIBADD      = $(_ldadd_com)

@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    30/10 2021 11:42
+# @date    19/01 2022 09:10
 # @version v0.0.1
 # 
 # @since    note
@@ -13,9 +13,9 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        30/10 2021      create the file
+#     00      zhenquan.qiu        19/01 2022      create the file
 # 
-#     last modified: 30/10 2021 11:42
+#     last modified: 19/01 2022 09:10
 # ===============================================================
 
 # ------------------
@@ -29,14 +29,13 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 # add necessary content
 # ---------------------
-_no_install_headers_com +=
+_no_install_headers_com += \
+                           hy_socket_client.h   \
+                           hy_socket_inside.h   \
+                           hy_socket_server.h
 
 _install_headers_com    += \
-                           hy_hash.h        \
-                           hy_net.h         \
-                           hy_net_wired.h   \
-                           hy_thread_pool.h \
-                           hy_timer.h
+                           hy_socket.h
 
 # ------------------
 # make install files

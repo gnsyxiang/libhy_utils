@@ -19,7 +19,7 @@
 # ===============================================================
 
 SUBDIRS = \
-          socket
+          ipc
 
 noinst_LTLIBRARIES = libhy_utils_os.la
 
@@ -71,7 +71,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/linux/socket/libhy_socket.la
+_ldadd_com      += $(top_builddir)/src/linux/ipc/libhy_ipc.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)

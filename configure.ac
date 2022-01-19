@@ -76,12 +76,14 @@ AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  example/Makefile
                  example/linux/Makefile
+                 example/linux/ipc/Makefile
                  example/mac/Makefile
                  example/mcu/Makefile
                  example/rtos/Makefile
                  example/window/Makefile
                  include/Makefile
                  include/linux/Makefile
+                 include/linux/ipc/Makefile
                  include/mac/Makefile
                  include/mcu/Makefile
                  include/rtos/Makefile
@@ -89,7 +91,7 @@ AC_CONFIG_FILES([Makefile
                  res/Makefile
                  src/Makefile
                  src/linux/Makefile
-                 src/linux/socket/Makefile
+                 src/linux/ipc/Makefile
                  src/mac/Makefile
                  src/mcu/Makefile
                  src/rtos/Makefile
