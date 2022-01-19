@@ -36,7 +36,7 @@ typedef struct {
     void *log_handle;
     void *signal_handle;
 
-    void *socket_server_handle;
+    void *socket_handle;
 
     hy_s32_t exit_flag;
 } _main_context_t;
@@ -63,9 +63,9 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"socket server",   &context->socket_server_handle,     HySocketDestroy},
-        {"signal",          &context->signal_handle,            HySignalDestroy},
-        {"log",             &context->log_handle,               HyLogDestroy},
+        {"socket server",   &context->socket_handle,    HySocketDestroy},
+        {"signal",          &context->signal_handle,    HySignalDestroy},
+        {"log",             &context->log_handle,       HyLogDestroy},
     };
 
     RUN_DESTROY(module);
@@ -109,9 +109,9 @@ static _main_context_t *_module_create(void)
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
-        {"log",             &context->log_handle,               &log_config,        (create_t)HyLogCreate,      HyLogDestroy},
-        {"signal",          &context->signal_handle,            &signal_config,     (create_t)HySignalCreate,   HySignalDestroy},
-        {"socket server",   &context->socket_server_handle,     &socket_config,     (create_t)HySocketCreate,   HySocketDestroy},
+        {"log",             &context->log_handle,       &log_config,        (create_t)HyLogCreate,      HyLogDestroy},
+        {"signal",          &context->signal_handle,    &signal_config,     (create_t)HySignalCreate,   HySignalDestroy},
+        {"socket server",   &context->socket_handle,    &socket_config,     (create_t)HySocketCreate,   HySocketDestroy},
     };
 
     RUN_CREATE(module);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HySocketAccept(context->socket_server_handle, _accept_cb, context);
+    HySocketAccept(context->socket_handle, _accept_cb, context);
 
     _module_destroy(&context);
 

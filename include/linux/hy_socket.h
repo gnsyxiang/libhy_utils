@@ -87,6 +87,15 @@ void *HySocketCreate(HySocketConfig_s *config);
  */
 void HySocketDestroy(void **handle);
 
+/**
+ * @brief 服务端等待客户端连接
+ *
+ * @param handle 句柄
+ * @param accept_cb 接收客户端回调
+ * @param args 上层传递的参数
+ *
+ * @return 错误返回-1，退出返回0
+ */
 hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args);
 hy_s32_t HySocketConnect(void *handle);
 
