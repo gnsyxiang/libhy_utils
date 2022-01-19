@@ -29,7 +29,8 @@ extern "C" {
 #include "hy_ipc_socket.h"
 
 typedef struct {
-    const char                  *name;
+    char                        name[HY_IPC_SOCKET_NAME_LEN_MAX];
+    const char                  *ipc_name;
     hy_s32_t                    fd;
     pthread_mutex_t             mutex;
 } hy_ipc_socket_s;
@@ -42,8 +43,16 @@ typedef struct {
     hy_s32_t                    reserved;
 } hy_ipc_socket_context_s;
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *name);
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name, const char *name);
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
+
+#define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                       \
+    do {                                                                        \
+        addr.sun_family = AF_UNIX;                                              \
+        strcpy(addr.sun_path, ipc_name);                                        \
+        \
+        addr_len = strlen(ipc_name) + offsetof(struct sockaddr_un, sun_path);   \
+    } while (0)
 
 #ifdef __cplusplus
 }

@@ -32,8 +32,8 @@
 
 #include "hy_ipc_socket.h"
 
-#define _IPC_SOCKET_SERVER_NAME "hy_ipc_server"
-#define _IPC_SOCKET_TAG "server_1"
+#define _IPC_SOCKET_IPC_NAME    "hy_ipc_server"
+#define _IPC_SOCKET_NAME        "server_1"
 
 typedef struct {
     void *log_handle;
@@ -107,9 +107,8 @@ static _main_context_t *_module_create(void)
 
     HyIpcSocketConfig_s ipc_socket_config;
     HY_MEMSET(&ipc_socket_config, sizeof(ipc_socket_config));
-    HY_MEMCPY(ipc_socket_config.save_config.server_name, _IPC_SOCKET_SERVER_NAME, HY_STRLEN(_IPC_SOCKET_SERVER_NAME));
-    HY_MEMCPY(ipc_socket_config.save_config.tag, _IPC_SOCKET_TAG, HY_STRLEN(_IPC_SOCKET_TAG));
-    ipc_socket_config.save_config.type = HY_IPC_SOCKET_TYPE_CLIENT;
+    HY_MEMCPY(ipc_socket_config.save_config.ipc_name, _IPC_SOCKET_IPC_NAME, HY_STRLEN(_IPC_SOCKET_IPC_NAME));
+    HY_MEMCPY(ipc_socket_config.name, _IPC_SOCKET_NAME, HY_STRLEN(_IPC_SOCKET_NAME));
     ipc_socket_config.save_config.type = HY_IPC_SOCKET_TYPE_SERVER;
 
     // note: 增加或删除要同步到module_destroy_t中
@@ -124,9 +123,10 @@ static _main_context_t *_module_create(void)
     return context;
 }
 
-static void _accept_cb(hy_s32_t fd, void *args)
+static void _accept_cb(hy_s32_t fd,
+        const char *ipc_name, const char *name, void *args)
 {
-    LOGD("fd: %d \n", fd);
+    LOGD("fd: %d, ipc_name: %s, name: %s \n", fd, ipc_name, name);
 }
 
 int main(int argc, char *argv[])

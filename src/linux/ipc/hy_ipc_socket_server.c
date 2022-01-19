@@ -34,12 +34,12 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
     LOGT("handle: %p, accept_cb: %p \n", context, accept_cb);
     HY_ASSERT_VAL_RET_VAL(!context || !accept_cb, -1);
 
-    hy_ipc_socket_s *socket = context->socket;
-    fd_set read_fs;
     hy_s32_t fd;
+    fd_set read_fs;
+    hy_ipc_socket_s *socket = context->socket;
 
     if (listen(socket->fd, SOMAXCONN) < 0) {
-        LOGES("listen failed, fd: %d, name: %s \n", socket->fd, socket->name);
+        LOGES("listen failed, fd: %d, name: %s \n", socket->fd, socket->ipc_name);
         return -1;
     }
 
@@ -49,7 +49,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
 
         if (select(FD_SETSIZE, &read_fs, NULL, NULL, NULL) < 0) {
             LOGES("select failed \n");
-            break;
+            return -1;
         }
 
         if (FD_ISSET(socket->fd, &read_fs)) {
@@ -59,7 +59,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
                 return -1;
             }
 
-            accept_cb(fd, args);
+            accept_cb(fd, socket->ipc_name, socket->name, args);
         }
     }
 
@@ -76,49 +76,37 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 
     close(socket->fd);
 
-    LOGI("socket server destroy, handle: %p, fd: %d \n",
-            context->socket, context->socket->fd);
+    LOGI("ipc socket client destroy, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
+            context->socket, socket->ipc_name, socket->name, socket->fd);
     hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
+hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context, const char *name)
 {
-    LOGT("handle: %p \n", context);
+    LOGT("handle: %p, name: %s \n", context, name);
     HY_ASSERT_VAL_RET_VAL(!context, -1);
 
-    hy_s32_t fd;
     hy_u32_t addr_len;
     struct sockaddr_un addr;
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_ipc_socket_socket_create(save_config->server_name);
+        context->socket = hy_ipc_socket_socket_create(save_config->ipc_name, name);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;
         }
 
-        fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
+        unlink(save_config->ipc_name);
 
-        context->socket->fd = fd;
+        HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, save_config->ipc_name);
 
-        unlink(save_config->server_name);
-
-        addr.sun_family = AF_UNIX;
-        strcpy(addr.sun_path, save_config->server_name);
-
-        addr_len = strlen(save_config->server_name)
-            + offsetof(struct sockaddr_un, sun_path);
-        if (bind(fd, (const struct sockaddr *)&addr, addr_len) < 0) {
+        if (bind(context->socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
             LOGES("bind failed \n");
             break;
         }
 
-        LOGI("socket server create, handle: %p, fd: %d \n", context->socket, fd);
+        LOGI("ipc socket server create \n");
         return 0;
     } while (0);
 

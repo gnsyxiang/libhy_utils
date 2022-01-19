@@ -35,21 +35,18 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
     HY_ASSERT_VAL_RET_VAL(!context, -1);
 
     hy_ipc_socket_s *socket = context->socket;
-    hy_u32_t addr_len = 0;
     hy_s32_t ret = 0;
     hy_u32_t time_cnt = 0;
+    hy_u32_t addr_len = 0;
     struct sockaddr_un addr;
 
-    addr.sun_family = AF_UNIX;
-    strcpy(addr.sun_path, socket->name);
-
-    addr_len = strlen(socket->name) + offsetof(struct sockaddr_un, sun_path);
+    HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, socket->ipc_name);
 
     do {
         ret = connect(socket->fd, (const struct sockaddr *)&addr, addr_len);
         if (ret < 0) {
             LOGES("connect failed, fd: %d, name: %s, sleep and connect \n",
-                    socket->fd, socket->name);
+                    socket->fd, socket->ipc_name);
 
             sleep(1);
         }
@@ -72,35 +69,26 @@ void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
 
     close(socket->fd);
 
-    LOGI("socket client destroy, handle: %p, fd: %d \n",
-            context->socket, context->socket->fd);
+    LOGI("ipc socket client destroy, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
+            context->socket, socket->ipc_name, socket->name, socket->fd);
     hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context)
+hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context, const char *name)
 {
-    LOGT("handle: %p \n", context);
+    LOGT("handle: %p, name: %s \n", context, name);
     HY_ASSERT_VAL_RET_VAL(!context, -1);
 
-    hy_s32_t fd;
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_ipc_socket_socket_create(save_config->server_name);
+        context->socket = hy_ipc_socket_socket_create(save_config->ipc_name, name);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;
         }
 
-        fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
-
-        context->socket->fd = fd;
-
-        LOGI("socket client create, handle: %p, fd: %d \n", context->socket, fd);
+        LOGI("ipc socket client create \n");
         return 0;
     } while (0);
 

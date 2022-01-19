@@ -51,24 +51,29 @@ typedef enum {
  * @brief 接收客户端回调
  *
  * @param fd 客户端fd
+ * @param ipc_name ipc socket管道
+ * @param name 服务器名字
  * @param args 上层传递参数
  */
-typedef void (*HyIpcSocketAcceptCb_t)(hy_s32_t fd, void *args);
+typedef void (*HyIpcSocketAcceptCb_t)(hy_s32_t fd,
+        const char *ipc_name, const char *name, void *args);
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    char                        name[HY_IPC_SOCKET_NAME_LEN_MAX];   ///< socket名字
-    HyIpcSocketType_e           type:2;                             ///< socket类型
-    HyIpcSocketType_e           reserved;
+    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX];       ///< 服务器名字
+    HyIpcSocketType_e           type:2;                                     ///< socket类型
+    HyIpcSocketType_e           reserved;                                   ///< 预留
 } HyIpcSocketSaveConfig_s;
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    HyIpcSocketSaveConfig_s     save_config;                        ///< 配置参数
+    HyIpcSocketSaveConfig_s     save_config;                                ///< 配置参数
+
+    char                        name[HY_IPC_SOCKET_NAME_LEN_MAX];           ///< 多个客户端的标识
 } HyIpcSocketConfig_s;
 
 /**
@@ -96,7 +101,8 @@ void HyIpcSocketDestroy(void **handle);
  *
  * @return 错误返回-1，退出返回0
  */
-hy_s32_t HyIpcSocketAccept(void *handle, HyIpcSocketAcceptCb_t accept_cb, void *args);
+hy_s32_t HyIpcSocketAccept(void *handle,
+        HyIpcSocketAcceptCb_t accept_cb, void *args);
 
 /**
  * @brief 客户端连接服务器

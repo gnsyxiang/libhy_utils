@@ -51,23 +51,23 @@ hy_s32_t HyIpcSocketAccept(void *handle,
 }
 
 static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
-        HyIpcSocketType_e type, hy_s32_t op)
+        HyIpcSocketType_e type, const char *name, hy_s32_t op)
 {
     struct {
         const char *str;
-        hy_s32_t (*socket_create_cb)(hy_ipc_socket_context_s *context);
-        void (*socket_destroy_cb)(hy_ipc_socket_context_s **context_pp);
+        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *context, const char *name);
+        void (*destroy_cb)(hy_ipc_socket_context_s **context_pp);
     } socket_create[HY_IPC_SOCKET_TYPE_MAX] = {
         {"client",      hy_ipc_client_create,   hy_ipc_client_destroy},
         {"server",      hy_ipc_server_create,   hy_ipc_server_destroy},
     };
 
     if (op) {
-        if (0 != socket_create[type].socket_create_cb(context)) {
-            LOGE("%s create failed \n", socket_create[type].str);
+        if (0 != socket_create[type].create_cb(context, name)) {
+            LOGE("ipc socket %s create failed \n", socket_create[type].str);
         }
     } else {
-        socket_create[type].socket_destroy_cb(&context);
+        socket_create[type].destroy_cb(&context);
     }
 }
 
@@ -79,9 +79,9 @@ void HyIpcSocketDestroy(void **handle)
     hy_ipc_socket_context_s *context = *handle;
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
-    _exec_ipc_socket_func(context, save_config->type, 0);
+    _exec_ipc_socket_func(context, save_config->type, NULL, 0);
 
-    LOGI("socket destroy, handle: %p \n", context);
+    LOGI("ipc socket destroy, handle: %p \n", context);
     HY_MEM_FREE_PP(handle);
 }
 
@@ -98,9 +98,9 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
         HyIpcSocketSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        _exec_ipc_socket_func(context, save_config->type, 1);
+        _exec_ipc_socket_func(context, save_config->type, config->name, 1);
 
-        LOGI("socket create, handle: %p \n", context);
+        LOGI("ipc socket create, handle: %p \n", context);
         return context;
     } while (0);
 

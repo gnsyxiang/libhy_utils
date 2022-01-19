@@ -19,6 +19,8 @@
  */
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
 
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
@@ -39,28 +41,40 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
         return;
     }
 
-    LOGI("socket scoket destroy, handle: %p \n", socket);
+    LOGI("ipc socket scoket destroy, handle: %p \n", socket);
     HY_MEM_FREE_PP(socket_pp);
 }
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *name)
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
+        const char *name)
 {
-    hy_ipc_socket_s *socket = NULL;
-    do {
-        socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*socket));
+    LOGT("ipc_name: %s, name: %s \n", ipc_name, name);
+    HY_ASSERT_VAL_RET_VAL(!ipc_name, NULL);
 
-        if (0 != pthread_mutex_init(&socket->mutex, NULL)) {
+    hy_ipc_socket_s *ipc_socket = NULL;
+
+    do {
+        ipc_socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*ipc_socket));
+
+        ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (ipc_socket->fd < 0) {
+            LOGES("socket failed \n");
+            break;
+        }
+
+        if (0 != pthread_mutex_init(&ipc_socket->mutex, NULL)) {
             LOGE("pthread_mutex_init failed \n");
             break;
         }
 
-        socket->fd   = -1;
-        socket->name = name;
+        ipc_socket->ipc_name = ipc_name;
+        HY_STRNCPY(ipc_socket->name, HY_IPC_SOCKET_NAME_LEN_MAX, name, HY_STRLEN(name));
 
-        LOGI("socket socket create, handle: %p \n", socket);
-        return socket;
+        LOGI("ipc socket socket create, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
+                ipc_socket, ipc_socket->ipc_name, ipc_socket->name, ipc_socket->fd);
+        return ipc_socket;
     } while (0);
 
-    hy_ipc_socket_socket_destroy(&socket);
+    hy_ipc_socket_socket_destroy(&ipc_socket);
     return NULL;
 }
