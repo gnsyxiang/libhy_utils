@@ -97,7 +97,16 @@ void HySocketDestroy(void **handle);
  * @return 错误返回-1，退出返回0
  */
 hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args);
-hy_s32_t HySocketConnect(void *handle);
+
+/**
+ * @brief 客户端连接服务器
+ *
+ * @param handle 句柄
+ * @param timeout_s 超时时间，0表示阻塞执行
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HySocketConnect(void *handle, hy_u32_t timeout_s);
 
 void HySocketRead(void *handle);
 void HySocketWrite(void *handle);

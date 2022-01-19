@@ -46,6 +46,7 @@ _include_com    += \
 
 _sources_com    += \
                    hy_socket.c          \
+                   hy_socket_client.c   \
                    hy_socket_inside.c   \
                    hy_socket_server.c
 

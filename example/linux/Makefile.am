@@ -113,6 +113,14 @@ BUILT_SOURCES += \
 CLEANFILES += $(BUILT_SOURCES)
 endif
 
+bin_PROGRAMS                    += hy_socket_client_test
+hy_socket_client_test_SOURCES   = $(_sources_com) hy_socket_client_test.c
+hy_socket_client_test_CPPFLAGS  = $(_cppflags_com)
+hy_socket_client_test_CFLAGS    = $(_cflags_com)
+hy_socket_client_test_CXXFLAGS  = $(_cxxflags_com)
+hy_socket_client_test_LDFLAGS   = $(_ldflags_com)
+hy_socket_client_test_LDADD     = $(_ldadd_com)
+
 bin_PROGRAMS                    += hy_socket_server_test
 hy_socket_server_test_SOURCES   = $(_sources_com) hy_socket_server_test.c
 hy_socket_server_test_CPPFLAGS  = $(_cppflags_com)

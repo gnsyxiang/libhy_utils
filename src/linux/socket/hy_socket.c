@@ -26,7 +26,18 @@
 
 #include "hy_socket.h"
 #include "hy_socket_inside.h"
+#include "hy_socket_client.h"
 #include "hy_socket_server.h"
+
+hy_s32_t HySocketConnect(void *handle, hy_u32_t timeout_s)
+{
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_VAL_RET_VAL(!handle, -1);
+
+    hy_socket_context_s *context = handle;
+
+    return hy_client_connect(context, timeout_s);
+}
 
 hy_s32_t HySocketAccept(void *handle, HySocketAcceptCb_t accept_cb, void *args)
 {
