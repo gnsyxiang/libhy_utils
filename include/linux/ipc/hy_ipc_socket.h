@@ -93,6 +93,30 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config);
 void HyIpcSocketDestroy(void **handle);
 
 /**
+ * @brief 读取数据
+ *
+ * @param handle 句柄
+ * @param buf 数据地址
+ * @param len 数据长度
+ *
+ * @return 成功返回读到的字节数，失败返回-1
+ */
+hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len);
+
+/**
+ * @brief 写入数据
+ *
+ * @param handle 句柄
+ * @param buf 数据地址
+ * @param len 数据长度
+ *
+ * @return 成功返回写入的字节数，失败返回-1
+ */
+hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len);
+
+void HyIpcSocketGetInfo(void *handle);
+
+/**
  * @brief 服务端等待客户端连接
  *
  * @param handle 句柄
@@ -114,10 +138,6 @@ hy_s32_t HyIpcSocketAccept(void *handle,
  */
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
 
-void HyIpcSocketRead(void *handle);
-void HyIpcSocketWrite(void *handle);
-
-void HyIpcSocketGetInfo(void *handle);
 
 #ifdef __cplusplus
 }

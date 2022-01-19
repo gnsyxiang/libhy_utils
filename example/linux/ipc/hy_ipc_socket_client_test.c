@@ -134,7 +134,16 @@ int main(int argc, char *argv[])
 
     HyIpcSocketConnect(context->ipc_socket_handle, 10);
 
+    const char *buf = "haha";
+    hy_s32_t ret = 0;
+
     while (!context->exit_flag) {
+        ret = HyIpcSocketWrite(context->ipc_socket_handle, buf, HY_STRLEN(buf));
+        if (ret < 0) {
+            LOGE("HyIpcSocketWrite failed \n");
+            break;
+        }
+
         sleep(1);
     }
 

@@ -21,6 +21,7 @@
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
+#include "hy_hal/hy_file.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_mem.h"
 
@@ -48,6 +49,26 @@ hy_s32_t HyIpcSocketAccept(void *handle,
     hy_ipc_socket_context_s *context = handle;
 
     return hy_ipc_server_accept(context, accept_cb, args);
+}
+
+hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
+{
+    LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
+    HY_ASSERT_VAL_RET_VAL(!handle || !buf, -1);
+
+    hy_ipc_socket_context_s *context = handle;
+
+    return HyFileRead(context->socket->fd, buf, len);
+}
+
+hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
+{
+    LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
+    HY_ASSERT_VAL_RET_VAL(!handle || !buf, -1);
+
+    hy_ipc_socket_context_s *context = handle;
+
+    return HyFileWriteN(context->socket->fd, buf, len);
 }
 
 static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
