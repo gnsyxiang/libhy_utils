@@ -104,7 +104,8 @@ static _main_context_t *_module_create(void)
 
     HySocketConfig_s socket_config;
     HY_MEMSET(&socket_config, sizeof(socket_config));
-    HY_MEMCPY(socket_config.save_config.name, "hy_server", HY_STRLEN("hy_server"));
+    #define _SOCKET_NAME "hy_server"
+    HY_MEMCPY(socket_config.save_config.name, _SOCKET_NAME, HY_STRLEN(_SOCKET_NAME));
     socket_config.save_config.type = HY_SOCKET_TYPE_SERVER;
 
     // note: 增加或删除要同步到module_destroy_t中
