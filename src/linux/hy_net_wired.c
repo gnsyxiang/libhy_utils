@@ -190,7 +190,7 @@ void HyNetWiredDestroy(void **handle)
 
 void *HyNetWiredCreate(HyNetWiredConfig_t *config)
 {
-    HY_ASSERT_VAL_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!config, NULL);
 
     do {
         context = HY_MEM_MALLOC_BREAK(_net_wired_context_t *, sizeof(*context));

@@ -56,7 +56,7 @@ typedef struct {
 hy_s32_t HyThreadPoolAdd(void *handle, HyThreadPoolTaskCb_t task_cb, void *args)
 {
     LOGT("handle: %p, task_cb: %p, args: %p \n", handle, task_cb, args);
-    HY_ASSERT_VAL_RET_VAL(!handle || !task_cb, HY_THREAD_POOL_INVALID);
+    HY_ASSERT_RET_VAL(!handle || !task_cb, HY_THREAD_POOL_INVALID);
 
     _thread_pool_context_t *context = handle;
     hy_s32_t ret = HY_THREAD_POOL_OK;
@@ -147,7 +147,7 @@ static hy_s32_t _thread_pool_loop_cb(void *args)
 void HyThreadPoolDestroy(void **handle)
 {
     LOGT("handle: %p, *handle: %p \n", handle, *handle);
-    HY_ASSERT_VAL_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
     _thread_pool_context_t *context = *handle;
 
@@ -178,7 +178,7 @@ void HyThreadPoolDestroy(void **handle)
 void *HyThreadPoolCreate(HyThreadPoolConfig_t *config)
 {
     LOGT("config: %p \n", config);
-    HY_ASSERT_VAL_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!config, NULL);
 
     _thread_pool_context_t *context = NULL;
     do {

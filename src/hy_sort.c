@@ -40,7 +40,7 @@ static inline void _mem_swap(void *dst, void *src,
 void HySortBubble(void *array, size_t len,
         size_t item_len, HySortSwapCb_t swap_cb)
 {
-    HY_ASSERT_VAL_RET(!array || !swap_cb)
+    HY_ASSERT_RET(!array || !swap_cb)
 
     if (0 == len || 0 == item_len) {
         LOGE("the len or item_len is zero \n");
@@ -96,7 +96,7 @@ static hy_s32_t _partition(void *array, hy_s32_t low, hy_s32_t high,
 void HySortQuick(void *array, hy_s32_t low, hy_s32_t high,
         size_t item_len, HySortSwapCb_t swap_cb)
 {
-    HY_ASSERT_VAL_RET(!array || !swap_cb);
+    HY_ASSERT_RET(!array || !swap_cb);
 
     if (0 == item_len) {
         LOGE("the item_len is zero \n");

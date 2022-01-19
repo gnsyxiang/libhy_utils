@@ -32,7 +32,7 @@
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 {
     LOGT("handle: %p, *handle: %p, \n", socket_pp, *socket_pp);
-    HY_ASSERT_VAL_RET(!socket_pp || !*socket_pp);
+    HY_ASSERT_RET(!socket_pp || !*socket_pp);
 
     hy_ipc_socket_s *socket = *socket_pp;
 
@@ -49,7 +49,7 @@ hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
         const char *name)
 {
     LOGT("ipc_name: %s, name: %s \n", ipc_name, name);
-    HY_ASSERT_VAL_RET_VAL(!ipc_name, NULL);
+    HY_ASSERT_RET_VAL(!ipc_name, NULL);
 
     hy_ipc_socket_s *ipc_socket = NULL;
 

@@ -32,7 +32,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
         hy_u32_t timeout_s)
 {
     LOGT("handle: %p, timeout_s: %d \n", context, timeout_s);
-    HY_ASSERT_VAL_RET_VAL(!context, -1);
+    HY_ASSERT_RET_VAL(!context, -1);
 
     hy_ipc_socket_s *socket = context->socket;
     hy_s32_t ret = 0;
@@ -62,7 +62,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
 void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
 {
     LOGT("handle: %p, *handle: %p \n", context_pp, *context_pp);
-    HY_ASSERT_VAL_RET(!context_pp || !*context_pp);
+    HY_ASSERT_RET(!context_pp || !*context_pp);
 
     hy_ipc_socket_context_s *context = *context_pp;
     hy_ipc_socket_s *socket = context->socket;
@@ -77,7 +77,7 @@ void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
 hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context, const char *name)
 {
     LOGT("handle: %p, name: %s \n", context, name);
-    HY_ASSERT_VAL_RET_VAL(!context, -1);
+    HY_ASSERT_RET_VAL(!context, -1);
 
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 

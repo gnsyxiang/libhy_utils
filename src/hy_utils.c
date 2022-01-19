@@ -30,7 +30,7 @@
 
 void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num)
 {
-    HY_ASSERT_VAL_RET(!ip_str);
+    HY_ASSERT_RET(!ip_str);
 
     int num[IP_INT_DOT_LEN];
 
@@ -44,7 +44,7 @@ void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num)
 
 void HyUtilsIpInt2Str(uint32_t ip_num, char *ip_str, size_t ip_str_len)
 {
-    HY_ASSERT_VAL_RET(!ip_str);
+    HY_ASSERT_RET(!ip_str);
 
     uint8_t *tmp = (uint8_t *)&ip_num;
     size_t len = 0;

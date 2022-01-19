@@ -48,7 +48,7 @@ typedef struct {
 
 hy_u32_t HyHashGet(const char *key)
 {
-    HY_ASSERT_VAL_RET_VAL(!key, 0);
+    HY_ASSERT_RET_VAL(!key, 0);
 
     hy_u32_t seed = 31; // 31 131 1313 13131 131313 etc..
     hy_u32_t hash = 0;
@@ -62,7 +62,7 @@ hy_u32_t HyHashGet(const char *key)
 
 static hy_s32_t _key_to_index(_hash_context_t *context, const char *key)
 {
-    HY_ASSERT_VAL_RET_VAL(!key, -1);
+    HY_ASSERT_RET_VAL(!key, -1);
 
     hy_s32_t bucket_max_len = context->save_config.bucket_cnt;
     hy_s32_t len   = HY_STRLEN(key);
@@ -173,7 +173,7 @@ static inline void _get_item_val(_item_t *pos, HyHashItem_t *h_item)
 
 hy_s32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item)
 {
-    HY_ASSERT_VAL_RET_VAL(!handle || !h_item
+    HY_ASSERT_RET_VAL(!handle || !h_item
             || !h_item->key || !h_item->val, -1);
 
     _hash_context_t *context = handle;
@@ -192,7 +192,7 @@ hy_s32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item)
 
 hy_s32_t HyHashItemDel(void *handle, HyHashItem_t *h_item)
 {
-    HY_ASSERT_VAL_RET_VAL(!handle || !h_item, -1);
+    HY_ASSERT_RET_VAL(!handle || !h_item, -1);
 
     _hash_context_t *context = handle;
     hy_s32_t index = -1;
@@ -203,7 +203,7 @@ hy_s32_t HyHashItemDel(void *handle, HyHashItem_t *h_item)
 
 hy_s32_t HyHashItemGet(void *handle, HyHashItem_t *h_item)
 {
-    HY_ASSERT_VAL_RET_VAL(!handle || !h_item, -1);
+    HY_ASSERT_RET_VAL(!handle || !h_item, -1);
 
     _hash_context_t *context = handle;
     hy_s32_t index = -1;
@@ -233,7 +233,7 @@ static void _traverse_item_list(_hash_context_t *context, hy_u32_t index,
 
 void HyHashDump(void *handle, HyHashDumpItemCb_t dump_item_cb, void *args)
 {
-    HY_ASSERT_VAL_RET(!handle || !dump_item_cb);
+    HY_ASSERT_RET(!handle || !dump_item_cb);
 
     _hash_context_t *context = handle;
 
@@ -250,7 +250,7 @@ static void _destroy_item_from_list(void *val, void *args)
 
 void HyHashDestroy(void **handle)
 {
-    HY_ASSERT_VAL_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
     _hash_context_t *context = *handle;
 
@@ -271,7 +271,7 @@ void HyHashDestroy(void **handle)
 
 void *HyHashCreate(HyHashConfig_t *config)
 {
-    HY_ASSERT_VAL_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!config, NULL);
 
     size_t bucket_cnt;
     _hash_context_t *context = NULL;

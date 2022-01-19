@@ -33,7 +33,7 @@
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s)
 {
     LOGT("handle: %p \n", handle);
-    HY_ASSERT_VAL_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle, -1);
 
     hy_ipc_socket_context_s *context = handle;
 
@@ -44,7 +44,7 @@ hy_s32_t HyIpcSocketAccept(void *handle,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
     LOGT("handle: %p, accept_cb: %p \n", handle, accept_cb);
-    HY_ASSERT_VAL_RET_VAL(!handle || !accept_cb, -1);
+    HY_ASSERT_RET_VAL(!handle || !accept_cb, -1);
 
     hy_ipc_socket_context_s *context = handle;
 
@@ -54,7 +54,7 @@ hy_s32_t HyIpcSocketAccept(void *handle,
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
 {
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_VAL_RET_VAL(!handle || !buf, -1);
+    HY_ASSERT_RET_VAL(!handle || !buf, -1);
 
     hy_ipc_socket_context_s *context = handle;
 
@@ -64,7 +64,7 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
 {
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_VAL_RET_VAL(!handle || !buf, -1);
+    HY_ASSERT_RET_VAL(!handle || !buf, -1);
 
     hy_ipc_socket_context_s *context = handle;
 
@@ -95,7 +95,7 @@ static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
 void HyIpcSocketDestroy(void **handle)
 {
     LOGT("handle: %p, *handle: %p \n", handle, *handle);
-    HY_ASSERT_VAL_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
     hy_ipc_socket_context_s *context = *handle;
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
@@ -109,7 +109,7 @@ void HyIpcSocketDestroy(void **handle)
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
 {
     LOGT("config: %p \n", config);
-    HY_ASSERT_VAL_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!config, NULL);
 
     hy_ipc_socket_context_s *context = NULL;
 

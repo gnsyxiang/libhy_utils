@@ -63,7 +63,7 @@ static _timer_context_t *context = NULL;
 void *HyTimerAdd(HyTimerConfig_t *timer_config)
 {
     LOGT("\n");
-    HY_ASSERT_VAL_RET_VAL(!timer_config, NULL);
+    HY_ASSERT_RET_VAL(!timer_config, NULL);
 
     _timer_t *timer = HY_MEM_MALLOC_RET_VAL(_timer_t *, sizeof(*timer), NULL);
 
@@ -84,7 +84,7 @@ void *HyTimerAdd(HyTimerConfig_t *timer_config)
 
 void HyTimerDel(void **timer_handle)
 {
-    HY_ASSERT_VAL_RET(!timer_handle || !*timer_handle);
+    HY_ASSERT_RET(!timer_handle || !*timer_handle);
 
     _timer_t *pos, *n;
     hy_u32_t i;
@@ -167,7 +167,7 @@ static hy_s32_t _timer_loop_cb(void *args)
 
 void HyTimerDestroy(void **handle)
 {
-    HY_ASSERT_VAL_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
     context->exit_flag = 1;
     HyThreadDestroy(&context->thread_handle);
@@ -195,7 +195,7 @@ void HyTimerDestroy(void **handle)
 
 void *HyTimerCreate(HyTimerServiceConfig_t *config)
 {
-    HY_ASSERT_VAL_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!config, NULL);
 
     do {
         context = HY_MEM_MALLOC_BREAK(_timer_context_t *, sizeof(*context));

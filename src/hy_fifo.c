@@ -70,7 +70,7 @@ static const char *_info_type[HY_FIFO_INFO_MAX] = {
 hy_u32_t HyFifoWrite(void *handle, void *buf, hy_u32_t len)
 {
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+    HY_ASSERT_RET_VAL(!handle || !buf || len == 0, 0);
 
     _fifo_context_t *context = handle;
     hy_u32_t len_tmp = 0;
@@ -141,7 +141,7 @@ static hy_s32_t _fifo_read_com(void *handle, void *buf, hy_u32_t len)
 hy_u32_t HyFifoRead(void *handle, void *buf, hy_u32_t len)
 {
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+    HY_ASSERT_RET_VAL(!handle || !buf || len == 0, 0);
     _fifo_context_t *context = handle;
 
     len = _fifo_read_com(handle, buf, len);
@@ -162,7 +162,7 @@ hy_u32_t HyFifoRead(void *handle, void *buf, hy_u32_t len)
 hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len)
 {
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_VAL_RET_VAL(!handle || !buf || len == 0, 0);
+    HY_ASSERT_RET_VAL(!handle || !buf || len == 0, 0);
 
     return _fifo_read_com(handle, buf, len);
 }
@@ -170,7 +170,7 @@ hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len)
 void HyFifoClean(void *handle)
 {
     LOGT("handle: %p \n", handle);
-    HY_ASSERT_VAL_RET(!handle);
+    HY_ASSERT_RET(!handle);
 
     _fifo_context_t *context = handle;
 
@@ -189,7 +189,7 @@ void HyFifoClean(void *handle)
 hy_u32_t HyFifoUpdateOut(void *handle, hy_u32_t len)
 {
     LOGT("handle: %p, len: %d \n", handle, len);
-    HY_ASSERT_VAL_RET_VAL(!handle, 0);
+    HY_ASSERT_RET_VAL(!handle, 0);
 
     _fifo_context_t *context = handle;
 
@@ -248,7 +248,7 @@ static void _dump_content(_fifo_context_t *context)
 void HyFifoDump(void *handle, HyFifoDumpType_t type)
 {
     LOGT("handle: %p, type: %s \n", handle, _dump_type[type]);
-    HY_ASSERT_VAL_RET(!handle);
+    HY_ASSERT_RET(!handle);
 
     _fifo_context_t *context = handle;
     switch (type) {
@@ -266,7 +266,7 @@ void HyFifoDump(void *handle, HyFifoDumpType_t type)
 hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type)
 {
     LOGT("handle: %p, type: %s \n", handle, _info_type[type]);
-    HY_ASSERT_VAL_RET_VAL(!handle, 0);
+    HY_ASSERT_RET_VAL(!handle, 0);
 
     _fifo_context_t *context = handle;
     hy_u32_t val = 0;
@@ -292,7 +292,7 @@ hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type)
 hy_s32_t HyFifoIsEmpty(void *handle)
 {
     LOGT("handle: %p \n", handle);
-    HY_ASSERT_VAL_RET_VAL(!handle, 0);
+    HY_ASSERT_RET_VAL(!handle, 0);
 
     _fifo_context_t *context = handle;
     return _FIFO_IS_EMPTY(context);
@@ -301,7 +301,7 @@ hy_s32_t HyFifoIsEmpty(void *handle)
 hy_s32_t HyFifoIsFull(void *handle)
 {
     LOGT("handle: %p \n", handle);
-    HY_ASSERT_VAL_RET_VAL(!handle, 0);
+    HY_ASSERT_RET_VAL(!handle, 0);
 
     _fifo_context_t *context = handle;
     return context->save_config.len == _FIFO_USED_LEN(context);
@@ -310,7 +310,7 @@ hy_s32_t HyFifoIsFull(void *handle)
 void HyFifoDestroy(void **handle)
 {
     LOGT("handle: %p, *handle: %p \n", handle, *handle);
-    HY_ASSERT_VAL_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
     _fifo_context_t *context = *handle;
 
@@ -325,7 +325,7 @@ void HyFifoDestroy(void **handle)
 void *HyFifoCreate(HyFifoConfig_t *config)
 {
     LOGT("config: %p \n", config);
-    HY_ASSERT_VAL_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!config, NULL);
 
     _fifo_context_t *context = NULL;
     do {

@@ -26,7 +26,7 @@
 
 void HyBitSet(char *byte, uint32_t index)
 {
-    HY_ASSERT_VAL_RET(!byte);
+    HY_ASSERT_RET(!byte);
 
     int byte_index = index / 8;
     int bit_index = index % 8;
@@ -36,7 +36,7 @@ void HyBitSet(char *byte, uint32_t index)
 
 int32_t HyBitVal(char *byte, uint32_t index)
 {
-    HY_ASSERT_VAL_RET_VAL(!byte, -1);
+    HY_ASSERT_RET_VAL(!byte, -1);
 
     int byte_index = index / 8;
     int bit_index = index % 8;

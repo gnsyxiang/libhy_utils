@@ -253,13 +253,13 @@ static size_t _file_content_create(const char *name, char **buf)
 
 void HyJsonFileDestroy(HyJson_t *root)
 {
-    HY_ASSERT_VAL_RET(!root);
+    HY_ASSERT_RET(!root);
     json_impl.item_destroy(root);
 }
 
 HyJson_t *HyJsonFileCreate(const char *name)
 {
-    HY_ASSERT_VAL_RET_VAL(!name, NULL);
+    HY_ASSERT_RET_VAL(!name, NULL);
 
     size_t len;
     char *buf = NULL;
@@ -276,21 +276,21 @@ HyJson_t *HyJsonFileCreate(const char *name)
 
 char *HyJsonDump(HyJson_t *root)
 {
-    HY_ASSERT_VAL_RET_VAL(!root, NULL);
+    HY_ASSERT_RET_VAL(!root, NULL);
 
     return json_impl.item_print_str(root);
 }
 
 void HyJsonDestroy(HyJson_t *root)
 {
-    HY_ASSERT_VAL_RET(!root);
+    HY_ASSERT_RET(!root);
 
     json_impl.item_destroy(root);
 }
 
 HyJson_t *HyJsonCreate(const char *buf)
 {
-    HY_ASSERT_VAL_RET_VAL(!buf, NULL);
+    HY_ASSERT_RET_VAL(!buf, NULL);
 
     HyJson_t *root = json_impl.item_create(buf, 0);
     if (!root) {

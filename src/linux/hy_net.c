@@ -51,7 +51,7 @@ static hy_s32_t _get_cmd_ret(const char *cmd_buf)
 
 hy_s32_t HyNetIsConnect(const char *dst)
 {
-    HY_ASSERT_VAL_RET_VAL(!dst, 0);
+    HY_ASSERT_RET_VAL(!dst, 0);
 
     char cmd_buf[256] = {0};
 

@@ -32,7 +32,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
     LOGT("handle: %p, accept_cb: %p \n", context, accept_cb);
-    HY_ASSERT_VAL_RET_VAL(!context || !accept_cb, -1);
+    HY_ASSERT_RET_VAL(!context || !accept_cb, -1);
 
     hy_s32_t fd;
     fd_set read_fs;
@@ -69,7 +69,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
 void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 {
     LOGT("handle: %p, *handle: %p \n", context_pp, *context_pp);
-    HY_ASSERT_VAL_RET(!context_pp || !*context_pp);
+    HY_ASSERT_RET(!context_pp || !*context_pp);
 
     hy_ipc_socket_context_s *context = *context_pp;
     hy_ipc_socket_s *socket = context->socket;
@@ -84,7 +84,7 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context, const char *name)
 {
     LOGT("handle: %p, name: %s \n", context, name);
-    HY_ASSERT_VAL_RET_VAL(!context, -1);
+    HY_ASSERT_RET_VAL(!context, -1);
 
     hy_u32_t addr_len;
     struct sockaddr_un addr;
