@@ -28,6 +28,9 @@ extern "C" {
 
 #include "hy_ipc_socket.h"
 
+#define HY_IPC_SOCKET_PATH_LEN_MAX_     (64)
+#define HY_IPC_SOCKET_PATH_             "/tmp"
+
 typedef struct {
     const char                  *ipc_name;
     hy_s32_t                    fd;
@@ -47,9 +50,10 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
 
 #define HY_IPC_SOCKADDR_UN_INIT_(type, addr, addr_len, ipc_name)                \
     do {                                                                        \
-        char ipc_path[64] = {0};                                                \
+        char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};                       \
         addr.sun_family = AF_UNIX;                                              \
-        snprintf(ipc_path, 64, "/tmp/%s", ipc_name);                            \
+        snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,                         \
+                "%s/%s", HY_IPC_SOCKET_PATH_, ipc_name);                        \
         strcpy(addr.sun_path, ipc_path);                                        \
         \
         addr_len = strlen(ipc_path) + offsetof(struct sockaddr_un, sun_path);   \

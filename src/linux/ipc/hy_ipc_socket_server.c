@@ -76,6 +76,11 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_context_s *context = *context_pp;
     hy_ipc_socket_s *socket = context->socket;
 
+    char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};
+    snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,
+            "%s/%s", HY_IPC_SOCKET_PATH_, socket->ipc_name);
+    unlink(ipc_path);
+
     close(socket->fd);
 
     LOGI("ipc socket server destroy \n");
