@@ -36,10 +36,6 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 
     hy_ipc_socket_s *socket = *socket_pp;
 
-    if (0 != pthread_mutex_destroy(&socket->mutex)) {
-        LOGES("pthread_mutex_destroy failed \n");
-        return;
-    }
 
     LOGI("ipc socket scoket destroy, socket: %p, ipc_name: %s, fd: %d \n",
             socket, socket->ipc_name, socket->fd);
@@ -59,11 +55,6 @@ hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name)
         ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
         if (ipc_socket->fd < 0) {
             LOGES("socket failed \n");
-            break;
-        }
-
-        if (0 != pthread_mutex_init(&ipc_socket->mutex, NULL)) {
-            LOGE("pthread_mutex_init failed \n");
             break;
         }
 

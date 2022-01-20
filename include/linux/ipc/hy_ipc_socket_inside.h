@@ -34,7 +34,6 @@ extern "C" {
 typedef struct {
     const char                  *ipc_name;
     hy_s32_t                    fd;
-    pthread_mutex_t             mutex;
 } hy_ipc_socket_s;
 
 typedef struct {
