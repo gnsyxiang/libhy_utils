@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
             LOGE("HyIpcSocketWrite failed \n");
             break;
         }
+        LOGE("buf: %s \n", buf);
 
         sleep(1);
     }

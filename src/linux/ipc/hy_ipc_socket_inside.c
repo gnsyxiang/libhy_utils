@@ -47,20 +47,20 @@ hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
     LOGT("ipc_name: %s \n", ipc_name);
     HY_ASSERT_RET_VAL(!ipc_name, NULL);
 
-    hy_ipc_socket_s *ipc_socket = NULL;
+    hy_ipc_socket_s *socket = NULL;
 
     do {
-        ipc_socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*ipc_socket));
+        socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*socket));
 
-        ipc_socket->type = type;
-        HY_MEMCPY(ipc_socket->ipc_name, ipc_name, HY_STRLEN(ipc_name));
+        socket->type = type;
+        HY_MEMCPY(socket->ipc_name, ipc_name, HY_STRLEN(ipc_name));
 
         LOGI("ipc socket socket create, socket: %p, ipc_name: %s, type: %d \n",
-                ipc_socket, ipc_socket->ipc_name, ipc_socket->type);
-        return ipc_socket;
+                socket, socket->ipc_name, socket->type);
+        return socket;
     } while (0);
 
     LOGE("ipc socket socket create failed \n");
-    hy_ipc_socket_socket_destroy(&ipc_socket);
+    hy_ipc_socket_socket_destroy(&socket);
     return NULL;
 }

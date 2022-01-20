@@ -18,6 +18,8 @@
  *     last modified: 17/01 2022 15:54
  */
 #include <stdio.h>
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
@@ -33,52 +35,42 @@
 
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s)
 {
-    LOGT("&socket: %p, timeout_s: %d \n", handle, timeout_s);
+    LOGT("context: %p, timeout_s: %d \n", handle, timeout_s);
     HY_ASSERT_RET_VAL(!handle, -1);
 
-    hy_ipc_socket_context_s *context
-        = HY_CONTAINER_OF(handle, hy_ipc_socket_context_s, socket);
-
-    return hy_ipc_client_connect(context, timeout_s);
+    return hy_ipc_client_connect((hy_ipc_socket_context_s *)handle, timeout_s);
 }
 
 hy_s32_t HyIpcSocketAccept(void *handle,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
-    LOGT("&socket: %p, accept_cb: %p \n", handle, accept_cb);
+    LOGT("context: %p, accept_cb: %p, args: %p \n", handle, accept_cb, args);
     HY_ASSERT_RET_VAL(!handle || !accept_cb, -1);
 
-    hy_ipc_socket_context_s *context
-        = HY_CONTAINER_OF(handle, hy_ipc_socket_context_s, socket);
-
-    return hy_ipc_server_accept(context, accept_cb, args);
+    return hy_ipc_server_accept((hy_ipc_socket_context_s *)handle, accept_cb, args);
 }
 
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
 {
-    LOGT("&socket: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_RET_VAL(!handle || !buf, -1);
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
 
-    hy_ipc_socket_s **socket = handle;
-
-    return HyFileRead((*socket)->fd, buf, len);
+    return HyFileRead(((hy_ipc_socket_s *)handle)->fd, buf, len);
 }
 
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
 {
-    LOGT("&socket: %p, buf: %p, len: %d \n", handle, buf, len);
-    HY_ASSERT_RET_VAL(!handle || !buf, -1);
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
 
-    hy_ipc_socket_s **socket = handle;
-
-    return HyFileWriteN((*socket)->fd, buf, len);
+    return HyFileWriteN(((hy_ipc_socket_s *)handle)->fd, buf, len);
 }
 
 static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
         const char *ipc_name, HyIpcSocketType_e type, hy_s32_t op)
 {
     struct {
-        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *, const char *, HyIpcSocketType_e);
+        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *, const char *);
         void (*destroy_cb)(hy_ipc_socket_context_s **);
     } socket_create[HY_IPC_SOCKET_TYPE_MAX] = {
         {hy_ipc_client_create,   hy_ipc_client_destroy},
@@ -86,7 +78,7 @@ static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
     };
 
     if (op) {
-        return socket_create[type].create_cb(context, ipc_name, type);
+        return socket_create[type].create_cb(context, ipc_name);
     } else {
         socket_create[type].destroy_cb(&context);
     }
@@ -96,17 +88,18 @@ static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
 
 void HyIpcSocketDestroy(void **handle)
 {
-    LOGT("&socket: %p, socket: %p \n", handle, *handle);
+    LOGT("&context: %p, context: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    hy_ipc_socket_context_s *context
-        = HY_CONTAINER_OF(*handle, hy_ipc_socket_context_s, socket);
-    hy_ipc_socket_s *socket = context->socket;
+    hy_ipc_socket_context_s *context = *handle;
+    hy_ipc_socket_s *socket = &context->socket;
 
-    _exec_ipc_socket_func(context, socket->ipc_name, socket->type, 0);
+    close(socket->fd);
 
-    LOGI("ipc socket destroy, context: %p\n", context);
-    HY_MEM_FREE_PP(&context);
+    _exec_ipc_socket_func(context, NULL, socket->type, 0);
+
+    LOGI("ipc socket destroy, context: %p, fd: %d \n", context, socket->fd);
+    HY_MEM_FREE_PP(handle);
 }
 
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
@@ -117,18 +110,33 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
     hy_ipc_socket_context_s *context = NULL;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(hy_ipc_socket_context_s *, sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(hy_ipc_socket_context_s *,
+                sizeof(*context));
 
-        if (0 != _exec_ipc_socket_func(context,
-                    config->ipc_name, config->type, 1)) {
+        hy_ipc_socket_s *ipc_socket = &context->socket;
+
+        ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (ipc_socket->fd < 0) {
+            LOGES("socket failed \n");
             break;
         }
 
-        LOGI("ipc socket create, context: %p \n", context);
-        return &context->socket;
+        ipc_socket->type = config->type;
+        HY_MEMCPY(ipc_socket->ipc_name,
+                config->ipc_name, HY_STRLEN(config->ipc_name));
+
+        if (0 != _exec_ipc_socket_func(context,
+                    config->ipc_name, config->type, 1)) {
+            LOGE("call server/client func failed \n");
+            break;
+        }
+
+        LOGI("ipc socket create, context: %p, fd: %d \n",
+                context, ipc_socket->fd);
+        return context;
     } while (0);
 
     LOGE("ipc socket create failed \n");
-    HyIpcSocketDestroy((void **)&context->socket);
+    HyIpcSocketDestroy((void **)&context);
     return NULL;
 }

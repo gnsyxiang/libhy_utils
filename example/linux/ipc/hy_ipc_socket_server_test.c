@@ -36,6 +36,11 @@
 #define _IPC_SOCKET_IPC_NAME    "hy_ipc_server"
 
 typedef struct {
+    void *ipc_socket_handle;
+    void *args;
+} _accept_s;
+
+typedef struct {
     void *log_handle;
     void *signal_handle;
 
@@ -122,57 +127,52 @@ static _main_context_t *_module_create(void)
     return context;
 }
 
-// static hy_s32_t _socket_communication(void *args)
-// {
-    // _main_context_t *context = args;
-//
-    // char buf[4] = {0};
-    // hy_s32_t ret = 0;
-//
-    // while (!context->exit_flag) {
-        // ret = HyIpcSocketRead(context->ipc_socket_handle, buf, 2);
-        // if (ret < 0) {
-            // LOGE("HyIpcSocketRead failed \n");
-            // break;
-        // }
-    // }
-//
-    // return -1;
-// }
-
-static void _accept_cb(void *handle, void *args)
+static hy_s32_t _socket_communication(void *args)
 {
-    LOGD("handle: %p, \n", handle);
+    LOGT("args: %p \n", args);
 
-    _main_context_t *context = args;
-
+    _accept_s *accept = args;
+    _main_context_t *context = accept->args;
     char buf[8] = {0};
     hy_s32_t ret = 0;
 
     while (!context->exit_flag) {
-        HY_MEMSET(buf, sizeof(buf));
-
-        ret = HyIpcSocketRead(handle, buf, sizeof(buf));
+        ret = HyIpcSocketRead(accept->ipc_socket_handle, buf, sizeof(buf));
         if (ret < 0) {
             LOGE("HyIpcSocketRead failed \n");
             break;
         }
 
-        LOGE("buf: %s \n", buf);
+        LOGI("buf: %s \n", buf);
     }
 
-    // HyThreadConfig_t thread_config;
-    // HY_MEMSET(&thread_config, sizeof(thread_config));
-    // thread_config.save_config.thread_loop_cb    = _socket_communication;
-    // thread_config.save_config.args              = args;
-    // thread_config.save_config.destroy_flag      = HY_THREAD_DESTROY_FORCE;
-    // thread_config.save_config.detach_flag       = HY_THREAD_DETACH_YES;
-    // HY_STRNCPY(thread_config.save_config.name,
-            // HY_THREAD_NAME_LEN_MAX, "hy_socket_communication", HY_STRLEN("hy_socket_communication"));
-//
-    // if (!HyThreadCreate(&thread_config)) {
-        // LOGE("HyThreadCreate failed \n");
-    // }
+    HyIpcSocketDestroy((void **)&accept->ipc_socket_handle);
+    HY_MEM_FREE_PP(&accept);
+
+    return -1;
+}
+
+static void _accept_cb(void *handle, void *args)
+{
+    LOGT("handle: %p, args: %p \n", handle, args);
+
+    _accept_s *accept = HY_MEM_MALLOC_RET(_accept_s *, sizeof(*accept));
+
+    accept->args = args;
+    accept->ipc_socket_handle = handle;
+
+    HyThreadConfig_t thread_config;
+    HY_MEMSET(&thread_config, sizeof(thread_config));
+    thread_config.save_config.thread_loop_cb    = _socket_communication;
+    thread_config.save_config.args              = accept;
+    thread_config.save_config.destroy_flag      = HY_THREAD_DESTROY_FORCE;
+    thread_config.save_config.detach_flag       = HY_THREAD_DETACH_YES;
+    HY_STRNCPY(thread_config.save_config.name,
+            HY_THREAD_NAME_LEN_MAX, "hy_socket_communication", HY_STRLEN("hy_socket_communication"));
+
+    if (!HyThreadCreate(&thread_config)) {
+        LOGE("HyThreadCreate failed \n");
+    }
 }
 
 int main(int argc, char *argv[])

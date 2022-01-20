@@ -27,7 +27,7 @@ extern "C" {
 #include "hy_ipc_socket_inside.h"
 
 hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context,
-        const char *ipc_name, HyIpcSocketType_e type);
+        const char *ipc_name);
 void hy_ipc_client_destroy(hy_ipc_socket_context_s **context);
 
 hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context, hy_u32_t timeout_s);

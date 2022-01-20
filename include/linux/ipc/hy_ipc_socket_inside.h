@@ -39,7 +39,7 @@ typedef struct {
 } hy_ipc_socket_s;
 
 typedef struct {
-    hy_ipc_socket_s             *socket;
+    hy_ipc_socket_s             socket; //@note: 一定要放在前面，用于指针强制类型转换
 
     hy_s32_t                    exit_flag:1;
     hy_s32_t                    reserved;

@@ -34,7 +34,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
     LOGT("context: %p, timeout_s: %d \n", context, timeout_s);
     HY_ASSERT_RET_VAL(!context, -1);
 
-    hy_ipc_socket_s *socket = context->socket;
+    hy_ipc_socket_s *socket = &context->socket;
     hy_s32_t ret = 0;
     hy_u32_t time_cnt = 0;
     hy_u32_t addr_len = 0;
@@ -56,6 +56,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
         LOGI("connect ipc server, fd: %d \n", socket->fd);
         return 0;
     } else {
+        LOGE("connect server failed \n");
         return -1;
     }
 }
@@ -65,36 +66,17 @@ void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
     LOGT("&context: %p, context: %p \n", context_pp, *context_pp);
     HY_ASSERT_RET(!context_pp || !*context_pp);
 
-    hy_ipc_socket_context_s *context = *context_pp;
-    hy_ipc_socket_s *socket = context->socket;
-
-    LOGI("ipc socket client destroy, fd: %d \n", socket->fd);
-
-    close(socket->fd);
-
-    hy_ipc_socket_socket_destroy(&socket);
+    LOGI("ipc socket client destroy \n");
 }
 
 hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context,
-        const char *ipc_name, HyIpcSocketType_e type)
+        const char *ipc_name)
 {
-    LOGT("context: %p, ipc_name: %s, type: %d \n", context, ipc_name, type);
+    LOGT("context: %p, ipc_name: %s \n", context, ipc_name);
     HY_ASSERT_RET_VAL(!context, -1);
 
     do {
-        context->socket = hy_ipc_socket_socket_create(ipc_name, type);
-        if (!context->socket) {
-            LOGE("socket create failed \n");
-            break;
-        }
-
-        context->socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (context->socket->fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
-
-        LOGI("ipc socket client create, fd: %d \n", context->socket->fd);
+        LOGI("ipc socket client create \n");
         return 0;
     } while (0);
 
