@@ -40,8 +40,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
     hy_u32_t addr_len = 0;
     struct sockaddr_un addr;
 
-    HY_IPC_SOCKADDR_UN_INIT_(HY_IPC_SOCKET_TYPE_CLIENT,
-            addr, addr_len, socket->ipc_name);
+    HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, socket->ipc_name);
 
     do {
         ret = connect(socket->fd, (const struct sockaddr *)&addr, addr_len);

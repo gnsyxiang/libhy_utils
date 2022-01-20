@@ -91,11 +91,6 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 
     close(socket->fd);
 
-    char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};
-    snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,
-            "%s/%s", HY_IPC_SOCKET_PATH_, socket->ipc_name);
-    unlink(ipc_path);
-
     hy_ipc_socket_socket_destroy(&socket);
 }
 
@@ -107,6 +102,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
 
     hy_u32_t addr_len;
     struct sockaddr_un addr;
+    char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};
 
     do {
         context->socket = hy_ipc_socket_socket_create(ipc_name, type);
@@ -121,8 +117,13 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
             break;
         }
 
-        HY_IPC_SOCKADDR_UN_INIT_(HY_IPC_SOCKET_TYPE_SERVER,
-                addr, addr_len, ipc_name);
+        HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name);
+
+        snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,
+                "%s/%s", HY_IPC_SOCKET_PATH_, context->socket->ipc_name);
+        if (0 == access(ipc_path, F_OK)) {
+            remove(ipc_path);
+        }
 
         if (bind(context->socket->fd,
                     (const struct sockaddr *)&addr, addr_len) < 0) {

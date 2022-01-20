@@ -45,7 +45,7 @@ typedef struct {
     hy_s32_t                    reserved;
 } hy_ipc_socket_context_s;
 
-#define HY_IPC_SOCKADDR_UN_INIT_(type, addr, addr_len, ipc_name)                \
+#define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                      \
     do {                                                                        \
         char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};                       \
         addr.sun_family = AF_UNIX;                                              \
@@ -54,10 +54,6 @@ typedef struct {
         strcpy(addr.sun_path, ipc_path);                                        \
         \
         addr_len = strlen(ipc_path) + offsetof(struct sockaddr_un, sun_path);   \
-        \
-        if (type == HY_IPC_SOCKET_TYPE_SERVER) {                                \
-            unlink(ipc_path);                                                   \
-        }                                                                       \
     } while (0)
 
 hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
