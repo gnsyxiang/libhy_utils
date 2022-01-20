@@ -73,15 +73,14 @@ void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context)
+hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context,
+        const char *ipc_name, HyIpcSocketType_e type)
 {
-    LOGT("context: %p \n", context);
+    LOGT("context: %p, ipc_name: %s, type: %d \n", context, ipc_name, type);
     HY_ASSERT_RET_VAL(!context, -1);
 
-    HyIpcSocketSaveConfig_s *save_config = &context->save_config;
-
     do {
-        context->socket = hy_ipc_socket_socket_create(save_config->ipc_name);
+        context->socket = hy_ipc_socket_socket_create(ipc_name, type);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;

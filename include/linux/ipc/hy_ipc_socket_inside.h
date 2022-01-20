@@ -32,12 +32,13 @@ extern "C" {
 #define HY_IPC_SOCKET_PATH_             "/tmp"
 
 typedef struct {
-    const char                  *ipc_name;
+    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX];
     hy_s32_t                    fd;
+    HyIpcSocketType_e           type:2;
+    hy_s32_t                    reserved;
 } hy_ipc_socket_s;
 
 typedef struct {
-    HyIpcSocketSaveConfig_s     save_config;
     hy_ipc_socket_s             *socket;
 
     hy_s32_t                    exit_flag:1;
@@ -59,7 +60,8 @@ typedef struct {
         }                                                                       \
     } while (0)
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name);
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
+        HyIpcSocketType_e type);
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
 
 #ifdef __cplusplus

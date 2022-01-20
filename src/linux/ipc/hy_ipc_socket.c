@@ -75,10 +75,10 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
 }
 
 static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
-        HyIpcSocketType_e type, hy_s32_t op)
+        const char *ipc_name, HyIpcSocketType_e type, hy_s32_t op)
 {
     struct {
-        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *);
+        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *, const char *, HyIpcSocketType_e);
         void (*destroy_cb)(hy_ipc_socket_context_s **);
     } socket_create[HY_IPC_SOCKET_TYPE_MAX] = {
         {hy_ipc_client_create,   hy_ipc_client_destroy},
@@ -86,7 +86,7 @@ static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
     };
 
     if (op) {
-        return socket_create[type].create_cb(context);
+        return socket_create[type].create_cb(context, ipc_name, type);
     } else {
         socket_create[type].destroy_cb(&context);
     }
@@ -101,9 +101,9 @@ void HyIpcSocketDestroy(void **handle)
 
     hy_ipc_socket_context_s *context
         = HY_CONTAINER_OF(*handle, hy_ipc_socket_context_s, socket);
-    HyIpcSocketSaveConfig_s *save_config = &context->save_config;
+    hy_ipc_socket_s *socket = context->socket;
 
-    _exec_ipc_socket_func(context, save_config->type, 0);
+    _exec_ipc_socket_func(context, socket->ipc_name, socket->type, 0);
 
     LOGI("ipc socket destroy, context: %p\n", context);
     HY_MEM_FREE_PP(&context);
@@ -119,15 +119,12 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
     do {
         context = HY_MEM_MALLOC_BREAK(hy_ipc_socket_context_s *, sizeof(*context));
 
-        HyIpcSocketSaveConfig_s *save_config = &config->save_config;
-        HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
-
-        if (0 != _exec_ipc_socket_func(context, save_config->type, 1)) {
+        if (0 != _exec_ipc_socket_func(context,
+                    config->ipc_name, config->type, 1)) {
             break;
         }
 
         LOGI("ipc socket create, context: %p \n", context);
-
         return &context->socket;
     } while (0);
 

@@ -86,24 +86,24 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
+hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
+        const char *ipc_name, HyIpcSocketType_e type)
 {
-    LOGT("context: %p, \n", context);
-    HY_ASSERT_RET_VAL(!context, -1);
+    LOGT("context: %p, ipc_name: %s, type: %d \n", context, ipc_name, type);
+    HY_ASSERT_RET_VAL(!context || !ipc_name, -1);
 
     hy_u32_t addr_len;
     struct sockaddr_un addr;
-    HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_ipc_socket_socket_create(save_config->ipc_name);
+        context->socket = hy_ipc_socket_socket_create(ipc_name, type);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;
         }
 
         HY_IPC_SOCKADDR_UN_INIT_(HY_IPC_SOCKET_TYPE_SERVER,
-                addr, addr_len, save_config->ipc_name);
+                addr, addr_len, ipc_name);
 
         if (bind(context->socket->fd,
                     (const struct sockaddr *)&addr, addr_len) < 0) {

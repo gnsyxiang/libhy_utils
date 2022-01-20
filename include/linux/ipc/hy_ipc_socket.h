@@ -62,16 +62,9 @@ typedef void (*HyIpcSocketAcceptCb_t)(hy_s32_t fd,
  * @brief 配置参数
  */
 typedef struct {
-    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX];       ///< 服务器名字
+    const char                  *ipc_name;                                  ///< 服务器名字
     HyIpcSocketType_e           type:2;                                     ///< socket类型
     hy_s32_t                    reserved;                                   ///< 预留
-} HyIpcSocketSaveConfig_s;
-
-/**
- * @brief 配置参数
- */
-typedef struct {
-    HyIpcSocketSaveConfig_s     save_config;                                ///< 配置参数
 } HyIpcSocketConfig_s;
 
 /**
