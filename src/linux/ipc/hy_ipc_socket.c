@@ -23,6 +23,7 @@
 #include "hy_hal/hy_log.h"
 #include "hy_hal/hy_file.h"
 #include "hy_hal/hy_string.h"
+#include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_mem.h"
 
 #include "hy_ipc_socket.h"
@@ -35,7 +36,8 @@ hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s)
     LOGT("handle: %p \n", handle);
     HY_ASSERT_RET_VAL(!handle, -1);
 
-    hy_ipc_socket_context_s *context = handle;
+    hy_ipc_socket_context_s *context
+        = HY_CONTAINER_OF(handle, hy_ipc_socket_context_s, socket);
 
     return hy_ipc_client_connect(context, timeout_s);
 }
@@ -46,7 +48,8 @@ hy_s32_t HyIpcSocketAccept(void *handle,
     LOGT("handle: %p, accept_cb: %p \n", handle, accept_cb);
     HY_ASSERT_RET_VAL(!handle || !accept_cb, -1);
 
-    hy_ipc_socket_context_s *context = handle;
+    hy_ipc_socket_context_s *context
+        = HY_CONTAINER_OF(handle, hy_ipc_socket_context_s, socket);
 
     return hy_ipc_server_accept(context, accept_cb, args);
 }
@@ -56,9 +59,9 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
     HY_ASSERT_RET_VAL(!handle || !buf, -1);
 
-    hy_ipc_socket_context_s *context = handle;
+    hy_ipc_socket_s *socket = handle;
 
-    return HyFileRead(context->socket->fd, buf, len);
+    return HyFileRead(socket->fd, buf, len);
 }
 
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
@@ -66,9 +69,9 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
     HY_ASSERT_RET_VAL(!handle || !buf, -1);
 
-    hy_ipc_socket_context_s *context = handle;
+    hy_ipc_socket_s *socket = handle;
 
-    return HyFileWriteN(context->socket->fd, buf, len);
+    return HyFileWriteN(socket->fd, buf, len);
 }
 
 static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
@@ -97,7 +100,8 @@ void HyIpcSocketDestroy(void **handle)
     LOGT("handle: %p, *handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    hy_ipc_socket_context_s *context = *handle;
+    hy_ipc_socket_context_s *context
+        = HY_CONTAINER_OF(*handle, hy_ipc_socket_context_s, socket);
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     _exec_ipc_socket_func(context, save_config->type, NULL, 0);
@@ -122,9 +126,9 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
         _exec_ipc_socket_func(context, save_config->type, config->name, 1);
 
         LOGI("ipc socket create, handle: %p \n", context);
-        return context;
+        return &context->socket;
     } while (0);
 
-    HyIpcSocketDestroy((void **)&context);
+    HyIpcSocketDestroy((void **)&context->socket);
     return NULL;
 }
