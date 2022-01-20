@@ -45,12 +45,14 @@ typedef struct {
 hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name);
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
 
-#define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                       \
+#define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                      \
     do {                                                                        \
+        char ipc_path[64] = {0};                                                \
         addr.sun_family = AF_UNIX;                                              \
-        strcpy(addr.sun_path, ipc_name);                                        \
+        snprintf(ipc_path, 64, "/tmp/%s", ipc_name);                            \
+        strcpy(addr.sun_path, ipc_path);                                        \
         \
-        addr_len = strlen(ipc_name) + offsetof(struct sockaddr_un, sun_path);   \
+        addr_len = strlen(ipc_path) + offsetof(struct sockaddr_un, sun_path);   \
     } while (0)
 
 #ifdef __cplusplus
