@@ -41,7 +41,7 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
         return;
     }
 
-    LOGI("ipc socket scoket destroy, handle: %p, ipc_name: %s, fd: %d \n",
+    LOGI("ipc socket scoket destroy, socket: %p, ipc_name: %s, fd: %d \n",
             socket, socket->ipc_name, socket->fd);
     HY_MEM_FREE_PP(socket_pp);
 }
@@ -69,11 +69,12 @@ hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name)
 
         ipc_socket->ipc_name = ipc_name;
 
-        LOGI("ipc socket socket create, handle: %p, ipc_name: %s, fd: %d \n",
+        LOGI("ipc socket socket create, socket: %p, ipc_name: %s, fd: %d \n",
                 ipc_socket, ipc_socket->ipc_name, ipc_socket->fd);
         return ipc_socket;
     } while (0);
 
+    LOGE("ipc socket socket create failed \n");
     hy_ipc_socket_socket_destroy(&ipc_socket);
     return NULL;
 }

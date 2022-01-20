@@ -59,6 +59,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
                 LOGES("accept failed \n");
                 return -1;
             }
+            LOGI("accept fd: %d \n", fd);
 
             accept_cb(fd, socket->ipc_name, args);
         }
@@ -77,7 +78,7 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 
     close(socket->fd);
 
-    LOGI("ipc socket client destroy \n");
+    LOGI("ipc socket server destroy \n");
     hy_ipc_socket_socket_destroy(&socket);
 }
 
@@ -100,7 +101,8 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
         HY_IPC_SOCKADDR_UN_INIT_(HY_IPC_SOCKET_TYPE_SERVER,
                 addr, addr_len, save_config->ipc_name);
 
-        if (bind(context->socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
+        if (bind(context->socket->fd,
+                    (const struct sockaddr *)&addr, addr_len) < 0) {
             LOGES("bind failed \n");
             break;
         }
@@ -109,6 +111,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
         return 0;
     } while (0);
 
+    LOGE("ipc socket server create failed \n");
     hy_ipc_server_destroy(&context);
     return -1;
 }
