@@ -33,7 +33,6 @@
 #include "hy_ipc_socket.h"
 
 #define _IPC_SOCKET_IPC_NAME    "hy_ipc_server"
-#define _IPC_SOCKET_NAME        "client_1"
 
 typedef struct {
     void        *log_handle;
@@ -107,7 +106,6 @@ static _main_context_t *_module_create(void)
     HyIpcSocketConfig_s ipc_socket_config;
     HY_MEMSET(&ipc_socket_config, sizeof(ipc_socket_config));
     HY_MEMCPY(ipc_socket_config.save_config.ipc_name, _IPC_SOCKET_IPC_NAME, HY_STRLEN(_IPC_SOCKET_IPC_NAME));
-    HY_MEMCPY(ipc_socket_config.name, _IPC_SOCKET_NAME, HY_STRLEN(_IPC_SOCKET_NAME));
     ipc_socket_config.save_config.type = HY_IPC_SOCKET_TYPE_CLIENT;
 
     // note: 增加或删除要同步到module_destroy_t中

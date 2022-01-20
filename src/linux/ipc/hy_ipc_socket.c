@@ -75,11 +75,11 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
 }
 
 static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
-        HyIpcSocketType_e type, const char *name, hy_s32_t op)
+        HyIpcSocketType_e type, hy_s32_t op)
 {
     struct {
         const char *str;
-        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *, const char *);
+        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *);
         void (*destroy_cb)(hy_ipc_socket_context_s **);
     } socket_create[HY_IPC_SOCKET_TYPE_MAX] = {
         {"client",      hy_ipc_client_create,   hy_ipc_client_destroy},
@@ -87,7 +87,7 @@ static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
     };
 
     if (op) {
-        if (0 != socket_create[type].create_cb(context, name)) {
+        if (0 != socket_create[type].create_cb(context)) {
             LOGE("ipc socket %s create failed \n", socket_create[type].str);
         }
     } else {
@@ -104,7 +104,7 @@ void HyIpcSocketDestroy(void **handle)
         = HY_CONTAINER_OF(*handle, hy_ipc_socket_context_s, socket);
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
-    _exec_ipc_socket_func(context, save_config->type, NULL, 0);
+    _exec_ipc_socket_func(context, save_config->type, 0);
 
     LOGI("ipc socket destroy, context: %p, socket: %p \n",
             context, context->socket);
@@ -124,7 +124,7 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
         HyIpcSocketSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        _exec_ipc_socket_func(context, save_config->type, config->name, 1);
+        _exec_ipc_socket_func(context, save_config->type, 1);
 
         LOGI("ipc socket create, context: %p, socket: %p \n",
                 context, context->socket);

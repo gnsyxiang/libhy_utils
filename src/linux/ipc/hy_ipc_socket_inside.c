@@ -41,15 +41,14 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
         return;
     }
 
-    LOGI("ipc socket scoket destroy, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
-            socket, socket->ipc_name, socket->name, socket->fd);
+    LOGI("ipc socket scoket destroy, handle: %p, ipc_name: %s, fd: %d \n",
+            socket, socket->ipc_name, socket->fd);
     HY_MEM_FREE_PP(socket_pp);
 }
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
-        const char *name)
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name)
 {
-    LOGT("ipc_name: %s, name: %s \n", ipc_name, name);
+    LOGT("ipc_name: %s \n", ipc_name);
     HY_ASSERT_RET_VAL(!ipc_name, NULL);
 
     hy_ipc_socket_s *ipc_socket = NULL;
@@ -69,10 +68,9 @@ hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
         }
 
         ipc_socket->ipc_name = ipc_name;
-        HY_STRNCPY(ipc_socket->name, HY_IPC_SOCKET_NAME_LEN_MAX, name, HY_STRLEN(name));
 
-        LOGI("ipc socket socket create, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
-                ipc_socket, ipc_socket->ipc_name, ipc_socket->name, ipc_socket->fd);
+        LOGI("ipc socket socket create, handle: %p, ipc_name: %s, fd: %d \n",
+                ipc_socket, ipc_socket->ipc_name, ipc_socket->fd);
         return ipc_socket;
     } while (0);
 

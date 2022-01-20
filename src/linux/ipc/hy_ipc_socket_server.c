@@ -60,7 +60,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
                 return -1;
             }
 
-            accept_cb(fd, socket->ipc_name, socket->name, args);
+            accept_cb(fd, socket->ipc_name, args);
         }
     }
 
@@ -81,9 +81,9 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_socket_destroy(&socket);
 }
 
-hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context, const char *name)
+hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
 {
-    LOGT("context: %p, name: %s \n", context, name);
+    LOGT("context: %p, \n", context);
     HY_ASSERT_RET_VAL(!context, -1);
 
     hy_u32_t addr_len;
@@ -91,7 +91,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context, const char *name
     HyIpcSocketSaveConfig_s *save_config = &context->save_config;
 
     do {
-        context->socket = hy_ipc_socket_socket_create(save_config->ipc_name, name);
+        context->socket = hy_ipc_socket_socket_create(save_config->ipc_name);
         if (!context->socket) {
             LOGE("socket create failed \n");
             break;

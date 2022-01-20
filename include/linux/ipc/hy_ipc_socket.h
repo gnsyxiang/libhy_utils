@@ -56,7 +56,7 @@ typedef enum {
  * @param args 上层传递参数
  */
 typedef void (*HyIpcSocketAcceptCb_t)(hy_s32_t fd,
-        const char *ipc_name, const char *name, void *args);
+        const char *ipc_name, void *args);
 
 /**
  * @brief 配置参数
@@ -72,8 +72,6 @@ typedef struct {
  */
 typedef struct {
     HyIpcSocketSaveConfig_s     save_config;                                ///< 配置参数
-
-    char                        name[HY_IPC_SOCKET_NAME_LEN_MAX];           ///< 多个客户端的标识
 } HyIpcSocketConfig_s;
 
 /**

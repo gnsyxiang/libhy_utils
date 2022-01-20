@@ -29,7 +29,6 @@ extern "C" {
 #include "hy_ipc_socket.h"
 
 typedef struct {
-    char                        name[HY_IPC_SOCKET_NAME_LEN_MAX];
     const char                  *ipc_name;
     hy_s32_t                    fd;
     pthread_mutex_t             mutex;
@@ -43,7 +42,7 @@ typedef struct {
     hy_s32_t                    reserved;
 } hy_ipc_socket_context_s;
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name, const char *name);
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name);
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
 
 #define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                       \
