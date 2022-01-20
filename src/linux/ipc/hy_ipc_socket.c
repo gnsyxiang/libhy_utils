@@ -33,7 +33,7 @@
 
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s)
 {
-    LOGT("handle: %p \n", handle);
+    LOGT("handle: %p, timeout_s: %d \n", handle, timeout_s);
     HY_ASSERT_RET_VAL(!handle, -1);
 
     hy_ipc_socket_context_s *context
@@ -79,8 +79,8 @@ static void _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
 {
     struct {
         const char *str;
-        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *context, const char *name);
-        void (*destroy_cb)(hy_ipc_socket_context_s **context_pp);
+        hy_s32_t (*create_cb)(hy_ipc_socket_context_s *, const char *);
+        void (*destroy_cb)(hy_ipc_socket_context_s **);
     } socket_create[HY_IPC_SOCKET_TYPE_MAX] = {
         {"client",      hy_ipc_client_create,   hy_ipc_client_destroy},
         {"server",      hy_ipc_server_create,   hy_ipc_server_destroy},
@@ -106,13 +106,14 @@ void HyIpcSocketDestroy(void **handle)
 
     _exec_ipc_socket_func(context, save_config->type, NULL, 0);
 
-    LOGI("ipc socket destroy, handle: %p \n", context);
+    LOGI("ipc socket destroy, context: %p, socket: %p \n",
+            context, context->socket);
     HY_MEM_FREE_PP(handle);
 }
 
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
 {
-    LOGT("config: %p \n", config);
+    LOGT("ipc socket config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);
 
     hy_ipc_socket_context_s *context = NULL;
@@ -125,7 +126,8 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
 
         _exec_ipc_socket_func(context, save_config->type, config->name, 1);
 
-        LOGI("ipc socket create, handle: %p \n", context);
+        LOGI("ipc socket create, context: %p, socket: %p \n",
+                context, context->socket);
         return &context->socket;
     } while (0);
 

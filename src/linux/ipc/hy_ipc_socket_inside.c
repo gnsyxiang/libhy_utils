@@ -31,7 +31,7 @@
 
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 {
-    LOGT("handle: %p, *handle: %p, \n", socket_pp, *socket_pp);
+    LOGT("socket: %p, *socket: %p, \n", socket_pp, *socket_pp);
     HY_ASSERT_RET(!socket_pp || !*socket_pp);
 
     hy_ipc_socket_s *socket = *socket_pp;
@@ -41,7 +41,8 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
         return;
     }
 
-    LOGI("ipc socket scoket destroy, handle: %p \n", socket);
+    LOGI("ipc socket scoket destroy, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
+            socket, socket->ipc_name, socket->name, socket->fd);
     HY_MEM_FREE_PP(socket_pp);
 }
 

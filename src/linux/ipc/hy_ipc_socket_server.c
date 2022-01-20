@@ -31,7 +31,7 @@
 hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
-    LOGT("handle: %p, accept_cb: %p \n", context, accept_cb);
+    LOGT("context: %p, accept_cb: %p \n", context, accept_cb);
     HY_ASSERT_RET_VAL(!context || !accept_cb, -1);
 
     hy_s32_t fd;
@@ -39,7 +39,8 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
     hy_ipc_socket_s *socket = context->socket;
 
     if (listen(socket->fd, SOMAXCONN) < 0) {
-        LOGES("listen failed, fd: %d, name: %s \n", socket->fd, socket->ipc_name);
+        LOGES("listen failed, fd: %d, name: %s \n",
+                socket->fd, socket->ipc_name);
         return -1;
     }
 
@@ -68,7 +69,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
 
 void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 {
-    LOGT("handle: %p, *handle: %p \n", context_pp, *context_pp);
+    LOGT("context: %p, *context: %p \n", context_pp, *context_pp);
     HY_ASSERT_RET(!context_pp || !*context_pp);
 
     hy_ipc_socket_context_s *context = *context_pp;
@@ -76,14 +77,13 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 
     close(socket->fd);
 
-    LOGI("ipc socket client destroy, handle: %p, ipc_name: %s, name: %s, fd: %d \n",
-            context->socket, socket->ipc_name, socket->name, socket->fd);
+    LOGI("ipc socket client destroy \n");
     hy_ipc_socket_socket_destroy(&socket);
 }
 
 hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context, const char *name)
 {
-    LOGT("handle: %p, name: %s \n", context, name);
+    LOGT("context: %p, name: %s \n", context, name);
     HY_ASSERT_RET_VAL(!context, -1);
 
     hy_u32_t addr_len;
