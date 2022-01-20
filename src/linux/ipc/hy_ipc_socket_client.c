@@ -69,8 +69,6 @@ void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_context_s *context = *context_pp;
     hy_ipc_socket_s *socket = context->socket;
 
-    close(socket->fd);
-
     LOGI("ipc socket client destroy \n");
     hy_ipc_socket_socket_destroy(&socket);
 }

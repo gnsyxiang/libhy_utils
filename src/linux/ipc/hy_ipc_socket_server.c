@@ -82,8 +82,6 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
             "%s/%s", HY_IPC_SOCKET_PATH_, socket->ipc_name);
     unlink(ipc_path);
 
-    close(socket->fd);
-
     LOGI("ipc socket server destroy \n");
     hy_ipc_socket_socket_destroy(&socket);
 }

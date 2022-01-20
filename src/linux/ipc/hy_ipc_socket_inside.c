@@ -36,6 +36,7 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 
     hy_ipc_socket_s *socket = *socket_pp;
 
+    close(socket->fd);
 
     LOGI("ipc socket scoket destroy, socket: %p, ipc_name: %s, fd: %d \n",
             socket, socket->ipc_name, socket->fd);
