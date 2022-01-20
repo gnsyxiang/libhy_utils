@@ -97,9 +97,8 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context)
             break;
         }
 
-        unlink(save_config->ipc_name);
-
-        HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, save_config->ipc_name);
+        HY_IPC_SOCKADDR_UN_INIT_(HY_IPC_SOCKET_TYPE_SERVER,
+                addr, addr_len, save_config->ipc_name);
 
         if (bind(context->socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
             LOGES("bind failed \n");
