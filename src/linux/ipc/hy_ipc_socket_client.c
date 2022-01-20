@@ -63,7 +63,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
 
 void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
 {
-    LOGT("context: %p, *context: %p \n", context_pp, *context_pp);
+    LOGT("&context: %p, context: %p \n", context_pp, *context_pp);
     HY_ASSERT_RET(!context_pp || !*context_pp);
 
     hy_ipc_socket_context_s *context = *context_pp;

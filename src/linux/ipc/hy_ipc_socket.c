@@ -96,7 +96,7 @@ static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
 
 void HyIpcSocketDestroy(void **handle)
 {
-    LOGT("socket: %p, *socket: %p \n", handle, *handle);
+    LOGT("&socket: %p, socket: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
     hy_ipc_socket_context_s *context

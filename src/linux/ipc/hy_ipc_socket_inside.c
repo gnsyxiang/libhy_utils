@@ -31,7 +31,7 @@
 
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 {
-    LOGT("socket: %p, *socket: %p, \n", socket_pp, *socket_pp);
+    LOGT("&socket: %p, socket: %p, \n", socket_pp, *socket_pp);
     HY_ASSERT_RET(!socket_pp || !*socket_pp);
 
     hy_ipc_socket_s *socket = *socket_pp;
