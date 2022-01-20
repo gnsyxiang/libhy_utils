@@ -128,6 +128,23 @@ hy_s32_t HyIpcSocketAccept(void *handle,
  */
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
 
+/**
+ * @brief 创建socket
+ *
+ * @param _ipc_name 服务器名字
+ * @param _type socket类型，详见HyIpcSocketType_e
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
+#define HyIpcSocketCreate_m(_ipc_name, _type)                   \
+    ({                                                          \
+        HyIpcSocketConfig_s config;                             \
+        HY_MEMSET(&config, sizeof(config));                     \
+        config.type      = _type;                               \
+        config.ipc_name  = _ipc_name;                           \
+        HyIpcSocketCreate(&config);                             \
+     })
+
 #ifdef __cplusplus
 }
 #endif

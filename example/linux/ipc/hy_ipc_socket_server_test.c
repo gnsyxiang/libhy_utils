@@ -185,12 +185,8 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HyIpcSocketConfig_s ipc_socket_config;
-    HY_MEMSET(&ipc_socket_config, sizeof(ipc_socket_config));
-    ipc_socket_config.type      = HY_IPC_SOCKET_TYPE_SERVER;
-    ipc_socket_config.ipc_name  = _IPC_SOCKET_IPC_NAME;
-
-    context->ipc_socket_handle = HyIpcSocketCreate(&ipc_socket_config);
+    context->ipc_socket_handle = HyIpcSocketCreate_m(_IPC_SOCKET_IPC_NAME,
+            HY_IPC_SOCKET_TYPE_SERVER);
     if (!context->ipc_socket_handle) {
         LOGE("HyIpcSocketCreate failed \n");
     }
