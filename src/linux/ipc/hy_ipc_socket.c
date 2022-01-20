@@ -105,8 +105,8 @@ void HyIpcSocketDestroy(void **handle)
 
     _exec_ipc_socket_func(context, save_config->type, 0);
 
-    HY_MEM_FREE_PP(handle);
     LOGI("ipc socket destroy, context: %p\n", context);
+    HY_MEM_FREE_PP(&context);
 }
 
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
