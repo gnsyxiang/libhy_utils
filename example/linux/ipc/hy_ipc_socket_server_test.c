@@ -43,6 +43,7 @@ typedef struct {
 typedef struct {
     void *log_handle;
     void *signal_handle;
+    void *thread_handle;
 
     void *ipc_socket_handle;
 
@@ -71,7 +72,6 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"socket server",   &context->ipc_socket_handle,    HyIpcSocketDestroy},
         {"signal",          &context->signal_handle,        HySignalDestroy},
         {"log",             &context->log_handle,           HyLogDestroy},
     };
@@ -110,16 +110,10 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    HyIpcSocketConfig_s ipc_socket_config;
-    HY_MEMSET(&ipc_socket_config, sizeof(ipc_socket_config));
-    ipc_socket_config.type      = HY_IPC_SOCKET_TYPE_SERVER;
-    ipc_socket_config.ipc_name  = _IPC_SOCKET_IPC_NAME;
-
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",             &context->log_handle,           &log_config,            (create_t)HyLogCreate,          HyLogDestroy},
         {"signal",          &context->signal_handle,        &signal_config,         (create_t)HySignalCreate,       HySignalDestroy},
-        {"socket server",   &context->ipc_socket_handle,    &ipc_socket_config,     (create_t)HyIpcSocketCreate,    HyIpcSocketDestroy},
     };
 
     RUN_CREATE(module);
@@ -143,10 +137,10 @@ static hy_s32_t _socket_communication(void *args)
             break;
         }
 
-        LOGI("buf: %s \n", buf);
+        LOGD("buf: %s \n", buf);
     }
 
-    HyIpcSocketDestroy((void **)&accept->ipc_socket_handle);
+    HyIpcSocketDestroy(&accept->ipc_socket_handle);
     HY_MEM_FREE_PP(&accept);
 
     return -1;
@@ -175,6 +169,12 @@ static void _accept_cb(void *handle, void *args)
     }
 }
 
+static hy_s32_t _thread_loop_cb(void *args)
+{
+    return HyIpcSocketAccept(((_main_context_t *)args)->ipc_socket_handle,
+            _accept_cb, args);
+}
+
 int main(int argc, char *argv[])
 {
     _main_context_t *context = _module_create();
@@ -185,7 +185,29 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HyIpcSocketAccept(context->ipc_socket_handle, _accept_cb, context);
+    HyIpcSocketConfig_s ipc_socket_config;
+    HY_MEMSET(&ipc_socket_config, sizeof(ipc_socket_config));
+    ipc_socket_config.type      = HY_IPC_SOCKET_TYPE_SERVER;
+    ipc_socket_config.ipc_name  = _IPC_SOCKET_IPC_NAME;
+
+    context->ipc_socket_handle = HyIpcSocketCreate(&ipc_socket_config);
+    if (!context->ipc_socket_handle) {
+        LOGE("HyIpcSocketCreate failed \n");
+    }
+
+    context->thread_handle = HyThreadCreate_m("hy_accept",
+            _thread_loop_cb, context);
+    if (!context->thread_handle) {
+        LOGE("HyThreadCreate_m failed \n");
+    }
+
+    while (!context->exit_flag) {
+        sleep(1);
+    }
+
+    HyIpcSocketDestroy(&context->ipc_socket_handle);
+
+    HyThreadDestroy(&context->thread_handle);
 
     _module_destroy(&context);
 

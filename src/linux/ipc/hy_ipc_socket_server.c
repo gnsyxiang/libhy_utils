@@ -48,10 +48,19 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
     while (!context->exit_flag) {
         FD_ZERO(&read_fs);
         FD_SET(socket->fd, &read_fs);
+        FD_SET(context->pipe_fd[0], &read_fs);
 
         if (select(FD_SETSIZE, &read_fs, NULL, NULL, NULL) < 0) {
             LOGES("select failed \n");
-            return -1;
+            break;
+        }
+
+        if (FD_ISSET(context->pipe_fd[0], &read_fs)) {
+            // char buf;
+            // read(context->pipe_fd[0], &buf, sizeof(buf));
+
+            LOGW("pipe break while for accept\n");
+            break;
         }
 
         if (FD_ISSET(socket->fd, &read_fs)) {
@@ -77,13 +86,25 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
         }
     }
 
-    return 0;
+    LOGI("accept stop \n");
+
+    return -1;
 }
 
 void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 {
     LOGT("&context: %p, context: %p \n", context_pp, *context_pp);
     HY_ASSERT_RET(!context_pp || !*context_pp);
+
+    hy_ipc_socket_context_s *context = *context_pp;
+
+    context->exit_flag = 1;
+    write(context->pipe_fd[1], context, sizeof(*context));
+
+    usleep(10 * 1000);
+
+    close(context->pipe_fd[0]);
+    close(context->pipe_fd[1]);
 
     LOGI("ipc socket server destroy \n");
 }
@@ -100,6 +121,11 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
     char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};
 
     do {
+        if (0 != pipe(context->pipe_fd)) {
+            LOGES("pipe failed \n");
+            break;
+        }
+
         HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name);
 
         snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,
