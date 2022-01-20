@@ -55,8 +55,7 @@ typedef enum {
  * @param name 服务器名字
  * @param args 上层传递参数
  */
-typedef void (*HyIpcSocketAcceptCb_t)(hy_s32_t fd,
-        const char *ipc_name, void *args);
+typedef void (*HyIpcSocketAcceptCb_t)(void *handle, void *args);
 
 /**
  * @brief 配置参数

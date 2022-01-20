@@ -36,10 +36,8 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 
     hy_ipc_socket_s *socket = *socket_pp;
 
-    close(socket->fd);
-
-    LOGI("ipc socket scoket destroy, socket: %p, ipc_name: %s, fd: %d, type: %d \n",
-            socket, socket->ipc_name, socket->fd, socket->type);
+    LOGI("ipc socket scoket destroy, socket: %p, ipc_name: %s, type: %d \n",
+            socket, socket->ipc_name, socket->type);
     HY_MEM_FREE_PP(socket_pp);
 }
 
@@ -54,17 +52,11 @@ hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
     do {
         ipc_socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*ipc_socket));
 
-        ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (ipc_socket->fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
-
         ipc_socket->type = type;
         HY_MEMCPY(ipc_socket->ipc_name, ipc_name, HY_STRLEN(ipc_name));
 
-        LOGI("ipc socket socket create, socket: %p, ipc_name: %s, fd: %d, type: %d \n",
-                ipc_socket, ipc_socket->ipc_name, ipc_socket->fd, ipc_socket->type);
+        LOGI("ipc socket socket create, socket: %p, ipc_name: %s, type: %d \n",
+                ipc_socket, ipc_socket->ipc_name, ipc_socket->type);
         return ipc_socket;
     } while (0);
 

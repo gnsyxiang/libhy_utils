@@ -140,10 +140,9 @@ static _main_context_t *_module_create(void)
     // return -1;
 // }
 
-static void _accept_cb(hy_s32_t fd,
-        const char *ipc_name, void *args)
+static void _accept_cb(void *handle, void *args)
 {
-    LOGD("fd: %d, ipc_name: %s \n", fd, ipc_name);
+    LOGD("handle: %p, \n", handle);
 
     _main_context_t *context = args;
 
@@ -153,7 +152,7 @@ static void _accept_cb(hy_s32_t fd,
     while (!context->exit_flag) {
         HY_MEMSET(buf, sizeof(buf));
 
-        ret = read(fd, buf, sizeof(buf));
+        ret = HyIpcSocketRead(handle, buf, sizeof(buf));
         if (ret < 0) {
             LOGE("HyIpcSocketRead failed \n");
             break;

@@ -36,6 +36,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
 
     hy_s32_t fd;
     fd_set read_fs;
+    hy_ipc_socket_s *new_socket = NULL;
     hy_ipc_socket_s *socket = context->socket;
 
     if (listen(socket->fd, SOMAXCONN) < 0) {
@@ -60,9 +61,18 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
                 return -1;
             }
 
-            LOGI("accept fd: %d \n", fd);
+            new_socket = hy_ipc_socket_socket_create(socket->ipc_name,
+                    HY_IPC_SOCKET_TYPE_CLIENT);
+            if (!new_socket) {
+                LOGE("ipc socket socket create failed \n");
+                break;
+            }
 
-            accept_cb(fd, socket->ipc_name, args);
+            new_socket->fd = fd;
+
+            LOGI("accept new socket, fd: %d \n", new_socket->fd);
+
+            accept_cb(&new_socket, args);
         }
     }
 
@@ -77,12 +87,15 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_context_s *context = *context_pp;
     hy_ipc_socket_s *socket = context->socket;
 
+    LOGI("ipc socket server destroy, fd: %d \n", socket->fd);
+
+    close(socket->fd);
+
     char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};
     snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,
             "%s/%s", HY_IPC_SOCKET_PATH_, socket->ipc_name);
     unlink(ipc_path);
 
-    LOGI("ipc socket server destroy \n");
     hy_ipc_socket_socket_destroy(&socket);
 }
 
@@ -102,6 +115,12 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
             break;
         }
 
+        context->socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (context->socket->fd < 0) {
+            LOGES("socket failed \n");
+            break;
+        }
+
         HY_IPC_SOCKADDR_UN_INIT_(HY_IPC_SOCKET_TYPE_SERVER,
                 addr, addr_len, ipc_name);
 
@@ -111,7 +130,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
             break;
         }
 
-        LOGI("ipc socket server create \n");
+        LOGI("ipc socket server create, fd: %d \n", context->socket->fd);
         return 0;
     } while (0);
 

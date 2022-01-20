@@ -69,7 +69,10 @@ void hy_ipc_client_destroy(hy_ipc_socket_context_s **context_pp)
     hy_ipc_socket_context_s *context = *context_pp;
     hy_ipc_socket_s *socket = context->socket;
 
-    LOGI("ipc socket client destroy \n");
+    LOGI("ipc socket client destroy, fd: %d \n", socket->fd);
+
+    close(socket->fd);
+
     hy_ipc_socket_socket_destroy(&socket);
 }
 
@@ -86,7 +89,13 @@ hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context,
             break;
         }
 
-        LOGI("ipc socket client create \n");
+        context->socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (context->socket->fd < 0) {
+            LOGES("socket failed \n");
+            break;
+        }
+
+        LOGI("ipc socket client create, fd: %d \n", context->socket->fd);
         return 0;
     } while (0);
 
