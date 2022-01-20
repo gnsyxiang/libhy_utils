@@ -91,5 +91,6 @@ hy_s32_t hy_ipc_client_create(hy_ipc_socket_context_s *context)
         return 0;
     } while (0);
 
+    hy_ipc_client_destroy(&context);
     return -1;
 }
