@@ -59,9 +59,9 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
     HY_ASSERT_RET_VAL(!handle || !buf, -1);
 
-    hy_ipc_socket_s *socket = handle;
+    hy_ipc_socket_s **socket = handle;
 
-    return HyFileRead(socket->fd, buf, len);
+    return HyFileRead((*socket)->fd, buf, len);
 }
 
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
@@ -69,9 +69,9 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
     LOGT("handle: %p, buf: %p, len: %d \n", handle, buf, len);
     HY_ASSERT_RET_VAL(!handle || !buf, -1);
 
-    hy_ipc_socket_s *socket = handle;
+    hy_ipc_socket_s **socket = handle;
 
-    return HyFileWriteN(socket->fd, buf, len);
+    return HyFileWriteN((*socket)->fd, buf, len);
 }
 
 static hy_s32_t _exec_ipc_socket_func(hy_ipc_socket_context_s *context,
