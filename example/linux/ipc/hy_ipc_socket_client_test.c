@@ -130,7 +130,10 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HyIpcSocketConnect(context->ipc_socket_handle, 10);
+    if (0 != HyIpcSocketConnect(context->ipc_socket_handle, 10)) {
+        LOGE("connect server failed \n");
+        context->exit_flag = 1;
+    }
 
     const char *buf = "haha";
     hy_s32_t ret = 0;
