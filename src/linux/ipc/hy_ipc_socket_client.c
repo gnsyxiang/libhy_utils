@@ -54,7 +54,7 @@ hy_s32_t hy_ipc_client_connect(hy_ipc_socket_context_s *context,
     } while ((ret < 0) && (++time_cnt < timeout_s));
 
     if (time_cnt < timeout_s) {
-        LOGI("connect server, fd: %d \n", socket->fd);
+        LOGI("connect ipc server, fd: %d \n", socket->fd);
         return 0;
     } else {
         return -1;

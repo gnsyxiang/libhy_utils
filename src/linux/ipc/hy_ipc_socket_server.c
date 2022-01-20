@@ -39,7 +39,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
     hy_ipc_socket_s *socket = context->socket;
 
     if (listen(socket->fd, SOMAXCONN) < 0) {
-        LOGES("listen failed, fd: %d, name: %s \n",
+        LOGES("listen failed, fd: %d, ipc_name: %s \n",
                 socket->fd, socket->ipc_name);
         return -1;
     }
@@ -59,6 +59,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
                 LOGES("accept failed \n");
                 return -1;
             }
+
             LOGI("accept fd: %d \n", fd);
 
             accept_cb(fd, socket->ipc_name, args);

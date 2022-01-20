@@ -143,7 +143,8 @@ static _main_context_t *_module_create(void)
 static void _accept_cb(hy_s32_t fd,
         const char *ipc_name, void *args)
 {
-    LOGD("fd: %d, ipc_name: %s, \n", fd, ipc_name);
+    LOGD("fd: %d, ipc_name: %s \n", fd, ipc_name);
+
     _main_context_t *context = args;
 
     char buf[8] = {0};

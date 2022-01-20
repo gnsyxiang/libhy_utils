@@ -45,9 +45,6 @@ typedef struct {
     hy_s32_t                    reserved;
 } hy_ipc_socket_context_s;
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name);
-void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
-
 #define HY_IPC_SOCKADDR_UN_INIT_(type, addr, addr_len, ipc_name)                \
     do {                                                                        \
         char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};                       \
@@ -62,6 +59,9 @@ void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
             unlink(ipc_path);                                                   \
         }                                                                       \
     } while (0)
+
+hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name);
+void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
 
 #ifdef __cplusplus
 }

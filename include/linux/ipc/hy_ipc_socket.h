@@ -136,7 +136,6 @@ hy_s32_t HyIpcSocketAccept(void *handle,
  */
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
 
-
 #ifdef __cplusplus
 }
 #endif
