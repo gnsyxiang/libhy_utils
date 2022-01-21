@@ -155,7 +155,7 @@ static void _accept_cb(void *handle, void *args)
     accept->args = args;
     accept->ipc_socket_handle = handle;
 
-    HyThreadConfig_t thread_config;
+    HyThreadConfig_s thread_config;
     HY_MEMSET(&thread_config, sizeof(thread_config));
     thread_config.save_config.thread_loop_cb    = _socket_communication;
     thread_config.save_config.args              = accept;

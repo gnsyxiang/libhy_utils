@@ -33,12 +33,12 @@
 #include "hy_thread_pool.h"
 
 typedef struct {
-    void *log_handle;
-    void *signal_handle;
+    void        *log_handle;
+    void        *signal_handle;
 
-    void *thread_pool_handle;
+    void        *thread_pool_handle;
 
-    hy_s32_t exit_flag;
+    hy_s32_t    exit_flag;
 } _main_context_t;
 
 static void _signal_error_cb(void *args)
@@ -51,7 +51,7 @@ static void _signal_error_cb(void *args)
 
 static void _signal_user_cb(void *args)
 {
-    LOGI("------user cb\n");
+    LOGW("------user cb\n");
 
     _main_context_t *context = args;
     context->exit_flag = 1;
@@ -80,7 +80,7 @@ static _main_context_t *_module_create(void)
     HyLogConfig_t log_config;
     log_config.save_config.buf_len_min  = 512;
     log_config.save_config.buf_len_max  = 512;
-    log_config.save_config.level        = HY_LOG_LEVEL_TRACE;
+    log_config.save_config.level        = HY_LOG_LEVEL_DEBUG;
     log_config.save_config.color_enable = HY_TYPE_FLAG_ENABLE;
 
     int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
@@ -102,7 +102,7 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    HyThreadPoolConfig_t thread_pool_config;
+    HyThreadPoolConfig_s thread_pool_config;
     thread_pool_config.shutdown_flag    = HY_THREAD_POOL_DESTROY_GRACEFUL;
     thread_pool_config.thread_max_cnt   = 4;
     thread_pool_config.task_max_cnt     = 12;
@@ -121,7 +121,7 @@ static _main_context_t *_module_create(void)
 
 static void _task_cb(void *args)
 {
-    sleep(1);
+    usleep(500 * 1000);
     LOGI("----haha\n");
 }
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
     hy_s32_t ret;
-    for (int i = 0; i < 20; ++i) {
+    for (hy_s32_t i = 0; i < 20; ++i) {
         ret = HyThreadPoolAdd(context->thread_pool_handle, _task_cb, context);
         if (0 != ret) {
             LOGE("thread pool add failed \n");

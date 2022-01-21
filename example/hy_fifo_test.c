@@ -127,7 +127,7 @@ static _main_context_t *_module_create(void)
     fifo_config.save_config.len = 15;
     fifo_config.save_config.mutex_flag = HY_FIFO_MUTEX_LOCK;
 
-    HyThreadConfig_t thread_config;
+    HyThreadConfig_s thread_config;
     thread_config.save_config.thread_loop_cb    = _get_fifo_loop_cb;
     thread_config.save_config.args              = context;
     #define _THREAD_NAME "get_fifo"

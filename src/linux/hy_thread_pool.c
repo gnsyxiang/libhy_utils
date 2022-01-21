@@ -71,7 +71,7 @@ hy_s32_t HyThreadPoolAdd(void *handle, HyThreadPoolTaskCb_t task_cb, void *args)
 
     do {
         if (context->task_pending_cnt == context->task_max_cnt) {
-            LOGE("task full \n");
+            LOGW("task full \n");
             ret = HY_THREAD_POOL_TASK_FULL;
             break;
         }
@@ -107,7 +107,7 @@ static hy_s32_t _thread_pool_loop_cb(void *args)
     _thread_pool_context_t *context = args;
     _task_t task;
     hy_u32_t next;
-    LOGI("thread pool start, handle: %p \n", context);
+    LOGI("thread pool start, context: %p \n", context);
 
     while (1) {
         pthread_mutex_lock(&context->mutex);
@@ -116,14 +116,14 @@ static hy_s32_t _thread_pool_loop_cb(void *args)
 
         while (context->task_pending_cnt == 0
                 && context->shutdown == HY_THREAD_POOL_DESTROY_RUNNING) {
-            LOGD("wait cond \n");
+            LOGI("wait cond \n");
             pthread_cond_wait(&context->cond, &context->mutex);
         }
 
         if (context->shutdown == HY_THREAD_POOL_DESTROY_IMMEDIATE
                 || (context->shutdown == HY_THREAD_POOL_DESTROY_GRACEFUL
                     && context->task_pending_cnt == 0)) {
-            LOGD("thread pool loop break \n");
+            LOGI("thread pool loop break \n");
             break;
         }
 
@@ -146,7 +146,7 @@ static hy_s32_t _thread_pool_loop_cb(void *args)
 
 void HyThreadPoolDestroy(void **handle)
 {
-    LOGT("handle: %p, *handle: %p \n", handle, *handle);
+    LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
     _thread_pool_context_t *context = *handle;
@@ -155,7 +155,7 @@ void HyThreadPoolDestroy(void **handle)
 
     pthread_mutex_lock(&context->mutex);
     if (0 != (pthread_cond_broadcast(&context->cond))) {
-        LOGE("broad cast signal failed \n");
+        LOGES("broad cast signal failed \n");
         pthread_mutex_unlock(&context->mutex);
         return;
     }
@@ -165,19 +165,20 @@ void HyThreadPoolDestroy(void **handle)
         HyThreadDestroy(&context->thread_handle[i]);
     }
 
-    HY_MEM_FREE_PP(&context->thread_handle);
-    HY_MEM_FREE_PP(&context->tasks);
-
     pthread_mutex_destroy(&context->mutex);
     pthread_cond_destroy(&context->cond);
 
-    LOGI("thread pool destroy, handle: %p \n", context);
+    LOGI("thread pool destroy, context: %p, tasks: %p, thread_handle: %p \n",
+            context, context->tasks, context->thread_handle);
+
+    HY_MEM_FREE_PP(&context->thread_handle);
+    HY_MEM_FREE_PP(&context->tasks);
     HY_MEM_FREE_PP(&context);
 }
 
-void *HyThreadPoolCreate(HyThreadPoolConfig_t *config)
+void *HyThreadPoolCreate(HyThreadPoolConfig_s *config)
 {
-    LOGT("config: %p \n", config);
+    LOGT("thread pool config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);
 
     _thread_pool_context_t *context = NULL;
@@ -192,12 +193,12 @@ void *HyThreadPoolCreate(HyThreadPoolConfig_t *config)
         }
 
         if (0 != (pthread_mutex_init(&context->mutex, NULL))) {
-            LOGE("mutex init failed \n");
+            LOGES("mutex init failed \n");
             break;
         }
 
         if (0 != (pthread_cond_init(&context->cond, NULL))) {
-            LOGE("cond init failed \n");
+            LOGES("cond init failed \n");
             break;
         }
 
@@ -228,11 +229,13 @@ void *HyThreadPoolCreate(HyThreadPoolConfig_t *config)
             context->thread_max_cnt++;
         }
 
-        LOGI("thread pool create, handle: %p \n", context);
+        LOGI("thread pool create, context: %p, tasks: %p, thread_handle: %p \n",
+                context, context->tasks, context->thread_handle);
         return context;
     } while (0);
 
 _ERR_THREAD_POOL_CREATE_1:
+    LOGI("thread pool create failed \n");
     HyThreadPoolDestroy((void **)&context);
     return NULL;
 }
