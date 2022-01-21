@@ -98,7 +98,7 @@ static _main_context_t *_module_create(void)
 {
     _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
 
-    HyLogConfig_t log_config;
+    HyLogConfig_s log_config;
     log_config.save_config.buf_len_min  = 512;
     log_config.save_config.buf_len_max  = 512;
     log_config.save_config.level        = HY_LOG_LEVEL_DEBUG;
@@ -123,7 +123,7 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    HyFifoConfig_t fifo_config;
+    HyFifoConfig_s fifo_config;
     fifo_config.save_config.len = 15;
     fifo_config.save_config.mutex_flag = HY_FIFO_MUTEX_LOCK;
 

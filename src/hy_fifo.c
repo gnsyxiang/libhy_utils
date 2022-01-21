@@ -47,7 +47,7 @@
 #define _FIFO_IS_EMPTY(context)     (context->read_pos == context->write_pos)
 
 typedef struct {
-    HyFifoSaveConfig_t  save_config;
+    HyFifoSaveConfig_s  save_config;
     char                *buf;
 
     hy_u32_t            read_pos;
@@ -245,7 +245,7 @@ static void _dump_content(_fifo_context_t *context)
     printf("\n");
 }
 
-void HyFifoDump(void *handle, HyFifoDumpType_t type)
+void HyFifoDump(void *handle, HyFifoDump_e type)
 {
     LOGT("handle: %p, type: %s \n", handle, _dump_type[type]);
     HY_ASSERT_RET(!handle);
@@ -263,7 +263,7 @@ void HyFifoDump(void *handle, HyFifoDumpType_t type)
     }
 }
 
-hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type)
+hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfo_e type)
 {
     LOGT("handle: %p, type: %s \n", handle, _info_type[type]);
     HY_ASSERT_RET_VAL(!handle, 0);
@@ -322,7 +322,7 @@ void HyFifoDestroy(void **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *HyFifoCreate(HyFifoConfig_t *config)
+void *HyFifoCreate(HyFifoConfig_s *config)
 {
     LOGT("config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);

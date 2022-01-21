@@ -93,6 +93,24 @@ void HyThreadPoolDestroy(void **handle);
 hy_s32_t HyThreadPoolAdd(void *handle,
         HyThreadPoolTaskCb_t task_cb, void *args);
 
+/**
+ * @brief 创建线程池
+ *
+ * @param _shutdown_flag 线程池退出方式
+ * @param _thread_max_cnt 同时运行的最大线程数
+ * @param _task_max_cnt 保存的最大任务数
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
+#define HyThreadPoolCreate_m(_shutdown_flag, _thread_max_cnt, _task_max_cnt)    \
+    ({                                                                          \
+        HyThreadPoolConfig_s __config;                                          \
+        __config.shutdown_flag      = _shutdown_flag;                           \
+        __config.thread_max_cnt     = _thread_max_cnt;                          \
+        __config.task_max_cnt       = _task_max_cnt;                            \
+        HyThreadPoolCreate(&__config);                                          \
+     })
+
 #ifdef __cplusplus
 }
 #endif

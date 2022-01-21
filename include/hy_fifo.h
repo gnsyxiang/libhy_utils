@@ -36,7 +36,7 @@ typedef enum {
     HY_FIFO_INFO_FREE_LEN,              ///< 获取FIFO空闲长度
 
     HY_FIFO_INFO_MAX,
-} HyFifoInfoType_t;
+} HyFifoInfo_e;
 
 /**
  * @brief 打印fifo相关信息
@@ -46,7 +46,7 @@ typedef enum {
     HY_FIFO_DUMP_CONTENT,               ///< 打印fifo里面的内容
 
     HY_FIFO_DUMP_MAX,
-} HyFifoDumpType_t;
+} HyFifoDump_e;
 
 /**
  * @brief 锁状态
@@ -54,27 +54,28 @@ typedef enum {
 typedef enum {
     HY_FIFO_MUTEX_UNLOCK,               ///< 不加锁
     HY_FIFO_MUTEX_LOCK,                 ///< 加锁
-} HyFifoMutexFlag_t;
+} HyFifoMutex_e;
 
 /**
- * @brief 模块配置参数
+ * @brief 配置参数
  */
 typedef struct {
-    hy_u32_t len;                       ///< fifo数据空间长度
-    hy_s32_t mutex_flag;                ///< 是否加锁，详见HyFifoMutexFlag_t
-} HyFifoSaveConfig_t;
+    hy_u32_t        len;                ///< fifo数据空间长度
+    HyFifoMutex_e   mutex_flag:2;       ///< 是否加锁
+    hy_s32_t        reserved;           ///< 预留
+} HyFifoSaveConfig_s;
 
 /**
- * @brief 模块配置参数
+ * @brief 配置参数
  */
 typedef struct {
-    HyFifoSaveConfig_t save_config;     ///< 参数，详见HyFifoSaveConfig_t
-} HyFifoConfig_t;
+    HyFifoSaveConfig_s save_config;     ///< 配置参数
+} HyFifoConfig_s;
 
 /**
  * @brief 创建fifo模块
  *
- * @param config 配置参数，详见HyFifoConfig_t
+ * @param config 配置参数
  *
  * @return 成功返回fifo句柄，失败返回NULL
  *
@@ -82,7 +83,7 @@ typedef struct {
  * 1, 该fifo里面没有使用锁，只能使用在一读和一写线程当中，多线程需要外部加锁
  * 2, 如果读取速度很慢且空间开辟的很小，则会丢弃数据
  */
-void *HyFifoCreate(HyFifoConfig_t *config);
+void *HyFifoCreate(HyFifoConfig_s *config);
 
 /**
  * @brief 销毁fifo模块
@@ -148,17 +149,17 @@ hy_u32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len);
  *
  * @param handle 操作fifo句柄
  */
-void HyFifoDump(void *handle, HyFifoDumpType_t type);
+void HyFifoDump(void *handle, HyFifoDump_e type);
 
 /**
  * @brief 获取FIFO相关信息
  *
  * @param handle 操作fifo句柄
- * @param type 操作类型，详见HyFifoInfoType_t
+ * @param type 操作类型
  *
  * @return 成功返回对应的值，失败有失败打印，且值为0
  */
-hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfoType_t type);
+hy_u32_t HyFifoGetInfo(void *handle, HyFifoInfo_e type);
 
 /**
  * @brief fifo是否满
@@ -186,13 +187,13 @@ hy_s32_t HyFifoIsEmpty(void *handle);
  *
  * @return 成功返回句柄，失败返回NULL
  */
-#define HyFifoCreate_m(_len, _mutex)                \
-    ({                                              \
-        HyFifoConfig_t config;                      \
-        HY_MEMSET(&config, sizeof(config));         \
-        config.save_config.len          = _len;     \
-        config.save_config.mutex_flag   = _mutex;   \
-        HyFifoCreate(&config);                      \
+#define HyFifoCreate_m(_len, _mutex)                        \
+    ({                                                      \
+        HyFifoConfig_s __config;                            \
+        HY_MEMSET(&__config, sizeof(__config));             \
+        __config.save_config.len            = _len;         \
+        __config.save_config.mutex_flag     = _mutex;       \
+        HyFifoCreate(&__config);                            \
      })
 
 #ifdef __cplusplus

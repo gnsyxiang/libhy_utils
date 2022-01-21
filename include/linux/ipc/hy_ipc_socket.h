@@ -54,6 +54,8 @@ typedef enum {
  *
  * @param handle 句柄
  * @param args 上层传递参数
+ *
+ * @note handle是内部申请的空间，需要上层释放
  */
 typedef void (*HyIpcSocketAcceptCb_t)(void *handle, void *args);
 
@@ -131,6 +133,8 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data);
  * @param args 上层传递的参数
  *
  * @return 错误返回-1，退出返回0
+ *
+ * @note accept_cb中的handle是内部申请的空间，需要上层释放
  */
 hy_s32_t HyIpcSocketAccept(void *handle,
         HyIpcSocketAcceptCb_t accept_cb, void *args);
@@ -155,11 +159,11 @@ hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
  */
 #define HyIpcSocketCreate_m(_ipc_name, _type)                   \
     ({                                                          \
-        HyIpcSocketConfig_s config;                             \
-        HY_MEMSET(&config, sizeof(config));                     \
-        config.type      = _type;                               \
-        config.ipc_name  = _ipc_name;                           \
-        HyIpcSocketCreate(&config);                             \
+        HyIpcSocketConfig_s __config;                           \
+        HY_MEMSET(&__config, sizeof(__config));                 \
+        __config.type       = _type;                            \
+        __config.ipc_name   = _ipc_name;                        \
+        HyIpcSocketCreate(&__config);                           \
      })
 
 #ifdef __cplusplus

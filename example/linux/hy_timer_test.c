@@ -89,7 +89,7 @@ static _main_context_t *_module_create(void)
 {
     _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
 
-    HyLogConfig_t log_config;
+    HyLogConfig_s log_config;
     log_config.save_config.buf_len_min  = 512;
     log_config.save_config.buf_len_max  = 512;
     log_config.save_config.level        = HY_LOG_LEVEL_TRACE;
@@ -114,7 +114,7 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    HyTimerServiceConfig_t timer_service_config;
+    HyTimerServiceConfig_s timer_service_config;
     timer_service_config.save_config.slot_interval_ms   = 1;
     timer_service_config.save_config.slot_num           = 1000;
 

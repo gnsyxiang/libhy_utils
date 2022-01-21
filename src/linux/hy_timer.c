@@ -38,7 +38,7 @@
  */
 
 typedef struct {
-    HyTimerConfig_t     timer_config;
+    HyTimerConfig_s     timer_config;
 
     hy_u32_t            rotation;           ///< 旋转的圈数，类比分针走一圈
 
@@ -46,7 +46,7 @@ typedef struct {
 } _timer_t;
 
 typedef struct {
-    HyTimerServiceSaveConfig_t  save_config;
+    HyTimerServiceSaveConfig_s  save_config;
 
     hy_u32_t                    cur_slot;
     pthread_mutex_t             mutex;
@@ -60,7 +60,7 @@ typedef struct {
 
 static _timer_context_t *context = NULL;
 
-void *HyTimerAdd(HyTimerConfig_t *timer_config)
+void *HyTimerAdd(HyTimerConfig_s *timer_config)
 {
     LOGT("\n");
     HY_ASSERT_RET_VAL(!timer_config, NULL);
@@ -117,7 +117,7 @@ static hy_s32_t _timer_loop_cb(void *args)
     int err;
     _timer_t *pos, *n;
     time_t sec, usec;
-    HyTimerConfig_t *timer_config = NULL;
+    HyTimerConfig_s *timer_config = NULL;
     hy_u32_t slot_num = context->save_config.slot_num;
 
     sec = context->save_config.slot_interval_ms / 1000;
@@ -193,7 +193,7 @@ void HyTimerDestroy(void **handle)
     HY_MEM_FREE_PP(&context);
 }
 
-void *HyTimerCreate(HyTimerServiceConfig_t *config)
+void *HyTimerCreate(HyTimerServiceConfig_s *config)
 {
     HY_ASSERT_RET_VAL(!config, NULL);
 
