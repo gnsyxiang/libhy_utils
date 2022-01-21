@@ -32,6 +32,7 @@ typedef void (*ipc_process_link_manager_accept_cb_t)(void);
 typedef struct {
     struct hy_list_head                     list;
 
+    void                                    *ipc_socket_handle;
     void                                    *accept_thread_handle;
     ipc_process_link_manager_accept_cb_t    accept_cb;
 
@@ -39,8 +40,8 @@ typedef struct {
     hy_s32_t                                reserved;
 } ipc_process_link_manager_s;
 
-void *ipc_process_link_manager_create(void);
-void ipc_process_link_manager_destroy(void);
+void *ipc_process_link_manager_create(const char *ipc_name);
+void ipc_process_link_manager_destroy(ipc_process_link_manager_s **link_manager);
 
 #ifdef __cplusplus
 }

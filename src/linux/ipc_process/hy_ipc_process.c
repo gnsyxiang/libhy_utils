@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_process.c
+ * @file    hy_ipc_process_server.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    21/01 2022 11:12
@@ -19,43 +19,29 @@
  */
 #include <stdio.h>
 
-#include "hy_hal/hy_log.h"
 #include "hy_hal/hy_assert.h"
+#include "hy_hal/hy_log.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_thread.h"
-
-#include "hy_ipc_socket.h"
 
 #include "hy_ipc_process.h"
 #include "ipc_process_inside.h"
-
-static void _accept_cb(void *handle, void *args)
-{
-    LOGD("handle: %p, args: %p \n", handle, args);
-}
-
-static hy_s32_t _accept_loop_cb(void *args)
-{
-    LOGT("args: %p \n", args);
-    HY_ASSERT_RET_VAL(!args, -1);
-
-    hy_ipc_process_context_s *context = args;
-
-    return HyIpcSocketAccept(context->ipc_socket_handle, _accept_cb, args);
-}
+#include "ipc_process_server.h"
 
 void HyIpcProcessDestroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    hy_ipc_process_context_s *context = *handle;
+    ipc_process_context_s *context = *handle;
+    HyIpcProcessSaveConfig_s *save_config = &context->save_config;
 
-    HyIpcSocketDestroy(&context->ipc_socket_handle);
+    if (HY_IPC_PROCESS_TYPE_SERVER == save_config->type) {
+        ipc_process_server_destroy((ipc_process_context_s **)handle);
+    } else {
+    }
 
-    HyThreadDestroy(&context->accept_thread_handle);
-
+    LOGI("ipc process destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
 }
 
@@ -64,30 +50,20 @@ void *HyIpcProcessCreate(HyIpcProcessConfig_s *config)
     LOGT("ipc process config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);
 
-    hy_ipc_process_context_s *context = NULL;
+    ipc_process_context_s *context = NULL;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(hy_ipc_process_context_s *,
-                sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(ipc_process_context_s *, sizeof(*context));
 
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        context->ipc_socket_handle = HyIpcSocketCreate_m(config->ipc_name,
-                HY_IPC_SOCKET_TYPE_SERVER);
-        if (!context->ipc_socket_handle) {
-            LOGE("HyIpcSocketCreate_m failed \n");
-            break;
+        if (HY_IPC_PROCESS_TYPE_SERVER == config->save_config.type) {
+            ipc_process_server_create(context, config->ipc_name);
+        } else {
         }
 
-        context->accept_thread_handle = HyThreadCreate_m("hy_accept",
-                _accept_loop_cb, context);
-        if (!context->accept_thread_handle) {
-            LOGE("HyThreadCreate_m failed \n");
-            break;
-        }
-
-        LOGI("ipc process create \n");
+        LOGI("ipc process create, context: %p \n", context);
         return context;
     } while (0);
 

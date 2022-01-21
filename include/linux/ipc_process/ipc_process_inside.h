@@ -29,12 +29,18 @@ extern "C" {
 typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
-    void                        *ipc_socket_handle;
-    void                        *accept_thread_handle;
-
     hy_s32_t                    eixt_flag:1;
     hy_s32_t                    reserved;
-} hy_ipc_process_context_s;
+
+    union {
+        struct {
+            void                *link_manager;
+        };
+        struct {
+            void                *link;
+        };
+    };
+} ipc_process_context_s;
 
 #ifdef __cplusplus
 }
