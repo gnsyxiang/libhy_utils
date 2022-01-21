@@ -29,6 +29,33 @@
 
 #include "hy_ipc_socket_inside.h"
 
+void hy_ipc_socket_socket_get_info(hy_ipc_socket_s *socket,
+        HyIpcSocketInfo_e info, void *data)
+{
+    LOGT("socket: %p, info: %d, data: %p \n", socket, info, data);
+    HY_ASSERT_RET(!socket || !data);
+
+    switch (info) {
+        case HY_IPC_SOCKET_INFO_FD:
+            *(hy_s32_t *) data = socket->fd;
+            break;
+        case HY_IPC_SOCKET_INFO_IPC_NAME:
+            if (HY_STRLEN(socket->ipc_name) < HY_IPC_SOCKET_NAME_LEN_MAX) {
+                HY_MEMCPY(data, socket->ipc_name, HY_STRLEN(socket->ipc_name) + 1);
+            } else {
+                LOGW("the ipc name is too long \n");
+
+                HY_MEMCPY(data, socket->ipc_name, HY_IPC_SOCKET_NAME_LEN_MAX);
+            }
+            break;
+        case HY_IPC_SOCKET_INFO_TYPE:
+            *(HyIpcSocketType_e *)data = socket->type;
+            break;
+        default:
+            break;
+    }
+}
+
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket_pp)
 {
     LOGT("&socket: %p, socket: %p, \n", socket_pp, *socket_pp);

@@ -28,11 +28,10 @@ extern "C" {
 
 #include "hy_ipc_socket.h"
 
-#define HY_IPC_SOCKET_PATH_LEN_MAX_     (64)
-#define HY_IPC_SOCKET_PATH_             "/tmp"
+#define HY_IPC_SOCKET_PATH_     "/tmp"
 
 typedef struct {
-    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX];
+    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
     hy_s32_t                    fd;
     HyIpcSocketType_e           type:2;
     hy_s32_t                    reserved;
@@ -48,9 +47,9 @@ typedef struct {
 
 #define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                      \
     do {                                                                        \
-        char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};                       \
+        char ipc_path[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};                        \
         addr.sun_family = AF_UNIX;                                              \
-        snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,                         \
+        snprintf(ipc_path, HY_IPC_SOCKET_NAME_LEN_MAX,                          \
                 "%s/%s", HY_IPC_SOCKET_PATH_, ipc_name);                        \
         strcpy(addr.sun_path, ipc_path);                                        \
         \
@@ -60,6 +59,9 @@ typedef struct {
 hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
         HyIpcSocketType_e type);
 void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
+
+void hy_ipc_socket_socket_get_info(hy_ipc_socket_s *socket,
+        HyIpcSocketInfo_e info, void *data);
 
 #ifdef __cplusplus
 }

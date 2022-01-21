@@ -50,6 +50,14 @@ hy_s32_t HyIpcSocketAccept(void *handle,
     return hy_ipc_server_accept((hy_ipc_socket_context_s *)handle, accept_cb, args);
 }
 
+void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
+{
+    LOGT("context: %p, info: %d, data: %p \n", handle, info, data);
+    HY_ASSERT_RET(!handle || !data);
+
+    hy_ipc_socket_socket_get_info((hy_ipc_socket_s *)socket, info, data);
+}
+
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
 {
     HY_ASSERT(handle);

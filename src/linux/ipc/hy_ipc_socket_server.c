@@ -118,7 +118,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
     hy_u32_t addr_len;
     struct sockaddr_un addr;
     hy_ipc_socket_s *socket = &context->socket;
-    char ipc_path[HY_IPC_SOCKET_PATH_LEN_MAX_] = {0};
+    char ipc_path[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};
 
     do {
         if (0 != pipe(context->pipe_fd)) {
@@ -128,7 +128,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
 
         HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name);
 
-        snprintf(ipc_path, HY_IPC_SOCKET_PATH_LEN_MAX_,
+        snprintf(ipc_path, HY_IPC_SOCKET_NAME_LEN_MAX,
                 "%s/%s", HY_IPC_SOCKET_PATH_, socket->ipc_name);
         if (0 == access(ipc_path, F_OK)) {
             remove(ipc_path);

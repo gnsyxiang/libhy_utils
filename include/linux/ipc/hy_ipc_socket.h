@@ -26,7 +26,7 @@ extern "C" {
 
 #include "hy_hal/hy_type.h"
 
-#define HY_IPC_SOCKET_NAME_LEN_MAX  (32)
+#define HY_IPC_SOCKET_NAME_LEN_MAX  (64)
 
 /**
  * @brief socket类型
@@ -39,10 +39,12 @@ typedef enum {
 } HyIpcSocketType_e;
 
 /**
- * @brief socket相关信息
+ * @brief ipc socket相关信息
  */
 typedef enum {
-    HY_IPC_SOCKET_INFO_FD,          ///< socket的fd
+    HY_IPC_SOCKET_INFO_FD,          ///< ipc socket的fd
+    HY_IPC_SOCKET_INFO_IPC_NAME,    ///< ipc socket绑定的文件
+    HY_IPC_SOCKET_INFO_TYPE,        ///< ipc socket的类型
 
     HY_IPC_SOCKET_INFO_MAX,
 } HyIpcSocketInfo_e;
@@ -104,7 +106,21 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len);
  */
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len);
 
-void HyIpcSocketGetInfo(void *handle);
+/**
+ * @brief 获取ipc socket相关信息
+ *
+ * @param handle 句柄
+ * @param info socket相关信息
+ * @param data 保存信息的地址
+ *
+ * @note 
+ * 1, data是传出参数，需要上层开辟空间
+ * 2，当info为HY_IPC_SOCKET_INFO_FD，data为hy_s32_t类型
+ * 3, 当info为HY_IPC_SOCKET_INFO_IPC_NAME，data为数组类型，以便保存数据，
+ *    数组长度必须等于或大于HY_IPC_SOCKET_NAME_LEN_MAX
+ * 4，当info为HY_IPC_SOCKET_INFO_TYPE，data为HyIpcSocketType_e类型
+ */
+void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data);
 
 /**
  * @brief 服务端等待客户端连接
