@@ -81,7 +81,7 @@ static _main_context_t *_module_create(void)
     HyLogConfig_t log_config;
     log_config.save_config.buf_len_min  = 512;
     log_config.save_config.buf_len_max  = 512;
-    log_config.save_config.level        = HY_LOG_LEVEL_TRACE;
+    log_config.save_config.level        = HY_LOG_LEVEL_DEBUG;
     log_config.save_config.color_enable = HY_TYPE_FLAG_ENABLE;
 
     int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
             LOGE("HyIpcSocketWrite failed \n");
             break;
         }
-        LOGE("buf: %s \n", buf);
+        LOGI("buf: %s \n", buf);
 
         sleep(1);
     }

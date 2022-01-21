@@ -22,11 +22,10 @@
 #include <sys/socket.h>
 
 #include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_log.h"
 #include "hy_hal/hy_file.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_log.h"
 
 #include "hy_ipc_socket.h"
 #include "hy_ipc_socket_inside.h"

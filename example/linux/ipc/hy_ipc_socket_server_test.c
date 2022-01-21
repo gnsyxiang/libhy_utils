@@ -36,18 +36,18 @@
 #define _IPC_SOCKET_IPC_NAME    "hy_ipc_server"
 
 typedef struct {
-    void *ipc_socket_handle;
-    void *args;
+    void        *ipc_socket_handle;
+    void        *args;
 } _accept_s;
 
 typedef struct {
-    void *log_handle;
-    void *signal_handle;
-    void *thread_handle;
+    void        *log_handle;
+    void        *signal_handle;
+    void        *thread_handle;
 
-    void *ipc_socket_handle;
+    void        *ipc_socket_handle;
 
-    hy_s32_t exit_flag;
+    hy_s32_t    exit_flag;
 } _main_context_t;
 
 static void _signal_error_cb(void *args)
@@ -88,7 +88,7 @@ static _main_context_t *_module_create(void)
     HyLogConfig_t log_config;
     log_config.save_config.buf_len_min  = 512;
     log_config.save_config.buf_len_max  = 512;
-    log_config.save_config.level        = HY_LOG_LEVEL_TRACE;
+    log_config.save_config.level        = HY_LOG_LEVEL_DEBUG;
     log_config.save_config.color_enable = HY_TYPE_FLAG_ENABLE;
 
     int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
@@ -137,7 +137,7 @@ static hy_s32_t _socket_communication(void *args)
             break;
         }
 
-        LOGD("buf: %s \n", buf);
+        LOGI("buf: %s \n", buf);
     }
 
     HyIpcSocketDestroy(&accept->ipc_socket_handle);

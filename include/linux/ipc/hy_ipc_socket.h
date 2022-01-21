@@ -29,11 +29,11 @@ extern "C" {
 #define HY_IPC_SOCKET_NAME_LEN_MAX  (64)
 
 /**
- * @brief socket类型
+ * @brief ipc socket类型
  */
 typedef enum {
-    HY_IPC_SOCKET_TYPE_CLIENT,      ///< 客户端
-    HY_IPC_SOCKET_TYPE_SERVER,      ///< 服务端
+    HY_IPC_SOCKET_TYPE_CLIENT,                  ///< 客户端
+    HY_IPC_SOCKET_TYPE_SERVER,                  ///< 服务端
 
     HY_IPC_SOCKET_TYPE_MAX,
 } HyIpcSocketType_e;
@@ -42,9 +42,9 @@ typedef enum {
  * @brief ipc socket相关信息
  */
 typedef enum {
-    HY_IPC_SOCKET_INFO_FD,          ///< ipc socket的fd
-    HY_IPC_SOCKET_INFO_IPC_NAME,    ///< ipc socket绑定的文件
-    HY_IPC_SOCKET_INFO_TYPE,        ///< ipc socket的类型
+    HY_IPC_SOCKET_INFO_FD,                      ///< ipc socket的fd
+    HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件
+    HY_IPC_SOCKET_INFO_TYPE,                    ///< ipc socket的类型
 
     HY_IPC_SOCKET_INFO_MAX,
 } HyIpcSocketInfo_e;
@@ -52,9 +52,7 @@ typedef enum {
 /**
  * @brief 接收客户端回调
  *
- * @param fd 客户端fd
- * @param ipc_name ipc socket管道
- * @param name 服务器名字
+ * @param handle 句柄
  * @param args 上层传递参数
  */
 typedef void (*HyIpcSocketAcceptCb_t)(void *handle, void *args);
@@ -63,13 +61,13 @@ typedef void (*HyIpcSocketAcceptCb_t)(void *handle, void *args);
  * @brief 配置参数
  */
 typedef struct {
-    const char                  *ipc_name;                                  ///< 服务器名字
-    HyIpcSocketType_e           type:2;                                     ///< socket类型
-    hy_s32_t                    reserved;                                   ///< 预留
+    const char                  *ipc_name;      ///< 服务器名字
+    HyIpcSocketType_e           type:2;         ///< ipc socket类型
+    hy_s32_t                    reserved;       ///< 预留
 } HyIpcSocketConfig_s;
 
 /**
- * @brief 创建socket
+ * @brief 创建ipc socket
  *
  * @param config 配置参数
  *
@@ -78,9 +76,9 @@ typedef struct {
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config);
 
 /**
- * @brief 销毁socket
+ * @brief 销毁ipc socket
  *
- * @param handle 句柄的地址
+ * @param handle 句柄的地址(二级指针)
  */
 void HyIpcSocketDestroy(void **handle);
 
@@ -119,6 +117,9 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len);
  * 3, 当info为HY_IPC_SOCKET_INFO_IPC_NAME，data为数组类型，以便保存数据，
  *    数组长度必须等于或大于HY_IPC_SOCKET_NAME_LEN_MAX
  * 4，当info为HY_IPC_SOCKET_INFO_TYPE，data为HyIpcSocketType_e类型
+ *
+ * 特别注意获取名字时
+ *     数组的长度一定要大于或等于HY_IPC_SOCKET_NAME_LEN_MAX，否则造成内存问题
  */
 void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data);
 
@@ -145,7 +146,7 @@ hy_s32_t HyIpcSocketAccept(void *handle,
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
 
 /**
- * @brief 创建socket
+ * @brief 创建ipc socket
  *
  * @param _ipc_name 服务器名字
  * @param _type socket类型，详见HyIpcSocketType_e
