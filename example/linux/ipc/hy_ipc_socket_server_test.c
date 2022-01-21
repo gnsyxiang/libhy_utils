@@ -205,6 +205,9 @@ int main(int argc, char *argv[])
 
     HyThreadDestroy(&context->thread_handle);
 
+    // mem leak for waitting thread exit
+    sleep(2);
+
     _module_destroy(&context);
 
     return 0;
