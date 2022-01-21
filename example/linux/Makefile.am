@@ -18,7 +18,9 @@
 #     last modified: 30/10 2021 11:35
 # ===============================================================
 
-SUBDIRS = ipc
+SUBDIRS = \
+          ipc           \
+          ipc_process
 
 # ------------------
 # defining variables
