@@ -32,6 +32,7 @@ extern "C" {
  * @brief ipc socket类型
  */
 typedef enum {
+    HY_IPC_SOCKET_TYPE_NO_SOCKET,               ///< 不需要重复创建socket
     HY_IPC_SOCKET_TYPE_CLIENT,                  ///< 客户端
     HY_IPC_SOCKET_TYPE_SERVER,                  ///< 服务端
 

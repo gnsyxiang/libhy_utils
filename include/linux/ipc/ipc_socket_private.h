@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_inside.h
+ * @file    ipc_socket_private.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 09:17
@@ -17,8 +17,8 @@
  * 
  *     last modified: 17/01 2022 09:17
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_INSIDE_H_
-#define __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_INSIDE_H_
+#ifndef __LIBHY_UTILS_INCLUDE_IPC_SOCKET_PRIVATE_H_
+#define __LIBHY_UTILS_INCLUDE_IPC_SOCKET_PRIVATE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,14 +37,6 @@ typedef struct {
     hy_s32_t                    reserved;
 } hy_ipc_socket_s;
 
-typedef struct {
-    hy_ipc_socket_s             socket; //@note: 一定要放在前面，用于指针强制类型转换
-
-    hy_s32_t                    pipe_fd[2];
-    hy_s32_t                    exit_flag:1;
-    hy_s32_t                    reserved;
-} hy_ipc_socket_context_s;
-
 #define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                      \
     do {                                                                        \
         char ipc_path[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};                        \
@@ -56,12 +48,8 @@ typedef struct {
         addr_len = strlen(ipc_path) + offsetof(struct sockaddr_un, sun_path);   \
     } while (0)
 
-hy_ipc_socket_s *hy_ipc_socket_socket_create(const char *ipc_name,
-        HyIpcSocketType_e type);
-void hy_ipc_socket_socket_destroy(hy_ipc_socket_s **socket);
-
-void hy_ipc_socket_socket_get_info(hy_ipc_socket_s *socket,
-        HyIpcSocketInfo_e info, void *data);
+void *ipc_socket_create(const char *ipc_name, HyIpcSocketType_e type);
+void ipc_socket_destroy(void **handle);
 
 #ifdef __cplusplus
 }

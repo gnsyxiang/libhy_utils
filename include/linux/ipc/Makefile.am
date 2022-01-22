@@ -31,8 +31,8 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com += \
                            hy_ipc_socket_client.h   \
-                           hy_ipc_socket_inside.h   \
-                           hy_ipc_socket_server.h
+                           hy_ipc_socket_server.h   \
+                           ipc_socket_private.h
 
 _install_headers_com    += \
                            hy_ipc_socket.h

@@ -48,8 +48,8 @@ _include_com    += \
 _sources_com    += \
                    hy_ipc_socket.c          \
                    hy_ipc_socket_client.c   \
-                   hy_ipc_socket_inside.c   \
-                   hy_ipc_socket_server.c
+                   hy_ipc_socket_server.c   \
+                   ipc_socket_private.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

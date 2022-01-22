@@ -25,18 +25,30 @@
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
+#include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_string.h"
 
+#include "ipc_socket_private.h"
 #include "hy_ipc_socket_server.h"
 
-hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
+typedef struct {
+    hy_ipc_socket_s         socket; //@note: 一定要放在前面，用于指针强制类型转换
+
+    hy_s32_t                pipe_fd[2];
+    hy_s32_t                exit_flag:1;
+    hy_s32_t                reserved;
+} _ipc_socket_server_context_t;
+
+hy_s32_t hy_ipc_server_accept(void *handle,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
-    LOGT("context: %p, accept_cb: %p, args: %p \n", context, accept_cb, args);
-    HY_ASSERT_RET_VAL(!context || !accept_cb, -1);
+    LOGT("handle: %p, accept_cb: %p, args: %p \n", handle, accept_cb, args);
+    HY_ASSERT_RET_VAL(!handle || !accept_cb, -1);
 
     hy_s32_t fd;
     fd_set read_fs;
     hy_ipc_socket_s *new_socket = NULL;
+    _ipc_socket_server_context_t *context = handle;
     hy_ipc_socket_s *socket = &context->socket;
 
     if (listen(socket->fd, SOMAXCONN) < 0) {
@@ -70,10 +82,10 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
                 break;
             }
 
-            new_socket = hy_ipc_socket_socket_create(socket->ipc_name,
+            new_socket = ipc_socket_create(socket->ipc_name,
                     HY_IPC_SOCKET_TYPE_CLIENT);
             if (!new_socket) {
-                LOGE("ipc socket socket create failed \n");
+                LOGE("ipc_socket_create failed \n");
                 break;
             }
 
@@ -91,12 +103,12 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
     return -1;
 }
 
-void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
+void hy_ipc_server_destroy(void **context_pp)
 {
     LOGT("&context: %p, context: %p \n", context_pp, *context_pp);
     HY_ASSERT_RET(!context_pp || !*context_pp);
 
-    hy_ipc_socket_context_s *context = *context_pp;
+    _ipc_socket_server_context_t *context = *context_pp;
     hy_ipc_socket_s *ipc_socket = &context->socket;
 
     context->exit_flag = 1;
@@ -109,26 +121,33 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
 
     close(ipc_socket->fd);
 
-    LOGI("ipc socket server destroy, fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
-            ipc_socket->fd, context->pipe_fd[0], context->pipe_fd[1]);
+    LOGI("ipc socket sserver create, context: %p, fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
+            context, ipc_socket->fd, context->pipe_fd[0], context->pipe_fd[1]);
+    HY_MEM_FREE_PP(context_pp);
 }
 
-hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
-        const char *ipc_name)
+void *hy_ipc_server_create(const char *ipc_name, HyIpcSocketType_e type)
 {
-    LOGT("context: %p, ipc_name: %s \n", context, ipc_name);
-    HY_ASSERT_RET_VAL(!context, -1);
+    LOGT("ipc_name: %s, type: %d \n", ipc_name, type);
+    HY_ASSERT_RET_VAL(!ipc_name, NULL);
 
     hy_u32_t addr_len;
     struct sockaddr_un addr;
-    hy_ipc_socket_s *ipc_socket = &context->socket;
     char ipc_path[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};
+    _ipc_socket_server_context_t *context = NULL;
 
     do {
+        context = HY_MEM_MALLOC_BREAK(_ipc_socket_server_context_t *, sizeof(*context));
+
+        context->socket.type = type;
+        HY_MEMCPY(context->socket.ipc_name, ipc_name, HY_STRLEN(ipc_name));
+
         if (0 != pipe(context->pipe_fd)) {
             LOGES("pipe failed \n");
             break;
         }
+
+        hy_ipc_socket_s *ipc_socket = &context->socket;
 
         ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
         if (ipc_socket->fd < 0) {
@@ -149,12 +168,12 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
             break;
         }
 
-        LOGI("ipc socket server create, fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
-                ipc_socket->fd, context->pipe_fd[0], context->pipe_fd[1]);
-        return 0;
+        LOGI("ipc socket sserver create, context: %p, fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
+                context, ipc_socket->fd, context->pipe_fd[0], context->pipe_fd[1]);
+        return context;
     } while (0);
 
     LOGE("ipc socket server create failed \n");
-    hy_ipc_server_destroy(&context);
-    return -1;
+    hy_ipc_server_destroy((void **)&context);
+    return NULL;
 }
