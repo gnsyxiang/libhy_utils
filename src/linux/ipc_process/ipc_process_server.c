@@ -30,11 +30,23 @@
 #include "ipc_process_link.h"
 #include "ipc_process_server.h"
 
+typedef struct {
+    void                                    *mutex_handle;
+    struct hy_list_head                     list;
+
+    ipc_process_link_s                      *link;
+    void                                    *accept_thread_handle;
+    ipc_process_link_accept_cb_t            accept_cb;
+
+    hy_s32_t                                exit_flag:2;
+    hy_s32_t                                reserved;
+} _ipc_process_server_s;
+
 static void _accept_cb(void *handle, void *args)
 {
     LOGE("handle: %p, args: %p \n", handle, args);
 
-    ipc_process_server_s *server = args;
+    _ipc_process_server_s *server = args;
 
     ipc_process_link_s *link = ipc_process_link_create_2(handle);
     if (!link) {
@@ -52,7 +64,7 @@ static hy_s32_t _accept_loop_cb(void *args)
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
 
-    ipc_process_server_s *server = args;
+    _ipc_process_server_s *server = args;
     hy_s32_t ret = 0;
 
     ret = ipc_process_link_accept(server->link, _accept_cb, server);
@@ -69,7 +81,7 @@ void ipc_process_server_destroy(void **handle)
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    ipc_process_server_s *server = *handle;
+    _ipc_process_server_s *server = *handle;
 
     ipc_process_link_destroy((void **)&server->link);
 
@@ -92,10 +104,13 @@ void ipc_process_server_destroy(void **handle)
 
 void *ipc_process_server_create(const char *ipc_name)
 {
-    ipc_process_server_s *server = NULL;
+    LOGT("ipc process server ipc_name: %s \n", ipc_name);
+    HY_ASSERT_RET_VAL(!ipc_name, NULL);
+
+    _ipc_process_server_s *server = NULL;
 
     do {
-        server = HY_MEM_MALLOC_BREAK(ipc_process_server_s *, sizeof(*server));
+        server = HY_MEM_MALLOC_BREAK(_ipc_process_server_s *, sizeof(*server));
 
         HY_INIT_LIST_HEAD(&server->list);
 
@@ -123,7 +138,7 @@ void *ipc_process_server_create(const char *ipc_name)
         return server;
     } while (0);
 
-    LOGI("ipc process link manager create failed \n");
+    LOGE("ipc process link manager create failed \n");
     ipc_process_server_destroy((void **)&server);
     return NULL;
 }

@@ -31,6 +31,7 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com += \
                            ipc_process_link.h           \
+                           ipc_process_client.h         \
                            ipc_process_private.h        \
                            ipc_process_server.h
 

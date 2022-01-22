@@ -48,6 +48,7 @@ _include_com    += \
 
 _sources_com    += \
                    hy_ipc_process.c             \
+                   ipc_process_client.c         \
                    ipc_process_link.c           \
                    ipc_process_server.c
 

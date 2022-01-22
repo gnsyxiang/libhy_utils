@@ -28,6 +28,16 @@
 
 #include "ipc_process_link.h"
 
+hy_s32_t ipc_process_link_connect(void *handle)
+{
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, -1);
+
+    ipc_process_link_s *link = handle;
+
+    return HyIpcSocketConnect(link->socket, 10);
+}
+
 hy_s32_t ipc_process_link_accept(void *handle,
         ipc_process_link_accept_cb_t accept_cb, void *args)
 {

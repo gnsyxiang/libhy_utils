@@ -27,6 +27,7 @@
 #include "hy_ipc_process.h"
 #include "ipc_process_private.h"
 #include "ipc_process_server.h"
+#include "ipc_process_client.h"
 #include "ipc_process_link.h"
 
 void HyIpcProcessDestroy(void **handle)
@@ -40,7 +41,7 @@ void HyIpcProcessDestroy(void **handle)
     if (HY_IPC_PROCESS_TYPE_SERVER == save_config->type) {
         ipc_process_server_destroy(&context->server_handle);
     } else {
-        ipc_process_link_destroy(&context->client);
+        ipc_process_client_destroy(&context->client);
     }
 
     LOGI("ipc process destroy, context: %p \n", context);
@@ -67,8 +68,7 @@ void *HyIpcProcessCreate(HyIpcProcessConfig_s *config)
                 break;
             }
         } else {
-            context->client = ipc_process_link_create(config->ipc_name,
-                    IPC_PROCESS_LINK_TYPE_CLIENT);
+            context->client = ipc_process_client_create(config->ipc_name);
             if (!context->client) {
                 LOGE("ipc_process_link_create failed \n");
                 break;

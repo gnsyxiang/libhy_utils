@@ -55,6 +55,8 @@ void ipc_process_link_destroy(void **handle);
 hy_s32_t ipc_process_link_accept(void *handle,
         ipc_process_link_accept_cb_t accept_cb, void *args);
 
+hy_s32_t ipc_process_link_connect(void *handle);
+
 #ifdef __cplusplus
 }
 #endif
