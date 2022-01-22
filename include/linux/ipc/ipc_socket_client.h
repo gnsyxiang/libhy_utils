@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_client.h
+ * @file    ipc_socket_client.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 16:37
@@ -17,8 +17,8 @@
  * 
  *     last modified: 17/01 2022 16:37
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_CLIENT_H_
-#define __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_CLIENT_H_
+#ifndef __LIBHY_UTILS_INCLUDE_IPC_SOCKET_CLIENT_H_
+#define __LIBHY_UTILS_INCLUDE_IPC_SOCKET_CLIENT_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,10 +26,10 @@ extern "C" {
 
 #include "ipc_socket_private.h"
 
-void *hy_ipc_client_create(const char *ipc_name, HyIpcSocketType_e type);
-void hy_ipc_client_destroy(void **handle);
+void *ipc_socket_client_create(const char *ipc_name, HyIpcSocketType_e type);
+void ipc_socket_client_destroy(void **handle);
 
-hy_s32_t hy_ipc_client_connect(void *handle, hy_u32_t timeout_s);
+hy_s32_t ipc_socket_client_connect(void *handle, hy_u32_t timeout_s);
 
 #ifdef __cplusplus
 }

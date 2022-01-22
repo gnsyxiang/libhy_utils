@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_server.h
+ * @file    ipc_socket_server.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 09:23
@@ -17,8 +17,8 @@
  * 
  *     last modified: 17/01 2022 09:23
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_SERVER_H_
-#define __LIBHY_UTILS_INCLUDE_HY_IPC_SOCKET_SERVER_H_
+#ifndef __LIBHY_UTILS_INCLUDE_IPC_SOCKET_SERVER_H_
+#define __LIBHY_UTILS_INCLUDE_IPC_SOCKET_SERVER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,10 +26,10 @@ extern "C" {
 
 #include "hy_ipc_socket.h"
 
-void *hy_ipc_server_create(const char *ipc_name, HyIpcSocketType_e type);
-void hy_ipc_server_destroy(void **handle);
+void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type);
+void ipc_socket_server_destroy(void **handle);
 
-hy_s32_t hy_ipc_server_accept(void *handle,
+hy_s32_t ipc_socket_server_accept(void *handle,
         HyIpcSocketAcceptCb_t accept_cb, void *args);
 
 #ifdef __cplusplus

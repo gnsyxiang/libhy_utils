@@ -30,13 +30,6 @@ extern "C" {
 
 #define HY_IPC_SOCKET_PATH_     "/tmp"
 
-typedef struct {
-    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
-    hy_s32_t                    fd;
-    HyIpcSocketType_e           type:2;
-    hy_s32_t                    reserved;
-} hy_ipc_socket_s;
-
 #define HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name)                      \
     do {                                                                        \
         char ipc_path[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};                        \
@@ -47,6 +40,13 @@ typedef struct {
         \
         addr_len = strlen(ipc_path) + offsetof(struct sockaddr_un, sun_path);   \
     } while (0)
+
+typedef struct {
+    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
+    hy_s32_t                    fd;
+    HyIpcSocketType_e           type:2;
+    hy_s32_t                    reserved;
+} hy_ipc_socket_s;
 
 void *ipc_socket_create(const char *ipc_name, HyIpcSocketType_e type);
 void ipc_socket_destroy(void **handle);

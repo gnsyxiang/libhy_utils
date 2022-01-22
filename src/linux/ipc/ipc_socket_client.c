@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_client.c
+ * @file    ipc_socket_client.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 16:38
@@ -29,13 +29,13 @@
 #include "hy_hal/hy_string.h"
 
 #include "ipc_socket_private.h"
-#include "hy_ipc_socket_client.h"
+#include "ipc_socket_client.h"
 
 typedef struct {
     hy_ipc_socket_s socket;
 } _ipc_socket_client_context_t;
 
-hy_s32_t hy_ipc_client_connect(void *handle, hy_u32_t timeout_s)
+hy_s32_t ipc_socket_client_connect(void *handle, hy_u32_t timeout_s)
 {
     LOGT("handle: %p, timeout_s: %d \n", handle, timeout_s);
     HY_ASSERT_RET_VAL(!handle, -1);
@@ -69,7 +69,7 @@ hy_s32_t hy_ipc_client_connect(void *handle, hy_u32_t timeout_s)
     }
 }
 
-void hy_ipc_client_destroy(void **handle)
+void ipc_socket_client_destroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
@@ -84,7 +84,7 @@ void hy_ipc_client_destroy(void **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *hy_ipc_client_create(const char *ipc_name, HyIpcSocketType_e type)
+void *ipc_socket_client_create(const char *ipc_name, HyIpcSocketType_e type)
 {
     LOGT("ipc_name: %s, type: %d \n", ipc_name, type);
     HY_ASSERT_RET_VAL(!ipc_name, NULL);
@@ -111,6 +111,6 @@ void *hy_ipc_client_create(const char *ipc_name, HyIpcSocketType_e type)
     } while (0);
 
     LOGE("ipc socket client create failed \n");
-    hy_ipc_client_destroy((void **)&context);
+    ipc_socket_client_destroy((void **)&context);
     return NULL;
 }

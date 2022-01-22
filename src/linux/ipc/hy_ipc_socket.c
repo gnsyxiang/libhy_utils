@@ -27,15 +27,15 @@
 
 #include "hy_ipc_socket.h"
 #include "ipc_socket_private.h"
-#include "hy_ipc_socket_client.h"
-#include "hy_ipc_socket_server.h"
+#include "ipc_socket_client.h"
+#include "ipc_socket_server.h"
 
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s)
 {
     LOGT("handle: %p, timeout_s: %d \n", handle, timeout_s);
     HY_ASSERT_RET_VAL(!handle, -1);
 
-    return hy_ipc_client_connect(handle, timeout_s);
+    return ipc_socket_client_connect(handle, timeout_s);
 }
 
 hy_s32_t HyIpcSocketAccept(void *handle,
@@ -44,7 +44,7 @@ hy_s32_t HyIpcSocketAccept(void *handle,
     LOGT("handle: %p, accept_cb: %p, args: %p \n", handle, accept_cb, args);
     HY_ASSERT_RET_VAL(!handle || !accept_cb, -1);
 
-    return hy_ipc_server_accept(handle, accept_cb, args);
+    return ipc_socket_server_accept(handle, accept_cb, args);
 }
 
 void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
@@ -59,13 +59,7 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
             *(hy_s32_t *) data = socket->fd;
             break;
         case HY_IPC_SOCKET_INFO_IPC_NAME:
-            if (HY_STRLEN(socket->ipc_name) < HY_IPC_SOCKET_NAME_LEN_MAX) {
-                HY_MEMCPY(data, socket->ipc_name, HY_STRLEN(socket->ipc_name) + 1);
-            } else {
-                LOGW("the ipc name is too long \n");
-
-                HY_MEMCPY(data, socket->ipc_name, HY_IPC_SOCKET_NAME_LEN_MAX);
-            }
+            HY_MEMCPY(data, socket->ipc_name, HY_IPC_SOCKET_NAME_LEN_MAX);
             break;
         case HY_IPC_SOCKET_INFO_TYPE:
             *(HyIpcSocketType_e *)data = socket->type;
@@ -99,9 +93,9 @@ void HyIpcSocketDestroy(void **handle)
     hy_ipc_socket_s *socket = *handle;
 
     if (HY_IPC_SOCKET_TYPE_SERVER == socket->type) {
-        return hy_ipc_server_destroy(handle);
+        return ipc_socket_server_destroy(handle);
     } else {
-        return hy_ipc_client_destroy(handle);
+        return ipc_socket_client_destroy(handle);
     }
 }
 
@@ -111,8 +105,8 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
     HY_ASSERT_RET_VAL(!config, NULL);
 
     if (HY_IPC_SOCKET_TYPE_SERVER == config->type) {
-        return hy_ipc_server_create(config->ipc_name, config->type);
+        return ipc_socket_server_create(config->ipc_name, config->type);
     } else {
-        return hy_ipc_client_create(config->ipc_name, config->type);
+        return ipc_socket_client_create(config->ipc_name, config->type);
     }
 }

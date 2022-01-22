@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_server.c
+ * @file    ipc_socket_server.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 09:34
@@ -29,7 +29,7 @@
 #include "hy_hal/hy_string.h"
 
 #include "ipc_socket_private.h"
-#include "hy_ipc_socket_server.h"
+#include "ipc_socket_server.h"
 
 typedef struct {
     hy_ipc_socket_s         socket; //@note: 一定要放在前面，用于指针强制类型转换
@@ -39,7 +39,7 @@ typedef struct {
     hy_s32_t                reserved;
 } _ipc_socket_server_context_t;
 
-hy_s32_t hy_ipc_server_accept(void *handle,
+hy_s32_t ipc_socket_server_accept(void *handle,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
     LOGT("handle: %p, accept_cb: %p, args: %p \n", handle, accept_cb, args);
@@ -103,7 +103,7 @@ hy_s32_t hy_ipc_server_accept(void *handle,
     return -1;
 }
 
-void hy_ipc_server_destroy(void **context_pp)
+void ipc_socket_server_destroy(void **context_pp)
 {
     LOGT("&context: %p, context: %p \n", context_pp, *context_pp);
     HY_ASSERT_RET(!context_pp || !*context_pp);
@@ -126,7 +126,7 @@ void hy_ipc_server_destroy(void **context_pp)
     HY_MEM_FREE_PP(context_pp);
 }
 
-void *hy_ipc_server_create(const char *ipc_name, HyIpcSocketType_e type)
+void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type)
 {
     LOGT("ipc_name: %s, type: %d \n", ipc_name, type);
     HY_ASSERT_RET_VAL(!ipc_name, NULL);
@@ -174,6 +174,6 @@ void *hy_ipc_server_create(const char *ipc_name, HyIpcSocketType_e type)
     } while (0);
 
     LOGE("ipc socket server create failed \n");
-    hy_ipc_server_destroy((void **)&context);
+    ipc_socket_server_destroy((void **)&context);
     return NULL;
 }
