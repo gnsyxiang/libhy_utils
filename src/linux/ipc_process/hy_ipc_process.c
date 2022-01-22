@@ -79,7 +79,7 @@ void *HyIpcProcessCreate(HyIpcProcessConfig_s *config)
         return context;
     } while (0);
 
-    LOGI("ipc process create failed \n");
+    LOGE("ipc process create failed \n");
     HyIpcProcessDestroy((void **)&context);
     return NULL;
 }

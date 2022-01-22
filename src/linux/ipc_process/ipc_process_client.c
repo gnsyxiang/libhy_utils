@@ -71,5 +71,6 @@ void *ipc_process_client_create(const char *ipc_name)
     } while (0);
 
     LOGE("ipc process client create failed \n");
+    ipc_process_client_destroy((void **)&client);
     return NULL;
 }

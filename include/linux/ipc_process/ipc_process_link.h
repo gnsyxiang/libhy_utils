@@ -44,6 +44,7 @@ typedef struct {
     char                        tag[HY_IPC_PROCESS_IPC_NAME_LEN_MAX / 2];
 
     ipc_process_link_type_e     link_type:2;
+    hy_s32_t                    is_connect:1;
     hy_s32_t                    reserved;
 } ipc_process_link_s;
 
