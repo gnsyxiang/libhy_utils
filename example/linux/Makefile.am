@@ -19,7 +19,8 @@
 # ===============================================================
 
 SUBDIRS = \
-          ipc
+          ipc   \
+          ipc_socket-process
 
 # ------------------
 # defining variables

@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    30/10 2021 11:42
+# @date    22/01 2022 16:49
 # @version v0.0.1
 # 
 # @since    note
@@ -13,12 +13,10 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        30/10 2021      create the file
+#     00      zhenquan.qiu        22/01 2022      create the file
 # 
-#     last modified: 30/10 2021 11:42
+#     last modified: 22/01 2022 16:49
 # ===============================================================
-
-SUBDIRS = ipc_socket-process
 
 # ------------------
 # defining variables
@@ -33,12 +31,7 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    += \
-                           hy_hash.h        \
-                           hy_net.h         \
-                           hy_net_wired.h   \
-                           hy_thread_pool.h \
-                           hy_timer.h
+_install_headers_com    +=
 
 # ------------------
 # make install files
