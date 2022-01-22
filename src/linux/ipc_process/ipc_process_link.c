@@ -28,26 +28,28 @@
 
 #include "ipc_process_link.h"
 
-hy_s32_t ipc_process_link_accept(ipc_process_link_s *link,
+hy_s32_t ipc_process_link_accept(void *handle,
         ipc_process_link_accept_cb_t accept_cb, void *args)
 {
-    LOGT("link: %p, accept_cb: %p \n", link, accept_cb);
-    HY_ASSERT_RET_VAL(!link || !accept_cb, -1);
+    LOGT("handle: %p, accept_cb: %p \n", handle, accept_cb);
+    HY_ASSERT_RET_VAL(!handle || !accept_cb, -1);
+
+    ipc_process_link_s *link = handle;
 
     return HyIpcSocketAccept(link->socket, accept_cb, args);
 }
 
-void ipc_process_link_destroy(ipc_process_link_s **link_pp)
+void ipc_process_link_destroy(void **handle)
 {
-    LOGT("&link: %p, link: %p \n", link_pp, *link_pp);
-    HY_ASSERT_RET(!link_pp || !*link_pp);
+    LOGT("&handle: %p, handle: %p \n", handle, *handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
-    ipc_process_link_s *link = *link_pp;
+    ipc_process_link_s *link = *handle;
 
     HyIpcSocketDestroy(&link->socket);
 
     LOGI("ipc process link destroy, link: %p \n", link);
-    HY_MEM_FREE_PP(link_pp);
+    HY_MEM_FREE_PP(handle);
 }
 
 ipc_process_link_s *ipc_process_link_create(const char *ipc_name,
@@ -79,7 +81,7 @@ ipc_process_link_s *ipc_process_link_create(const char *ipc_name,
     } while (0);
 
     LOGE("ipc process link create failed \n");
-    ipc_process_link_destroy(&link);
+    ipc_process_link_destroy((void **)&link);
     return NULL;
 }
 
@@ -101,6 +103,6 @@ ipc_process_link_s *ipc_process_link_create_2(void *socket)
     } while (0);
 
     LOGE("ipc process link create failed \n");
-    ipc_process_link_destroy(&link);
+    ipc_process_link_destroy((void **)&link);
     return NULL;
 }

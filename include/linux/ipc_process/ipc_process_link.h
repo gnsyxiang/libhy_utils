@@ -50,9 +50,9 @@ typedef struct {
 ipc_process_link_s *ipc_process_link_create(const char *ipc_name,
         ipc_process_link_type_e type);
 ipc_process_link_s *ipc_process_link_create_2(void *link);
-void ipc_process_link_destroy(ipc_process_link_s **link_pp);
+void ipc_process_link_destroy(void **handle);
 
-hy_s32_t ipc_process_link_accept(ipc_process_link_s *link,
+hy_s32_t ipc_process_link_accept(void *handle,
         ipc_process_link_accept_cb_t accept_cb, void *args);
 
 #ifdef __cplusplus

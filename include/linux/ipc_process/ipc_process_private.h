@@ -34,10 +34,10 @@ typedef struct {
 
     union {
         struct {
-            void                *link_manager;
+            void                *server_handle;
         };
         struct {
-            void                *link;
+            void                *client;
         };
     };
 } ipc_process_context_s;
