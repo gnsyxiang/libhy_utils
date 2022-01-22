@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    ipc_process_inside.h
+ * @file    ipc_process_private.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    21/01 2022 11:20
@@ -17,8 +17,8 @@
  * 
  *     last modified: 21/01 2022 11:20
  */
-#ifndef __LIBHY_UTILS_INCLUDE_IPC_PROCESS_INSIDE_H_
-#define __LIBHY_UTILS_INCLUDE_IPC_PROCESS_INSIDE_H_
+#ifndef __LIBHY_UTILS_INCLUDE_IPC_PROCESS_PRIVATE_H_
+#define __LIBHY_UTILS_INCLUDE_IPC_PROCESS_PRIVATE_H_
 
 #ifdef __cplusplus
 extern "C" {

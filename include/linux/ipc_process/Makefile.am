@@ -30,9 +30,9 @@ install_includedir      = $(includedir)/@project_name@
 # add necessary content
 # ---------------------
 _no_install_headers_com += \
-                           ipc_process_inside.h         \
                            ipc_process_link.h           \
                            ipc_process_link_manager.h   \
+                           ipc_process_private.h        \
                            ipc_process_server.h
 
 _install_headers_com    += \

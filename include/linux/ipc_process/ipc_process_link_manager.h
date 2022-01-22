@@ -26,15 +26,15 @@ extern "C" {
 
 #include "hy_ipc_process.h"
 #include "hy_list.h"
-
-typedef void (*ipc_process_link_manager_accept_cb_t)(void);
+#include "ipc_process_link.h"
 
 typedef struct {
+    void                                    *mutex_handle;
     struct hy_list_head                     list;
 
-    void                                    *ipc_socket_handle;
+    ipc_process_link_s                      *link;
     void                                    *accept_thread_handle;
-    ipc_process_link_manager_accept_cb_t    accept_cb;
+    ipc_process_link_accept_cb_t            accept_cb;
 
     hy_s32_t                                exit_flag:2;
     hy_s32_t                                reserved;

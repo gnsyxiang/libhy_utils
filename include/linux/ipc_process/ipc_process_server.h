@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "ipc_process_inside.h"
+#include "ipc_process_private.h"
 
 hy_s32_t ipc_process_server_create(ipc_process_context_s *context,
         const char *ipc_name);

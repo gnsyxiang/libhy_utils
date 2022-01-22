@@ -25,7 +25,7 @@
 #include "hy_hal/hy_string.h"
 
 #include "hy_ipc_process.h"
-#include "ipc_process_inside.h"
+#include "ipc_process_private.h"
 #include "ipc_process_server.h"
 
 void HyIpcProcessDestroy(void **handle)

@@ -28,24 +28,32 @@ extern "C" {
 #include "hy_list.h"
 
 typedef enum {
-    IPC_PROCESS_LINK_TYPE_SERVER,
+    IPC_PROCESS_LINK_TYPE_NO_SOCKET,
     IPC_PROCESS_LINK_TYPE_CLIENT,
+    IPC_PROCESS_LINK_TYPE_SERVER,
 
     IPC_PROCESS_LINK_TYPE_MAX,
 } ipc_process_link_type_e;
 
-typedef struct {
-    struct hy_list_head         entry;
+typedef void (*ipc_process_link_accept_cb_t)(void *handle, void *args);
 
-    void                        *ipc_socket_handle;
+typedef struct {
+    struct hy_list_head         list;
+
+    void                        *socket;
     char                        tag[HY_IPC_PROCESS_IPC_NAME_LEN_MAX / 2];
-    hy_u32_t                    pid;
 
     ipc_process_link_type_e     link_type:2;
     hy_s32_t                    reserved;
 } ipc_process_link_s;
 
-void *ipc_process_link_create();
+ipc_process_link_s *ipc_process_link_create(const char *ipc_name,
+        ipc_process_link_type_e type);
+ipc_process_link_s *ipc_process_link_create_2(void *link);
+void ipc_process_link_destroy(ipc_process_link_s **link_pp);
+
+hy_s32_t ipc_process_link_accept(ipc_process_link_s *link,
+        ipc_process_link_accept_cb_t accept_cb, void *args);
 
 #ifdef __cplusplus
 }
