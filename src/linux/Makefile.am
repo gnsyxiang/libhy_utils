@@ -19,8 +19,7 @@
 # ===============================================================
 
 SUBDIRS = \
-          ipc   \
-          ipc_process
+          ipc
 
 noinst_LTLIBRARIES = libhy_utils_os.la
 
@@ -73,8 +72,7 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += \
-                   $(top_builddir)/src/linux/ipc/libhy_ipc.la                   \
-                   $(top_builddir)/src/linux/ipc_process/libhy_ipc_process.la
+                   $(top_builddir)/src/linux/ipc/libhy_ipc.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
