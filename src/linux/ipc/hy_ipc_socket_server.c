@@ -67,7 +67,7 @@ hy_s32_t hy_ipc_server_accept(hy_ipc_socket_context_s *context,
             fd = accept(socket->fd, NULL, NULL);
             if (fd < 0) {
                 LOGES("accept failed \n");
-                return -1;
+                break;
             }
 
             new_socket = hy_ipc_socket_socket_create(socket->ipc_name,
@@ -97,6 +97,7 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
     HY_ASSERT_RET(!context_pp || !*context_pp);
 
     hy_ipc_socket_context_s *context = *context_pp;
+    hy_ipc_socket_s *ipc_socket = &context->socket;
 
     context->exit_flag = 1;
     write(context->pipe_fd[1], context, sizeof(*context));
@@ -106,7 +107,10 @@ void hy_ipc_server_destroy(hy_ipc_socket_context_s **context_pp)
     close(context->pipe_fd[0]);
     close(context->pipe_fd[1]);
 
-    LOGI("ipc socket server destroy \n");
+    close(ipc_socket->fd);
+
+    LOGI("ipc socket server destroy, fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
+            ipc_socket->fd, context->pipe_fd[0], context->pipe_fd[1]);
 }
 
 hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
@@ -117,7 +121,7 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
 
     hy_u32_t addr_len;
     struct sockaddr_un addr;
-    hy_ipc_socket_s *socket = &context->socket;
+    hy_ipc_socket_s *ipc_socket = &context->socket;
     char ipc_path[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};
 
     do {
@@ -126,20 +130,27 @@ hy_s32_t hy_ipc_server_create(hy_ipc_socket_context_s *context,
             break;
         }
 
+        ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        if (ipc_socket->fd < 0) {
+            LOGES("socket failed \n");
+            break;
+        }
+
         HY_IPC_SOCKADDR_UN_INIT_(addr, addr_len, ipc_name);
 
         snprintf(ipc_path, HY_IPC_SOCKET_NAME_LEN_MAX,
-                "%s/%s", HY_IPC_SOCKET_PATH_, socket->ipc_name);
+                "%s/%s", HY_IPC_SOCKET_PATH_, ipc_socket->ipc_name);
         if (0 == access(ipc_path, F_OK)) {
             remove(ipc_path);
         }
 
-        if (bind(socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
+        if (bind(ipc_socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
             LOGES("bind failed \n");
             break;
         }
 
-        LOGI("ipc socket server create \n");
+        LOGI("ipc socket server create, fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
+                ipc_socket->fd, context->pipe_fd[0], context->pipe_fd[1]);
         return 0;
     } while (0);
 

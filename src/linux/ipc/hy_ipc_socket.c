@@ -18,8 +18,6 @@
  *     last modified: 17/01 2022 15:54
  */
 #include <stdio.h>
-#include <sys/types.h>          /* See NOTES */
-#include <sys/socket.h>
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_file.h"
@@ -54,7 +52,7 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
     LOGT("context: %p, info: %d, data: %p \n", handle, info, data);
     HY_ASSERT_RET(!handle || !data);
 
-    hy_ipc_socket_socket_get_info((hy_ipc_socket_s *)socket, info, data);
+    hy_ipc_socket_socket_get_info((hy_ipc_socket_s *)handle, info, data);
 }
 
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
@@ -99,13 +97,10 @@ void HyIpcSocketDestroy(void **handle)
     HY_ASSERT_RET(!handle || !*handle);
 
     hy_ipc_socket_context_s *context = *handle;
-    hy_ipc_socket_s *socket = &context->socket;
 
-    close(socket->fd);
+    _exec_ipc_socket_func(context, NULL, context->socket.type, 0);
 
-    _exec_ipc_socket_func(context, NULL, socket->type, 0);
-
-    LOGI("ipc socket destroy, context: %p, fd: %d \n", context, socket->fd);
+    LOGI("ipc socket destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
 }
 
@@ -120,16 +115,8 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
         context = HY_MEM_MALLOC_BREAK(hy_ipc_socket_context_s *,
                 sizeof(*context));
 
-        hy_ipc_socket_s *ipc_socket = &context->socket;
-
-        ipc_socket->fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if (ipc_socket->fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
-
-        ipc_socket->type = config->type;
-        HY_MEMCPY(ipc_socket->ipc_name,
+        context->socket.type = config->type;
+        HY_MEMCPY(context->socket.ipc_name,
                 config->ipc_name, HY_STRLEN(config->ipc_name));
 
         if (0 != _exec_ipc_socket_func(context,
@@ -138,8 +125,7 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
             break;
         }
 
-        LOGI("ipc socket create, context: %p, fd: %d \n",
-                context, ipc_socket->fd);
+        LOGI("ipc socket create, context: %p \n", context);
         return context;
     } while (0);
 
