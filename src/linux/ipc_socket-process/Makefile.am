@@ -46,7 +46,8 @@ _include_com    += \
                    -I$(top_srcdir)/include/linux                        \
                    -I$(top_srcdir)/include
 
-_sources_com    +=
+_sources_com    += \
+                   hy_ipc_socket_process.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
