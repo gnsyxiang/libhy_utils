@@ -26,8 +26,12 @@ extern "C" {
 
 #include "ipc_link.h"
 
+typedef struct {
+    ipc_link_s  *link;
+} ipc_link_client_s;
+
 void *ipc_link_client_create(const char *name, const char *tag);
-void ipc_link_client_destroy(ipc_link_s **handle);
+void ipc_link_client_destroy(ipc_link_client_s **handle);
 
 #ifdef __cplusplus
 }

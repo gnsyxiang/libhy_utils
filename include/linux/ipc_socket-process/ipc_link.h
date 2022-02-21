@@ -52,6 +52,9 @@ typedef struct {
     hy_s32_t                reserved;
 } ipc_link_s;
 
+void *ipc_link_create(const char *name, const char *tag, ipc_link_type_e type);
+void ipc_link_destroy(ipc_link_s **handle);
+
 #ifdef __cplusplus
 }
 #endif

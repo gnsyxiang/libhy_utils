@@ -33,7 +33,7 @@ typedef struct {
     union {
         // client
         struct {
-            ipc_link_s              *link_handle;
+            ipc_link_client_s       *link_handle;
         };
 
         // server

@@ -27,7 +27,7 @@ extern "C" {
 #include "ipc_link.h"
 
 typedef struct {
-    ipc_link_s  link;
+    ipc_link_s  *link;
 
     void        *accept_thread_handle;
 } ipc_link_server_s;

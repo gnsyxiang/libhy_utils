@@ -27,15 +27,15 @@
 #include "hy_ipc_socket.h"
 #include "ipc_link_client.h"
 
-void ipc_link_client_destroy(ipc_link_s **handle)
+void ipc_link_client_destroy(ipc_link_client_s **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
-    ipc_link_s *link = *handle;
+    ipc_link_client_s *client_link = *handle;
 
-    HyIpcSocketDestroy(&link->ipc_socket_handle);
+    ipc_link_destroy(&client_link->link);
 
-    LOGI("ipc link client destroy \n");
+    LOGI("ipc link client destroy, client_link: %p \n", client_link);
     HY_MEM_FREE_PP(handle);
 }
 
@@ -44,27 +44,28 @@ void *ipc_link_client_create(const char *name, const char *tag)
     LOGT("name: %s, tag: %s \n", name, tag);
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
 
-    ipc_link_s *link = NULL;
+    ipc_link_client_s *client_link = NULL;
 
     do {
-        link = HY_MEM_MALLOC_BREAK(ipc_link_s *, sizeof(*link));
+        client_link = HY_MEM_MALLOC_BREAK(ipc_link_client_s *,
+                sizeof(*client_link));
 
-        link->ipc_socket_handle = HyIpcSocketCreate_m(name, HY_IPC_SOCKET_TYPE_CLIENT);
-        if (!link->ipc_socket_handle) {
-            LOGE("HyIpcSocketCreate_m failed \n");
+        client_link->link = ipc_link_create(name, tag, IPC_LINK_TYPE_CLIENT);
+        if (!client_link->link) {
+            LOGE("ipc_link_create failed \n");
             break;
         }
 
-        if (0 != HyIpcSocketConnect(link->ipc_socket_handle, -1)) {
+        if (0 != HyIpcSocketConnect(client_link->link->ipc_socket_handle, -1)) {
             LOGE("HyIpcSocketConnect failed \n");
             break;
         }
 
-        LOGI("ipc link client create, link: %p \n", link);
-        return link;
+        LOGI("ipc link client create, link: %p \n", client_link);
+        return client_link;
     } while (0);
 
     LOGE("ipc link client create failed \n");
-    ipc_link_client_destroy(&link);
+    ipc_link_client_destroy(&client_link);
     return NULL;
 }

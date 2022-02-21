@@ -42,7 +42,7 @@ static hy_s32_t _server_link_accept_cb(void *args)
 
     ipc_link_server_s *server_link = args;
 
-    return HyIpcSocketAccept(server_link->link.ipc_socket_handle,
+    return HyIpcSocketAccept(server_link->link->ipc_socket_handle,
             _server_accept_cb, server_link);
 }
 
@@ -54,9 +54,9 @@ void ipc_link_server_destroy(ipc_link_server_s **handle)
 
     HyThreadDestroy(&server_link->accept_thread_handle);
 
-    HyIpcSocketDestroy(&server_link->link.ipc_socket_handle);
+    ipc_link_destroy(&server_link->link);
 
-    LOGI("ipc link server destroy \n");
+    LOGI("ipc link server destroy, server_link: %p \n", server_link);
     HY_MEM_FREE_PP(handle);
 }
 
@@ -68,12 +68,12 @@ void *ipc_link_server_create(const char *name, const char *tag)
     ipc_link_server_s *server_link = NULL;
 
     do {
-        server_link = HY_MEM_MALLOC_BREAK(ipc_link_server_s *, sizeof(*server_link));
+        server_link = HY_MEM_MALLOC_BREAK(ipc_link_server_s *,
+                sizeof(*server_link));
 
-        server_link->link.ipc_socket_handle = HyIpcSocketCreate_m(name,
-                HY_IPC_SOCKET_TYPE_SERVER);
-        if (!server_link->link.ipc_socket_handle) {
-            LOGE("HyIpcSocketCreate_m failed \n");
+        server_link->link = ipc_link_create(name, tag, IPC_LINK_TYPE_SERVER);
+        if (!server_link->link) {
+            LOGE("ipc_link_create failed \n");
             break;
         }
 
@@ -91,7 +91,7 @@ void *ipc_link_server_create(const char *name, const char *tag)
             break;
         }
 
-        LOGI("ipc link server create, link: %p \n", link);
+        LOGI("ipc link server create, link: %p \n", server_link);
         return server_link;
     } while (0);
 
