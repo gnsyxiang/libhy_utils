@@ -47,7 +47,9 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_ipc_socket_process.c
+                   hy_ipc_socket_process.c      \
+                   ipc_link_client.c            \
+                   ipc_link_server.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

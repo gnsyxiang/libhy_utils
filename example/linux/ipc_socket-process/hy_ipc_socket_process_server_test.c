@@ -30,9 +30,11 @@
 #include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_log.h"
 
-#include "hy_utils/hy_utils.h"
+#include "hy_utils.h"
 
 #include "hy_ipc_socket_process.h"
+
+#define IPC_SOCKET_NAME "ipc_socket"
 
 typedef struct {
     void        *log_handle;
@@ -125,12 +127,12 @@ static _main_context_t *_module_create(void)
     HyIpcSocketProcessConfig_s ipc_process_config;
     HY_MEMSET(&ipc_process_config, sizeof(ipc_process_config));
     HY_STRCPY(ipc_process_config.save_config.tag, "server-01");
-    ipc_process_config.save_config.connect_change = _ipc_process_connect_change_cb;
-    ipc_process_config.save_config.args = context;
-    ipc_process_config.save_config.type = HY_IPC_SOCKET_PROCESS_TYPE_SERVER;
-    HY_STRCPY(ipc_process_config.ipc_name, "ipc");
-    ipc_process_config.callback = ipc_process_cb;
-    ipc_process_config.callback_cnt = HY_UTILS_ARRAY_CNT(ipc_process_cb);
+    ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
+    ipc_process_config.save_config.args             = context;
+    ipc_process_config.save_config.type             = HY_IPC_SOCKET_PROCESS_TYPE_SERVER;
+    ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
+    ipc_process_config.callback                     = ipc_process_cb;
+    ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
