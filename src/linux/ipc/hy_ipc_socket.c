@@ -21,12 +21,10 @@
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_file.h"
-#include "hy_hal/hy_string.h"
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
-#include "hy_ipc_socket.h"
-#include "ipc_socket_private.h"
 #include "ipc_socket_client.h"
 #include "ipc_socket_server.h"
 
@@ -59,12 +57,14 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
             *(hy_s32_t *) data = socket->fd;
             break;
         case HY_IPC_SOCKET_INFO_IPC_NAME:
-            HY_MEMCPY(data, socket->ipc_name, HY_IPC_SOCKET_NAME_LEN_MAX);
+            HY_STRNCPY(data, HY_IPC_SOCKET_NAME_LEN_MAX,
+                    socket->ipc_name, HY_STRLEN(socket->ipc_name));
             break;
         case HY_IPC_SOCKET_INFO_TYPE:
             *(HyIpcSocketType_e *)data = socket->type;
             break;
         default:
+            LOGE("error type, info: %d \n", info);
             break;
     }
 }
@@ -92,11 +92,12 @@ void HyIpcSocketDestroy(void **handle)
 
     hy_ipc_socket_s *socket = *handle;
 
-    if (HY_IPC_SOCKET_TYPE_SERVER == socket->type) {
-        return ipc_socket_server_destroy(handle);
-    } else {
-        return ipc_socket_client_destroy(handle);
-    }
+    void (*socket_destroy[HY_IPC_SOCKET_TYPE_MAX])(void **handle) = {
+        ipc_socket_client_destroy,
+        ipc_socket_server_destroy,
+    };
+
+    socket_destroy[socket->type](handle);
 }
 
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
@@ -104,9 +105,11 @@ void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
     LOGT("ipc socket config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);
 
-    if (HY_IPC_SOCKET_TYPE_SERVER == config->type) {
-        return ipc_socket_server_create(config->ipc_name, config->type);
-    } else {
-        return ipc_socket_client_create(config->ipc_name, config->type);
-    }
+    void *(*socket_create[HY_IPC_SOCKET_TYPE_MAX])(const char *ipc_name,
+            HyIpcSocketType_e type) = {
+        ipc_socket_client_create,
+        ipc_socket_server_create,
+    };
+
+    return socket_create[config->type](config->ipc_name, config->type);
 }

@@ -30,8 +30,8 @@ install_includedir      = $(includedir)/@project_name@
 # add necessary content
 # ---------------------
 _no_install_headers_com += \
-                           ipc_socket_client.h   \
-                           ipc_socket_private.h  \
+                           ipc_socket.h         \
+                           ipc_socket_client.h  \
                            ipc_socket_server.h
 
 _install_headers_com    += \

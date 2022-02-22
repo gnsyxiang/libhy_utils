@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_ipc_socket.h"
+#include "ipc_socket.h"
 
 void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type);
 void ipc_socket_server_destroy(void **handle);

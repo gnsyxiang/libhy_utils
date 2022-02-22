@@ -32,7 +32,6 @@ extern "C" {
  * @brief ipc socket类型
  */
 typedef enum {
-    HY_IPC_SOCKET_TYPE_NO_SOCKET,               ///< 不需要重复创建socket
     HY_IPC_SOCKET_TYPE_CLIENT,                  ///< 客户端
     HY_IPC_SOCKET_TYPE_SERVER,                  ///< 服务端
 
@@ -44,19 +43,19 @@ typedef enum {
  */
 typedef enum {
     HY_IPC_SOCKET_INFO_FD,                      ///< ipc socket的fd
-    HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件
+    HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件路径
     HY_IPC_SOCKET_INFO_TYPE,                    ///< ipc socket的类型
 
     HY_IPC_SOCKET_INFO_MAX,
 } HyIpcSocketInfo_e;
 
 /**
- * @brief 接收客户端回调
+ * @brief 接收客户端连接回调
  *
  * @param handle 句柄
  * @param args 上层传递参数
  *
- * @note handle是内部申请的空间，需要上层释放
+ * @note handle是内部申请的空间，需要上层释放，否者造成内存泄露
  */
 typedef void (*HyIpcSocketAcceptCb_t)(void *handle, void *args);
 

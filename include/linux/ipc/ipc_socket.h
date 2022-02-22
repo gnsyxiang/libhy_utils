@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    ipc_socket_private.h
+ * @file    ipc_socket.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/01 2022 09:17
@@ -17,8 +17,8 @@
  * 
  *     last modified: 17/01 2022 09:17
  */
-#ifndef __LIBHY_UTILS_INCLUDE_IPC_SOCKET_PRIVATE_H_
-#define __LIBHY_UTILS_INCLUDE_IPC_SOCKET_PRIVATE_H_
+#ifndef __LIBHY_UTILS_INCLUDE_IPC_SOCKET_H_
+#define __LIBHY_UTILS_INCLUDE_IPC_SOCKET_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,14 +42,20 @@ extern "C" {
     } while (0)
 
 typedef struct {
-    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
     hy_s32_t                    fd;
+
+    char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
     HyIpcSocketType_e           type:2;
     hy_s32_t                    reserved;
 } hy_ipc_socket_s;
 
-void *ipc_socket_create(const char *ipc_name, HyIpcSocketType_e type);
+void *ipc_socket_create(hy_s32_t fd, const char *ipc_name,
+        HyIpcSocketType_e type);
 void ipc_socket_destroy(void **handle);
+
+hy_s32_t ipc_socket_create_2(hy_ipc_socket_s *ipc_socket,
+        const char *ipc_name, HyIpcSocketType_e type);
+void ipc_socket_destroy_2(void *handle);
 
 #ifdef __cplusplus
 }

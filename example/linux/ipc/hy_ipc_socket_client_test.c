@@ -141,7 +141,8 @@ int main(int argc, char *argv[])
     while (!context->exit_flag) {
         ret = HyIpcSocketWrite(context->ipc_socket_handle, buf, HY_STRLEN(buf));
         if (ret < 0) {
-            LOGE("HyIpcSocketWrite failed \n");
+            LOGE("HyIpcSocketWrite failed, ipc_socket_handle: %p \n",
+                    context->ipc_socket_handle);
             break;
         }
         LOGI("buf: %s \n", buf);
