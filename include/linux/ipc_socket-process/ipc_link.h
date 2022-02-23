@@ -43,7 +43,7 @@ typedef struct {
 
     pid_t                   pid;
     char                    tag[HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2];
-    const char              *ipc_name;
+    const char              ipc_name[HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2];
 
     hy_u32_t                use_cnt;
 

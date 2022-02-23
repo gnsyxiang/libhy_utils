@@ -126,11 +126,11 @@ static _main_context_t *_module_create(void)
 
     HyIpcSocketProcessConfig_s ipc_process_config;
     HY_MEMSET(&ipc_process_config, sizeof(ipc_process_config));
-    HY_STRCPY(ipc_process_config.save_config.tag, "server-01");
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
     ipc_process_config.save_config.type             = HY_IPC_SOCKET_PROCESS_TYPE_SERVER;
     ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
+    ipc_process_config.tag                          = "server";
     ipc_process_config.callback                     = ipc_process_cb;
     ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
 

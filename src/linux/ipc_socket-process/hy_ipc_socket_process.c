@@ -76,10 +76,10 @@ void *HyIpcSocketProcessCreate(HyIpcSocketProcessConfig_s *config)
 
         if (save_config->type == HY_IPC_SOCKET_PROCESS_TYPE_SERVER) {
             context->link_handle = ipc_link_server_create(config->ipc_name,
-                    save_config->tag);
+                    config->tag);
         } else {
             context->link_handle = ipc_link_client_create(config->ipc_name,
-                    save_config->tag);
+                    config->tag);
         }
         if (!context->link_handle) {
             LOGE("ipc link create failed \n");

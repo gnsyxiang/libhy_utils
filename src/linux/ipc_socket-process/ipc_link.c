@@ -46,17 +46,15 @@ void *ipc_link_create(const char *name, const char *tag, ipc_link_type_e type)
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
 
     ipc_link_s *link = NULL;
-    HyIpcSocketType_e ipc_socket_type;
+    HyIpcSocketType_e ipc_socket_type[HY_IPC_SOCKET_TYPE_MAX] = {
+        HY_IPC_SOCKET_TYPE_CLIENT, HY_IPC_SOCKET_TYPE_SERVER
+    };
 
     do {
         link = HY_MEM_MALLOC_BREAK(ipc_link_s *, sizeof(*link));
 
-        if (type == IPC_LINK_TYPE_SERVER) {
-            ipc_socket_type = HY_IPC_SOCKET_TYPE_SERVER;
-        } else {
-            ipc_socket_type = HY_IPC_SOCKET_TYPE_CLIENT;
-        }
-        link->ipc_socket_handle = HyIpcSocketCreate_m(name, ipc_socket_type);
+        link->ipc_socket_handle = HyIpcSocketCreate_m(name,
+                ipc_socket_type[type]);
         if (!link->ipc_socket_handle) {
             LOGE("HyIpcSocketCreate_m failed \n");
             break;
