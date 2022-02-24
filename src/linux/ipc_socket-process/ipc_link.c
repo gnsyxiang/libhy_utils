@@ -24,20 +24,24 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 
-#include "hy_ipc_socket.h"
 #include "ipc_link.h"
 
-void ipc_link_destroy(ipc_link_s **handle)
+hy_s32_t ipc_link_wait_accept(ipc_link_s *ipc_link,
+        HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
-    HY_ASSERT_RET(!handle || !*handle);
+    LOGT("ipc_link: %p, args: %p \n", ipc_link, args);
+    HY_ASSERT_RET_VAL(!ipc_link, -1);
 
-    ipc_link_s *link = *handle;
+    void *ipc_socket_handle = ipc_link->ipc_socket_handle;
 
-    HyIpcSocketDestroy(&link->ipc_socket_handle);
+    if (!ipc_socket_handle) {
+        LOGE("ipc_socket_handle is NULL \n");
+        return -1;
+    }
 
-    LOGI("ipc link destroy, link: %p \n", link);
-    HY_MEM_FREE_PP(handle);
+    return HyIpcSocketAccept(ipc_link->ipc_socket_handle, accept_cb, args);
+}
+
 hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s)
 {
     LOGT("ipc_link: %p, timeout_s: %d \n", ipc_link, timeout_s);
@@ -56,6 +60,20 @@ hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s)
     } else {
         return 0;
     }
+}
+
+{
+void ipc_link_destroy(ipc_link_s **ipc_link_pp)
+{
+    LOGT("&ipc_link: %p, ipc_link: %p \n", ipc_link_pp, *ipc_link_pp);
+    HY_ASSERT_RET(!ipc_link_pp || !*ipc_link_pp);
+
+    ipc_link_s *ipc_link = *ipc_link_pp;
+
+    HyIpcSocketDestroy(&ipc_link->ipc_socket_handle);
+
+    LOGI("ipc link destroy, ipc_link: %p \n", ipc_link);
+    HY_MEM_FREE_PP(ipc_link_pp);
 }
 
 ipc_link_s *ipc_link_create(const char *name, const char *tag,

@@ -58,7 +58,7 @@ static hy_s32_t _server_link_accept_cb(void *args)
 
     ipc_link_server_s *server_link = args;
 
-    return HyIpcSocketAccept(server_link->link->ipc_socket_handle,
+    return ipc_link_wait_accept(server_link->link,
             _server_accept_cb, server_link);
 }
 
