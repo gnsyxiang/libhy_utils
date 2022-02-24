@@ -38,6 +38,24 @@ void ipc_link_destroy(ipc_link_s **handle)
 
     LOGI("ipc link destroy, link: %p \n", link);
     HY_MEM_FREE_PP(handle);
+hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s)
+{
+    LOGT("ipc_link: %p, timeout_s: %d \n", ipc_link, timeout_s);
+    HY_ASSERT_RET_VAL(!ipc_link, -1);
+
+    void *ipc_socket_handle = ipc_link->ipc_socket_handle;
+
+    if (!ipc_socket_handle) {
+        LOGE("ipc_socket_handle is NULL \n");
+        return -1;
+    }
+
+    if (0 != HyIpcSocketConnect(ipc_socket_handle, timeout_s)) {
+        LOGE("HyIpcSocketConnect failed \n");
+        return -1;
+    } else {
+        return 0;
+    }
 }
 
 ipc_link_s *ipc_link_create(const char *name, const char *tag,

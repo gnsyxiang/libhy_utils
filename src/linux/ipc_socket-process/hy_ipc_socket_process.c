@@ -80,7 +80,7 @@ void *HyIpcSocketProcessCreate(HyIpcSocketProcessConfig_s *config)
                     config->tag);
         } else {
             context->link_handle = ipc_link_client_create(config->ipc_name,
-                    config->tag);
+                    config->tag, config->timeout_s);
         }
         if (!context->link_handle) {
             LOGE("ipc link create failed \n");

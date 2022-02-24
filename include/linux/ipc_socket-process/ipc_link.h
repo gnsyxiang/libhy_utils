@@ -56,6 +56,7 @@ typedef struct {
 ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_handle);
 void ipc_link_destroy(ipc_link_s **handle);
+hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s);
 
 #ifdef __cplusplus
 }

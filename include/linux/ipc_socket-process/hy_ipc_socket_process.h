@@ -110,6 +110,9 @@ typedef struct {
     const char                              *tag;               ///< ipc-process标记
     HyIpcSocketProcessCallbackCb_s          *callback;          ///< id回调结构体
     hy_u32_t                                callback_cnt;       ///< id回调个数
+
+    // client
+    hy_u32_t                                timeout_s;          ///< 连接超时时间，0为阻塞
 } HyIpcSocketProcessConfig_s;
 
 /**

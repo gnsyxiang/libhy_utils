@@ -39,7 +39,8 @@ void ipc_link_client_destroy(ipc_link_client_s **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *ipc_link_client_create(const char *name, const char *tag)
+void *ipc_link_client_create(const char *name,
+        const char *tag, hy_u32_t timeout_s)
 {
     LOGT("name: %s, tag: %s \n", name, tag);
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
@@ -57,8 +58,8 @@ void *ipc_link_client_create(const char *name, const char *tag)
             break;
         }
 
-        if (0 != HyIpcSocketConnect(client_link->link->ipc_socket_handle, -1)) {
-            LOGE("HyIpcSocketConnect failed \n");
+        if (0 != ipc_link_connect(client_link->link, 0)) {
+            LOGE("ipc_link_connect failed \n");
             break;
         }
 
