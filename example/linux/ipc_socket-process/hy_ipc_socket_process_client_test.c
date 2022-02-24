@@ -133,7 +133,7 @@ static _main_context_t *_module_create(void)
     ipc_process_config.tag                          = "client-01";
     ipc_process_config.callback                     = ipc_process_cb;
     ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
-    ipc_process_config.timeout_s                    = 0;
+    ipc_process_config.timeout_s                    = 10;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {

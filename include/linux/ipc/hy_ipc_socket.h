@@ -167,6 +167,8 @@ hy_s32_t HyIpcSocketAccept(void *handle,
  * @param timeout_s 超时时间，0表示阻塞执行
  *
  * @return 成功返回0，失败返回-1
+ *
+ * @note 如果是阻塞执行，ctrl+c将不能完全释放资源
  */
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s);
 
