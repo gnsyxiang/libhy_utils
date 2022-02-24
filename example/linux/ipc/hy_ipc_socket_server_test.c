@@ -196,13 +196,13 @@ int main(int argc, char *argv[])
     HyIpcSocketGetInfo(context->ipc_socket_handle, HY_IPC_SOCKET_INFO_FD, &fd);
     LOGI("fd: %d \n", fd);
 
-    char ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX] = {0};
-    HyIpcSocketGetInfo(context->ipc_socket_handle, HY_IPC_SOCKET_INFO_IPC_NAME, ipc_name);
-    LOGI("ipc_name: %s \n", ipc_name);
-
     HyIpcSocketType_e type = 0;
     HyIpcSocketGetInfo(context->ipc_socket_handle, HY_IPC_SOCKET_INFO_TYPE, &type);
     LOGI("type: %d \n", type);
+
+    const char *ipc_name;
+    HyIpcSocketGetName(context->ipc_socket_handle, &ipc_name);
+    LOGI("ipc_name: %s \n", ipc_name);
 
     context->thread_handle = HyThreadCreate_m("hy_accept",
             _thread_loop_cb, context);

@@ -43,7 +43,7 @@ typedef enum {
  */
 typedef enum {
     HY_IPC_SOCKET_INFO_FD,                      ///< ipc socket的fd
-    HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件路径
+    // HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件
     HY_IPC_SOCKET_INFO_TYPE,                    ///< ipc socket的类型
 
     HY_IPC_SOCKET_INFO_MAX,
@@ -118,12 +118,21 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len);
  * 2，当info为HY_IPC_SOCKET_INFO_FD，data为hy_s32_t类型
  * 3, 当info为HY_IPC_SOCKET_INFO_IPC_NAME，data为数组类型，以便保存数据，
  *    数组长度必须等于或大于HY_IPC_SOCKET_NAME_LEN_MAX
+ *    （用HyIpcSocketGetName替代）
  * 4，当info为HY_IPC_SOCKET_INFO_TYPE，data为HyIpcSocketType_e类型
  *
  * 特别注意获取名字时
  *     数组的长度一定要大于或等于HY_IPC_SOCKET_NAME_LEN_MAX，否则造成内存问题
  */
 void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data);
+
+/**
+ * @brief 获取ipc socket绑定的文件
+ *
+ * @param handle 句柄
+ * @param ipc_name 存放数据的二级指针
+ */
+void HyIpcSocketGetName(void *handle, const char **ipc_name);
 
 /**
  * @brief 服务端等待客户端连接

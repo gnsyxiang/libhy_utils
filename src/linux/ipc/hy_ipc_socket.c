@@ -56,10 +56,12 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
         case HY_IPC_SOCKET_INFO_FD:
             *(hy_s32_t *) data = socket->fd;
             break;
+#if 0
         case HY_IPC_SOCKET_INFO_IPC_NAME:
             HY_STRNCPY(data, HY_IPC_SOCKET_NAME_LEN_MAX,
                     socket->ipc_name, HY_STRLEN(socket->ipc_name));
             break;
+#endif
         case HY_IPC_SOCKET_INFO_TYPE:
             *(HyIpcSocketType_e *)data = socket->type;
             break;
@@ -67,6 +69,16 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
             LOGE("error type, info: %d \n", info);
             break;
     }
+}
+
+void HyIpcSocketGetName(void *handle, const char **ipc_name)
+{
+    LOGT("handle: %p, data: %p \n", handle, ipc_name);
+    HY_ASSERT_RET(!handle || !ipc_name);
+
+    hy_ipc_socket_s *socket = handle;
+
+    *ipc_name = socket->ipc_name;
 }
 
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
