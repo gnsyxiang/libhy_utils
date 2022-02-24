@@ -50,7 +50,8 @@ void *ipc_link_client_create(const char *name, const char *tag)
         client_link = HY_MEM_MALLOC_BREAK(ipc_link_client_s *,
                 sizeof(*client_link));
 
-        client_link->link = ipc_link_create(name, tag, IPC_LINK_TYPE_CLIENT);
+        client_link->link = ipc_link_create(name, tag,
+                IPC_LINK_TYPE_CLIENT, NULL);
         if (!client_link->link) {
             LOGE("ipc_link_create failed \n");
             break;

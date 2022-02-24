@@ -30,9 +30,23 @@
 
 static void _server_accept_cb(void *handle, void *args)
 {
-    LOGE("------handle: %p \n", handle);
+    LOGT("handle: %p, args: %p \n", handle, args);
+    HY_ASSERT_RET(!handle || !args);
 
-    free(handle);
+    ipc_link_server_s *server_link = args;
+
+    ipc_link_s *link = ipc_link_create(server_link->ipc_name,
+            NULL, IPC_LINK_TYPE_MAX, handle);
+    if (!link) {
+        LOGE("ipc_link_create failed \n");
+        return;
+    }
+
+    LOGI("add new link to list \n");
+
+    pthread_mutex_lock(&server_link->mutex);
+    hy_list_add_tail(&link->list, &server_link->list);
+    pthread_mutex_unlock(&server_link->mutex);
 }
 
 static hy_s32_t _server_link_accept_cb(void *args)
@@ -51,9 +65,21 @@ void ipc_link_server_destroy(ipc_link_server_s **handle)
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
     ipc_link_server_s *server_link = *handle;
+    ipc_link_s *pos, *n;
 
     HyThreadDestroy(&server_link->accept_thread_handle);
 
+    pthread_mutex_lock(&server_link->mutex);
+    hy_list_for_each_entry_safe(pos, n, &server_link->list, list) {
+        hy_list_del(&pos->list);
+
+        // pthread_mutex_unlock(&server_link->mutex);
+        ipc_link_destroy(&pos);
+        // pthread_mutex_lock(&server_link->mutex);
+    }
+    pthread_mutex_unlock(&server_link->mutex);
+
+    pthread_mutex_destroy(&server_link->mutex);
     ipc_link_destroy(&server_link->link);
 
     LOGI("ipc link server destroy, server_link: %p \n", server_link);
@@ -71,7 +97,13 @@ void *ipc_link_server_create(const char *name, const char *tag)
         server_link = HY_MEM_MALLOC_BREAK(ipc_link_server_s *,
                 sizeof(*server_link));
 
-        server_link->link = ipc_link_create(name, tag, IPC_LINK_TYPE_SERVER);
+        HY_INIT_LIST_HEAD(&server_link->list);
+        pthread_mutex_init(&server_link->mutex, NULL);
+
+        server_link->ipc_name = name;
+
+        server_link->link = ipc_link_create(name, tag,
+                IPC_LINK_TYPE_SERVER, NULL);
         if (!server_link->link) {
             LOGE("ipc_link_create failed \n");
             break;
@@ -91,7 +123,7 @@ void *ipc_link_server_create(const char *name, const char *tag)
             break;
         }
 
-        LOGI("ipc link server create, link: %p \n", server_link);
+        LOGI("ipc link server create, server_link: %p \n", server_link);
         return server_link;
     } while (0);
 

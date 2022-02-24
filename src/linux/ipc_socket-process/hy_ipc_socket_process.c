@@ -30,6 +30,7 @@
 
 typedef struct {
     HyIpcSocketProcessSaveConfig_s  save_config;
+
     union {
         // client
         struct {
@@ -75,10 +76,10 @@ void *HyIpcSocketProcessCreate(HyIpcSocketProcessConfig_s *config)
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
         if (save_config->type == HY_IPC_SOCKET_PROCESS_TYPE_SERVER) {
-            context->link_handle = ipc_link_server_create(config->ipc_name,
+            context->link_handle = ipc_link_server_create(context->save_config.ipc_name,
                     config->tag);
         } else {
-            context->link_handle = ipc_link_client_create(config->ipc_name,
+            context->link_handle = ipc_link_client_create(context->save_config.ipc_name,
                     config->tag);
         }
         if (!context->link_handle) {
