@@ -62,7 +62,33 @@ hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s)
     }
 }
 
+hy_s32_t ipc_link_write(ipc_link_s *ipc_link, const void *buf, hy_u32_t len)
 {
+    LOGT("ipc_link: %p, buf: %p, len: %d \n", ipc_link, buf, len);
+    HY_ASSERT(ipc_link);
+    HY_ASSERT(buf);
+
+    HyIpcSocketConnectState_e connect_state;
+    hy_s32_t ret = 0;
+
+    HyIpcSocketGetInfo(ipc_link->ipc_socket_handle,
+            HY_IPC_SOCKET_INFO_CONNECT_STATE, &connect_state);
+
+    if (connect_state == HY_IPC_SOCKET_CONNECT_STATE_CONNECT) {
+        ret = HyIpcSocketWrite(ipc_link->ipc_socket_handle, &len, sizeof(hy_u32_t));
+        if (ret == sizeof(hy_u32_t)) {
+            ret = HyIpcSocketWrite(ipc_link->ipc_socket_handle, buf, len);
+        }
+    }
+
+    if (ret != (hy_s32_t)len) {
+        LOGE("ipc link write failed \n");
+        return -1;
+    } else {
+        return ret;
+    }
+}
+
 void ipc_link_destroy(ipc_link_s **ipc_link_pp)
 {
     LOGT("&ipc_link: %p, ipc_link: %p \n", ipc_link_pp, *ipc_link_pp);
