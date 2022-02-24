@@ -35,7 +35,7 @@ typedef struct {
     pthread_mutex_t         mutex;
 } ipc_link_server_s;
 
-void *ipc_link_server_create(const char *name, const char *tag);
+ipc_link_server_s *ipc_link_server_create(const char *name, const char *tag);
 void ipc_link_server_destroy(ipc_link_server_s **handle);
 
 #ifdef __cplusplus

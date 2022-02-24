@@ -34,7 +34,7 @@ typedef struct {
     union {
         // client
         struct {
-            ipc_link_client_s       *link_handle;
+            ipc_link_client_s       *client_link_handle;
         };
 
         // server
@@ -55,7 +55,7 @@ void HyIpcSocketProcessDestroy(void **handle)
     if (save_config->type == HY_IPC_SOCKET_PROCESS_TYPE_SERVER) {
         ipc_link_server_destroy(&context->server_link_handle);
     } else {
-        ipc_link_client_destroy(&context->link_handle);
+        ipc_link_client_destroy(&context->client_link_handle);
     }
 
     LOGI("ipc socket process destroy \n");
@@ -76,15 +76,19 @@ void *HyIpcSocketProcessCreate(HyIpcSocketProcessConfig_s *config)
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
         if (save_config->type == HY_IPC_SOCKET_PROCESS_TYPE_SERVER) {
-            context->link_handle = ipc_link_server_create(config->ipc_name,
-                    config->tag);
+            context->server_link_handle
+                = ipc_link_server_create(config->ipc_name, config->tag);
+            if (!context->server_link_handle) {
+                LOGE("ipc_link_server_create failed \n");
+                break;
+            }
         } else {
-            context->link_handle = ipc_link_client_create(config->ipc_name,
-                    config->tag, config->timeout_s);
-        }
-        if (!context->link_handle) {
-            LOGE("ipc link create failed \n");
-            break;
+            context->client_link_handle
+                = ipc_link_client_create(config->ipc_name, config->tag, config->timeout_s);
+            if (!context->client_link_handle) {
+                LOGE("ipc_link_client_create failed \n");
+                break;
+            }
         }
 
         LOGI("ipc socket process create, context: %p \n", context);

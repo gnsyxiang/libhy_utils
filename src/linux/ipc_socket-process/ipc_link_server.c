@@ -66,6 +66,7 @@ void ipc_link_server_destroy(ipc_link_server_s **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
+
     ipc_link_server_s *server_link = *handle;
     ipc_link_s *pos, *n;
 
@@ -88,7 +89,7 @@ void ipc_link_server_destroy(ipc_link_server_s **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *ipc_link_server_create(const char *name, const char *tag)
+ipc_link_server_s *ipc_link_server_create(const char *name, const char *tag)
 {
     LOGT("name: %s, tag: %s \n", name, tag);
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
