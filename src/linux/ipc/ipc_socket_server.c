@@ -31,11 +31,11 @@
 #include "ipc_socket_server.h"
 
 typedef struct {
-    hy_ipc_socket_s         socket;         // 放在前面，用于强制类型转换
+    ipc_socket_s    socket;         // 放在前面，用于强制类型转换
 
-    hy_s32_t                pipe_fd[2];
-    hy_s32_t                exit_flag:1;
-    hy_s32_t                reserved;
+    hy_s32_t        pipe_fd[2];
+    hy_s32_t        exit_flag:1;
+    hy_s32_t        reserved;
 } _ipc_socket_server_s;
 
 hy_s32_t ipc_socket_server_accept(void *handle,
@@ -46,9 +46,9 @@ hy_s32_t ipc_socket_server_accept(void *handle,
 
     hy_s32_t fd = -1;
     fd_set read_fs;
-    hy_ipc_socket_s *new_socket = NULL;
+    ipc_socket_s *new_socket = NULL;
     _ipc_socket_server_s *socket_server = handle;
-    hy_ipc_socket_s *socket = &socket_server->socket;
+    ipc_socket_s *socket = &socket_server->socket;
 
     if (listen(socket->fd, SOMAXCONN) < 0) {
         LOGES("listen failed, fd: %d \n", socket->fd);
@@ -144,7 +144,7 @@ void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type)
             break;
         }
 
-        hy_ipc_socket_s *socket = &socket_server->socket;
+        ipc_socket_s *socket = &socket_server->socket;
         if (0 != ipc_socket_create_2(socket, ipc_name, type)) {
             LOGE("ipc_socket_create_2 failed \n");
             break;

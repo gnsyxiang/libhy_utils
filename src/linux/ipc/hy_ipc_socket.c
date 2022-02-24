@@ -50,7 +50,7 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
     LOGT("handle: %p, info: %d, data: %p \n", handle, info, data);
     HY_ASSERT_RET(!handle || !data);
 
-    hy_ipc_socket_s *socket = handle;
+    ipc_socket_s *socket = handle;
 
     switch (info) {
         case HY_IPC_SOCKET_INFO_FD:
@@ -76,7 +76,7 @@ void HyIpcSocketGetName(void *handle, const char **ipc_name)
     LOGT("handle: %p, data: %p \n", handle, ipc_name);
     HY_ASSERT_RET(!handle || !ipc_name);
 
-    hy_ipc_socket_s *socket = handle;
+    ipc_socket_s *socket = handle;
 
     *ipc_name = socket->ipc_name;
 }
@@ -86,7 +86,7 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
     HY_ASSERT(handle);
     HY_ASSERT(buf);
 
-    return HyFileRead(((hy_ipc_socket_s *)handle)->fd, buf, len);
+    return HyFileRead(((ipc_socket_s *)handle)->fd, buf, len);
 }
 
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
@@ -94,7 +94,7 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
     HY_ASSERT(handle);
     HY_ASSERT(buf);
 
-    return HyFileWriteN(((hy_ipc_socket_s *)handle)->fd, buf, len);
+    return HyFileWriteN(((ipc_socket_s *)handle)->fd, buf, len);
 }
 
 void HyIpcSocketDestroy(void **handle)
@@ -102,7 +102,7 @@ void HyIpcSocketDestroy(void **handle)
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    hy_ipc_socket_s *socket = *handle;
+    ipc_socket_s *socket = *handle;
 
     void (*socket_destroy[HY_IPC_SOCKET_TYPE_MAX])(void **handle) = {
         ipc_socket_client_destroy,

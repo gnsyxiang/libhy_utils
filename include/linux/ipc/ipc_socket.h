@@ -47,15 +47,15 @@ typedef struct {
     char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
     HyIpcSocketType_e           type:2;
     hy_s32_t                    reserved;
-} hy_ipc_socket_s;
+} ipc_socket_s;
 
-void *ipc_socket_create(hy_s32_t fd, const char *ipc_name,
-        HyIpcSocketType_e type);
-void ipc_socket_destroy(void **handle);
-
-hy_s32_t ipc_socket_create_2(hy_ipc_socket_s *ipc_socket,
+ipc_socket_s *ipc_socket_create(hy_s32_t fd,
         const char *ipc_name, HyIpcSocketType_e type);
-void ipc_socket_destroy_2(void *handle);
+void ipc_socket_destroy(ipc_socket_s **ipc_socket_pp);
+
+hy_s32_t ipc_socket_create_2(ipc_socket_s *ipc_socket,
+        const char *ipc_name, HyIpcSocketType_e type);
+void ipc_socket_destroy_2(ipc_socket_s *ipc_socket);
 
 #ifdef __cplusplus
 }

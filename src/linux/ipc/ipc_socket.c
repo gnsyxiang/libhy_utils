@@ -28,20 +28,18 @@
 
 #include "ipc_socket.h"
 
-void ipc_socket_destroy_2(void *handle)
+void ipc_socket_destroy_2(ipc_socket_s *ipc_socket)
 {
-    LOGT("handle: %p \n", handle);
-    HY_ASSERT_RET(!handle);
+    LOGT("ipc_socket: %p \n", ipc_socket);
+    HY_ASSERT_RET(!ipc_socket);
 
-    hy_ipc_socket_s *socket = handle;
+    LOGI("ipc socket destroy 2, fd: %d \n", ipc_socket->fd);
 
-    LOGI("ipc socket destroy 2, fd: %d \n", socket->fd);
-
-    close(socket->fd);
-    socket->fd = -1;
+    close(ipc_socket->fd);
+    ipc_socket->fd = -1;
 }
 
-hy_s32_t ipc_socket_create_2(hy_ipc_socket_s *ipc_socket,
+hy_s32_t ipc_socket_create_2(ipc_socket_s *ipc_socket,
         const char *ipc_name, HyIpcSocketType_e type)
 {
     LOGT("ipc_socket: %p, ipc_name: %s, type: %d \n",
@@ -62,31 +60,31 @@ hy_s32_t ipc_socket_create_2(hy_ipc_socket_s *ipc_socket,
     return 0;
 }
 
-void ipc_socket_destroy(void **handle)
+void ipc_socket_destroy(ipc_socket_s **ipc_socket_pp)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
-    HY_ASSERT_RET(!handle || !*handle);
+    LOGT("&ipc_socket: %p, ipc_socket: %p \n", ipc_socket_pp, *ipc_socket_pp);
+    HY_ASSERT_RET(!ipc_socket_pp|| !*ipc_socket_pp);
 
-    hy_ipc_socket_s *socket = *handle;
+    ipc_socket_s *socket = *ipc_socket_pp;
 
     LOGI("ipc socket destroy, socket: %p, fd: %d \n", socket, socket->fd);
 
     close(socket->fd);
     socket->fd = -1;
 
-    HY_MEM_FREE_PP(handle);
+    HY_MEM_FREE_PP(ipc_socket_pp);
 }
 
-void *ipc_socket_create(hy_s32_t fd, const char *ipc_name,
-        HyIpcSocketType_e type)
+ipc_socket_s *ipc_socket_create(hy_s32_t fd,
+        const char *ipc_name, HyIpcSocketType_e type)
 {
     LOGT("fd: %d, ipc_name: %s, type: %d \n", fd, ipc_name, type);
     HY_ASSERT_RET_VAL(!ipc_name, NULL);
 
-    hy_ipc_socket_s *socket = NULL;
+    ipc_socket_s *socket = NULL;
 
     do {
-        socket = HY_MEM_MALLOC_BREAK(hy_ipc_socket_s *, sizeof(*socket));
+        socket = HY_MEM_MALLOC_BREAK(ipc_socket_s *, sizeof(*socket));
 
         socket->fd      = fd;
         socket->type    = type;
@@ -97,6 +95,6 @@ void *ipc_socket_create(hy_s32_t fd, const char *ipc_name,
     } while (0);
 
     LOGE("ipc socket create failed \n");
-    ipc_socket_destroy((void **)&socket);
+    ipc_socket_destroy(&socket);
     return NULL;
 }

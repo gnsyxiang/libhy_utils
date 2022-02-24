@@ -31,7 +31,7 @@
 #include "ipc_socket_client.h"
 
 typedef struct {
-    hy_ipc_socket_s         socket;         // 放在前面，用于强制类型转换
+    ipc_socket_s    socket;         // 放在前面，用于强制类型转换
 } _ipc_socket_client_s;
 
 hy_s32_t ipc_socket_client_connect(void *handle, hy_u32_t timeout_s)
@@ -40,7 +40,7 @@ hy_s32_t ipc_socket_client_connect(void *handle, hy_u32_t timeout_s)
     HY_ASSERT_RET_VAL(!handle, -1);
 
     _ipc_socket_client_s *socket_client = handle;
-    hy_ipc_socket_s *socket = &socket_client->socket;
+    ipc_socket_s *socket = &socket_client->socket;
 
     hy_s32_t ret = 0;
     hy_u32_t time_cnt = 0;
