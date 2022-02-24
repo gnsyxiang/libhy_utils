@@ -21,11 +21,11 @@
 include res/doxygen.am
 
 SUBDIRS = \
+          doc       \
+          res       \
           include   \
           src       \
-          doc       \
-          example   \
-          res
+          example
 
 # ------------------
 # defining variables

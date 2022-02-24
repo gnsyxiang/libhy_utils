@@ -64,6 +64,7 @@ AC_C_INLINE
 AC_TYPE_INT32_T
 AC_TYPE_INT8_T
 AC_TYPE_OFF_T
+AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT8_T
@@ -77,7 +78,8 @@ AC_CONFIG_FILES([Makefile
                  example/Makefile
                  example/linux/Makefile
                  example/linux/ipc/Makefile
-                 example/linux/ipc_socket-process/Makefile
+                 example/linux/ipc/ipc_socket/Makefile
+                 example/linux/ipc/ipc_socket/ipc_process/Makefile
                  example/mac/Makefile
                  example/mcu/Makefile
                  example/rtos/Makefile
@@ -85,7 +87,8 @@ AC_CONFIG_FILES([Makefile
                  include/Makefile
                  include/linux/Makefile
                  include/linux/ipc/Makefile
-                 include/linux/ipc_socket-process/Makefile
+                 include/linux/ipc/ipc_socket/Makefile
+                 include/linux/ipc/ipc_socket/ipc_process/Makefile
                  include/mac/Makefile
                  include/mcu/Makefile
                  include/rtos/Makefile
@@ -94,7 +97,8 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/linux/Makefile
                  src/linux/ipc/Makefile
-                 src/linux/ipc_socket-process/Makefile
+                 src/linux/ipc/ipc_socket/Makefile
+                 src/linux/ipc/ipc_socket/ipc_process/Makefile
                  src/mac/Makefile
                  src/mcu/Makefile
                  src/rtos/Makefile

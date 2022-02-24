@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_process_server_test.c
+ * @file    hy_ipc_process_client_test.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    17/02 2022 11:12
+ * @date    17/02 2022 11:07
  * @version v0.0.1
  * 
  * @since    note
@@ -15,7 +15,7 @@
  *     NO.     Author              Date            Modified
  *     00      zhenquan.qiu        17/02 2022      create the file
  * 
- *     last modified: 17/02 2022 11:12
+ *     last modified: 17/02 2022 11:07
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@
 
 #include "hy_utils.h"
 
-#include "hy_ipc_socket_process.h"
+#include "hy_ipc_process.h"
 
 #define IPC_SOCKET_NAME "ipc_socket"
 
@@ -45,9 +45,9 @@ typedef struct {
 } _main_context_t;
 
 static void _ipc_process_connect_change_cb(void *handle,
-        HyIpcSocketProcessConnectState_e is_connect, void *args)
+        HyIpcProcessConnectState_e is_connect, void *args)
 {
-    LOGD("%s \n", is_connect == HY_IPC_SOCKET_PROCESS_STATE_CONNECT
+    LOGD("%s \n", is_connect == HY_IPC_PROCESS_STATE_CONNECT
             ? "connect" : "disconnect");
 }
 
@@ -81,7 +81,7 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"ipc process handle",  &context->ipc_process_handle,   HyIpcSocketProcessDestroy},
+        {"ipc process handle",  &context->ipc_process_handle,   HyIpcProcessDestroy},
         {"signal",              &context->signal_handle,        HySignalDestroy},
         {"log",                 &context->log_handle,           HyLogDestroy},
     };
@@ -120,25 +120,26 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    HyIpcSocketProcessCallbackCb_s ipc_process_cb[] = {
-        {HY_IPC_SOCKET_PROCESS_ID_TEST, _ipc_process_test_cb},
+    HyIpcProcessCallbackCb_s ipc_process_cb[] = {
+        {HY_IPC_PROCESS_ID_TEST, _ipc_process_test_cb},
     };
 
-    HyIpcSocketProcessConfig_s ipc_process_config;
+    HyIpcProcessConfig_s ipc_process_config;
     HY_MEMSET(&ipc_process_config, sizeof(ipc_process_config));
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
-    ipc_process_config.save_config.type             = HY_IPC_SOCKET_PROCESS_TYPE_SERVER;
+    ipc_process_config.save_config.type             = HY_IPC_PROCESS_TYPE_CLIENT;
     ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
-    ipc_process_config.tag                          = "server";
+    ipc_process_config.tag                          = "client-01";
     ipc_process_config.callback                     = ipc_process_cb;
     ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
+    ipc_process_config.timeout_s                    = 10;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",                 &context->log_handle,           &log_config,            (create_t)HyLogCreate,                  HyLogDestroy},
         {"signal",              &context->signal_handle,        &signal_config,         (create_t)HySignalCreate,               HySignalDestroy},
-        {"ipc process handle",  &context->ipc_process_handle,   &ipc_process_config,    (create_t)HyIpcSocketProcessCreate,     HyIpcSocketProcessDestroy},
+        {"ipc process handle",  &context->ipc_process_handle,   &ipc_process_config,    (create_t)HyIpcProcessCreate,     HyIpcProcessDestroy},
     };
 
     RUN_CREATE(module);

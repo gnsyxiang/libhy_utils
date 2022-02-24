@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    19/01 2022 09:10
+# @date    24/02 2022 14:28
 # @version v0.0.1
 # 
 # @since    note
@@ -13,10 +13,12 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        19/01 2022      create the file
+#     00      zhenquan.qiu        24/02 2022      create the file
 # 
-#     last modified: 19/01 2022 09:10
+#     last modified: 24/02 2022 14:28
 # ===============================================================
+
+SUBDIRS = ipc_socket
 
 # ------------------
 # defining variables
@@ -29,13 +31,9 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 # add necessary content
 # ---------------------
-_no_install_headers_com += \
-                           ipc_socket.h         \
-                           ipc_socket_client.h  \
-                           ipc_socket_server.h
+_no_install_headers_com +=
 
-_install_headers_com    += \
-                           hy_ipc_socket.h
+_install_headers_com    +=
 
 # ------------------
 # make install files

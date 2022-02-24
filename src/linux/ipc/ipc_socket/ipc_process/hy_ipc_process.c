@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_socket_process.c
+ * @file    hy_ipc_process.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/02 2022 11:36
@@ -24,12 +24,12 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 
-#include "hy_ipc_socket_process.h"
+#include "hy_ipc_process.h"
 #include "ipc_link_client.h"
 #include "ipc_link_server.h"
 
 typedef struct {
-    HyIpcSocketProcessSaveConfig_s  save_config;
+    HyIpcProcessSaveConfig_s        save_config;
 
     union {
         // client
@@ -42,40 +42,40 @@ typedef struct {
             ipc_link_server_s       *server_link_handle;
         };
     };
-} _ipc_socket_process_context_s;
+} _ipc_process_context_s;
 
-void HyIpcSocketProcessDestroy(void **handle)
+void HyIpcProcessDestroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    _ipc_socket_process_context_s *context = *handle;
-    HyIpcSocketProcessSaveConfig_s *save_config = &context->save_config;
+    _ipc_process_context_s *context = *handle;
+    HyIpcProcessSaveConfig_s *save_config = &context->save_config;
 
-    if (save_config->type == HY_IPC_SOCKET_PROCESS_TYPE_SERVER) {
+    if (save_config->type == HY_IPC_PROCESS_TYPE_SERVER) {
         ipc_link_server_destroy(&context->server_link_handle);
     } else {
         ipc_link_client_destroy(&context->client_link_handle);
     }
 
-    LOGI("ipc socket process destroy \n");
+    LOGI("ipc process destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
 }
 
-void *HyIpcSocketProcessCreate(HyIpcSocketProcessConfig_s *config)
+void *HyIpcProcessCreate(HyIpcProcessConfig_s *config)
 {
-    LOGT("ipc socket process config: %p \n", config);
+    LOGT("config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);
 
-    _ipc_socket_process_context_s *context = NULL;
+    _ipc_process_context_s *context = NULL;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_ipc_socket_process_context_s *, sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(_ipc_process_context_s *, sizeof(*context));
 
-        HyIpcSocketProcessSaveConfig_s *save_config = &config->save_config;
+        HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        if (save_config->type == HY_IPC_SOCKET_PROCESS_TYPE_SERVER) {
+        if (save_config->type == HY_IPC_PROCESS_TYPE_SERVER) {
             context->server_link_handle
                 = ipc_link_server_create(config->ipc_name, config->tag);
             if (!context->server_link_handle) {
@@ -91,11 +91,11 @@ void *HyIpcSocketProcessCreate(HyIpcSocketProcessConfig_s *config)
             }
         }
 
-        LOGI("ipc socket process create, context: %p \n", context);
+        LOGI("ipc process create, context: %p \n", context);
         return context;
     } while (0);
 
-    LOGE("ipc socket process create failed \n");
-    HyIpcSocketProcessDestroy((void **)&context);
+    LOGE("ipc process create failed \n");
+    HyIpcProcessDestroy((void **)&context);
     return NULL;
 }

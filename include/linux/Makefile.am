@@ -18,7 +18,7 @@
 #     last modified: 30/10 2021 11:42
 # ===============================================================
 
-SUBDIRS = ipc_socket-process
+SUBDIRS = ipc
 
 # ------------------
 # defining variables

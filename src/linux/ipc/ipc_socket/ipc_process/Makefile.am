@@ -18,7 +18,7 @@
 #     last modified: 22/01 2022 16:50
 # ===============================================================
 
-noinst_LTLIBRARIES = libhy_ipc_socket-process.la
+noinst_LTLIBRARIES = libhy_ipc_process.la
 
 # ------------------
 # defining variables
@@ -41,15 +41,15 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc                    \
-                   -I$(top_srcdir)/include/linux/ipc_socket-process     \
-                   -I$(top_srcdir)/include/linux                        \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket/ipc_process     \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket                 \
+                   -I$(top_srcdir)/include/linux                                \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_ipc_socket_process.c      \
-                   ipc_link.c                   \
-                   ipc_link_client.c            \
+                   hy_ipc_process.c     \
+                   ipc_link.c           \
+                   ipc_link_client.c    \
                    ipc_link_server.c
 
 _cppflags_com   += \
@@ -69,9 +69,9 @@ if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 endif
 
-libhy_ipc_socket_process_la_SOURCES     = $(_sources_com)
-libhy_ipc_socket_process_la_CPPFLAGS    = $(_cppflags_com)
-libhy_ipc_socket_process_la_CFLAGS      = $(_cflags_com)
-libhy_ipc_socket_process_la_CXXFLAGS    = $(_cxxflags_com)
-libhy_ipc_socket_process_la_LDFLAGS     = $(_ldflags_com)
-libhy_ipc_socket_process_la_LIBADD      = $(_ldadd_com)
+libhy_ipc_process_la_SOURCES    = $(_sources_com)
+libhy_ipc_process_la_CPPFLAGS   = $(_cppflags_com)
+libhy_ipc_process_la_CFLAGS     = $(_cflags_com)
+libhy_ipc_process_la_CXXFLAGS   = $(_cxxflags_com)
+libhy_ipc_process_la_LDFLAGS    = $(_ldflags_com)
+libhy_ipc_process_la_LIBADD     = $(_ldadd_com)

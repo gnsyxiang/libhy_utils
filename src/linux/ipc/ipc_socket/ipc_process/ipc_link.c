@@ -121,7 +121,7 @@ ipc_link_s *ipc_link_create(const char *name, const char *tag,
             ipc_link->ipc_socket_handle = ipc_socket_handle;
         } else {
             ipc_link->pid = getpid();
-            HY_STRNCPY(ipc_link->tag, HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2,
+            HY_STRNCPY(ipc_link->tag, HY_IPC_PROCESS_IPC_NAME_LEN_MAX / 2,
                     tag, HY_STRLEN(tag));
 
             ipc_link->ipc_socket_handle = HyIpcSocketCreate_m(name,

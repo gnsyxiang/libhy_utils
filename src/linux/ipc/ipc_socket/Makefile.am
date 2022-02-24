@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    21/01 2022 10:56
+# @date    17/01 2022 09:25
 # @version v0.0.1
 # 
 # @since    note
@@ -13,12 +13,14 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        21/01 2022      create the file
+#     00      zhenquan.qiu        17/01 2022      create the file
 # 
-#     last modified: 21/01 2022 10:56
+#     last modified: 17/01 2022 09:25
 # ===============================================================
 
-noinst_LTLIBRARIES = libhy_ipc_process.la
+SUBDIRS = ipc_process
+
+noinst_LTLIBRARIES = libhy_ipc_socket.la
 
 # ------------------
 # defining variables
@@ -41,16 +43,15 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc            \
-                   -I$(top_srcdir)/include/linux/ipc_process    \
-                   -I$(top_srcdir)/include/linux                \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket     \
+                   -I$(top_srcdir)/include/linux                    \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_ipc_process.c             \
-                   ipc_process_client.c         \
-                   ipc_process_link.c           \
-                   ipc_process_server.c
+                   hy_ipc_socket.c          \
+                   ipc_socket.c             \
+                   ipc_socket_client.c      \
+                   ipc_socket_server.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -63,15 +64,15 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      +=
+_ldadd_com      += $(top_builddir)/src/linux/ipc/ipc_socket/ipc_process/libhy_ipc_process.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 endif
 
-libhy_ipc_process_la_SOURCES    = $(_sources_com)
-libhy_ipc_process_la_CPPFLAGS   = $(_cppflags_com)
-libhy_ipc_process_la_CFLAGS     = $(_cflags_com)
-libhy_ipc_process_la_CXXFLAGS   = $(_cxxflags_com)
-libhy_ipc_process_la_LDFLAGS    = $(_ldflags_com)
-libhy_ipc_process_la_LIBADD     = $(_ldadd_com)
+libhy_ipc_socket_la_SOURCES      = $(_sources_com)
+libhy_ipc_socket_la_CPPFLAGS     = $(_cppflags_com)
+libhy_ipc_socket_la_CFLAGS       = $(_cflags_com)
+libhy_ipc_socket_la_CXXFLAGS     = $(_cxxflags_com)
+libhy_ipc_socket_la_LDFLAGS      = $(_ldflags_com)
+libhy_ipc_socket_la_LIBADD       = $(_ldadd_com)

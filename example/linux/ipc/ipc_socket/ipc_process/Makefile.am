@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    21/01 2022 10:55
+# @date    22/01 2022 16:47
 # @version v0.0.1
 # 
 # @since    note
@@ -13,9 +13,9 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        21/01 2022      create the file
+#     00      zhenquan.qiu        22/01 2022      create the file
 # 
-#     last modified: 21/01 2022 10:55
+#     last modified: 22/01 2022 16:47
 # ===============================================================
 
 # ------------------
@@ -40,9 +40,9 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc            \
-                   -I$(top_srcdir)/include/linux/ipc_process    \
-                   -I$(top_srcdir)/include/linux                \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket/ipc_process     \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket                 \
+                   -I$(top_srcdir)/include/linux                                \
                    -I$(top_srcdir)/include
 
 _sources_com    +=

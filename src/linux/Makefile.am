@@ -18,9 +18,7 @@
 #     last modified: 30/10 2021 11:44
 # ===============================================================
 
-SUBDIRS = \
-          ipc                   \
-          ipc_socket-process
+SUBDIRS = ipc
 
 noinst_LTLIBRARIES = libhy_utils_os.la
 
@@ -72,9 +70,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += \
-                   $(top_builddir)/src/linux/ipc/libhy_ipc.la                                   \
-                   $(top_builddir)/src/linux/ipc_socket-process/libhy_ipc_socket-process.la
+_ldadd_com      += $(top_builddir)/src/linux/ipc/libhy_ipc.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)

@@ -85,8 +85,8 @@ doxygen/
 hy_utils.pc
 example/hy_*_test
 example/linux/hy_*_test
-example/linux/ipc/hy_*_test
-example/linux/ipc_socket-process/hy_*_test
+example/linux/ipc/ipc_socket/hy_*_test
+example/linux/ipc/ipc_socket/ipc_process/hy_*_test
 example/mac/hy_*_test
 example/mcu/hy_*_test
 example/rtos/hy_*_test

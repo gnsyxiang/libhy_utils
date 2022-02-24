@@ -30,7 +30,7 @@ extern "C" {
 
 #include "hy_ipc_socket.h"
 #include "hy_list.h"
-#include "hy_ipc_socket_process.h"
+#include "hy_ipc_process.h"
 
 typedef enum {
     IPC_LINK_TYPE_CLIENT,
@@ -45,7 +45,7 @@ typedef struct {
     void                    *ipc_socket_handle;
 
     pid_t                   pid;
-    char                    tag[HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2];
+    char                    tag[HY_IPC_PROCESS_IPC_NAME_LEN_MAX / 2];
 
     hy_u32_t                use_cnt;
 

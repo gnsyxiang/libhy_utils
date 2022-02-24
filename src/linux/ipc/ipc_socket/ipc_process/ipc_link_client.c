@@ -24,7 +24,6 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 
-#include "hy_ipc_socket.h"
 #include "ipc_link_client.h"
 
 void ipc_link_client_destroy(ipc_link_client_s **handle)

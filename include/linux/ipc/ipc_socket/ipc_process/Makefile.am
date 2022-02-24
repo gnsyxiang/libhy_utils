@@ -35,7 +35,7 @@ _no_install_headers_com += \
                            ipc_link_server.h
 
 _install_headers_com    += \
-                           hy_ipc_socket_process.h  \
+                           hy_ipc_process.h         \
                            ipc_process_id.h
 
 # ------------------

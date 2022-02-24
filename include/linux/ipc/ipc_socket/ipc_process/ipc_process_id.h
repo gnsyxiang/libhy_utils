@@ -30,15 +30,15 @@ extern "C" {
  * @brief 通信id
  */
 typedef enum {
-    HY_IPC_SOCKET_PROCESS_ID_TEST,
+    HY_IPC_PROCESS_ID_TEST,
 
-    HY_IPC_SOCKET_PROCESS_ID_MAX,
-} HyIpcSocketProcessId_e;
+    HY_IPC_PROCESS_ID_MAX,
+} HyIpcProcessId_e;
 
-// HY_IPC_SOCKET_PROCESS_ID_TEST
+// HY_IPC_PROCESS_ID_TEST
 typedef struct {
     hy_s32_t test;
-} HyIpcSocketProcessTestId_s;
+} HyIpcProcessTestId_s;
 
 #ifdef __cplusplus
 }

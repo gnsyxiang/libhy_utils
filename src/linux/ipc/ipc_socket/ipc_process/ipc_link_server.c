@@ -25,7 +25,6 @@
 #include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_string.h"
 
-#include "hy_ipc_socket.h"
 #include "ipc_link_server.h"
 
 static void _server_accept_cb(void *handle, void *args)
