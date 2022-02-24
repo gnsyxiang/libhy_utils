@@ -40,7 +40,7 @@ void ipc_link_destroy(ipc_link_s **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *ipc_link_create(const char *name, const char *tag,
+ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_handle)
 {
     LOGT("name: %s, tag: %s, type: %d \n", name, tag, type);
@@ -53,8 +53,6 @@ void *ipc_link_create(const char *name, const char *tag,
 
     do {
         link = HY_MEM_MALLOC_BREAK(ipc_link_s *, sizeof(*link));
-
-        link->ipc_name = name;
 
         if (ipc_socket_handle) {
             link->ipc_socket_handle = ipc_socket_handle;

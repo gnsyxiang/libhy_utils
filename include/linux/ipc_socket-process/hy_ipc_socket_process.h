@@ -97,19 +97,19 @@ typedef void (*HyIpcSocketProcessConnectChangeCb_t)(void *handle,
  * @brief 配置参数
  */
 typedef struct {
-    char                                    ipc_name[HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2];   ///< ipc-process名字
-    HyIpcSocketProcessConnectChangeCb_t     connect_change;                                         ///< ipc-process状态回调函数
-    const void                              *args;                                                  ///< 上层传递参数
-    HyIpcSocketProcessType_e                type:2;                                                 ///< ipc-process类型
-    hy_s32_t                                reserved;                                               ///< 预留
+    HyIpcSocketProcessConnectChangeCb_t     connect_change;     ///< ipc-process状态回调函数
+    const void                              *args;              ///< 上层传递参数
+    HyIpcSocketProcessType_e                type:2;             ///< ipc-process类型
+    hy_s32_t                                reserved;           ///< 预留
 } HyIpcSocketProcessSaveConfig_s;
 
 typedef struct {
-    HyIpcSocketProcessSaveConfig_s          save_config;                                            ///< 配置参数
+    HyIpcSocketProcessSaveConfig_s          save_config;        ///< 配置参数
 
-    char                                    *tag;                                                   ///< ipc-process标记
-    HyIpcSocketProcessCallbackCb_s          *callback;                                              ///< id回调结构体
-    hy_u32_t                                callback_cnt;                                           ///< id回调个数
+    const char                              *ipc_name;          ///< ipc-process名字
+    const char                              *tag;               ///< ipc-process标记
+    HyIpcSocketProcessCallbackCb_s          *callback;          ///< id回调结构体
+    hy_u32_t                                callback_cnt;       ///< id回调个数
 } HyIpcSocketProcessConfig_s;
 
 /**

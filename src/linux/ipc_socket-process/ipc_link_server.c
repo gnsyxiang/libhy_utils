@@ -35,8 +35,10 @@ static void _server_accept_cb(void *handle, void *args)
 
     ipc_link_server_s *server_link = args;
 
-    ipc_link_s *link = ipc_link_create(server_link->ipc_name,
-            NULL, IPC_LINK_TYPE_MAX, handle);
+    const char *ipc_name = NULL;
+    HyIpcSocketGetName(server_link->link->ipc_socket_handle, &ipc_name);
+
+    ipc_link_s *link = ipc_link_create(ipc_name, NULL, IPC_LINK_TYPE_MAX, handle);
     if (!link) {
         LOGE("ipc_link_create failed \n");
         return;
@@ -99,8 +101,6 @@ void *ipc_link_server_create(const char *name, const char *tag)
 
         HY_INIT_LIST_HEAD(&server_link->list);
         pthread_mutex_init(&server_link->mutex, NULL);
-
-        server_link->ipc_name = name;
 
         server_link->link = ipc_link_create(name, tag,
                 IPC_LINK_TYPE_SERVER, NULL);

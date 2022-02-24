@@ -45,7 +45,6 @@ typedef struct {
 
     pid_t                   pid;
     char                    tag[HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2];
-    const char              *ipc_name;
 
     hy_u32_t                use_cnt;
 
@@ -54,7 +53,7 @@ typedef struct {
     hy_s32_t                reserved;
 } ipc_link_s;
 
-void *ipc_link_create(const char *name, const char *tag,
+ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_handle);
 void ipc_link_destroy(ipc_link_s **handle);
 

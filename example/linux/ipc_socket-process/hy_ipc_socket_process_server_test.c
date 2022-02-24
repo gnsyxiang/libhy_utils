@@ -129,8 +129,7 @@ static _main_context_t *_module_create(void)
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
     ipc_process_config.save_config.type             = HY_IPC_SOCKET_PROCESS_TYPE_SERVER;
-    HY_STRNCPY(ipc_process_config.save_config.ipc_name,
-            HY_IPC_SOCKET_PROCESS_IPC_NAME_LEN_MAX / 2, IPC_SOCKET_NAME, HY_STRLEN(IPC_SOCKET_NAME));
+    ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
     ipc_process_config.tag                          = "server";
     ipc_process_config.callback                     = ipc_process_cb;
     ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);

@@ -29,7 +29,6 @@ extern "C" {
 typedef struct {
     ipc_link_s              *link;
 
-    const char              *ipc_name;
     void                    *accept_thread_handle;
 
     struct hy_list_head     list;
