@@ -22,7 +22,6 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
 #include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_string.h"
 
 #include "ipc_link.h"

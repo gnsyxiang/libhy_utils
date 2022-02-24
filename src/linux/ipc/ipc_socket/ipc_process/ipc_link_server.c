@@ -27,12 +27,21 @@
 
 #include "ipc_link_server.h"
 
+typedef struct {
+    ipc_link_s              *link;
+
+    void                    *accept_thread_handle;
+
+    struct hy_list_head     list;
+    pthread_mutex_t         mutex;
+} _ipc_link_server_s;
+
 static void _server_accept_cb(void *handle, void *args)
 {
     LOGT("handle: %p, args: %p \n", handle, args);
     HY_ASSERT_RET(!handle || !args);
 
-    ipc_link_server_s *server_link = args;
+    _ipc_link_server_s *server_link = args;
 
     const char *ipc_name = NULL;
     HyIpcSocketGetName(server_link->link->ipc_socket_handle, &ipc_name);
@@ -55,18 +64,18 @@ static hy_s32_t _server_link_accept_cb(void *args)
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
 
-    ipc_link_server_s *server_link = args;
+    _ipc_link_server_s *server_link = args;
 
     return ipc_link_wait_accept(server_link->link,
             _server_accept_cb, server_link);
 }
 
-void ipc_link_server_destroy(ipc_link_server_s **handle)
+void ipc_link_server_destroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
-    ipc_link_server_s *server_link = *handle;
+    _ipc_link_server_s *server_link = *handle;
     ipc_link_s *pos, *n;
 
     HyThreadDestroy(&server_link->accept_thread_handle);
@@ -88,15 +97,15 @@ void ipc_link_server_destroy(ipc_link_server_s **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-ipc_link_server_s *ipc_link_server_create(const char *name, const char *tag)
+void *ipc_link_server_create(const char *name, const char *tag)
 {
     LOGT("name: %s, tag: %s \n", name, tag);
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
 
-    ipc_link_server_s *server_link = NULL;
+    _ipc_link_server_s *server_link = NULL;
 
     do {
-        server_link = HY_MEM_MALLOC_BREAK(ipc_link_server_s *,
+        server_link = HY_MEM_MALLOC_BREAK(_ipc_link_server_s *,
                 sizeof(*server_link));
 
         HY_INIT_LIST_HEAD(&server_link->list);
@@ -128,6 +137,6 @@ ipc_link_server_s *ipc_link_server_create(const char *name, const char *tag)
     } while (0);
 
     LOGE("ipc link server create failed \n");
-    ipc_link_server_destroy(&server_link);
+    ipc_link_server_destroy((void **)&server_link);
     return NULL;
 }

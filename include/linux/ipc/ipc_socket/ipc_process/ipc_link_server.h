@@ -26,17 +26,8 @@ extern "C" {
 
 #include "ipc_link.h"
 
-typedef struct {
-    ipc_link_s              *link;
-
-    void                    *accept_thread_handle;
-
-    struct hy_list_head     list;
-    pthread_mutex_t         mutex;
-} ipc_link_server_s;
-
-ipc_link_server_s *ipc_link_server_create(const char *name, const char *tag);
-void ipc_link_server_destroy(ipc_link_server_s **handle);
+void *ipc_link_server_create(const char *name, const char *tag);
+void ipc_link_server_destroy(void **handle);
 
 #ifdef __cplusplus
 }

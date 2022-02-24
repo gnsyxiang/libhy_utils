@@ -26,11 +26,15 @@
 
 #include "ipc_link_client.h"
 
-void ipc_link_client_destroy(ipc_link_client_s **handle)
+typedef struct {
+    ipc_link_s  *link;
+} _ipc_link_client_s;
+
+void ipc_link_client_destroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
-    ipc_link_client_s *client_link = *handle;
+    _ipc_link_client_s *client_link = *handle;
 
     ipc_link_destroy(&client_link->link);
 
@@ -38,16 +42,16 @@ void ipc_link_client_destroy(ipc_link_client_s **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-ipc_link_client_s *ipc_link_client_create(const char *name,
+void *ipc_link_client_create(const char *name,
         const char *tag, hy_u32_t timeout_s)
 {
     LOGT("name: %s, tag: %s, timeout_s: %d \n", name, tag, timeout_s);
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
 
-    ipc_link_client_s *client_link = NULL;
+    _ipc_link_client_s *client_link = NULL;
 
     do {
-        client_link = HY_MEM_MALLOC_BREAK(ipc_link_client_s *,
+        client_link = HY_MEM_MALLOC_BREAK(_ipc_link_client_s *,
                 sizeof(*client_link));
 
         client_link->link = ipc_link_create(name, tag,
@@ -67,6 +71,6 @@ ipc_link_client_s *ipc_link_client_create(const char *name,
     } while (0);
 
     LOGE("ipc link client create failed \n");
-    ipc_link_client_destroy(&client_link);
+    ipc_link_client_destroy((void **)&client_link);
     return NULL;
 }
