@@ -60,6 +60,8 @@ hy_s32_t ipc_socket_client_connect(void *handle, hy_u32_t timeout_s)
 
     if (time_cnt < timeout_s) {
         LOGI("connect ipc server, fd: %d \n", socket->fd);
+
+        socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
         return 0;
     } else {
         LOGE("connect server failed \n");

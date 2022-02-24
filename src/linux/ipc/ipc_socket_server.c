@@ -163,6 +163,8 @@ void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type)
             break;
         }
 
+        socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
+
         LOGI("ipc socket server create, socket_server: %p, "
                 "pipe_fd[0]: %d, pipe_fd[1]: %d \n",
                 socket_server,

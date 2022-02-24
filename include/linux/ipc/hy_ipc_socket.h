@@ -45,9 +45,20 @@ typedef enum {
     HY_IPC_SOCKET_INFO_FD,                      ///< ipc socket的fd
     // HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件
     HY_IPC_SOCKET_INFO_TYPE,                    ///< ipc socket的类型
+    HY_IPC_SOCKET_INFO_CONNECT_STATE,           ///< ipc socket连接状态
 
     HY_IPC_SOCKET_INFO_MAX,
 } HyIpcSocketInfo_e;
+
+/**
+ * @brief ipc socket连接状态
+ */
+typedef enum {
+    HY_IPC_SOCKET_CONNECT_STATE_DISCONNECT,
+    HY_IPC_SOCKET_CONNECT_STATE_CONNECT,
+
+    HY_IPC_SOCKET_CONNECT_STATE_MAX,
+} HyIpcSocketConnectState_e;
 
 /**
  * @brief 接收客户端连接回调
@@ -120,6 +131,7 @@ hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len);
  *    数组长度必须等于或大于HY_IPC_SOCKET_NAME_LEN_MAX
  *    （用HyIpcSocketGetName替代）
  * 4，当info为HY_IPC_SOCKET_INFO_TYPE，data为HyIpcSocketType_e类型
+ * 5，当info为HY_IPC_SOCKET_INFO_CONNECT_STATE，data为HyIpcSocketConnectState_e类型
  *
  * 特别注意获取名字时
  *     数组的长度一定要大于或等于HY_IPC_SOCKET_NAME_LEN_MAX，否则造成内存问题

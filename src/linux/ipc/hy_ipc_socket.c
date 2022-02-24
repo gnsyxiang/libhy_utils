@@ -65,6 +65,9 @@ void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
         case HY_IPC_SOCKET_INFO_TYPE:
             *(HyIpcSocketType_e *)data = socket->type;
             break;
+        case HY_IPC_SOCKET_INFO_CONNECT_STATE:
+            *(HyIpcSocketConnectState_e *)data = socket->connect_state;
+            break;
         default:
             LOGE("error type, info: %d \n", info);
             break;

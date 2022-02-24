@@ -46,6 +46,7 @@ typedef struct {
 
     char                        ipc_name[HY_IPC_SOCKET_NAME_LEN_MAX / 2];
     HyIpcSocketType_e           type:2;
+    HyIpcSocketConnectState_e   connect_state:2;
     hy_s32_t                    reserved;
 } ipc_socket_s;
 
