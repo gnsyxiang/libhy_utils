@@ -43,6 +43,7 @@ void *ipc_link_client_create(const char *name,
         const char *tag, hy_u32_t timeout_s)
 {
     LOGT("name: %s, tag: %s \n", name, tag);
+    LOGT("name: %s, tag: %s, timeout_s: %d \n", name, tag, timeout_s);
     HY_ASSERT_RET_VAL(!name || !tag, NULL);
 
     ipc_link_client_s *client_link = NULL;
@@ -58,7 +59,7 @@ void *ipc_link_client_create(const char *name,
             break;
         }
 
-        if (0 != ipc_link_connect(client_link->link, 0)) {
+        if (0 != ipc_link_connect(client_link->link, timeout_s)) {
             LOGE("ipc_link_connect failed \n");
             break;
         }

@@ -56,9 +56,9 @@ hy_s32_t ipc_socket_client_connect(void *handle, hy_u32_t timeout_s)
 
             sleep(1);
         }
-    } while ((ret < 0) && (++time_cnt < timeout_s));
+    } while ((ret < 0) && (0 == timeout_s || ++time_cnt < timeout_s));
 
-    if (time_cnt < timeout_s) {
+    if (0 == ret && (0 == timeout_s || time_cnt < timeout_s)) {
         LOGI("connect ipc server, fd: %d \n", socket->fd);
 
         socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
