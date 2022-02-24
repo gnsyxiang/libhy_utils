@@ -26,7 +26,10 @@ extern "C" {
 
 #include "ipc_link.h"
 
-void *ipc_link_server_create(const char *name, const char *tag);
+typedef void (*ipc_link_server_accept_cb)(void *handle, void *args);
+
+void *ipc_link_server_create(const char *name, const char *tag,
+        ipc_link_server_accept_cb accpet, void *args);
 void ipc_link_server_destroy(void **handle);
 
 #ifdef __cplusplus

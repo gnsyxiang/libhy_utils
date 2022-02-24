@@ -28,12 +28,14 @@
 #include "ipc_link_server.h"
 
 typedef struct {
-    ipc_link_s              *link;
+    ipc_link_s                  *link;
 
-    void                    *accept_thread_handle;
+    ipc_link_server_accept_cb   accept;
+    void                        *args;
+    void                        *accept_thread_handle;
 
-    struct hy_list_head     list;
-    pthread_mutex_t         mutex;
+    struct hy_list_head         list;
+    pthread_mutex_t             mutex;
 } _ipc_link_server_s;
 
 static void _server_accept_cb(void *handle, void *args)
@@ -57,6 +59,8 @@ static void _server_accept_cb(void *handle, void *args)
     pthread_mutex_lock(&server_link->mutex);
     hy_list_add_tail(&link->list, &server_link->list);
     pthread_mutex_unlock(&server_link->mutex);
+
+    server_link->accept(link, server_link->args);
 }
 
 static hy_s32_t _server_link_accept_cb(void *args)
@@ -97,10 +101,12 @@ void ipc_link_server_destroy(void **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *ipc_link_server_create(const char *name, const char *tag)
+void *ipc_link_server_create(const char *name, const char *tag,
+        ipc_link_server_accept_cb accept, void *args)
 {
-    LOGT("name: %s, tag: %s \n", name, tag);
-    HY_ASSERT_RET_VAL(!name || !tag, NULL);
+    LOGT("name: %s, tag: %s, accept: %p, args: %p \n",
+            name, tag, accept, args);
+    HY_ASSERT_RET_VAL(!name || !tag || !accept, NULL);
 
     _ipc_link_server_s *server_link = NULL;
 
@@ -110,6 +116,9 @@ void *ipc_link_server_create(const char *name, const char *tag)
 
         HY_INIT_LIST_HEAD(&server_link->list);
         pthread_mutex_init(&server_link->mutex, NULL);
+
+        server_link->accept = accept;
+        server_link->args   = args;
 
         server_link->link = ipc_link_create(name, tag,
                 IPC_LINK_TYPE_SERVER, NULL);
