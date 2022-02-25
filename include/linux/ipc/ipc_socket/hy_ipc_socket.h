@@ -39,18 +39,6 @@ typedef enum {
 } HyIpcSocketType_e;
 
 /**
- * @brief ipc socket相关信息
- */
-typedef enum {
-    HY_IPC_SOCKET_INFO_FD,                      ///< ipc socket的fd
-    // HY_IPC_SOCKET_INFO_IPC_NAME,                ///< ipc socket绑定的文件
-    HY_IPC_SOCKET_INFO_TYPE,                    ///< ipc socket的类型
-    HY_IPC_SOCKET_INFO_CONNECT_STATE,           ///< ipc socket连接状态
-
-    HY_IPC_SOCKET_INFO_MAX,
-} HyIpcSocketInfo_e;
-
-/**
  * @brief ipc socket连接状态
  */
 typedef enum {
@@ -118,33 +106,40 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len);
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len);
 
 /**
- * @brief 获取ipc socket相关信息
+ * @brief 获取ipc_socket通信fd
  *
  * @param handle 句柄
- * @param info socket相关信息
- * @param data 保存信息的地址
  *
- * @note 
- * 1, data是传出参数，需要上层开辟空间
- * 2，当info为HY_IPC_SOCKET_INFO_FD，data为hy_s32_t类型
- * 3, 当info为HY_IPC_SOCKET_INFO_IPC_NAME，data为数组类型，以便保存数据，
- *    数组长度必须等于或大于HY_IPC_SOCKET_NAME_LEN_MAX
- *    （用HyIpcSocketGetName替代）
- * 4，当info为HY_IPC_SOCKET_INFO_TYPE，data为HyIpcSocketType_e类型
- * 5，当info为HY_IPC_SOCKET_INFO_CONNECT_STATE，data为HyIpcSocketConnectState_e类型
- *
- * 特别注意获取名字时
- *     数组的长度一定要大于或等于HY_IPC_SOCKET_NAME_LEN_MAX，否则造成内存问题
+ * @return 成功返回fd，失败返回-1
  */
-void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data);
+hy_s32_t HyIpcSocketGetFD(void *handle);
 
 /**
- * @brief 获取ipc socket绑定的文件
+ * @brief 获取ipc_socket名字
  *
  * @param handle 句柄
- * @param ipc_name 存放数据的二级指针
+ *
+ * @return 成功返回ipc_name，失败返回NULL
  */
-void HyIpcSocketGetName(void *handle, const char **ipc_name);
+const char *HyIpcSocketGetName(void *handle);
+
+/**
+ * @brief 获取ipc_socket类型
+ *
+ * @param handle 句柄
+ *
+ * @return 成功返回状态，失败返回HY_IPC_SOCKET_TYPE_MAX
+ */
+HyIpcSocketType_e HyIpcSocketGetType(void *handle);
+
+/**
+ * @brief 获取ipc_socket连接状态
+ *
+ * @param handle 句柄
+ *
+ * @return 成功返回状态，失败返回HY_IPC_SOCKET_CONNECT_STATE_MAX
+ */
+HyIpcSocketConnectState_e HyIpcSocketGetConnectState(void *handle);
 
 /**
  * @brief 服务端等待客户端连接

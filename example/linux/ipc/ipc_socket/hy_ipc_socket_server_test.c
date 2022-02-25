@@ -192,17 +192,9 @@ int main(int argc, char *argv[])
         LOGE("HyIpcSocketCreate failed \n");
     }
 
-    hy_s32_t fd = -1;
-    HyIpcSocketGetInfo(context->ipc_socket_handle, HY_IPC_SOCKET_INFO_FD, &fd);
-    LOGI("fd: %d \n", fd);
-
-    HyIpcSocketType_e type = 0;
-    HyIpcSocketGetInfo(context->ipc_socket_handle, HY_IPC_SOCKET_INFO_TYPE, &type);
-    LOGI("type: %d \n", type);
-
-    const char *ipc_name;
-    HyIpcSocketGetName(context->ipc_socket_handle, &ipc_name);
-    LOGI("ipc_name: %s \n", ipc_name);
+    LOGI("fd: %d \n",       HyIpcSocketGetFD(context->ipc_socket_handle));
+    LOGI("type: %d \n",     HyIpcSocketGetType(context->ipc_socket_handle));
+    LOGI("ipc_name: %s \n", HyIpcSocketGetName(context->ipc_socket_handle));
 
     context->thread_handle = HyThreadCreate_m("hy_accept",
             _thread_loop_cb, context);

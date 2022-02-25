@@ -45,43 +45,44 @@ hy_s32_t HyIpcSocketAccept(void *handle,
     return ipc_socket_server_accept(handle, accept_cb, args);
 }
 
-void HyIpcSocketGetInfo(void *handle, HyIpcSocketInfo_e info, void *data)
+hy_s32_t HyIpcSocketGetFD(void *handle)
 {
-    LOGT("handle: %p, info: %d, data: %p \n", handle, info, data);
-    HY_ASSERT_RET(!handle || !data);
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, -1);
 
     ipc_socket_s *socket = handle;
 
-    switch (info) {
-        case HY_IPC_SOCKET_INFO_FD:
-            *(hy_s32_t *) data = socket->fd;
-            break;
-#if 0
-        case HY_IPC_SOCKET_INFO_IPC_NAME:
-            HY_STRNCPY(data, HY_IPC_SOCKET_NAME_LEN_MAX,
-                    socket->ipc_name, HY_STRLEN(socket->ipc_name));
-            break;
-#endif
-        case HY_IPC_SOCKET_INFO_TYPE:
-            *(HyIpcSocketType_e *)data = socket->type;
-            break;
-        case HY_IPC_SOCKET_INFO_CONNECT_STATE:
-            *(HyIpcSocketConnectState_e *)data = socket->connect_state;
-            break;
-        default:
-            LOGE("error type, info: %d \n", info);
-            break;
-    }
+    return socket->fd;
 }
 
-void HyIpcSocketGetName(void *handle, const char **ipc_name)
+const char *HyIpcSocketGetName(void *handle)
 {
-    LOGT("handle: %p, data: %p \n", handle, ipc_name);
-    HY_ASSERT_RET(!handle || !ipc_name);
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, NULL);
 
     ipc_socket_s *socket = handle;
 
-    *ipc_name = socket->ipc_name;
+    return socket->ipc_name;
+}
+
+HyIpcSocketType_e HyIpcSocketGetType(void *handle)
+{
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, HY_IPC_SOCKET_TYPE_MAX);
+
+    ipc_socket_s *socket = handle;
+
+    return socket->type;
+}
+
+HyIpcSocketConnectState_e HyIpcSocketGetConnectState(void *handle)
+{
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, HY_IPC_SOCKET_CONNECT_STATE_MAX);
+
+    ipc_socket_s *socket = handle;
+
+    return socket->connect_state;
 }
 
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
