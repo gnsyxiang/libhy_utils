@@ -89,7 +89,22 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
     HY_ASSERT(handle);
     HY_ASSERT(buf);
 
-    return HyFileRead(((ipc_socket_s *)handle)->fd, buf, len);
+    hy_s32_t ret = 0;
+    hy_s32_t fd = ((ipc_socket_s *)handle)->fd;
+
+    ret = HyFileReadN(fd, buf, len);
+    if (-1 == ret) {
+        LOGE("HyFileReadN failed \n");
+
+        close(fd);
+        return -1;
+    } else if (ret > 0 && ret != (hy_s32_t)len) {
+        LOGE("HyFileReadN error \n");
+
+        return -1;
+    } else {
+        return len;
+    }
 }
 
 hy_s32_t HyIpcSocketWrite(void *handle, const void *buf, hy_u32_t len)
