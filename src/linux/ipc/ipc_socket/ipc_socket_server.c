@@ -89,6 +89,8 @@ hy_s32_t ipc_socket_server_accept(void *handle,
                 break;
             }
 
+            new_socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
+
             LOGI("accept new client socket, socket: %p, fd: %d \n",
                     new_socket, new_socket->fd);
 
