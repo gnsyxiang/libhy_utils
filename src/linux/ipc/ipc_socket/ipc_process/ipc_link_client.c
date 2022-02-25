@@ -30,6 +30,47 @@ typedef struct {
     ipc_link_s  *link;
 } _ipc_link_client_s;
 
+hy_s32_t ipc_link_client_write_info(void *handle, pid_t pid)
+{
+    LOGT("handle: %p, pid: %d \n", handle, pid);
+    HY_ASSERT_RET_VAL(!handle, -1);
+
+    hy_u32_t total_len = sizeof(ipc_link_msg_s)
+        + HY_IPC_PROCESS_IPC_NAME_LEN_MAX + sizeof(pid_t);
+    hy_s32_t offset = 0;
+    char *ipc_msg_buf = NULL;
+    ipc_link_msg_s *ipc_msg = NULL;
+    ipc_link_s *link = NULL;
+
+    ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
+
+    ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
+    link = ((_ipc_link_client_s *)handle)->link;
+
+    HY_MEMCPY(ipc_msg->buf + offset, link->tag, HY_STRLEN(link->tag));
+    offset += HY_STRLEN(link->tag) + 1;
+
+    HY_MEMCPY(ipc_msg->buf + offset, &pid, sizeof(pid_t));
+    offset += sizeof(pid_t);
+
+    ipc_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
+    ipc_msg->type       = IPC_LINK_MSG_TYPE_INFO;
+    ipc_msg->thread_id  = pthread_self();
+    ipc_msg->buf_len    = offset;
+
+    return ipc_link_write(link, ipc_msg);
+}
+
+hy_s32_t ipc_link_client_is_connect(void *handle)
+{
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, 0);
+
+    ipc_link_s *link = ((_ipc_link_client_s *)handle)->link;
+
+    return (link->is_connect == HY_IPC_PROCESS_STATE_CONNECT) ? 1 : 0;
+}
+
 void ipc_link_client_destroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);

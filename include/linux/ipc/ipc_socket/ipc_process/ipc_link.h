@@ -39,8 +39,16 @@ typedef enum {
     IPC_LINK_TYPE_MAX,
 } ipc_link_type_e;
 
+typedef enum {
+    IPC_LINK_MSG_TYPE_RETURN,
+    IPC_LINK_MSG_TYPE_CB,
+    IPC_LINK_MSG_TYPE_INFO,
+
+    IPC_LINK_MSG_TYPE_MAX,
+} ipc_link_msg_type_e;
+
 typedef struct {
-    struct hy_list_head     list;
+    struct hy_list_head     entry;
 
     void                    *ipc_socket_handle;
 
@@ -50,15 +58,27 @@ typedef struct {
     hy_u32_t                use_cnt;
 
     ipc_link_type_e         link_type:2;
-    hy_s32_t                is_connect:1;
+    hy_s32_t                is_connect:2;
     hy_s32_t                reserved;
 } ipc_link_s;
+
+typedef struct {
+    hy_s32_t                total_len;
+    hy_s32_t                type;
+
+    hy_s32_t                pfd1;
+    pthread_t               thread_id;
+
+    hy_s32_t                buf_len;
+    char                    buf[];
+} ipc_link_msg_s;
 
 ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_handle);
 void ipc_link_destroy(ipc_link_s **ipc_link);
 
-hy_s32_t ipc_link_write(ipc_link_s *ipc_link, const void *buf, hy_u32_t len);
+hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);
+hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg);
 
 hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(ipc_link_s *ipc_link,

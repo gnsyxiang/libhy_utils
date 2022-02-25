@@ -30,6 +30,7 @@
 typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
+    pid_t                       pid;
     void                        *ipc_link_handle;
 } _ipc_process_client_context_s;
 
@@ -57,6 +58,8 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
         context = HY_MEM_MALLOC_BREAK(_ipc_process_client_context_s *,
                 sizeof(*context));
 
+        context->pid = getpid();
+
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
@@ -64,6 +67,12 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
                 config->tag, config->timeout_s);
         if (!context->ipc_link_handle) {
             LOGE("ipc_link_client_create failed \n");
+            break;
+        }
+
+        if (0 != ipc_link_client_write_info(context->ipc_link_handle,
+                    context->pid)) {
+            LOGE("ipc_link_client_write_info failed \n");
             break;
         }
 

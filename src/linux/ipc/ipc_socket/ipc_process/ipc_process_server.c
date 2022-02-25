@@ -45,9 +45,14 @@ static void _ipc_process_accept_cb(void *handle, void *args)
 
     _ipc_process_server_context_s *context = args;
 
-    LOGI("ipc_process_server accept new client \n");
+    LOGI("ipc_process_server accept new client: %p \n", handle);
 
-    write(context->pfd[1], handle, sizeof(void *));
+    write(context->pfd[1], &handle, sizeof(void *));
+}
+
+static hy_s32_t _ipc_process_detect_cb(void *args)
+{
+    return 0;
 }
 
 static hy_s32_t _ipc_process_msg_handle_cb(void *args)
@@ -56,13 +61,17 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
     fd_set read_fs = {0};
     struct timeval timeout = {0};
     hy_s32_t ret = 0;
+    char client_link_handle_buf[sizeof(void *)];
     void *client_link_handle = NULL;
 
     while (!context->exit_flag) {
         FD_ZERO(&read_fs);
         FD_SET(context->pfd[0], &read_fs);
 
-        timeout.tv_sec = 5;
+        ipc_link_server_set_fd(context->ipc_link_handle, &read_fs);
+
+        LOGE("-----timeout------haha \n");
+        timeout.tv_sec = 10;
         ret = select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout);
         if (ret < 0) {
             LOGES("select failed \n");
@@ -71,8 +80,11 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
 
         if (FD_ISSET(context->pfd[0], &read_fs)) {
             read(context->pfd[0], &client_link_handle, sizeof(void *));
-            LOGE("---------haha\n");
+            LOGE("---haha, client_link_handle: %p \n", client_link_handle);
         }
+
+        ipc_link_server_detect_fd(context->ipc_link_handle, &read_fs,
+                _ipc_process_detect_cb, context);
     }
 
     return -1;

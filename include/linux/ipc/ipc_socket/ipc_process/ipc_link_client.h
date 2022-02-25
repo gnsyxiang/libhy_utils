@@ -30,6 +30,10 @@ void *ipc_link_client_create(const char *name,
         const char *tag, hy_u32_t timeout_s);
 void ipc_link_client_destroy(void **handle);
 
+hy_s32_t ipc_link_client_is_connect(void *handle);
+
+hy_s32_t ipc_link_client_write_info(void *handle, pid_t pid);
+
 #ifdef __cplusplus
 }
 #endif

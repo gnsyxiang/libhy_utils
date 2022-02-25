@@ -62,31 +62,79 @@ hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s)
     }
 }
 
-hy_s32_t ipc_link_write(ipc_link_s *ipc_link, const void *buf, hy_u32_t len)
+hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg)
 {
-    LOGT("ipc_link: %p, buf: %p, len: %d \n", ipc_link, buf, len);
-    HY_ASSERT(ipc_link);
-    HY_ASSERT(buf);
+    LOGT("ipc_link: %p, &ipc_msg: %p \n", ipc_link, ipc_msg);
+    HY_ASSERT_RET_VAL(!ipc_link || !ipc_msg, -1);
 
-    HyIpcSocketConnectState_e connect_state;
-    hy_s32_t ret = 0;
+    hy_s32_t total_len = 0;
+    char *ipc_link_msg_buf = NULL;
 
-    HyIpcSocketGetInfo(ipc_link->ipc_socket_handle,
-            HY_IPC_SOCKET_INFO_CONNECT_STATE, &connect_state);
-
-    if (connect_state == HY_IPC_SOCKET_CONNECT_STATE_CONNECT) {
-        ret = HyIpcSocketWrite(ipc_link->ipc_socket_handle, &len, sizeof(hy_u32_t));
-        if (ret == sizeof(hy_u32_t)) {
-            ret = HyIpcSocketWrite(ipc_link->ipc_socket_handle, buf, len);
+    do {
+        if (HY_IPC_SOCKET_CONNECT_STATE_CONNECT
+                != HyIpcSocketGetConnectState(ipc_link->ipc_socket_handle)) {
+            LOGE("ipc socket disconnect \n");
+            break;
         }
-    }
 
-    if (ret != (hy_s32_t)len) {
-        LOGE("ipc link write failed \n");
-        return -1;
-    } else {
-        return ret;
-    }
+        if (-1 == HyIpcSocketRead(ipc_link->ipc_socket_handle,
+                    &total_len, sizeof(hy_u32_t))) {
+            LOGE("HyIpcSocketRead failed \n");
+            break;
+        }
+        LOGD("ipc link read total_len: %d \n", total_len);
+
+        ipc_link_msg_buf = HY_MEM_MALLOC_BREAK(char *, total_len);
+        *ipc_msg = (ipc_link_msg_s *)ipc_link_msg_buf;
+
+        if (-1 == HyIpcSocketRead(ipc_link->ipc_socket_handle,
+                    ipc_link_msg_buf, total_len)) {
+            LOGE("HyIpcSocketRead failed \n");
+            break;
+        }
+        LOGD("ipc link read ipc_msg type: %d \n", (*ipc_msg)->type);
+
+        return 0;
+    } while (0);
+
+    return -1;
+}
+
+hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg)
+{
+    LOGT("ipc_link: %p, ipc_msg: %p \n", ipc_link, ipc_msg);
+    HY_ASSERT(ipc_link);
+    HY_ASSERT(ipc_msg);
+
+    hy_s32_t ret = -1;
+
+    do {
+        if (HY_IPC_SOCKET_CONNECT_STATE_CONNECT
+                != HyIpcSocketGetConnectState(ipc_link->ipc_socket_handle)) {
+            LOGE("ipc socket disconnect \n");
+            break;
+        }
+
+        if (-1 == HyIpcSocketWrite(ipc_link->ipc_socket_handle,
+                    &ipc_msg->total_len, sizeof(hy_u32_t))) {
+            LOGE("HyIpcSocketWrite failed \n");
+            break;
+        }
+        LOGD("ipc link write total_len: %d \n", ipc_msg->total_len);
+
+        if (-1 == HyIpcSocketWrite(ipc_link->ipc_socket_handle,
+                    ipc_msg, ipc_msg->total_len)) {
+            LOGE("HyIpcSocketWrite failed \n");
+            break;
+        }
+        LOGD("ipc link write ipc_msg type: %d \n", ipc_msg->type);
+
+        ret = 0;
+    } while (0);
+
+    free(ipc_msg);
+
+    return (ret == 0 ? 0 : -1);
 }
 
 void ipc_link_destroy(ipc_link_s **ipc_link_pp)

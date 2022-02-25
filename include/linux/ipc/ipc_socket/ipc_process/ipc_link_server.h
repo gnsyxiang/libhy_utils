@@ -27,10 +27,15 @@ extern "C" {
 #include "ipc_link.h"
 
 typedef void (*ipc_link_server_accept_cb)(void *handle, void *args);
+typedef hy_s32_t (*ipc_link_server_detect_fd_cb)(void *args);
 
 void *ipc_link_server_create(const char *name, const char *tag,
         ipc_link_server_accept_cb accpet, void *args);
 void ipc_link_server_destroy(void **handle);
+
+void ipc_link_server_set_fd(void *handle, fd_set *read_fs);
+void ipc_link_server_detect_fd(void *handle, fd_set *read_fs,
+        ipc_link_server_detect_fd_cb detect_fd_cb, void *args);
 
 #ifdef __cplusplus
 }
