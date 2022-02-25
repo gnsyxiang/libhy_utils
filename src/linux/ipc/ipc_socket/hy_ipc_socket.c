@@ -99,7 +99,7 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
 
         close(fd);
         return -1;
-    } else if (ret > 0 && ret != (hy_s32_t)len) {
+    } else if (ret >= 0 && ret != (hy_s32_t)len) {
         LOGE("HyFileReadN error \n");
 
         return -1;
