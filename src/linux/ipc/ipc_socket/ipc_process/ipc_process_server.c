@@ -61,7 +61,6 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
     fd_set read_fs = {0};
     struct timeval timeout = {0};
     hy_s32_t ret = 0;
-    char client_link_handle_buf[sizeof(void *)];
     void *client_link_handle = NULL;
 
     while (!context->exit_flag) {
@@ -70,8 +69,7 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
 
         ipc_link_server_set_fd(context->ipc_link_handle, &read_fs);
 
-        LOGE("-----timeout------haha \n");
-        timeout.tv_sec = 10;
+        timeout.tv_sec = 5;
         ret = select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout);
         if (ret < 0) {
             LOGES("select failed \n");

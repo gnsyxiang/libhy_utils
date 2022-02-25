@@ -82,7 +82,6 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg)
             LOGE("HyIpcSocketRead failed \n");
             break;
         }
-        LOGD("ipc link read total_len: %d \n", total_len);
 
         ipc_link_msg_buf = HY_MEM_MALLOC_BREAK(char *, total_len);
         *ipc_msg = (ipc_link_msg_s *)ipc_link_msg_buf;
@@ -92,7 +91,6 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg)
             LOGE("HyIpcSocketRead failed \n");
             break;
         }
-        LOGD("ipc link read ipc_msg type: %d \n", (*ipc_msg)->type);
 
         return 0;
     } while (0);
@@ -120,14 +118,12 @@ hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg)
             LOGE("HyIpcSocketWrite failed \n");
             break;
         }
-        LOGD("ipc link write total_len: %d \n", ipc_msg->total_len);
 
         if (-1 == HyIpcSocketWrite(ipc_link->ipc_socket_handle,
                     ipc_msg, ipc_msg->total_len)) {
             LOGE("HyIpcSocketWrite failed \n");
             break;
         }
-        LOGD("ipc link write ipc_msg type: %d \n", ipc_msg->type);
 
         ret = 0;
     } while (0);

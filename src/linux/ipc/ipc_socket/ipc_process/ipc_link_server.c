@@ -59,6 +59,10 @@ void ipc_link_server_detect_fd(void *handle, fd_set *read_fs,
         if (FD_ISSET(fd, read_fs)) {
             if (0 != ipc_link_read(pos, &ipc_msg)) {
                 LOGE("ipc_link_read failed \n");
+
+                hy_list_del(&pos->entry);
+                ipc_link_destroy(&pos);
+
                 continue;
             }
 
@@ -80,6 +84,10 @@ void ipc_link_server_detect_fd(void *handle, fd_set *read_fs,
             ret = detect_fd_cb(args);
             if (0 != ret) {
                 LOGE("\n");
+            }
+
+            if (ipc_msg) {
+                HY_MEM_FREE_P(ipc_msg);
             }
         }
     }
