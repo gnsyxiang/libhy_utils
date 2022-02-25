@@ -55,6 +55,24 @@ static hy_s32_t _ipc_process_detect_cb(void *args)
     return 0;
 }
 
+static hy_s32_t _ipc_process_detect_fd_info_cb(void *handle, void *args)
+{
+    LOGT("handle: %p, args: %p \n", handle, args);
+    HY_ASSERT_RET_VAL(!handle || !args, -1);
+
+    _ipc_process_server_context_s *context = args;
+    HyIpcProcessInfo_s ipc_process_info;
+
+    ipc_link_get_info(handle, &ipc_process_info);
+
+    HyIpcProcessSaveConfig_s *save_config = &context->save_config;
+    if (save_config->connect_change) {
+        save_config->connect_change(&ipc_process_info, save_config->args);
+    }
+
+    return 0;
+}
+
 static hy_s32_t _ipc_process_msg_handle_cb(void *args)
 {
     _ipc_process_server_context_s *context = args;
@@ -69,7 +87,7 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
 
         ipc_link_server_set_fd(context->ipc_link_handle, &read_fs);
 
-        timeout.tv_sec = 5;
+        timeout.tv_sec = 1;
         ret = select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout);
         if (ret < 0) {
             LOGES("select failed \n");
@@ -79,10 +97,16 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
         if (FD_ISSET(context->pfd[0], &read_fs)) {
             read(context->pfd[0], &client_link_handle, sizeof(void *));
             LOGE("---haha, client_link_handle: %p \n", client_link_handle);
+
+            // 发送info消息给对方
         }
 
+        ipc_link_server_detect_fd_cb_s detect_fd_cb;
+        detect_fd_cb.detect_fd_info_cb = _ipc_process_detect_fd_info_cb;
+        detect_fd_cb.args = context;
+
         ipc_link_server_detect_fd(context->ipc_link_handle, &read_fs,
-                _ipc_process_detect_cb, context);
+                &detect_fd_cb);
     }
 
     return -1;

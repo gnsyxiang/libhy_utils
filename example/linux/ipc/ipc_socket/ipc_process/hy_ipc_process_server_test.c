@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
@@ -44,11 +45,15 @@ typedef struct {
     hy_s32_t    exit_flag;
 } _main_context_t;
 
-static void _ipc_process_connect_change_cb(void *handle,
-        HyIpcProcessConnectState_e is_connect, void *args)
+static void _ipc_process_connect_change_cb(
+        HyIpcProcessInfo_s *ipc_process_info, const void *args)
 {
-    LOGD("%s \n", is_connect == HY_IPC_PROCESS_STATE_CONNECT
-            ? "connect" : "disconnect");
+    HY_ASSERT_RET(!ipc_process_info);
+
+    LOGI("new ipc process connect, ipd_name: %s, tag: %s, pid: %d \n",
+            ipc_process_info->ipc_name,
+            ipc_process_info->tag,
+            ipc_process_info->pid);
 }
 
 static hy_s32_t _ipc_process_test_cb(void *server_handle,

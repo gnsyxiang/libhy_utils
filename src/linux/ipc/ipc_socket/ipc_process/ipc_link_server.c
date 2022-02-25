@@ -39,16 +39,16 @@ typedef struct {
 } _ipc_link_server_s;
 
 void ipc_link_server_detect_fd(void *handle, fd_set *read_fs,
-        ipc_link_server_detect_fd_cb detect_fd_cb, void *args)
+        ipc_link_server_detect_fd_cb_s *detect_fd_cb)
 {
-    LOGT("handle: %p, read_fs: %p, detect_fd_cb: %p, void *args: %p \n",
-            handle, read_fs, detect_fd_cb, args);
+    LOGT("handle: %p, read_fs: %p, detect_fd_cb: %p \n",
+            handle, read_fs, detect_fd_cb);
     HY_ASSERT_RET(!handle || !read_fs || !detect_fd_cb);
 
     _ipc_link_server_s *server_link = handle;
     ipc_link_msg_s *ipc_msg = NULL;
     hy_s32_t fd = 0;
-    hy_s32_t ret = 0;
+    pid_t pid;
     ipc_link_s *pos, *n;
 
     pthread_mutex_lock(&server_link->mutex);
@@ -74,16 +74,14 @@ void ipc_link_server_detect_fd(void *handle, fd_set *read_fs,
                     LOGE("--------haha----cb \n");
                     break;
                 case IPC_LINK_MSG_TYPE_INFO:
-                    LOGE("--------haha----info \n");
+                    pid = *(pid_t *)(ipc_msg->buf + HY_STRLEN(ipc_msg->buf) + 1);
+                    ipc_link_set_info(pos, ipc_msg->buf, pid);
+                    if (detect_fd_cb) {
+                        detect_fd_cb->detect_fd_info_cb(pos, detect_fd_cb->args);
+                    }
                     break;
                 default:
                     break;
-            }
-
-            // 处理数据，回调
-            ret = detect_fd_cb(args);
-            if (0 != ret) {
-                LOGE("\n");
             }
 
             if (ipc_msg) {

@@ -28,6 +28,12 @@ extern "C" {
 
 typedef void (*ipc_link_server_accept_cb)(void *handle, void *args);
 typedef hy_s32_t (*ipc_link_server_detect_fd_cb)(void *args);
+typedef hy_s32_t (*ipc_link_server_detect_fd_info_cb_t)(void *handle, void *args);
+
+typedef struct {
+    ipc_link_server_detect_fd_info_cb_t detect_fd_info_cb;
+    void *args;
+} ipc_link_server_detect_fd_cb_s;
 
 void *ipc_link_server_create(const char *name, const char *tag,
         ipc_link_server_accept_cb accpet, void *args);
@@ -35,7 +41,7 @@ void ipc_link_server_destroy(void **handle);
 
 void ipc_link_server_set_fd(void *handle, fd_set *read_fs);
 void ipc_link_server_detect_fd(void *handle, fd_set *read_fs,
-        ipc_link_server_detect_fd_cb detect_fd_cb, void *args);
+        ipc_link_server_detect_fd_cb_s *detect_fd_cb);
 
 #ifdef __cplusplus
 }

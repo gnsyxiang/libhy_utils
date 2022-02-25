@@ -80,6 +80,9 @@ void ipc_link_destroy(ipc_link_s **ipc_link);
 hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);
 hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg);
 
+void ipc_link_set_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
+void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_info);
+
 hy_s32_t ipc_link_connect(ipc_link_s *ipc_link, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(ipc_link_s *ipc_link,
         HyIpcSocketAcceptCb_t accept_cb, void *args);

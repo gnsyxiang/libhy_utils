@@ -90,8 +90,8 @@ typedef struct {
  * @param is_connect 连接或断开
  * @param args 上层参数
  */
-typedef void (*HyIpcProcessConnectChangeCb_t)(void *handle,
-        HyIpcProcessConnectState_e is_connect, void *args);
+typedef void (*HyIpcProcessConnectChangeCb_t)(
+        HyIpcProcessInfo_s *ipc_process_info, const void *args);
 
 /**
  * @brief 配置参数

@@ -26,6 +26,26 @@
 
 #include "ipc_link.h"
 
+void ipc_link_set_info(ipc_link_s *ipc_link, const char *tag, pid_t pid)
+{
+    LOGT("ipc_link: %p, tag: %s, pid: %d \n", ipc_link, tag, pid);
+    HY_ASSERT_RET(!ipc_link || !tag);
+
+    ipc_link->pid = pid;
+    HY_STRNCPY(ipc_link->tag, HY_IPC_PROCESS_IPC_NAME_LEN_MAX / 2,
+            tag, HY_STRLEN(tag));
+}
+
+void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_info)
+{
+    LOGT("ipc_link: %p, ipc_process_info: %p \n", ipc_link, ipc_process_info);
+    HY_ASSERT_RET(!ipc_link || !ipc_process_info);
+
+    ipc_process_info->tag       = ipc_link->tag;
+    ipc_process_info->pid       = ipc_link->pid;
+    ipc_process_info->ipc_name  = HyIpcSocketGetName(ipc_link->ipc_socket_handle);
+}
+
 hy_s32_t ipc_link_wait_accept(ipc_link_s *ipc_link,
         HyIpcSocketAcceptCb_t accept_cb, void *args)
 {
