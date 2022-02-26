@@ -32,12 +32,12 @@ typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
     pid_t                       pid;
-    ipc_link_s                  *ipc_link_handle;
-    void                        *handle_msg_thread_handle;
+    ipc_link_s                  *ipc_link_h;
+    void                        *handle_msg_thread_h;
     hy_s32_t                    exit_flag;
 } _ipc_process_client_context_s;
 
-static hy_s32_t _ipc_process_msg_handle_cb(void *args)
+static hy_s32_t _process_handle_msg_cb(void *args)
 {
     _ipc_process_client_context_s *context = args;
     fd_set read_fs = {0};
@@ -46,7 +46,7 @@ static hy_s32_t _ipc_process_msg_handle_cb(void *args)
     hy_s32_t fd = 0;
 
     while (!context->exit_flag) {
-        fd = ipc_link_get_fd(context->ipc_link_handle);
+        fd = ipc_link_get_fd(context->ipc_link_h);
 
         FD_ZERO(&read_fs);
         FD_SET(fd, &read_fs);
@@ -73,9 +73,9 @@ void ipc_process_client_destroy(void **handle)
     _ipc_process_client_context_s *context = *handle;
 
     context->exit_flag = 1;
-    HyThreadDestroy(&context->handle_msg_thread_handle);
+    HyThreadDestroy(&context->handle_msg_thread_h);
 
-    ipc_link_destroy(&context->ipc_link_handle);
+    ipc_link_destroy(&context->ipc_link_h);
 
     LOGI("ipc process client destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -97,27 +97,26 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        context->ipc_link_handle = ipc_link_create(config->ipc_name,
+        context->ipc_link_h = ipc_link_create(config->ipc_name,
                 config->tag, IPC_LINK_TYPE_CLIENT, NULL);
-        if (!context->ipc_link_handle) {
+        if (!context->ipc_link_h) {
             LOGE("ipc_link_create failed \n");
             break;
         }
 
-        if (0 != ipc_link_connect(context->ipc_link_handle, config->timeout_s)) {
+        if (0 != ipc_link_connect(context->ipc_link_h, config->timeout_s)) {
             LOGE("ipc_link_connect failed \n");
             break;
         }
 
-        if (0 != ipc_link_write_info(context->ipc_link_handle,
-                    context->pid)) {
+        if (0 != ipc_link_write_info(context->ipc_link_h, context->pid)) {
             LOGE("ipc_link_write_info failed \n");
             break;
         }
 
-        context->handle_msg_thread_handle = HyThreadCreate_m("hy_c_handle_msg",
-                _ipc_process_msg_handle_cb, context);
-        if (!context->handle_msg_thread_handle) {
+        context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
+                _process_handle_msg_cb, context);
+        if (!context->handle_msg_thread_h) {
             LOGE("HyThreadCreate_m failed \n");
             break;
         }

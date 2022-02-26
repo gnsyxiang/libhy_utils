@@ -28,8 +28,8 @@ extern "C" {
 #include <unistd.h>
 #include <pthread.h>
 
-#include "hy_ipc_socket.h"
 #include "hy_list.h"
+#include "hy_ipc_socket.h"
 #include "hy_ipc_process.h"
 
 typedef enum {
