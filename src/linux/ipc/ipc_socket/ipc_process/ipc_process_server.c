@@ -38,6 +38,22 @@ typedef struct {
     hy_s32_t                    exit_flag;
 } _ipc_process_server_context_s;
 
+static void _process_server_parse_info_cb(HyIpcProcessInfo_s *ipc_process_info,
+        HyIpcProcessConnectState_e is_connect, void *args)
+{
+    LOGT("ipc_process_info: %p, is_connect: %d, args: %p \n",
+            ipc_process_info, is_connect, args);
+    HY_ASSERT_RET(!ipc_process_info || !args);
+
+    _ipc_process_server_context_s *context = args;
+    HyIpcProcessSaveConfig_s *save_config = &context->save_config;
+
+    if (save_config->connect_change) {
+        save_config->connect_change(ipc_process_info,
+                is_connect, save_config->args);
+    }
+}
+
 static void _process_server_link_manager_accept_cb(void *handle, void *args)
 {
     LOGT("handle: %p, args: %p \n", handle, args);
@@ -64,7 +80,7 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
     struct hy_list_head *client_link_list = NULL;
     ipc_link_parse_msg_cb_s parse_msg_cb;
 
-    parse_msg_cb.parse_info_cb = context->save_config.connect_change;
+    parse_msg_cb.parse_info_cb = _process_server_parse_info_cb;
     parse_msg_cb.args = context;
 
     LOGI("ipc process server handle msg start \n");
