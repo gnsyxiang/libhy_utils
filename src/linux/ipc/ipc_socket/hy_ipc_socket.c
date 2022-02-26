@@ -27,6 +27,7 @@
 
 #include "ipc_socket_client.h"
 #include "ipc_socket_server.h"
+#include "hy_ipc_socket.h"
 
 hy_s32_t HyIpcSocketConnect(void *handle, hy_u32_t timeout_s)
 {
@@ -45,24 +46,12 @@ hy_s32_t HyIpcSocketAccept(void *handle,
     return ipc_socket_server_accept(handle, accept_cb, args);
 }
 
-hy_s32_t HyIpcSocketGetFD(void *handle)
+HyIpcSocketConnectState_e HyIpcSocketGetConnectState(void *handle)
 {
     LOGT("handle: %p \n", handle);
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle, HY_IPC_SOCKET_CONNECT_STATE_MAX);
 
-    ipc_socket_s *socket = handle;
-
-    return socket->fd;
-}
-
-const char *HyIpcSocketGetName(void *handle)
-{
-    LOGT("handle: %p \n", handle);
-    HY_ASSERT_RET_VAL(!handle, NULL);
-
-    ipc_socket_s *socket = handle;
-
-    return socket->ipc_name;
+    return ((ipc_socket_s *)handle)->connect_state;
 }
 
 HyIpcSocketType_e HyIpcSocketGetType(void *handle)
@@ -70,19 +59,23 @@ HyIpcSocketType_e HyIpcSocketGetType(void *handle)
     LOGT("handle: %p \n", handle);
     HY_ASSERT_RET_VAL(!handle, HY_IPC_SOCKET_TYPE_MAX);
 
-    ipc_socket_s *socket = handle;
-
-    return socket->type;
+    return ((ipc_socket_s *)handle)->type;
 }
 
-HyIpcSocketConnectState_e HyIpcSocketGetConnectState(void *handle)
+const char *HyIpcSocketGetName(void *handle)
 {
     LOGT("handle: %p \n", handle);
-    HY_ASSERT_RET_VAL(!handle, HY_IPC_SOCKET_CONNECT_STATE_MAX);
+    HY_ASSERT_RET_VAL(!handle, NULL);
 
-    ipc_socket_s *socket = handle;
+    return ((ipc_socket_s *)handle)->ipc_name;
+}
 
-    return socket->connect_state;
+hy_s32_t HyIpcSocketGetFD(void *handle)
+{
+    LOGT("handle: %p \n", handle);
+    HY_ASSERT_RET_VAL(!handle, -1);
+
+    return ((ipc_socket_s *)handle)->fd;
 }
 
 hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
@@ -95,12 +88,12 @@ hy_s32_t HyIpcSocketRead(void *handle, void *buf, hy_u32_t len)
 
     ret = HyFileReadN(fd, buf, len);
     if (-1 == ret) {
-        LOGE("HyFileReadN failed \n");
+        LOGE("hy file read n failed \n");
 
         close(fd);
         return -1;
     } else if (ret >= 0 && ret != (hy_s32_t)len) {
-        LOGE("HyFileReadN error \n");
+        LOGE("hy file read n error \n");
 
         return -1;
     } else {
@@ -133,7 +126,7 @@ void HyIpcSocketDestroy(void **handle)
 
 void *HyIpcSocketCreate(HyIpcSocketConfig_s *config)
 {
-    LOGT("ipc socket config: %p \n", config);
+    LOGT("config: %p \n", config);
     HY_ASSERT_RET_VAL(!config, NULL);
 
     void *(*socket_create[HY_IPC_SOCKET_TYPE_MAX])(const char *ipc_name,

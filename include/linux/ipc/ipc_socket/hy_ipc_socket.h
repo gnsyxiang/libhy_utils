@@ -26,7 +26,7 @@ extern "C" {
 
 #include "hy_hal/hy_type.h"
 
-#define HY_IPC_SOCKET_NAME_LEN_MAX  (64)
+#define HY_IPC_SOCKET_NAME_LEN_MAX              (64)
 
 /**
  * @brief ipc socket类型
@@ -42,8 +42,8 @@ typedef enum {
  * @brief ipc socket连接状态
  */
 typedef enum {
-    HY_IPC_SOCKET_CONNECT_STATE_DISCONNECT,
-    HY_IPC_SOCKET_CONNECT_STATE_CONNECT,
+    HY_IPC_SOCKET_CONNECT_STATE_DISCONNECT,     ///< 断开
+    HY_IPC_SOCKET_CONNECT_STATE_CONNECT,        ///< 连接
 
     HY_IPC_SOCKET_CONNECT_STATE_MAX,
 } HyIpcSocketConnectState_e;

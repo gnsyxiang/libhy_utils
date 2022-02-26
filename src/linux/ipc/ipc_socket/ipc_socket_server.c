@@ -31,7 +31,7 @@
 #include "ipc_socket_server.h"
 
 typedef struct {
-    ipc_socket_s    socket;         // 放在前面，用于强制类型转换
+    ipc_socket_s    ipc_socket;         // 放在前面，用于强制类型转换
 
     hy_s32_t        pipe_fd[2];
     hy_s32_t        exit_flag:1;
@@ -49,18 +49,18 @@ hy_s32_t ipc_socket_server_accept(void *handle,
     fd_set read_fs;
     ipc_socket_s *new_socket = NULL;
     _ipc_socket_server_s *socket_server = handle;
-    ipc_socket_s *socket = &socket_server->socket;
+    ipc_socket_s *ipc_socket = &socket_server->ipc_socket;
 
-    if (listen(socket->fd, SOMAXCONN) < 0) {
-        LOGES("listen failed, fd: %d \n", socket->fd);
+    if (listen(ipc_socket->fd, SOMAXCONN) < 0) {
+        LOGES("listen failed, fd: %d \n", ipc_socket->fd);
         return -1;
     }
 
-    LOGI("accept start \n");
+    LOGI("ipc socket server accept start \n");
 
     while (!socket_server->exit_flag) {
         FD_ZERO(&read_fs);
-        FD_SET(socket->fd, &read_fs);
+        FD_SET(ipc_socket->fd, &read_fs);
         FD_SET(socket_server->pipe_fd[0], &read_fs);
 
         if (select(FD_SETSIZE, &read_fs, NULL, NULL, NULL) < 0) {
@@ -76,30 +76,30 @@ hy_s32_t ipc_socket_server_accept(void *handle,
             break;
         }
 
-        if (FD_ISSET(socket->fd, &read_fs)) {
-            fd = accept(socket->fd, NULL, NULL);
+        if (FD_ISSET(ipc_socket->fd, &read_fs)) {
+            fd = accept(ipc_socket->fd, NULL, NULL);
             if (fd < 0) {
-                LOGES("accept failed, fd: %d \n", socket->fd);
+                LOGES("accept failed, fd: %d \n", ipc_socket->fd);
                 break;
             }
 
-            new_socket = ipc_socket_create(fd, socket->ipc_name,
+            new_socket = ipc_socket_create(fd, ipc_socket->ipc_name,
                     HY_IPC_SOCKET_TYPE_CLIENT);
             if (!new_socket) {
-                LOGE("ipc_socket_create failed \n");
+                LOGE("ipc socket create failed \n");
                 break;
             }
 
             new_socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
 
-            LOGI("accept new client socket, socket: %p, fd: %d \n",
+            LOGI("accept new client ipc socket, ipc_socket: %p, fd: %d \n",
                     new_socket, new_socket->fd);
 
             accept_cb(new_socket, args);
         }
     }
 
-    LOGI("accept stop \n");
+    LOGI("ipc socket server accept stop \n");
     socket_server->wait_exit_flag = 1;
 
     return -1;
@@ -122,7 +122,7 @@ void ipc_socket_server_destroy(void **handle)
     close(socket_server->pipe_fd[0]);
     close(socket_server->pipe_fd[1]);
 
-    ipc_socket_destroy_2(&socket_server->socket);
+    ipc_socket_destroy_2(&socket_server->ipc_socket);
 
     LOGI("ipc socket server destroy, socket_server: %p, "
             "pipe_fd[0]: %d, pipe_fd[1]: %d \n",
@@ -150,9 +150,9 @@ void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type)
             break;
         }
 
-        ipc_socket_s *socket = &socket_server->socket;
-        if (0 != ipc_socket_create_2(socket, ipc_name, type)) {
-            LOGE("ipc_socket_create_2 failed \n");
+        ipc_socket_s *ipc_socket = &socket_server->ipc_socket;
+        if (0 != ipc_socket_create_2(ipc_socket, ipc_name, type)) {
+            LOGE("ipc socket create 2 failed \n");
             break;
         }
 
@@ -164,12 +164,12 @@ void *ipc_socket_server_create(const char *ipc_name, HyIpcSocketType_e type)
             remove(ipc_path);
         }
 
-        if (bind(socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
-            LOGES("bind failed, fd: %d \n", socket->fd);
+        if (bind(ipc_socket->fd, (const struct sockaddr *)&addr, addr_len) < 0) {
+            LOGES("bind failed, fd: %d \n", ipc_socket->fd);
             break;
         }
 
-        socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
+        ipc_socket->connect_state = HY_IPC_SOCKET_CONNECT_STATE_CONNECT;
 
         LOGI("ipc socket server create, socket_server: %p, "
                 "pipe_fd[0]: %d, pipe_fd[1]: %d \n",
