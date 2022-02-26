@@ -35,6 +35,7 @@ typedef struct {
 
     hy_s32_t        pipe_fd[2];
     hy_s32_t        exit_flag:1;
+    hy_s32_t        wait_exit_flag:1;
     hy_s32_t        reserved;
 } _ipc_socket_server_s;
 
@@ -99,6 +100,7 @@ hy_s32_t ipc_socket_server_accept(void *handle,
     }
 
     LOGI("accept stop \n");
+    socket_server->wait_exit_flag = 1;
 
     return -1;
 }
@@ -113,7 +115,9 @@ void ipc_socket_server_destroy(void **handle)
     socket_server->exit_flag = 1;
     write(socket_server->pipe_fd[1], socket_server, sizeof(*socket_server));
 
-    usleep(10 * 1000);
+    while (!socket_server->wait_exit_flag) {
+        usleep(10 * 1000);
+    }
 
     close(socket_server->pipe_fd[0]);
     close(socket_server->pipe_fd[1]);
