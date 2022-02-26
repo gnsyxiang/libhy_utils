@@ -38,24 +38,6 @@ typedef struct {
     hy_s32_t                    exit_flag;
 } _ipc_process_server_context_s;
 
-static hy_s32_t _process_server_parse_info_cb(void *handle, void *args)
-{
-    LOGT("handle: %p, args: %p \n", handle, args);
-    HY_ASSERT_RET_VAL(!handle || !args, -1);
-
-    _ipc_process_server_context_s *context = args;
-    HyIpcProcessInfo_s ipc_process_info;
-
-    ipc_link_get_info(handle, &ipc_process_info);
-
-    HyIpcProcessSaveConfig_s *save_config = &context->save_config;
-    if (save_config->connect_change) {
-        save_config->connect_change(&ipc_process_info, save_config->args);
-    }
-
-    return 0;
-}
-
 static void _process_server_link_manager_accept_cb(void *handle, void *args)
 {
     LOGT("handle: %p, args: %p \n", handle, args);
@@ -80,12 +62,12 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
     hy_s32_t fd = 0;
     void *client_link_handle = NULL;
     struct hy_list_head *client_link_list = NULL;
-    ipc_link_manager_parse_cb_s parse_cb;
+    ipc_link_parse_msg_cb_s parse_msg_cb;
 
-    parse_cb.parse_info_cb = _process_server_parse_info_cb;
-    parse_cb.args = context;
+    parse_msg_cb.parse_info_cb = context->save_config.connect_change;
+    parse_msg_cb.args = context;
 
-    LOGI("ipc process handle msg start \n");
+    LOGI("ipc process server handle msg start \n");
 
     while (!context->exit_flag) {
         FD_ZERO(&read_fs);
@@ -120,7 +102,7 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
             fd = ipc_link_get_fd(pos);
 
             if (FD_ISSET(fd, &read_fs)) {
-                if (-1 == ipc_link_manager_parse_msg(pos, &parse_cb)) {
+                if (-1 == ipc_link_parse_msg(pos, &parse_msg_cb)) {
                     hy_list_del(&pos->entry);
                     ipc_link_destroy(&pos);
 
@@ -131,7 +113,7 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
         ipc_link_manager_put_list(context->ipc_link_manager_h);
     }
 
-    LOGI("ipc process handle msg stop \n");
+    LOGI("ipc process server handle msg stop \n");
 
     return -1;
 }

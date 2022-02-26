@@ -27,12 +27,6 @@ extern "C" {
 #include "ipc_link.h"
 
 typedef void (*ipc_link_manager_accept_cb_t)(void *handle, void *args);
-typedef hy_s32_t (*ipc_link_manager_parse_info_cb_t)(void *handle, void *args);
-
-typedef struct {
-    ipc_link_manager_parse_info_cb_t    parse_info_cb;
-    void                                *args;
-} ipc_link_manager_parse_cb_s;
 
 typedef struct {
     ipc_link_s                          *link;
@@ -51,9 +45,6 @@ void ipc_link_manager_destroy(void **handle);
 
 struct hy_list_head *ipc_link_manager_get_list(void *handle);
 void ipc_link_manager_put_list(void *handle);
-
-hy_s32_t ipc_link_manager_parse_msg(ipc_link_s *ipc_link,
-        ipc_link_manager_parse_cb_s *parse_cb);
 
 #ifdef __cplusplus
 }

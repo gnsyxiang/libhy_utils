@@ -73,6 +73,11 @@ typedef struct {
     char                    buf[];
 } ipc_link_msg_s;
 
+typedef struct {
+    HyIpcProcessConnectChangeCb_t   parse_info_cb;
+    void                            *args;
+} ipc_link_parse_msg_cb_s;
+
 ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_handle);
 void ipc_link_destroy(ipc_link_s **ipc_link);
@@ -81,6 +86,8 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);
 hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg);
 
 hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, pid_t pid);
+hy_s32_t ipc_link_parse_msg(ipc_link_s *ipc_link,
+        ipc_link_parse_msg_cb_s *parse_msg_cb);
 
 void ipc_link_set_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
 void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_info);

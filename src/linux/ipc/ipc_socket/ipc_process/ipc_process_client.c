@@ -37,17 +37,27 @@ typedef struct {
     hy_s32_t                    exit_flag;
 } _ipc_process_client_context_s;
 
-static hy_s32_t _process_handle_msg_cb(void *args)
+static hy_s32_t _process_client_handle_msg_cb(void *args)
 {
+    LOGT("args: %p \n", args);
+    HY_ASSERT_RET_VAL(!args, -1);
+
     _ipc_process_client_context_s *context = args;
+    HyIpcProcessSaveConfig_s *save_config = &context->save_config;
     fd_set read_fs = {0};
     struct timeval timeout = {0};
     hy_s32_t ret = 0;
     hy_s32_t fd = 0;
+    ipc_link_parse_msg_cb_s parse_msg_cb;
+
+    LOGI("ipc process client handle msg start \n");
+
+    parse_msg_cb.parse_info_cb = save_config->connect_change;
+    parse_msg_cb.args = save_config->args;
+
+    fd = ipc_link_get_fd(context->ipc_link_h);
 
     while (!context->exit_flag) {
-        fd = ipc_link_get_fd(context->ipc_link_h);
-
         FD_ZERO(&read_fs);
         FD_SET(fd, &read_fs);
 
@@ -59,8 +69,19 @@ static hy_s32_t _process_handle_msg_cb(void *args)
         }
 
         if (FD_ISSET(fd, &read_fs)) {
+            if (-1 == ipc_link_parse_msg(context->ipc_link_h, &parse_msg_cb)) {
+                LOGE("ipc link parse msg failed \n");
+
+                if (save_config->connect_change) {
+                    save_config->connect_change(NULL,
+                            HY_IPC_PROCESS_STATE_DISCONNECT, save_config->args);
+                }
+                break;
+            }
         }
     }
+
+    LOGI("ipc process client handle msg stop \n");
 
     return -1;
 }
@@ -100,24 +121,24 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
         context->ipc_link_h = ipc_link_create(config->ipc_name,
                 config->tag, IPC_LINK_TYPE_CLIENT, NULL);
         if (!context->ipc_link_h) {
-            LOGE("ipc_link_create failed \n");
+            LOGE("ipc link create failed \n");
             break;
         }
 
         if (0 != ipc_link_connect(context->ipc_link_h, config->timeout_s)) {
-            LOGE("ipc_link_connect failed \n");
+            LOGE("ipc link connect failed \n");
             break;
         }
 
         if (0 != ipc_link_write_info(context->ipc_link_h, context->pid)) {
-            LOGE("ipc_link_write_info failed \n");
+            LOGE("ipc link write info failed \n");
             break;
         }
 
         context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
-                _process_handle_msg_cb, context);
+                _process_client_handle_msg_cb, context);
         if (!context->handle_msg_thread_h) {
-            LOGE("HyThreadCreate_m failed \n");
+            LOGE("hy thread create failed \n");
             break;
         }
 

@@ -27,44 +27,6 @@
 
 #include "ipc_link_manager.h"
 
-hy_s32_t ipc_link_manager_parse_msg(ipc_link_s *ipc_link,
-        ipc_link_manager_parse_cb_s *parse_cb)
-{
-    ipc_link_msg_s *ipc_msg = NULL;
-    pid_t pid = 0;
-
-    if (0 != ipc_link_read(ipc_link, &ipc_msg)) {
-        LOGE("ipc link read failed \n");
-        return -1;
-    }
-
-    switch (ipc_msg->type) {
-        case IPC_LINK_MSG_TYPE_RETURN:
-            LOGE("--------haha----return \n");
-            break;
-        case IPC_LINK_MSG_TYPE_CB:
-            LOGE("--------haha----cb \n");
-            break;
-        case IPC_LINK_MSG_TYPE_INFO:
-            pid = *(pid_t *)(ipc_msg->buf + HY_STRLEN(ipc_msg->buf) + 1);
-            ipc_link_set_info(ipc_link, ipc_msg->buf, pid);
-
-            if (parse_cb) {
-                parse_cb->parse_info_cb(ipc_link, parse_cb->args);
-            }
-            break;
-        default:
-            LOGE("error ipc_msg type\n");
-            break;
-    }
-
-    if (ipc_msg) {
-        HY_MEM_FREE_P(ipc_msg);
-    }
-
-    return 0;
-}
-
 struct hy_list_head *ipc_link_manager_get_list(void *handle)
 {
     LOGT("handle: %p \n", handle);
@@ -135,6 +97,7 @@ void ipc_link_manager_destroy(void **handle)
     ipc_link_manager_s *ipc_link_manager = *handle;
     ipc_link_s *pos, *n;
 
+    ipc_link_destroy(&ipc_link_manager->link);
     HyThreadDestroy(&ipc_link_manager->link_manager_thread_h);
 
     pthread_mutex_lock(&ipc_link_manager->mutex);
@@ -148,7 +111,6 @@ void ipc_link_manager_destroy(void **handle)
     pthread_mutex_unlock(&ipc_link_manager->mutex);
 
     pthread_mutex_destroy(&ipc_link_manager->mutex);
-    ipc_link_destroy(&ipc_link_manager->link);
 
     LOGI("link manager destroy, ipc_link_manager: %p \n", ipc_link_manager);
     HY_MEM_FREE_PP(handle);
@@ -180,16 +142,10 @@ void *ipc_link_manager_create(const char *name, const char *tag,
             break;
         }
 
-        HyThreadConfig_s thread_config;
-        HyThreadSaveConfig_s *save_config = &thread_config.save_config;
-        HY_MEMSET(&thread_config, sizeof(thread_config));
-        #define _LINK_MANAGER_THREAD_NAME "link_manager_accept"
-        HY_STRNCPY(save_config->name, HY_THREAD_NAME_LEN_MAX,
-                _LINK_MANAGER_THREAD_NAME, HY_STRLEN(_LINK_MANAGER_THREAD_NAME));
-        save_config->destroy_flag   = HY_THREAD_DESTROY_FORCE;
-        save_config->thread_loop_cb = _link_manager_wait_accept_cb;
-        save_config->args           = ipc_link_manager;
-        ipc_link_manager->link_manager_thread_h = HyThreadCreate(&thread_config);
+        ipc_link_manager->link_manager_thread_h = HyThreadCreate_m(
+                "link_manager_accept",
+                _link_manager_wait_accept_cb,
+                ipc_link_manager);
         if (!ipc_link_manager->link_manager_thread_h) {
             LOGE("hy thread create failed \n");
             break;

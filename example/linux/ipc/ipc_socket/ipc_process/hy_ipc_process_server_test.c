@@ -46,14 +46,24 @@ typedef struct {
 } _main_context_t;
 
 static void _ipc_process_connect_change_cb(
-        HyIpcProcessInfo_s *ipc_process_info, const void *args)
+        HyIpcProcessInfo_s *ipc_process_info,
+        HyIpcProcessConnectState_e is_connect, void *args)
 {
-    HY_ASSERT_RET(!ipc_process_info);
+    LOGT("ipc_process_info: %p, is_connect: %d, args: %p \n",
+            ipc_process_info, is_connect, args);
 
+    _main_context_t *context = args;
+
+    if (HY_IPC_PROCESS_STATE_CONNECT == is_connect) {
     LOGI("new ipc process connect, ipd_name: %s, tag: %s, pid: %d \n",
             ipc_process_info->ipc_name,
             ipc_process_info->tag,
             ipc_process_info->pid);
+    } else {
+        LOGI("ipc process client stop \n");
+
+        context->exit_flag = 1;
+    }
 }
 
 static hy_s32_t _ipc_process_test_cb(void *server_handle,

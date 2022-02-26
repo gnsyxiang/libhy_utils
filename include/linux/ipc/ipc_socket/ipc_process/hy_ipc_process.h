@@ -91,14 +91,15 @@ typedef struct {
  * @param args 上层参数
  */
 typedef void (*HyIpcProcessConnectChangeCb_t)(
-        HyIpcProcessInfo_s *ipc_process_info, const void *args);
+        HyIpcProcessInfo_s *ipc_process_info,
+        HyIpcProcessConnectState_e is_connect, void *args);
 
 /**
  * @brief 配置参数
  */
 typedef struct {
     HyIpcProcessConnectChangeCb_t   connect_change;     ///< ipc_process状态回调函数
-    const void                      *args;              ///< 上层传递参数
+    void                            *args;              ///< 上层传递参数
     HyIpcProcessType_e              type:2;             ///< ipc_process类型
     hy_s32_t                        reserved;           ///< 预留
 } HyIpcProcessSaveConfig_s;
