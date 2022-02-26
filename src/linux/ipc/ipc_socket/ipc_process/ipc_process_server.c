@@ -31,19 +31,14 @@
 typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
-    void                        *ipc_server_link_h;
+    void                        *ipc_link_manager_h;
 
     hy_s32_t                    pfd[2];
     void                        *handle_msg_thread_h;
     hy_s32_t                    exit_flag;
 } _ipc_process_server_context_s;
 
-static hy_s32_t _ipc_process_detect_cb(void *args)
-{
-    return 0;
-}
-
-static hy_s32_t _ipc_process_detect_fd_info_cb(void *handle, void *args)
+static hy_s32_t _process_server_parse_info_cb(void *handle, void *args)
 {
     LOGT("handle: %p, args: %p \n", handle, args);
     HY_ASSERT_RET_VAL(!handle || !args, -1);
@@ -61,19 +56,19 @@ static hy_s32_t _ipc_process_detect_fd_info_cb(void *handle, void *args)
     return 0;
 }
 
-static void _ipc_process_accept_cb(void *handle, void *args)
+static void _process_server_link_manager_accept_cb(void *handle, void *args)
 {
     LOGT("handle: %p, args: %p \n", handle, args);
     HY_ASSERT_RET(!handle);
 
-    _ipc_process_server_context_s *context = args;
-
     LOGI("ipc process server accept new ipc link: %p \n", handle);
+
+    _ipc_process_server_context_s *context = args;
 
     write(context->pfd[1], &handle, sizeof(void *));
 }
 
-static hy_s32_t _ipc_process_handle_msg_cb(void *args)
+static hy_s32_t _process_server_handle_msg_cb(void *args)
 {
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
@@ -88,7 +83,7 @@ static hy_s32_t _ipc_process_handle_msg_cb(void *args)
     struct hy_list_head *client_link_list = NULL;
     ipc_link_manager_parse_cb_s parse_cb;
 
-    parse_cb.detect_fd_info_cb = _ipc_process_detect_fd_info_cb;
+    parse_cb.parse_info_cb = _process_server_parse_info_cb;
     parse_cb.args = context;
 
     LOGI("ipc process handle msg start \n");
@@ -97,12 +92,12 @@ static hy_s32_t _ipc_process_handle_msg_cb(void *args)
         FD_ZERO(&read_fs);
         FD_SET(context->pfd[0], &read_fs);
 
-        client_link_list = ipc_link_manager_get_list(context->ipc_server_link_h);
+        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager_h);
         hy_list_for_each_entry(pos, client_link_list, entry) {
             fd = ipc_link_get_fd(pos);
             FD_SET(fd, &read_fs);
         }
-        ipc_link_manager_put_list(context->ipc_server_link_h);
+        ipc_link_manager_put_list(context->ipc_link_manager_h);
 
         timeout.tv_sec = 1;
         ret = select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout);
@@ -112,6 +107,8 @@ static hy_s32_t _ipc_process_handle_msg_cb(void *args)
         }
 
         if (FD_ISSET(context->pfd[0], &read_fs)) {
+            LOGI("ipc process server send info to client \n");
+
             read(context->pfd[0], &client_link_handle, sizeof(void *));
 
             HyIpcProcessInfo_s ipc_process_info;
@@ -120,12 +117,12 @@ static hy_s32_t _ipc_process_handle_msg_cb(void *args)
             ipc_link_write_info(client_link_handle, ipc_process_info.pid);
         }
 
-        client_link_list = ipc_link_manager_get_list(context->ipc_server_link_h);
+        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager_h);
         hy_list_for_each_entry_safe(pos, n, client_link_list, entry) {
             fd = ipc_link_get_fd(pos);
 
             if (FD_ISSET(fd, &read_fs)) {
-                if (-1 == ipc_link_manager_parse(pos, &parse_cb)) {
+                if (-1 == ipc_link_manager_parse_msg(pos, &parse_cb)) {
                     hy_list_del(&pos->entry);
                     ipc_link_destroy(&pos);
 
@@ -133,7 +130,7 @@ static hy_s32_t _ipc_process_handle_msg_cb(void *args)
                 }
             }
         }
-        ipc_link_manager_put_list(context->ipc_server_link_h);
+        ipc_link_manager_put_list(context->ipc_link_manager_h);
     }
 
     LOGI("ipc process handle msg stop \n");
@@ -151,7 +148,7 @@ void ipc_process_server_destroy(void **handle)
     context->exit_flag = 1;
     HyThreadDestroy(&context->handle_msg_thread_h);
 
-    ipc_link_manager_destroy(&context->ipc_server_link_h);
+    ipc_link_manager_destroy(&context->ipc_link_manager_h);
 
     LOGI("ipc process server destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -173,17 +170,17 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *config)
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        context->ipc_server_link_h = ipc_link_manager_create(config->ipc_name,
-                config->tag, _ipc_process_accept_cb, context);
-        if (!context->ipc_server_link_h) {
-            LOGE("ipc_link_manager_create failed \n");
+        context->ipc_link_manager_h = ipc_link_manager_create(config->ipc_name,
+                config->tag, _process_server_link_manager_accept_cb, context);
+        if (!context->ipc_link_manager_h) {
+            LOGE("ipc link manager create failed \n");
             break;
         }
 
         context->handle_msg_thread_h= HyThreadCreate_m("hy_s_handle_msg",
-                _ipc_process_handle_msg_cb, context);
+                _process_server_handle_msg_cb, context);
         if (!context->handle_msg_thread_h) {
-            LOGE("HyThreadCreate_m failed \n");
+            LOGE("hy thread create failed \n");
             break;
         }
 
