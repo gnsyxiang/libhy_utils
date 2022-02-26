@@ -26,6 +26,29 @@
 
 #include "ipc_link.h"
 
+void ipc_link_dump(ipc_link_s *ipc_link)
+{
+    LOGT("ipc_link: %p \n", ipc_link);
+    HY_ASSERT_RET(!ipc_link);
+
+    LOGI("ipc_link: %p \n",             ipc_link);
+    LOGI("ipc_socket_handle: %p \n",    ipc_link->ipc_socket_handle);
+    LOGI("tag: %s \n",                  ipc_link->tag);
+    LOGI("ipc_name: %s \n",             HyIpcSocketGetName(ipc_link->ipc_socket_handle));
+    LOGI("pid: %d \n",                  ipc_link->pid);
+    LOGI("is_connect: %d \n",           ipc_link->is_connect);
+    LOGI("link_type: %d \n",            ipc_link->link_type);
+
+}
+
+hy_s32_t ipc_link_get_fd(ipc_link_s *ipc_link)
+{
+    LOGT("ipc_link: %p \n", ipc_link);
+    HY_ASSERT_RET_VAL(!ipc_link, -1);
+
+    return HyIpcSocketGetFD(ipc_link->ipc_socket_handle);
+}
+
 void ipc_link_set_info(ipc_link_s *ipc_link, const char *tag, pid_t pid)
 {
     LOGT("ipc_link: %p, tag: %s, pid: %d \n", ipc_link, tag, pid);
@@ -151,6 +174,35 @@ hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg)
     free(ipc_msg);
 
     return (ret == 0 ? 0 : -1);
+}
+
+hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, pid_t pid)
+{
+    LOGT("ipc_link: %p, pid: %d \n", ipc_link, pid);
+    HY_ASSERT_RET_VAL(!ipc_link, -1);
+
+    hy_u32_t total_len = sizeof(ipc_link_msg_s)
+        + HY_IPC_PROCESS_IPC_NAME_LEN_MAX + sizeof(pid_t);
+    hy_s32_t offset = 0;
+    char *ipc_msg_buf = NULL;
+    ipc_link_msg_s *ipc_msg = NULL;
+
+    ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
+
+    ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
+
+    HY_MEMCPY(ipc_msg->buf + offset, ipc_link->tag, HY_STRLEN(ipc_link->tag));
+    offset += HY_STRLEN(ipc_link->tag) + 1;
+
+    HY_MEMCPY(ipc_msg->buf + offset, &pid, sizeof(pid_t));
+    offset += sizeof(pid_t);
+
+    ipc_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
+    ipc_msg->type       = IPC_LINK_MSG_TYPE_INFO;
+    ipc_msg->thread_id  = pthread_self();
+    ipc_msg->buf_len    = offset;
+
+    return ipc_link_write(ipc_link, ipc_msg);
 }
 
 void ipc_link_destroy(ipc_link_s **ipc_link_pp)
