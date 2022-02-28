@@ -140,8 +140,9 @@ void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_inf
 hy_s32_t ipc_link_parse_msg(ipc_link_s *ipc_link,
         ipc_link_parse_msg_cb_s *parse_msg_cb)
 {
-    ipc_link_msg_s *ipc_msg = NULL;
     pid_t pid = 0;
+    ipc_link_msg_usr_s *ipc_msg_usr = NULL;
+    ipc_link_msg_s *ipc_msg = NULL;
     HyIpcProcessInfo_s ipc_process_info;
 
     if (0 != ipc_link_read(ipc_link, &ipc_msg)) {
@@ -168,23 +169,23 @@ hy_s32_t ipc_link_parse_msg(ipc_link_s *ipc_link,
                 parse_msg_cb->parse_info_cb(&ipc_process_info,
                         HY_IPC_PROCESS_STATE_CONNECT, parse_msg_cb->args);
             }
+
+            if (ipc_msg) {
+                HY_MEM_FREE_PP(&ipc_msg);
+            }
             break;
         default:
             LOGE("error ipc_msg type\n");
             break;
     }
 
-    if (ipc_msg) {
-        HY_MEM_FREE_P(ipc_msg);
-    }
-
     return 0;
 }
 
-hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, pid_t pid)
+hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid)
 {
-    LOGT("ipc_link: %p, pid: %d \n", ipc_link, pid);
-    HY_ASSERT_RET_VAL(!ipc_link, -1);
+    LOGT("ipc_link: %p, tag: %s, pid: %d \n", ipc_link, tag, pid);
+    HY_ASSERT_RET_VAL(!ipc_link || !tag, -1);
 
     hy_u32_t total_len = sizeof(ipc_link_msg_s)
         + HY_IPC_PROCESS_IPC_NAME_LEN_MAX + sizeof(pid_t);
@@ -193,11 +194,10 @@ hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, pid_t pid)
     ipc_link_msg_s *ipc_msg = NULL;
 
     ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
-
     ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
 
-    HY_MEMCPY(ipc_msg->buf + offset, ipc_link->tag, HY_STRLEN(ipc_link->tag));
-    offset += HY_STRLEN(ipc_link->tag) + 1;
+    HY_MEMCPY(ipc_msg->buf + offset, tag, HY_STRLEN(tag));
+    offset += HY_STRLEN(tag) + 1;
 
     HY_MEMCPY(ipc_msg->buf + offset, &pid, sizeof(pid_t));
     offset += sizeof(pid_t);
@@ -231,7 +231,8 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg)
             break;
         }
 
-        ipc_link_msg_buf = HY_MEM_MALLOC_BREAK(char *, total_len);
+        ipc_link_msg_buf = HY_MEM_MALLOC_BREAK(char *,
+                HY_MEM_ALIGN4_UP(total_len));
         *ipc_msg = (ipc_link_msg_s *)ipc_link_msg_buf;
 
         if (-1 == HyIpcSocketRead(ipc_link->ipc_socket_handle,

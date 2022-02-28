@@ -80,8 +80,12 @@ typedef struct {
     ipc_link_msg_s          *ipc_msg;
 } ipc_link_msg_usr_s;
 
+typedef void (*ipc_link_parse_callback_cb_t)(ipc_link_msg_usr_s *ipc_msg_usr,
+        hy_u32_t len, void *args);
+
 typedef struct {
     HyIpcProcessConnectChangeCb_t   parse_info_cb;
+    ipc_link_parse_callback_cb_t    parse_callback_cb;
     void                            *args;
 } ipc_link_parse_msg_cb_s;
 
@@ -92,7 +96,7 @@ void ipc_link_destroy(ipc_link_s **ipc_link);
 hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);
 hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg);
 
-hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, pid_t pid);
+hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
 hy_s32_t ipc_link_parse_msg(ipc_link_s *ipc_link,
         ipc_link_parse_msg_cb_s *parse_msg_cb);
 

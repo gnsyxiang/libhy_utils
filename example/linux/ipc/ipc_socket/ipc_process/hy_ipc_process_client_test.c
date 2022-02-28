@@ -136,7 +136,7 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.args          = context;
 
     HyIpcProcessCallbackCb_s ipc_process_cb[] = {
-        {HY_IPC_PROCESS_ID_TEST, _ipc_process_test_cb},
+        {HY_IPC_PROCESS_ID_TEST_GET, _ipc_process_test_cb},
     };
 
     HyIpcProcessConfig_s ipc_process_config;
@@ -171,6 +171,15 @@ int main(int argc, char *argv[])
     }
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+    sleep(1);
+
+    HyIpcProcessIdDemoParam_s demo_param;
+    demo_param.id       = HY_IPC_PROCESS_ID_DEMO_PARAM_SET;
+    HY_STRNCPY(demo_param.param, sizeof(demo_param.param),
+            "hax", HY_STRLEN("hax"));
+
+    HyIpcProcessSend(context->ipc_process_handle, &demo_param, sizeof(demo_param));
 
     while (!context->exit_flag) {
         sleep(1);

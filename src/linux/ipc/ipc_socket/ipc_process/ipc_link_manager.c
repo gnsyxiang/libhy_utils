@@ -89,7 +89,7 @@ static hy_s32_t _link_manager_wait_accept_cb(void *args)
             _link_manager_accept_cb, ipc_link_manager);
 }
 
-void ipc_link_manager_destroy(void **handle)
+void ipc_link_manager_destroy(ipc_link_manager_s **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
@@ -156,6 +156,6 @@ void *ipc_link_manager_create(const char *name, const char *tag,
     } while (0);
 
     LOGE("link manager create failed \n");
-    ipc_link_manager_destroy((void **)&ipc_link_manager);
+    ipc_link_manager_destroy(&ipc_link_manager);
     return NULL;
 }

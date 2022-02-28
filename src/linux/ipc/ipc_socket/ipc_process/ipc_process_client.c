@@ -32,10 +32,38 @@ typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
     pid_t                       pid;
-    ipc_link_s                  *ipc_link_h;
+    ipc_link_s                  *ipc_link;
     void                        *handle_msg_thread_h;
     hy_s32_t                    exit_flag;
 } _ipc_process_client_context_s;
+
+hy_s32_t ipc_process_client_write_sync(void *handle, void *msg, hy_u32_t len)
+{
+    LOGT("handle: %p, msg: %p, len: %d \n", handle, msg, len);
+    HY_ASSERT(handle);
+    HY_ASSERT(msg);
+
+    hy_s32_t offset = 0;
+    hy_u32_t total_len = 0;
+    char *ipc_msg_buf = NULL;
+    ipc_link_msg_s *ipc_msg = NULL;
+    _ipc_process_client_context_s *context = handle;
+
+    total_len = HY_MEM_ALIGN4_UP(sizeof(ipc_link_msg_s) + len);
+
+    ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
+    ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
+
+    HY_MEMCPY(ipc_msg->buf + offset, msg, len);
+    offset += len;
+
+    ipc_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
+    ipc_msg->type       = IPC_LINK_MSG_TYPE_CB;
+    ipc_msg->thread_id  = pthread_self();
+    ipc_msg->buf_len    = offset;
+
+    return ipc_link_write(context->ipc_link, ipc_msg);
+}
 
 static void _process_client_parse_info_cb(HyIpcProcessInfo_s *ipc_process_info,
         HyIpcProcessConnectState_e is_connect, void *args)
@@ -71,7 +99,7 @@ static hy_s32_t _process_client_handle_msg_cb(void *args)
     parse_msg_cb.parse_info_cb = _process_client_parse_info_cb;
     parse_msg_cb.args = context;
 
-    fd = ipc_link_get_fd(context->ipc_link_h);
+    fd = ipc_link_get_fd(context->ipc_link);
 
     while (!context->exit_flag) {
         FD_ZERO(&read_fs);
@@ -85,7 +113,7 @@ static hy_s32_t _process_client_handle_msg_cb(void *args)
         }
 
         if (FD_ISSET(fd, &read_fs)) {
-            if (-1 == ipc_link_parse_msg(context->ipc_link_h, &parse_msg_cb)) {
+            if (-1 == ipc_link_parse_msg(context->ipc_link, &parse_msg_cb)) {
                 LOGE("ipc link parse msg failed \n");
 
                 if (save_config->connect_change) {
@@ -112,7 +140,7 @@ void ipc_process_client_destroy(void **handle)
     context->exit_flag = 1;
     HyThreadDestroy(&context->handle_msg_thread_h);
 
-    ipc_link_destroy(&context->ipc_link_h);
+    ipc_link_destroy(&context->ipc_link);
 
     LOGI("ipc process client destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -134,19 +162,20 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        context->ipc_link_h = ipc_link_create(config->ipc_name,
+        context->ipc_link = ipc_link_create(config->ipc_name,
                 config->tag, IPC_LINK_TYPE_CLIENT, NULL);
-        if (!context->ipc_link_h) {
+        if (!context->ipc_link) {
             LOGE("ipc link create failed \n");
             break;
         }
 
-        if (0 != ipc_link_connect(context->ipc_link_h, config->timeout_s)) {
+        if (0 != ipc_link_connect(context->ipc_link, config->timeout_s)) {
             LOGE("ipc link connect failed \n");
             break;
         }
 
-        if (0 != ipc_link_write_info(context->ipc_link_h, context->pid)) {
+        if (0 != ipc_link_write_info(context->ipc_link,
+                    context->ipc_link->tag, context->pid)) {
             LOGE("ipc link write info failed \n");
             break;
         }

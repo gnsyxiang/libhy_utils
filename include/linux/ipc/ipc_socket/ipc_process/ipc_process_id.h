@@ -25,20 +25,28 @@ extern "C" {
 #endif
 
 #include "hy_hal/hy_type.h"
+#include "hy_hal/hy_compile.h"
 
 /**
  * @brief 通信id
  */
 typedef enum {
-    HY_IPC_PROCESS_ID_TEST,
+    HY_IPC_PROCESS_ID_DEMO_PARAM_GET,
+    HY_IPC_PROCESS_ID_DEMO_PARAM_SET,
+
+    HY_IPC_PROCESS_ID_TEST_GET,
+    HY_IPC_PROCESS_ID_TEST_SET,
 
     HY_IPC_PROCESS_ID_MAX,
 } HyIpcProcessId_e;
 
-// HY_IPC_PROCESS_ID_TEST
+// HY_IPC_PROCESS_ID_DEMO_PARAM_GET
+// HY_IPC_PROCESS_ID_DEMO_PARAM_SET
 typedef struct {
-    hy_s32_t test;
-} HyIpcProcessTestId_s;
+    HyIpcProcessId_e    id;
+
+    char                param[4];
+} UNPACKED HyIpcProcessIdDemoParam_s;
 
 #ifdef __cplusplus
 }

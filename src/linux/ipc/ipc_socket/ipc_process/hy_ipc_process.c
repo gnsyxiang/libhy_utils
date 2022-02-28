@@ -26,6 +26,23 @@
 #include "ipc_process_server.h"
 #include "hy_ipc_process.h"
 
+hy_s32_t HyIpcProcessSend(void *handle, void *msg, hy_u32_t len)
+{
+    LOGT("handle: %p, msg: %p, len: %d \n", handle, msg, len);
+    HY_ASSERT(handle);
+    HY_ASSERT(msg);
+
+    HyIpcProcessSaveConfig_s *save_config = handle;
+
+    hy_s32_t (*_write_sync_cb[HY_IPC_PROCESS_TYPE_MAX])(void *handle,
+            void *msg, hy_u32_t len) = {
+        ipc_process_client_write_sync,
+        ipc_process_server_write_sync,
+    };
+
+    return _write_sync_cb[save_config->type](handle, msg, len);
+}
+
 void HyIpcProcessDestroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
