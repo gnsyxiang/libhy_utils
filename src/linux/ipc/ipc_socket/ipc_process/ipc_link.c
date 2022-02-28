@@ -137,51 +137,6 @@ void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_inf
     ipc_process_info->ipc_name  = HyIpcSocketGetName(ipc_link->ipc_socket_handle);
 }
 
-hy_s32_t ipc_link_parse_msg(ipc_link_s *ipc_link,
-        ipc_link_parse_msg_cb_s *parse_msg_cb)
-{
-    pid_t pid = 0;
-    ipc_link_msg_usr_s *ipc_msg_usr = NULL;
-    ipc_link_msg_s *ipc_msg = NULL;
-    HyIpcProcessInfo_s ipc_process_info;
-
-    if (0 != ipc_link_read(ipc_link, &ipc_msg)) {
-        LOGE("ipc link read failed \n");
-        return -1;
-    }
-
-    switch (ipc_msg->type) {
-        case IPC_LINK_MSG_TYPE_RETURN:
-            LOGE("--------haha----return \n");
-            break;
-        case IPC_LINK_MSG_TYPE_CB:
-            LOGE("--------haha----cb \n");
-            break;
-        case IPC_LINK_MSG_TYPE_INFO:
-            pid = *(pid_t *)(ipc_msg->buf + HY_STRLEN(ipc_msg->buf) + 1);
-            ipc_link_set_info(ipc_link, ipc_msg->buf, pid);
-
-            ipc_process_info.tag        = ipc_link->tag;
-            ipc_process_info.pid        = ipc_link->pid;
-            ipc_process_info.ipc_name   = HyIpcSocketGetName(ipc_link->ipc_socket_handle);
-
-            if (parse_msg_cb) {
-                parse_msg_cb->parse_info_cb(&ipc_process_info,
-                        HY_IPC_PROCESS_STATE_CONNECT, parse_msg_cb->args);
-            }
-
-            if (ipc_msg) {
-                HY_MEM_FREE_PP(&ipc_msg);
-            }
-            break;
-        default:
-            LOGE("error ipc_msg type\n");
-            break;
-    }
-
-    return 0;
-}
-
 hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid)
 {
     LOGT("ipc_link: %p, tag: %s, pid: %d \n", ipc_link, tag, pid);
