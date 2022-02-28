@@ -135,15 +135,18 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
+    HyIpcProcessCallbackCb_s ipc_process_cb[] = {
+    };
+
     HyIpcProcessConfig_s ipc_process_config;
     HY_MEMSET(&ipc_process_config, sizeof(ipc_process_config));
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
     ipc_process_config.save_config.type             = HY_IPC_PROCESS_TYPE_SERVER;
+    ipc_process_config.save_config.callback         = ipc_process_cb;
+    ipc_process_config.save_config.callback_cnt     = HY_UTILS_ARRAY_CNT(ipc_process_cb);
     ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
     ipc_process_config.tag                          = "server";
-    ipc_process_config.callback                     = NULL;
-    ipc_process_config.callback_cnt                 = 0;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {

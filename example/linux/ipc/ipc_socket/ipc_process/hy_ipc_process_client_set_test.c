@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_process_client_test.c
+ * @file    hy_ipc_process_client_set_test.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    17/02 2022 11:07
+ * @date    28/02 2022 19:45
  * @version v0.0.1
  * 
  * @since    note
@@ -13,9 +13,9 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        17/02 2022      create the file
+ *     00      zhenquan.qiu        28/02 2022      create the file
  * 
- *     last modified: 17/02 2022 11:07
+ *     last modified: 28/02 2022 19:45
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -136,7 +136,6 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.args          = context;
 
     HyIpcProcessCallbackCb_s ipc_process_cb[] = {
-        {HY_IPC_PROCESS_ID_TEST_GET, _ipc_process_test_cb,  context},
     };
 
     HyIpcProcessConfig_s ipc_process_config;
@@ -171,6 +170,15 @@ int main(int argc, char *argv[])
     }
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+    sleep(1);
+
+    HyIpcProcessIdDemoParam_s demo_param;
+    demo_param.id       = HY_IPC_PROCESS_ID_DEMO_PARAM_SET;
+    HY_STRNCPY(demo_param.param, sizeof(demo_param.param),
+            "hax", HY_STRLEN("hax"));
+
+    HyIpcProcessSend(context->ipc_process_handle, &demo_param, sizeof(demo_param));
 
     while (!context->exit_flag) {
         sleep(1);
