@@ -192,6 +192,9 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
             _process_server_handle_callback(ipc_msg_usr_pos, context);
 
             hy_list_del(&ipc_msg_usr_pos->entry);
+            if (ipc_msg_usr_pos->ipc_msg) {
+                HY_MEM_FREE_PP(&ipc_msg_usr_pos->ipc_msg);
+            }
             ipc_link_msg_usr_destroy(ipc_msg_usr_pos);
         }
     }
