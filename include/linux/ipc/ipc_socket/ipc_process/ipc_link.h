@@ -74,6 +74,13 @@ typedef struct {
 } ipc_link_msg_s;
 
 typedef struct {
+    struct hy_list_head     entry;
+
+    void                    *ipc_link;
+    ipc_link_msg_s          *ipc_msg;
+} ipc_link_msg_usr_s;
+
+typedef struct {
     HyIpcProcessConnectChangeCb_t   parse_info_cb;
     void                            *args;
 } ipc_link_parse_msg_cb_s;
@@ -98,6 +105,10 @@ hy_s32_t ipc_link_wait_accept(ipc_link_s *ipc_link,
 
 hy_s32_t ipc_link_get_fd(ipc_link_s *ipc_link);
 void ipc_link_dump(ipc_link_s *ipc_link);
+
+ipc_link_msg_usr_s *ipc_link_msg_usr_create(void *ipc_link,
+        ipc_link_msg_s *ipc_msg);
+void ipc_link_msg_usr_destroy(ipc_link_msg_usr_s *ipc_msg_usr);
 
 #ifdef __cplusplus
 }

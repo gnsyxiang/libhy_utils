@@ -26,6 +26,38 @@
 
 #include "ipc_link.h"
 
+
+void ipc_link_msg_usr_destroy(ipc_link_msg_usr_s *ipc_msg_usr)
+{
+    LOGT("ipc_msg_usr: %p \n", ipc_msg_usr);
+    HY_ASSERT_RET(!ipc_msg_usr);
+
+    // LOGD("ipc link msg usr destroy, ipc_msg_usr: %p \n", ipc_msg_usr);
+    HY_MEM_FREE_PP(&ipc_msg_usr);
+}
+
+ipc_link_msg_usr_s *ipc_link_msg_usr_create(void *ipc_link,
+        ipc_link_msg_s *ipc_msg)
+{
+    LOGT("ipc_link: %p, ipc_msg: %p \n", ipc_link, ipc_msg);
+    HY_ASSERT_RET_VAL(!ipc_link || !ipc_msg, NULL);
+
+    ipc_link_msg_usr_s *ipc_msg_usr = NULL;
+    do {
+        ipc_msg_usr = HY_MEM_MALLOC_BREAK(ipc_link_msg_usr_s *,
+                sizeof(*ipc_msg_usr));
+
+        ipc_msg_usr->ipc_link = ipc_link;
+        ipc_msg_usr->ipc_msg = ipc_msg;
+
+        // LOGD("ipc link msg usr create, ipc_msg_usr: %p \n", ipc_msg_usr);
+        return ipc_msg_usr;
+    } while (0);
+
+    LOGE("ipc link msg usr failed \n");
+    return NULL;
+}
+
 void ipc_link_dump(ipc_link_s *ipc_link)
 {
     LOGT("ipc_link: %p \n", ipc_link);
