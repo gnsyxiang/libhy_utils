@@ -40,9 +40,10 @@ typedef enum {
 } ipc_link_type_e;
 
 typedef enum {
-    IPC_LINK_MSG_TYPE_RETURN,
-    IPC_LINK_MSG_TYPE_CB,
+    IPC_LINK_MSG_TYPE_ACK,
     IPC_LINK_MSG_TYPE_INFO,
+    IPC_LINK_MSG_TYPE_CB,
+    IPC_LINK_MSG_TYPE_CB_ID,
 
     IPC_LINK_MSG_TYPE_MAX,
 } ipc_link_msg_type_e;
@@ -80,6 +81,12 @@ typedef struct {
     ipc_link_msg_s          *ipc_msg;
 } ipc_link_msg_usr_s;
 
+typedef struct {
+    struct hy_list_head     entry;
+    hy_u32_t                *id;
+    hy_u32_t                id_cnt;
+} ipc_link_id_s;
+
 ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_handle);
 void ipc_link_destroy(ipc_link_s **ipc_link);
@@ -88,6 +95,7 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);
 hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg);
 
 hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
+hy_s32_t ipc_link_write_cb(ipc_link_s *ipc_link, hy_u32_t *id, hy_u32_t id_cnt);
 
 void ipc_link_set_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
 void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_info);

@@ -165,6 +165,29 @@ hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid)
     return ipc_link_write(ipc_link, ipc_msg);
 }
 
+hy_s32_t ipc_link_write_cb(ipc_link_s *ipc_link, hy_u32_t *id, hy_u32_t id_cnt)
+{
+    LOGT("ipc_link: %p, id: %p, id_cnt: %d \n", ipc_link, id, id_cnt);
+    HY_ASSERT_RET_VAL(!ipc_link || !id, -1);
+
+    hy_s32_t offset = id_cnt * sizeof(hy_u32_t);
+    hy_u32_t total_len = sizeof(ipc_link_msg_s) + offset;
+    char *ipc_msg_buf = NULL;
+    ipc_link_msg_s *ipc_msg = NULL;
+
+    ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
+    ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
+
+    HY_MEMCPY(ipc_msg->buf, id, offset);
+
+    ipc_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
+    ipc_msg->type       = IPC_LINK_MSG_TYPE_CB_ID;
+    ipc_msg->thread_id  = pthread_self();
+    ipc_msg->buf_len    = offset;
+
+    return ipc_link_write(ipc_link, ipc_msg);
+}
+
 hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg)
 {
     LOGT("ipc_link: %p, &ipc_msg: %p \n", ipc_link, ipc_msg);

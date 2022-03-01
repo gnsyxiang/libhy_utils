@@ -80,7 +80,7 @@ static hy_s32_t _ipc_client_parse_msg(ipc_link_s *ipc_link,
     }
 
     switch (ipc_msg->type) {
-        case IPC_LINK_MSG_TYPE_RETURN:
+        case IPC_LINK_MSG_TYPE_ACK:
             LOGE("--------haha----return \n");
             break;
         case IPC_LINK_MSG_TYPE_CB:
@@ -188,6 +188,13 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
+        context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
+                _process_client_handle_msg_cb, context);
+        if (!context->handle_msg_thread_h) {
+            LOGE("hy thread create failed \n");
+            break;
+        }
+
         context->ipc_link = ipc_link_create(config->ipc_name,
                 config->tag, IPC_LINK_TYPE_CLIENT, NULL);
         if (!context->ipc_link) {
@@ -206,12 +213,11 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
             break;
         }
 
-        context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
-                _process_client_handle_msg_cb, context);
-        if (!context->handle_msg_thread_h) {
-            LOGE("hy thread create failed \n");
-            break;
+        hy_u32_t id[save_config->callback_cnt];
+        for (hy_u32_t i = 0; i < save_config->callback_cnt; ++i) {
+            id[i] = save_config->callback[i].id;
         }
+        ipc_link_write_cb(context->ipc_link, id, save_config->callback_cnt);
 
         LOGI("ipc process client create, context: %p \n", context);
         return context;

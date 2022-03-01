@@ -33,6 +33,7 @@ typedef struct {
 
     ipc_link_manager_s          *ipc_link_manager_h;
     struct hy_list_head         ipc_msg_usr_list;
+    struct hy_list_head         id_list;
 
     hy_s32_t                    pfd[2];
     void                        *handle_msg_thread_h;
@@ -81,16 +82,8 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
     }
 
     switch (ipc_msg->type) {
-        case IPC_LINK_MSG_TYPE_RETURN:
+        case IPC_LINK_MSG_TYPE_ACK:
             LOGE("--------haha----return \n");
-            break;
-        case IPC_LINK_MSG_TYPE_CB:
-            ipc_msg_usr = ipc_link_msg_usr_create(ipc_link, ipc_msg);
-            if (!ipc_msg_usr) {
-                LOGE("ipc link msg usr create failed \n");
-            }
-
-            hy_list_add_tail(&ipc_msg_usr->entry, &context->ipc_msg_usr_list);
             break;
         case IPC_LINK_MSG_TYPE_INFO:
             pid = *(pid_t *)(ipc_msg->buf + HY_STRLEN(ipc_msg->buf) + 1);
@@ -108,6 +101,16 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
             if (ipc_msg) {
                 HY_MEM_FREE_PP(&ipc_msg);
             }
+            break;
+        case IPC_LINK_MSG_TYPE_CB:
+            ipc_msg_usr = ipc_link_msg_usr_create(ipc_link, ipc_msg);
+            if (!ipc_msg_usr) {
+                LOGE("ipc link msg usr create failed \n");
+            }
+
+            hy_list_add_tail(&ipc_msg_usr->entry, &context->ipc_msg_usr_list);
+            break;
+        case IPC_LINK_MSG_TYPE_CB_ID:
             break;
         default:
             LOGE("error ipc_msg type\n");
@@ -186,6 +189,9 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
         }
         ipc_link_manager_put_list(context->ipc_link_manager_h);
 
+        // 处理ack消息
+
+        // 处理回调消息
         ipc_link_msg_usr_s *ipc_msg_usr_pos, *ipc_msg_usr_n;
         hy_list_for_each_entry_safe(ipc_msg_usr_pos, ipc_msg_usr_n,
                 &context->ipc_msg_usr_list, entry) {
@@ -232,6 +238,7 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *config)
                 sizeof(*context));
 
         HY_INIT_LIST_HEAD(&context->ipc_msg_usr_list);
+        HY_INIT_LIST_HEAD(&context->id_list);
         pipe(context->pfd);
 
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
