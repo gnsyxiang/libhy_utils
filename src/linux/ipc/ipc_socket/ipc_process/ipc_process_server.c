@@ -31,7 +31,7 @@
 typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
-    ipc_link_manager_s          *ipc_link_manager_h;
+    ipc_link_manager_s          *ipc_link_manager;
     struct hy_list_head         ipc_msg_usr_list;
     struct hy_list_head         id_list;
 
@@ -55,7 +55,7 @@ static void _process_server_handle_callback(ipc_link_msg_usr_s *ipc_msg_usr,
     ipc_link_s *pos;
     struct hy_list_head *client_link_list = NULL;
 
-    client_link_list = ipc_link_manager_get_list(context->ipc_link_manager_h);
+    client_link_list = ipc_link_manager_get_list(context->ipc_link_manager);
     hy_list_for_each_entry(pos, client_link_list, entry) {
         if (pos == ipc_msg_usr->ipc_link) {
             continue;
@@ -64,7 +64,7 @@ static void _process_server_handle_callback(ipc_link_msg_usr_s *ipc_msg_usr,
         ipc_link_write(pos, ipc_msg_usr->ipc_msg);
         ipc_msg_usr->ipc_msg = NULL;
     }
-    ipc_link_manager_put_list(context->ipc_link_manager_h);
+    ipc_link_manager_put_list(context->ipc_link_manager);
 }
 
 static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
@@ -91,7 +91,7 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
 
             ipc_process_info.tag        = ipc_link->tag;
             ipc_process_info.pid        = ipc_link->pid;
-            ipc_process_info.ipc_name   = HyIpcSocketGetName(ipc_link->ipc_socket_handle);
+            ipc_process_info.ipc_name   = HyIpcSocketGetName(ipc_link->ipc_socket_h);
 
             if (save_config->connect_change) {
                 save_config->connect_change(&ipc_process_info,
@@ -151,12 +151,12 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
         FD_ZERO(&read_fs);
         FD_SET(context->pfd[0], &read_fs);
 
-        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager_h);
+        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager);
         hy_list_for_each_entry(pos, client_link_list, entry) {
             fd = ipc_link_get_fd(pos);
             FD_SET(fd, &read_fs);
         }
-        ipc_link_manager_put_list(context->ipc_link_manager_h);
+        ipc_link_manager_put_list(context->ipc_link_manager);
 
         timeout.tv_sec = 1;
         if (select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout) < 0) {
@@ -170,11 +170,11 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
             read(context->pfd[0], &client_link_handle, sizeof(void *));
 
             ipc_link_write_info(client_link_handle,
-                    context->ipc_link_manager_h->link->tag,
-                    context->ipc_link_manager_h->link->pid);
+                    context->ipc_link_manager->link->tag,
+                    context->ipc_link_manager->link->pid);
         }
 
-        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager_h);
+        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager);
         hy_list_for_each_entry_safe(pos, n, client_link_list, entry) {
             fd = ipc_link_get_fd(pos);
 
@@ -187,7 +187,7 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
                 }
             }
         }
-        ipc_link_manager_put_list(context->ipc_link_manager_h);
+        ipc_link_manager_put_list(context->ipc_link_manager);
 
         // 处理ack消息
 
@@ -220,7 +220,7 @@ void ipc_process_server_destroy(void **handle)
     context->exit_flag = 1;
     HyThreadDestroy(&context->handle_msg_thread_h);
 
-    ipc_link_manager_destroy(&context->ipc_link_manager_h);
+    ipc_link_manager_destroy(&context->ipc_link_manager);
 
     LOGI("ipc process server destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -244,9 +244,9 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *config)
         HyIpcProcessSaveConfig_s *save_config = &config->save_config;
         HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
 
-        context->ipc_link_manager_h = ipc_link_manager_create(config->ipc_name,
+        context->ipc_link_manager = ipc_link_manager_create(config->ipc_name,
                 config->tag, _process_server_link_manager_accept_cb, context);
-        if (!context->ipc_link_manager_h) {
+        if (!context->ipc_link_manager) {
             LOGE("ipc link manager create failed \n");
             break;
         }

@@ -57,7 +57,7 @@ static void _link_manager_accept_cb(void *handle, void *args)
     ipc_link_manager_s *ipc_link_manager = args;
     const char *ipc_name = NULL;
 
-    ipc_name = HyIpcSocketGetName(ipc_link_manager->link->ipc_socket_handle);
+    ipc_name = HyIpcSocketGetName(ipc_link_manager->link->ipc_socket_h);
 
     ipc_link_s *ipc_link = ipc_link_create(ipc_name, NULL,
             IPC_LINK_TYPE_MAX, handle);
@@ -67,7 +67,7 @@ static void _link_manager_accept_cb(void *handle, void *args)
     }
 
     LOGI("ipc link manager accept new ipc link to list, "
-            "ipc_socket_handle: %p, ipc_link: %p \n", handle, ipc_link);
+            "ipc_socket_h: %p, ipc_link: %p \n", handle, ipc_link);
 
     pthread_mutex_lock(&ipc_link_manager->mutex);
     hy_list_add_tail(&ipc_link->entry, &ipc_link_manager->list);

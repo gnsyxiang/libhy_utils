@@ -40,7 +40,7 @@
 typedef struct {
     void        *log_handle;
     void        *signal_handle;
-    void        *ipc_process_handle;
+    void        *ipc_process_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
@@ -96,7 +96,7 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"ipc process handle",  &context->ipc_process_handle,   HyIpcProcessDestroy},
+        {"ipc process handle",  &context->ipc_process_h,        HyIpcProcessDestroy},
         {"signal",              &context->signal_handle,        HySignalDestroy},
         {"log",                 &context->log_handle,           HyLogDestroy},
     };
@@ -153,7 +153,7 @@ static _main_context_t *_module_create(void)
     module_create_t module[] = {
         {"log",                 &context->log_handle,           &log_config,            (create_t)HyLogCreate,                  HyLogDestroy},
         {"signal",              &context->signal_handle,        &signal_config,         (create_t)HySignalCreate,               HySignalDestroy},
-        {"ipc process handle",  &context->ipc_process_handle,   &ipc_process_config,    (create_t)HyIpcProcessCreate,     HyIpcProcessDestroy},
+        {"ipc process handle",  &context->ipc_process_h,        &ipc_process_config,    (create_t)HyIpcProcessCreate,     HyIpcProcessDestroy},
     };
 
     RUN_CREATE(module);
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     HY_STRNCPY(demo_param.param, sizeof(demo_param.param),
             "hax", HY_STRLEN("hax"));
 
-    HyIpcProcessSend(context->ipc_process_handle, &demo_param, sizeof(demo_param));
+    HyIpcProcessSend(context->ipc_process_h, &demo_param, sizeof(demo_param));
 
     while (!context->exit_flag) {
         sleep(1);

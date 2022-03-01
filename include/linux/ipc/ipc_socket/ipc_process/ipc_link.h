@@ -51,7 +51,7 @@ typedef enum {
 typedef struct {
     struct hy_list_head     entry;
 
-    void                    *ipc_socket_handle;
+    void                    *ipc_socket_h;
 
     pid_t                   pid;
     char                    tag[HY_IPC_PROCESS_IPC_NAME_LEN_MAX / 2];
@@ -88,7 +88,7 @@ typedef struct {
 } ipc_link_id_s;
 
 ipc_link_s *ipc_link_create(const char *name, const char *tag,
-        ipc_link_type_e type, void *ipc_socket_handle);
+        ipc_link_type_e type, void *ipc_socket_h);
 void ipc_link_destroy(ipc_link_s **ipc_link);
 
 hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);

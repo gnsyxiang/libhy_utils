@@ -36,7 +36,7 @@
 #define _IPC_SOCKET_IPC_NAME    "hy_ipc_server"
 
 typedef struct {
-    void        *ipc_socket_handle;
+    void        *ipc_socket_h;
     void        *args;
 } _accept_s;
 
@@ -45,7 +45,7 @@ typedef struct {
     void        *signal_handle;
     void        *thread_handle;
 
-    void        *ipc_socket_handle;
+    void        *ipc_socket_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
@@ -131,17 +131,17 @@ static hy_s32_t _socket_communication(void *args)
     hy_s32_t ret = 0;
 
     while (!context->exit_flag) {
-        ret = HyIpcSocketRead(accept->ipc_socket_handle, buf, sizeof(buf));
+        ret = HyIpcSocketRead(accept->ipc_socket_h, buf, sizeof(buf));
         if (ret < 0) {
-            LOGE("HyIpcSocketRead failed, ipc_socket_handle: %p \n",
-                    accept->ipc_socket_handle);
+            LOGE("HyIpcSocketRead failed, ipc_socket_h: %p \n",
+                    accept->ipc_socket_h);
             break;
         }
 
         LOGI("buf: %s \n", buf);
     }
 
-    HyIpcSocketDestroy(&accept->ipc_socket_handle);
+    HyIpcSocketDestroy(&accept->ipc_socket_h);
     HY_MEM_FREE_PP(&accept);
 
     return -1;
@@ -154,7 +154,7 @@ static void _accept_cb(void *handle, void *args)
     _accept_s *accept = HY_MEM_MALLOC_RET(_accept_s *, sizeof(*accept));
 
     accept->args = args;
-    accept->ipc_socket_handle = handle;
+    accept->ipc_socket_h = handle;
 
     HyThreadConfig_s thread_config;
     HY_MEMSET(&thread_config, sizeof(thread_config));
@@ -172,7 +172,7 @@ static void _accept_cb(void *handle, void *args)
 
 static hy_s32_t _thread_loop_cb(void *args)
 {
-    return HyIpcSocketAccept(((_main_context_t *)args)->ipc_socket_handle,
+    return HyIpcSocketAccept(((_main_context_t *)args)->ipc_socket_h,
             _accept_cb, args);
 }
 
@@ -186,15 +186,15 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    context->ipc_socket_handle = HyIpcSocketCreate_m(_IPC_SOCKET_IPC_NAME,
+    context->ipc_socket_h = HyIpcSocketCreate_m(_IPC_SOCKET_IPC_NAME,
             HY_IPC_SOCKET_TYPE_SERVER);
-    if (!context->ipc_socket_handle) {
+    if (!context->ipc_socket_h) {
         LOGE("HyIpcSocketCreate failed \n");
     }
 
-    LOGI("fd: %d \n",       HyIpcSocketGetFD(context->ipc_socket_handle));
-    LOGI("type: %d \n",     HyIpcSocketGetType(context->ipc_socket_handle));
-    LOGI("ipc_name: %s \n", HyIpcSocketGetName(context->ipc_socket_handle));
+    LOGI("fd: %d \n",       HyIpcSocketGetFD(context->ipc_socket_h));
+    LOGI("type: %d \n",     HyIpcSocketGetType(context->ipc_socket_h));
+    LOGI("ipc_name: %s \n", HyIpcSocketGetName(context->ipc_socket_h));
 
     context->thread_handle = HyThreadCreate_m("hy_accept",
             _thread_loop_cb, context);
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
         sleep(1);
     }
 
-    HyIpcSocketDestroy(&context->ipc_socket_handle);
+    HyIpcSocketDestroy(&context->ipc_socket_h);
 
     HyThreadDestroy(&context->thread_handle);
 

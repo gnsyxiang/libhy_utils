@@ -37,7 +37,7 @@
 typedef struct {
     void        *log_handle;
     void        *signal_handle;
-    void        *ipc_socket_handle;
+    void        *ipc_socket_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
@@ -64,7 +64,7 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"socket client",   &context->ipc_socket_handle,    HyIpcSocketDestroy},
+        {"socket client",   &context->ipc_socket_h,         HyIpcSocketDestroy},
         {"signal",          &context->signal_handle,        HySignalDestroy},
         {"log",             &context->log_handle,           HyLogDestroy},
     };
@@ -112,7 +112,7 @@ static _main_context_t *_module_create(void)
     module_create_t module[] = {
         {"log",             &context->log_handle,           &log_config,            (create_t)HyLogCreate,          HyLogDestroy},
         {"signal",          &context->signal_handle,        &signal_config,         (create_t)HySignalCreate,       HySignalDestroy},
-        {"socket client",   &context->ipc_socket_handle,    &ipc_socket_config,     (create_t)HyIpcSocketCreate,    HyIpcSocketDestroy},
+        {"socket client",   &context->ipc_socket_h,         &ipc_socket_config,     (create_t)HyIpcSocketCreate,    HyIpcSocketDestroy},
     };
 
     RUN_CREATE(module);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    if (0 != HyIpcSocketConnect(context->ipc_socket_handle, 10)) {
+    if (0 != HyIpcSocketConnect(context->ipc_socket_h, 10)) {
         LOGE("connect server failed \n");
         context->exit_flag = 1;
     }
@@ -139,10 +139,10 @@ int main(int argc, char *argv[])
     hy_s32_t ret = 0;
 
     while (!context->exit_flag) {
-        ret = HyIpcSocketWrite(context->ipc_socket_handle, buf, HY_STRLEN(buf));
+        ret = HyIpcSocketWrite(context->ipc_socket_h, buf, HY_STRLEN(buf));
         if (ret < 0) {
-            LOGE("HyIpcSocketWrite failed, ipc_socket_handle: %p \n",
-                    context->ipc_socket_handle);
+            LOGE("HyIpcSocketWrite failed, ipc_socket_h: %p \n",
+                    context->ipc_socket_h);
             break;
         }
         LOGI("buf: %s \n", buf);

@@ -92,7 +92,7 @@ static hy_s32_t _ipc_client_parse_msg(ipc_link_s *ipc_link,
 
             ipc_process_info.tag        = ipc_link->tag;
             ipc_process_info.pid        = ipc_link->pid;
-            ipc_process_info.ipc_name   = HyIpcSocketGetName(ipc_link->ipc_socket_handle);
+            ipc_process_info.ipc_name   = HyIpcSocketGetName(ipc_link->ipc_socket_h);
 
             if (save_config->connect_change) {
                 save_config->connect_change(&ipc_process_info,
