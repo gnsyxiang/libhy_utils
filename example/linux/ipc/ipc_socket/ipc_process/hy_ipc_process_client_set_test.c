@@ -66,8 +66,7 @@ static void _ipc_process_connect_change_cb(
     }
 }
 
-static hy_s32_t _ipc_process_test_cb(void *server_handle,
-        void *client_handle, void *args)
+static hy_s32_t _ipc_process_test_cb(void *buf, hy_u32_t len, void *args)
 {
     LOGD("test cb \n");
 
@@ -143,10 +142,10 @@ static _main_context_t *_module_create(void)
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
     ipc_process_config.save_config.type             = HY_IPC_PROCESS_TYPE_CLIENT;
-    ipc_process_config.save_config.callback         = ipc_process_cb;
-    ipc_process_config.save_config.callback_cnt     = HY_UTILS_ARRAY_CNT(ipc_process_cb);
+    ipc_process_config.callback                     = ipc_process_cb;
+    ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
     ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
-    ipc_process_config.tag                          = "client-01";
+    ipc_process_config.tag                          = "client-02";
     ipc_process_config.timeout_s                    = 10;
 
     // note: 增加或删除要同步到module_destroy_t中
@@ -161,6 +160,45 @@ static _main_context_t *_module_create(void)
     return context;
 }
 
+static void _demo_param_test(_main_context_t *context)
+{
+    {
+        hy_s32_t ret = 0;
+        DemoParamGet_s demo_param_get = {0};
+
+        demo_param_get.id = HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_GET;
+        ret = HyIpcProcessSend(context->ipc_process_h,
+                &demo_param_get, sizeof(demo_param_get));
+        LOGI("ret: %d \n", ret);
+
+        LOGI("-1-get buf: %s \n", demo_param_get.buf);
+    }
+
+    {
+        hy_s32_t ret = 0;
+        DemoParamSet_s demo_param_set;
+        demo_param_set.id       = HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_SET;
+        HY_STRNCPY(demo_param_set.buf, sizeof(demo_param_set.buf),
+                "hax", HY_STRLEN("hax"));
+
+        ret = HyIpcProcessSend(context->ipc_process_h,
+                &demo_param_set, sizeof(demo_param_set));
+        LOGI("ret: %d \n", ret);
+    }
+
+    {
+        hy_s32_t ret = 0;
+        DemoParamGet_s demo_param_get;
+
+        demo_param_get.id = HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_GET;
+        ret = HyIpcProcessSend(context->ipc_process_h,
+                &demo_param_get, sizeof(demo_param_get));
+        LOGI("ret: %d \n", ret);
+
+        LOGI("-2-get buf: %s \n", demo_param_get.buf);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     _main_context_t *context = _module_create();
@@ -172,13 +210,7 @@ int main(int argc, char *argv[])
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
     sleep(1);
-
-    HyIpcProcessIdDemoParam_s demo_param;
-    demo_param.id       = HY_IPC_PROCESS_ID_DEMO_PARAM_SET;
-    HY_STRNCPY(demo_param.param, sizeof(demo_param.param),
-            "hax", HY_STRLEN("hax"));
-
-    HyIpcProcessSend(context->ipc_process_h, &demo_param, sizeof(demo_param));
+    _demo_param_test(context);
 
     while (!context->exit_flag) {
         sleep(1);

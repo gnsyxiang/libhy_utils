@@ -63,14 +63,13 @@ typedef enum {
  *
  * @return 成功返回0，失败返回-1
  */
-typedef hy_s32_t (*HyIpcProcessCallbackCb_t)(void *server_handle,
-        void *client_handle, void *args);
+typedef hy_s32_t (*HyIpcProcessCallbackCb_t)(void *buf, hy_u32_t len, void *args);
 
 /**
  * @brief id回调结构体
  */
 typedef struct {
-    HyIpcProcessId_e            id;                     ///< id
+    HyIpcProcessMsgId_e         id;                     ///< id
     HyIpcProcessCallbackCb_t    callback_cb;            ///< id回调函数
     void                        *args;                  ///< 上层传递参数
 } HyIpcProcessCallbackCb_s;
@@ -101,8 +100,6 @@ typedef void (*HyIpcProcessConnectChangeCb_t)(
 typedef struct {
     HyIpcProcessConnectChangeCb_t   connect_change;     ///< ipc_process状态回调函数
     void                            *args;              ///< 上层传递参数
-    HyIpcProcessCallbackCb_s        *callback;          ///< id回调结构体
-    hy_u32_t                        callback_cnt;       ///< id回调个数
     HyIpcProcessType_e              type:2;             ///< ipc_process类型
     hy_s32_t                        reserved;           ///< 预留
 } HyIpcProcessSaveConfig_s;
@@ -115,6 +112,9 @@ typedef struct {
 
     const char                      *ipc_name;          ///< ipc_process名字
     const char                      *tag;               ///< ipc_process标记
+
+    HyIpcProcessCallbackCb_s        *callback;          ///< id回调结构体
+    hy_u32_t                        callback_cnt;       ///< id回调个数
 
     // client
     hy_u32_t                        timeout_s;          ///< 连接超时时间，0为阻塞

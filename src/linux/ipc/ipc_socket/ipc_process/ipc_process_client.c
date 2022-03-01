@@ -31,6 +31,9 @@
 typedef struct {
     HyIpcProcessSaveConfig_s    save_config;
 
+    HyIpcProcessCallbackCb_s    *callback;
+    hy_u32_t                    callback_cnt;
+
     pid_t                       pid;
     ipc_link_s                  *ipc_link;
     void                        *handle_msg_thread_h;
@@ -49,7 +52,7 @@ hy_s32_t ipc_process_client_write_sync(void *handle, void *msg, hy_u32_t len)
     ipc_link_msg_s *ipc_msg = NULL;
     _ipc_process_client_context_s *context = handle;
 
-    total_len = HY_MEM_ALIGN4_UP(sizeof(ipc_link_msg_s) + len);
+    total_len = sizeof(ipc_link_msg_s) + len;
 
     ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
     ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
@@ -69,7 +72,7 @@ static hy_s32_t _ipc_client_parse_msg(ipc_link_s *ipc_link,
         _ipc_process_client_context_s *context)
 {
     pid_t pid = 0;
-    ipc_link_msg_usr_s *ipc_msg_usr = NULL;
+    HyIpcProcessMsgId_e msg_id = 0;
     ipc_link_msg_s *ipc_msg = NULL;
     HyIpcProcessInfo_s ipc_process_info;
     HyIpcProcessSaveConfig_s *save_config = &context->save_config;
@@ -79,12 +82,22 @@ static hy_s32_t _ipc_client_parse_msg(ipc_link_s *ipc_link,
         return -1;
     }
 
+    LOGD("ipc msg type: %d \n", ipc_msg->type);
     switch (ipc_msg->type) {
         case IPC_LINK_MSG_TYPE_ACK:
             LOGE("--------haha----return \n");
             break;
         case IPC_LINK_MSG_TYPE_CB:
-            LOGE("--------haha----cb \n");
+            msg_id = *(HyIpcProcessMsgId_e *)ipc_msg->buf;
+
+            for (hy_u32_t i = 0; i < context->callback_cnt; ++i) {
+                if (context->callback[i].id == msg_id) {
+                    context->callback[i].callback_cb(ipc_msg->buf,
+                            ipc_msg->buf_len, context->callback[i].args);
+
+                    break;
+                }
+            }
             break;
         case IPC_LINK_MSG_TYPE_INFO:
             pid = *(pid_t *)(ipc_msg->buf + HY_STRLEN(ipc_msg->buf) + 1);
@@ -169,6 +182,10 @@ void ipc_process_client_destroy(void **handle)
     ipc_link_destroy(&context->ipc_link);
 
     LOGI("ipc process client destroy, context: %p \n", context);
+
+    if (context->callback) {
+        HY_MEM_FREE_PP(&context->callback);
+    }
     HY_MEM_FREE_PP(handle);
 }
 
@@ -185,8 +202,18 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
 
         context->pid = getpid();
 
-        HyIpcProcessSaveConfig_s *save_config = &config->save_config;
-        HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
+        HY_MEMCPY(&context->save_config,
+                &config->save_config, sizeof(context->save_config));
+
+        if (config->callback_cnt) {
+            context->callback_cnt = config->callback_cnt;
+
+            context->callback = HY_MEM_MALLOC_BREAK(HyIpcProcessCallbackCb_s *,
+                    sizeof(HyIpcProcessCallbackCb_s) * config->callback_cnt);
+
+            HY_MEMCPY(context->callback, config->callback,
+                    sizeof(HyIpcProcessCallbackCb_s) * config->callback_cnt);
+        }
 
         context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
                 _process_client_handle_msg_cb, context);
@@ -213,11 +240,11 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
             break;
         }
 
-        hy_u32_t id[save_config->callback_cnt];
-        for (hy_u32_t i = 0; i < save_config->callback_cnt; ++i) {
-            id[i] = save_config->callback[i].id;
+        hy_u32_t id[config->callback_cnt];
+        for (hy_u32_t i = 0; i < config->callback_cnt; ++i) {
+            id[i] = config->callback[i].id;
         }
-        ipc_link_write_cb(context->ipc_link, id, save_config->callback_cnt);
+        ipc_link_write_cb(context->ipc_link, id, config->callback_cnt);
 
         LOGI("ipc process client create, context: %p \n", context);
         return context;

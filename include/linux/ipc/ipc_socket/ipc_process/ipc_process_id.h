@@ -31,22 +31,31 @@ extern "C" {
  * @brief 通信id
  */
 typedef enum {
-    HY_IPC_PROCESS_ID_DEMO_PARAM_GET,
-    HY_IPC_PROCESS_ID_DEMO_PARAM_SET,
+    HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_GET,
+    HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_SET,
 
-    HY_IPC_PROCESS_ID_TEST_GET,
-    HY_IPC_PROCESS_ID_TEST_SET,
+    HY_IPC_PROCESS_MSG_ID_BROADCAST_DEMO_PARAM,
 
-    HY_IPC_PROCESS_ID_MAX,
-} HyIpcProcessId_e;
+    HY_IPC_PROCESS_MSG_ID_MAX,
+} HyIpcProcessMsgId_e;
 
-// HY_IPC_PROCESS_ID_DEMO_PARAM_GET
-// HY_IPC_PROCESS_ID_DEMO_PARAM_SET
 typedef struct {
-    HyIpcProcessId_e    id;
+    HyIpcProcessMsgId_e     id;
 
-    char                param[4];
-} UNPACKED HyIpcProcessIdDemoParam_s;
+    // send
+
+    // recv
+    char                    buf[4];
+} UNPACKED DemoParamGet_s;
+
+typedef struct {
+    HyIpcProcessMsgId_e     id;
+
+    // send
+    char                    buf[4];
+
+    // recv
+} UNPACKED DemoParamSet_s;
 
 #ifdef __cplusplus
 }

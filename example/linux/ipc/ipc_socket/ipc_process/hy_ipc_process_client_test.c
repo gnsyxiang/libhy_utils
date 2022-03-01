@@ -42,6 +42,8 @@ typedef struct {
     void        *signal_handle;
     void        *ipc_process_h;
 
+    char        buf[4];
+
     hy_s32_t    exit_flag;
 } _main_context_t;
 
@@ -66,10 +68,28 @@ static void _ipc_process_connect_change_cb(
     }
 }
 
-static hy_s32_t _ipc_process_test_cb(void *server_handle,
-        void *client_handle, void *args)
+static hy_s32_t _demo_param_get_cb(void *buf, hy_u32_t len, void *args)
 {
-    LOGD("test cb \n");
+    DemoParamSet_s *demo_param_get = (DemoParamSet_s *)buf;
+    _main_context_t *context = args;
+
+    HY_STRNCPY(demo_param_get->buf, sizeof(demo_param_get->buf),
+            context->buf, HY_STRLEN(context->buf));
+
+    LOGI("demo param get buf: %s \n", demo_param_get->buf);
+
+    return 0;
+}
+
+static hy_s32_t _demo_param_set_cb(void *buf, hy_u32_t len, void *args)
+{
+    DemoParamSet_s *demo_param_set = (DemoParamSet_s *)buf;
+    _main_context_t *context = args;
+
+    HY_STRNCPY(context->buf, sizeof(context->buf),
+            demo_param_set->buf, HY_STRLEN(demo_param_set->buf));
+
+    LOGD("demo param set buf: %s \n", demo_param_set->buf);
 
     return 0;
 }
@@ -136,7 +156,8 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.args          = context;
 
     HyIpcProcessCallbackCb_s ipc_process_cb[] = {
-        {HY_IPC_PROCESS_ID_TEST_GET, _ipc_process_test_cb,  context},
+        {HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_GET,     _demo_param_get_cb,     context},
+        {HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_SET,     _demo_param_set_cb,     context},
     };
 
     HyIpcProcessConfig_s ipc_process_config;
@@ -144,8 +165,8 @@ static _main_context_t *_module_create(void)
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
     ipc_process_config.save_config.type             = HY_IPC_PROCESS_TYPE_CLIENT;
-    ipc_process_config.save_config.callback         = ipc_process_cb;
-    ipc_process_config.save_config.callback_cnt     = HY_UTILS_ARRAY_CNT(ipc_process_cb);
+    ipc_process_config.callback                     = ipc_process_cb;
+    ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
     ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
     ipc_process_config.tag                          = "client-01";
     ipc_process_config.timeout_s                    = 10;

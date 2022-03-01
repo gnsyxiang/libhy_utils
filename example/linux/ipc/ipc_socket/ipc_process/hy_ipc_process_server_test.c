@@ -66,14 +66,6 @@ static void _ipc_process_connect_change_cb(
     }
 }
 
-static hy_s32_t _ipc_process_test_cb(void *server_handle,
-        void *client_handle, void *args)
-{
-    LOGD("test cb \n");
-
-    return 0;
-}
-
 static void _signal_error_cb(void *args)
 {
     LOGE("------error cb\n");
@@ -143,8 +135,8 @@ static _main_context_t *_module_create(void)
     ipc_process_config.save_config.connect_change   = _ipc_process_connect_change_cb;
     ipc_process_config.save_config.args             = context;
     ipc_process_config.save_config.type             = HY_IPC_PROCESS_TYPE_SERVER;
-    ipc_process_config.save_config.callback         = ipc_process_cb;
-    ipc_process_config.save_config.callback_cnt     = HY_UTILS_ARRAY_CNT(ipc_process_cb);
+    ipc_process_config.callback                     = ipc_process_cb;
+    ipc_process_config.callback_cnt                 = HY_UTILS_ARRAY_CNT(ipc_process_cb);
     ipc_process_config.ipc_name                     = IPC_SOCKET_NAME;
     ipc_process_config.tag                          = "server";
 

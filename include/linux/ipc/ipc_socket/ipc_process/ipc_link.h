@@ -28,6 +28,8 @@ extern "C" {
 #include <unistd.h>
 #include <pthread.h>
 
+#include "hy_hal/hy_compile.h"
+
 #include "hy_list.h"
 #include "hy_ipc_socket.h"
 #include "hy_ipc_process.h"
@@ -72,14 +74,12 @@ typedef struct {
 
     hy_s32_t                buf_len;
     char                    buf[];
-} ipc_link_msg_s;
+} UNPACKED ipc_link_msg_s;
 
 typedef struct {
-    struct hy_list_head     entry;
-
-    void                    *ipc_link;
+    ipc_link_s              *ipc_link;
     ipc_link_msg_s          *ipc_msg;
-} ipc_link_msg_usr_s;
+} ipc_link_msg_handle_s;
 
 typedef struct {
     struct hy_list_head     entry;
@@ -106,10 +106,6 @@ hy_s32_t ipc_link_wait_accept(ipc_link_s *ipc_link,
 
 hy_s32_t ipc_link_get_fd(ipc_link_s *ipc_link);
 void ipc_link_dump(ipc_link_s *ipc_link);
-
-ipc_link_msg_usr_s *ipc_link_msg_usr_create(void *ipc_link,
-        ipc_link_msg_s *ipc_msg);
-void ipc_link_msg_usr_destroy(ipc_link_msg_usr_s *ipc_msg_usr);
 
 #ifdef __cplusplus
 }

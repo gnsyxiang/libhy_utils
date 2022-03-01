@@ -18,12 +18,15 @@
  *     last modified: 24/02 2022 15:41
  */
 #include <stdio.h>
+#include <semaphore.h>
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
 #include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_string.h"
+#include "hy_hal/hy_thread.h"
+
+#include "hy_fifo.h"
 
 #include "ipc_link_manager.h"
 #include "ipc_process_server.h"
@@ -35,8 +38,12 @@ typedef struct {
     struct hy_list_head         ipc_msg_usr_list;
     struct hy_list_head         id_list;
 
+    sem_t                       msg_sem;
+
     hy_s32_t                    pfd[2];
-    void                        *handle_msg_thread_h;
+    void                        *fifo_read_h;
+    void                        *read_msg_thread_h;
+    void                        *write_msg_thread_h;
     hy_s32_t                    exit_flag;
 } _ipc_process_server_context_s;
 
@@ -45,7 +52,7 @@ hy_s32_t ipc_process_server_write_sync(void *handle, void *msg, hy_u32_t len)
     return 0;
 }
 
-static void _process_server_handle_callback(ipc_link_msg_usr_s *ipc_msg_usr,
+static void _process_server_handle_callback(ipc_link_msg_handle_s *ipc_msg_usr,
         _ipc_process_server_context_s *context)
 {
     LOGT("ipc_link: %p, context: %p \n", ipc_msg_usr, context);
@@ -72,7 +79,7 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
 {
     pid_t pid = 0;
     ipc_link_msg_s *ipc_msg = NULL;
-    ipc_link_msg_usr_s *ipc_msg_usr = NULL;
+    ipc_link_msg_handle_s ipc_link_msg_handle;
     HyIpcProcessInfo_s ipc_process_info;
     HyIpcProcessSaveConfig_s *save_config = &context->save_config;
 
@@ -81,6 +88,7 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
         return -1;
     }
 
+    LOGD("ipc msg type: %d \n", ipc_msg->type);
     switch (ipc_msg->type) {
         case IPC_LINK_MSG_TYPE_ACK:
             LOGE("--------haha----return \n");
@@ -103,14 +111,19 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
             }
             break;
         case IPC_LINK_MSG_TYPE_CB:
-            ipc_msg_usr = ipc_link_msg_usr_create(ipc_link, ipc_msg);
-            if (!ipc_msg_usr) {
-                LOGE("ipc link msg usr create failed \n");
+            ipc_link_msg_handle.ipc_link = ipc_link;
+            ipc_link_msg_handle.ipc_msg = ipc_msg;
+
+            if (0 == HyFifoWrite(context->fifo_read_h,
+                    &ipc_link_msg_handle, sizeof(ipc_link_msg_handle))) {
+                LOGE("hy fifo write failed, lost data \n");
+                break;
             }
 
-            hy_list_add_tail(&ipc_msg_usr->entry, &context->ipc_msg_usr_list);
+            sem_post(&context->msg_sem);
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
+            LOGE("-----haha---------cb_id \n");
             break;
         default:
             LOGE("error ipc_msg type\n");
@@ -132,7 +145,7 @@ static void _process_server_link_manager_accept_cb(void *handle, void *args)
     write(context->pfd[1], &handle, sizeof(void *));
 }
 
-static hy_s32_t _process_server_handle_msg_cb(void *args)
+static hy_s32_t _process_server_read_msg_cb(void *args)
 {
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
@@ -159,7 +172,7 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
         ipc_link_manager_put_list(context->ipc_link_manager);
 
         timeout.tv_sec = 1;
-        if (select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout) < 0) {
+        if (select(FD_SETSIZE, &read_fs, NULL, NULL, NULL) < 0) {
             LOGES("select failed \n");
             break;
         }
@@ -188,24 +201,47 @@ static hy_s32_t _process_server_handle_msg_cb(void *args)
             }
         }
         ipc_link_manager_put_list(context->ipc_link_manager);
+    }
+
+    LOGI("ipc process server handle msg stop \n");
+
+    return -1;
+}
+
+static hy_s32_t _process_server_write_msg_cb(void *args)
+{
+    LOGT("args: %p \n", args);
+    HY_ASSERT_RET_VAL(!args, -1);
+
+    ipc_link_msg_handle_s ipc_handle_msg;
+    ipc_link_s *pos = NULL;
+    struct hy_list_head *client_link_list = NULL;
+    _ipc_process_server_context_s *context = args;
+
+    while (!context->exit_flag) {
+        sem_wait(&context->msg_sem);
 
         // 处理ack消息
 
         // 处理回调消息
-        ipc_link_msg_usr_s *ipc_msg_usr_pos, *ipc_msg_usr_n;
-        hy_list_for_each_entry_safe(ipc_msg_usr_pos, ipc_msg_usr_n,
-                &context->ipc_msg_usr_list, entry) {
-            _process_server_handle_callback(ipc_msg_usr_pos, context);
+        HyFifoRead(context->fifo_read_h, &ipc_handle_msg, sizeof(ipc_handle_msg));
 
-            hy_list_del(&ipc_msg_usr_pos->entry);
-            if (ipc_msg_usr_pos->ipc_msg) {
-                HY_MEM_FREE_PP(&ipc_msg_usr_pos->ipc_msg);
+        client_link_list = ipc_link_manager_get_list(context->ipc_link_manager);
+        hy_list_for_each_entry(pos, client_link_list, entry) {
+            if (pos == ipc_handle_msg.ipc_link) {
+                LOGD("save ipc link \n");
+                continue;
             }
-            ipc_link_msg_usr_destroy(ipc_msg_usr_pos);
+
+            ipc_link_write(pos, ipc_handle_msg.ipc_msg);
+            ipc_handle_msg.ipc_msg = NULL;
+        }
+        ipc_link_manager_put_list(context->ipc_link_manager);
+
+        if (ipc_handle_msg.ipc_msg) {
+            free(ipc_handle_msg.ipc_msg);
         }
     }
-
-    LOGI("ipc process server handle msg stop \n");
 
     return -1;
 }
@@ -218,9 +254,12 @@ void ipc_process_server_destroy(void **handle)
     _ipc_process_server_context_s *context = *handle;
 
     context->exit_flag = 1;
-    HyThreadDestroy(&context->handle_msg_thread_h);
+    HyThreadDestroy(&context->read_msg_thread_h);
 
     ipc_link_manager_destroy(&context->ipc_link_manager);
+
+    HyFifoDestroy(&context->fifo_read_h);
+    sem_destroy(&context->msg_sem);
 
     LOGI("ipc process server destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -237,12 +276,21 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *config)
         context = HY_MEM_MALLOC_BREAK(_ipc_process_server_context_s *,
                 sizeof(*context));
 
+        HyIpcProcessSaveConfig_s *save_config = &config->save_config;
+        HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
+
         HY_INIT_LIST_HEAD(&context->ipc_msg_usr_list);
         HY_INIT_LIST_HEAD(&context->id_list);
         pipe(context->pfd);
 
-        HyIpcProcessSaveConfig_s *save_config = &config->save_config;
-        HY_MEMCPY(&context->save_config, save_config, sizeof(*save_config));
+        sem_init(&context->msg_sem, 0, 0);
+
+        hy_u32_t len = sizeof(ipc_link_msg_handle_s *) * 1024;
+        context->fifo_read_h = HyFifoCreate_m(len, HY_FIFO_MUTEX_LOCK);
+        if (!context->fifo_read_h) {
+            LOGE("hy fifo create failed \n");
+            break;
+        }
 
         context->ipc_link_manager = ipc_link_manager_create(config->ipc_name,
                 config->tag, _process_server_link_manager_accept_cb, context);
@@ -251,9 +299,16 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *config)
             break;
         }
 
-        context->handle_msg_thread_h= HyThreadCreate_m("hy_s_handle_msg",
-                _process_server_handle_msg_cb, context);
-        if (!context->handle_msg_thread_h) {
+        context->read_msg_thread_h = HyThreadCreate_m("hy_i_p_read_msg",
+                _process_server_read_msg_cb, context);
+        if (!context->read_msg_thread_h) {
+            LOGE("hy thread create failed \n");
+            break;
+        }
+
+        context->write_msg_thread_h = HyThreadCreate_m("hy_i_p_write_msg",
+                _process_server_write_msg_cb, context);
+        if (!context->write_msg_thread_h) {
             LOGE("hy thread create failed \n");
             break;
         }
