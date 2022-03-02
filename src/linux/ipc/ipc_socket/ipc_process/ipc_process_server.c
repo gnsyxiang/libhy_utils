@@ -36,6 +36,8 @@ typedef struct {
 
     ipc_link_manager_s          *ipc_link_manager;
     struct hy_list_head         ipc_msg_usr_list;
+
+    pthread_mutex_t             id_list_mutex;
     struct hy_list_head         id_list;
 
     sem_t                       msg_sem;
@@ -80,6 +82,9 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
     pid_t pid = 0;
     ipc_link_msg_s *ipc_msg = NULL;
     ipc_link_msg_handle_s ipc_link_msg_handle;
+    ipc_link_msg_cb_id_s *msg_cb_id;
+    hy_u32_t *cb_id = NULL;
+    hy_u32_t cb_id_cnt = 0;
     HyIpcProcessInfo_s ipc_process_info;
     HyIpcProcessSaveConfig_s *save_config = &context->save_config;
 
@@ -124,6 +129,23 @@ static hy_s32_t _process_server_parse_msg(ipc_link_s *ipc_link,
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
             LOGE("-----haha---------cb_id \n");
+
+            cb_id_cnt = *(hy_u32_t *)(ipc_msg->buf);
+            cb_id = (hy_u32_t *)(ipc_msg->buf + sizeof(hy_u32_t));
+            msg_cb_id = ipc_link_msg_cb_id_create(cb_id, cb_id_cnt);
+            if (!msg_cb_id) {
+                LOGE("ipc link msg cb id create failed \n");
+                break;
+            }
+
+            pthread_mutex_lock(&context->id_list_mutex);
+            hy_list_add_tail(&msg_cb_id->entry, &context->id_list);
+            pthread_mutex_unlock(&context->id_list_mutex);
+
+            if (ipc_msg) {
+                HY_MEM_FREE_PP(&ipc_msg);
+            }
+
             break;
         default:
             LOGE("error ipc_msg type\n");
@@ -208,6 +230,42 @@ static hy_s32_t _process_server_read_msg_cb(void *args)
     return -1;
 }
 
+static hy_s32_t _write_msg_from_cb_id_list(ipc_link_s *ipc_link,
+        ipc_link_msg_handle_s *ipc_handle_msg,
+        _ipc_process_server_context_s *context)
+{
+    ipc_link_msg_cb_id_s *pos;
+    HyIpcProcessMsgId_e msg_id = 0;
+    hy_s32_t find_id_cnt = 0;
+
+    msg_id = *(HyIpcProcessMsgId_e *)ipc_handle_msg->ipc_msg->buf;
+
+    hy_list_for_each_entry(pos, &context->id_list, entry) {
+        find_id_cnt = 0;
+
+        for (hy_u32_t i = 0; i < pos->id_cnt; ++i) {
+            if (msg_id == pos->id[i]) {
+                LOGD("ipc_link contain msg id, ipc_link: %p, msg id: %d \n",
+                        ipc_link, msg_id);
+
+                if (msg_id >= HY_IPC_PROCESS_MSG_ID_BROADCAST_BASE) {
+                    ipc_link_write(ipc_link, ipc_handle_msg->ipc_msg);
+                    ipc_handle_msg->ipc_msg = NULL;
+                } else {
+                    if (++find_id_cnt > 1) {
+                        LOGE("two client use same msg id \n");
+                        break;
+                    }
+                    ipc_link_write(ipc_link, ipc_handle_msg->ipc_msg);
+                    ipc_handle_msg->ipc_msg = NULL;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
 static hy_s32_t _process_server_write_msg_cb(void *args)
 {
     LOGT("args: %p \n", args);
@@ -237,8 +295,7 @@ static hy_s32_t _process_server_write_msg_cb(void *args)
                 continue;
             }
 
-            ipc_link_write(pos, ipc_handle_msg.ipc_msg);
-            ipc_handle_msg.ipc_msg = NULL;
+            _write_msg_from_cb_id_list(pos, &ipc_handle_msg, context);
         }
         ipc_link_manager_put_list(context->ipc_link_manager);
 
@@ -256,6 +313,7 @@ void ipc_process_server_destroy(void **handle)
     HY_ASSERT_RET(!handle || !*handle);
 
     _ipc_process_server_context_s *context = *handle;
+    ipc_link_msg_cb_id_s *pos, *n;
 
     context->exit_flag = 1;
     HyThreadDestroy(&context->read_msg_thread_h);
@@ -265,8 +323,14 @@ void ipc_process_server_destroy(void **handle)
 
     ipc_link_manager_destroy(&context->ipc_link_manager);
 
+    hy_list_for_each_entry_safe(pos, n, &context->id_list, entry) {
+        hy_list_del(&pos->entry);
+        ipc_link_msg_cb_id_destroy(&pos);
+    }
+
     HyFifoDestroy(&context->fifo_read_h);
     sem_destroy(&context->msg_sem);
+    pthread_mutex_destroy(&context->id_list_mutex);
 
     LOGI("ipc process server destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -291,6 +355,7 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *config)
         pipe(context->pfd);
 
         sem_init(&context->msg_sem, 0, 0);
+        pthread_mutex_init(&context->id_list_mutex, NULL);
 
         hy_u32_t len = sizeof(ipc_link_msg_handle_s *) * 1024;
         context->fifo_read_h = HyFifoCreate_m(len, HY_FIFO_MUTEX_LOCK);

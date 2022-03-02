@@ -83,9 +83,10 @@ typedef struct {
 
 typedef struct {
     struct hy_list_head     entry;
+
     hy_u32_t                *id;
     hy_u32_t                id_cnt;
-} ipc_link_id_s;
+} ipc_link_msg_cb_id_s;
 
 ipc_link_s *ipc_link_create(const char *name, const char *tag,
         ipc_link_type_e type, void *ipc_socket_h);
@@ -95,7 +96,10 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg);
 hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg);
 
 hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
-hy_s32_t ipc_link_write_cb(ipc_link_s *ipc_link, hy_u32_t *id, hy_u32_t id_cnt);
+ipc_link_msg_cb_id_s *ipc_link_msg_cb_id_create(hy_u32_t *id, hy_u32_t id_cnt);
+void ipc_link_msg_cb_id_destroy(ipc_link_msg_cb_id_s **handle);
+hy_s32_t ipc_link_write_cb_id(ipc_link_s *ipc_link,
+        HyIpcProcessCallbackCb_s *callback, hy_u32_t callback_cnt);
 
 void ipc_link_set_info(ipc_link_s *ipc_link, const char *tag, pid_t pid);
 void ipc_link_get_info(ipc_link_s *ipc_link, HyIpcProcessInfo_s *ipc_process_info);

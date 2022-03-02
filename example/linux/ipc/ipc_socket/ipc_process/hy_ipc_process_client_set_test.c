@@ -177,6 +177,7 @@ static void _demo_param_test(_main_context_t *context)
     {
         hy_s32_t ret = 0;
         DemoParamSet_s demo_param_set;
+
         demo_param_set.id       = HY_IPC_PROCESS_MSG_ID_SYNC_DEMO_PARAM_SET;
         HY_STRNCPY(demo_param_set.buf, sizeof(demo_param_set.buf),
                 "hax", HY_STRLEN("hax"));

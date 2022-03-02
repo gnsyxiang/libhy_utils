@@ -68,11 +68,33 @@ hy_s32_t ipc_process_client_write_sync(void *handle, void *msg, hy_u32_t len)
     return ipc_link_write(context->ipc_link, ipc_msg);
 }
 
+static hy_s32_t _ipc_client_handle_msg_cb(ipc_link_msg_s *ipc_msg,
+        _ipc_process_client_context_s *context)
+{
+    HyIpcProcessMsgId_e msg_id = 0;
+    hy_s32_t ret = 0;
+
+    msg_id = *(HyIpcProcessMsgId_e *)ipc_msg->buf;
+
+    for (hy_u32_t i = 0; i < context->callback_cnt; ++i) {
+        if (context->callback[i].id == msg_id) {
+            LOGE("--------haha \n");
+            ret = context->callback[i].callback_cb(ipc_msg->buf,
+                    ipc_msg->buf_len, context->callback[i].args);
+            if (ret) {
+            }
+
+            break;
+        }
+    }
+
+    return 0;
+}
+
 static hy_s32_t _ipc_client_parse_msg(ipc_link_s *ipc_link,
         _ipc_process_client_context_s *context)
 {
     pid_t pid = 0;
-    HyIpcProcessMsgId_e msg_id = 0;
     ipc_link_msg_s *ipc_msg = NULL;
     HyIpcProcessInfo_s ipc_process_info;
     HyIpcProcessSaveConfig_s *save_config = &context->save_config;
@@ -88,16 +110,7 @@ static hy_s32_t _ipc_client_parse_msg(ipc_link_s *ipc_link,
             LOGE("--------haha----return \n");
             break;
         case IPC_LINK_MSG_TYPE_CB:
-            msg_id = *(HyIpcProcessMsgId_e *)ipc_msg->buf;
-
-            for (hy_u32_t i = 0; i < context->callback_cnt; ++i) {
-                if (context->callback[i].id == msg_id) {
-                    context->callback[i].callback_cb(ipc_msg->buf,
-                            ipc_msg->buf_len, context->callback[i].args);
-
-                    break;
-                }
-            }
+            _ipc_client_handle_msg_cb(ipc_msg, context);
             break;
         case IPC_LINK_MSG_TYPE_INFO:
             pid = *(pid_t *)(ipc_msg->buf + HY_STRLEN(ipc_msg->buf) + 1);
@@ -217,19 +230,25 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
 
         context->ipc_link = ipc_link_create(config->ipc_name,
                 config->tag, IPC_LINK_TYPE_CLIENT, NULL);
-        if (!context->ipc_link) {
+        ipc_link_s *ipc_link= context->ipc_link;
+        if (!ipc_link) {
             LOGE("ipc link create failed \n");
             break;
         }
 
-        if (0 != ipc_link_connect(context->ipc_link, config->timeout_s)) {
+        if (0 != ipc_link_connect(ipc_link, config->timeout_s)) {
             LOGE("ipc link connect failed \n");
             break;
         }
 
-        if (0 != ipc_link_write_info(context->ipc_link,
-                    context->ipc_link->tag, context->pid)) {
+        if (0 != ipc_link_write_info(ipc_link, ipc_link->tag, context->pid)) {
             LOGE("ipc link write info failed \n");
+            break;
+        }
+
+        if (0 != ipc_link_write_cb_id(ipc_link,
+                    config->callback, config->callback_cnt)) {
+            LOGE("ipc link write cb id failed \n");
             break;
         }
 
@@ -239,12 +258,6 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
             LOGE("hy thread create failed \n");
             break;
         }
-
-        hy_u32_t id[config->callback_cnt];
-        for (hy_u32_t i = 0; i < config->callback_cnt; ++i) {
-            id[i] = config->callback[i].id;
-        }
-        ipc_link_write_cb(context->ipc_link, id, config->callback_cnt);
 
         LOGI("ipc process client create, context: %p \n", context);
         return context;

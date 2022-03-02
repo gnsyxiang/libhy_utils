@@ -133,20 +133,70 @@ hy_s32_t ipc_link_write_info(ipc_link_s *ipc_link, const char *tag, pid_t pid)
     return ipc_link_write(ipc_link, ipc_msg);
 }
 
-hy_s32_t ipc_link_write_cb(ipc_link_s *ipc_link, hy_u32_t *id, hy_u32_t id_cnt)
+void ipc_link_msg_cb_id_destroy(ipc_link_msg_cb_id_s **handle)
 {
-    LOGT("ipc_link: %p, id: %p, id_cnt: %d \n", ipc_link, id, id_cnt);
-    HY_ASSERT_RET_VAL(!ipc_link || !id, -1);
+    LOGT("&handle: %p, handle: %p \n", handle, *handle);
+    HY_ASSERT_RET(!handle || !*handle);
 
-    hy_s32_t offset = id_cnt * sizeof(hy_u32_t);
-    hy_u32_t total_len = sizeof(ipc_link_msg_s) + offset;
+    ipc_link_msg_cb_id_s *msg_cb_id = *handle;
+
+    LOGI("ipc link msg cb id destroy, msg_cb_id: %p \n", msg_cb_id);
+    HY_MEM_FREE_PP(&msg_cb_id->id);
+    HY_MEM_FREE_PP(&msg_cb_id);
+}
+
+ipc_link_msg_cb_id_s *ipc_link_msg_cb_id_create(hy_u32_t *id, hy_u32_t id_cnt)
+{
+    LOGT("id: %p, id_cnt: %d \n", id, id_cnt);
+    HY_ASSERT_RET_VAL(!id, NULL);
+
+    ipc_link_msg_cb_id_s *msg_cb_id = NULL;
+    hy_u32_t len = sizeof(hy_u32_t) * id_cnt;
+
+    do {
+        msg_cb_id = HY_MEM_MALLOC_BREAK(ipc_link_msg_cb_id_s *, sizeof(*msg_cb_id));
+        msg_cb_id->id = HY_MEM_MALLOC_BREAK(hy_u32_t *, len);
+
+        HY_MEMCPY(msg_cb_id->id, id, len);
+        msg_cb_id->id_cnt = id_cnt;
+
+        LOGI("ipc link msg cb id create, msg_cb_id: %p \n", msg_cb_id);
+        return msg_cb_id;
+    } while (0);
+
+    LOGE("ipc link msg cb id failed \n");
+    return NULL;
+}
+
+hy_s32_t ipc_link_write_cb_id(ipc_link_s *ipc_link,
+        HyIpcProcessCallbackCb_s *callback, hy_u32_t callback_cnt)
+{
+    LOGT("ipc_link: %p, callback: %p, callback_cnt: %d \n",
+            ipc_link, callback, callback_cnt);
+    HY_ASSERT_RET_VAL(!ipc_link || !callback, -1);
+
+    hy_s32_t offset = 0;
+    hy_s32_t len = 0;
+    hy_u32_t total_len = sizeof(ipc_link_msg_s)
+        + callback_cnt * sizeof(hy_u32_t) + sizeof(hy_u32_t);
     char *ipc_msg_buf = NULL;
     ipc_link_msg_s *ipc_msg = NULL;
+    hy_u32_t id[callback_cnt];
 
     ipc_msg_buf = HY_MEM_MALLOC_RET_VAL(char *, total_len, -1);
     ipc_msg = (ipc_link_msg_s *)ipc_msg_buf;
 
-    HY_MEMCPY(ipc_msg->buf, id, offset);
+    for (hy_u32_t i = 0; i < callback_cnt; ++i) {
+        id[i] = callback[i].id;
+    }
+
+    len = sizeof(hy_u32_t);
+    HY_MEMCPY(ipc_msg->buf + offset, &callback_cnt, len);
+    offset += len;
+
+    len = callback_cnt * sizeof(hy_u32_t);
+    HY_MEMCPY(ipc_msg->buf + offset, id, len);
+    offset += len;
 
     ipc_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
     ipc_msg->type       = IPC_LINK_MSG_TYPE_CB_ID;
