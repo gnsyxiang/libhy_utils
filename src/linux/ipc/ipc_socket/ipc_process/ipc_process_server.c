@@ -172,7 +172,7 @@ static hy_s32_t _process_server_read_msg_cb(void *args)
         ipc_link_manager_put_list(context->ipc_link_manager);
 
         timeout.tv_sec = 1;
-        if (select(FD_SETSIZE, &read_fs, NULL, NULL, NULL) < 0) {
+        if (select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout) < 0) {
             LOGES("select failed \n");
             break;
         }
@@ -221,6 +221,10 @@ static hy_s32_t _process_server_write_msg_cb(void *args)
     while (!context->exit_flag) {
         sem_wait(&context->msg_sem);
 
+        if (context->exit_flag) {
+            break;
+        }
+
         // 处理ack消息
 
         // 处理回调消息
@@ -255,6 +259,9 @@ void ipc_process_server_destroy(void **handle)
 
     context->exit_flag = 1;
     HyThreadDestroy(&context->read_msg_thread_h);
+
+    sem_post(&context->msg_sem);
+    HyThreadDestroy(&context->write_msg_thread_h);
 
     ipc_link_manager_destroy(&context->ipc_link_manager);
 
