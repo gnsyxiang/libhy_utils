@@ -215,13 +215,6 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
                     sizeof(HyIpcProcessCallbackCb_s) * config->callback_cnt);
         }
 
-        context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
-                _process_client_handle_msg_cb, context);
-        if (!context->handle_msg_thread_h) {
-            LOGE("hy thread create failed \n");
-            break;
-        }
-
         context->ipc_link = ipc_link_create(config->ipc_name,
                 config->tag, IPC_LINK_TYPE_CLIENT, NULL);
         if (!context->ipc_link) {
@@ -237,6 +230,13 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *config)
         if (0 != ipc_link_write_info(context->ipc_link,
                     context->ipc_link->tag, context->pid)) {
             LOGE("ipc link write info failed \n");
+            break;
+        }
+
+        context->handle_msg_thread_h = HyThreadCreate_m("hy_c_handle_msg",
+                _process_client_handle_msg_cb, context);
+        if (!context->handle_msg_thread_h) {
+            LOGE("hy thread create failed \n");
             break;
         }
 
