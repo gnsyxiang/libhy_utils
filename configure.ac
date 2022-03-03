@@ -99,8 +99,8 @@ AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/linux/Makefile
                  src/linux/ipc/Makefile
+                 src/linux/ipc/ipc-process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
-                 src/linux/ipc/ipc_socket/ipc-process/Makefile
                  src/linux/ipc/ipc_socket/ipc_process/Makefile
                  src/mac/Makefile
                  src/mcu/Makefile

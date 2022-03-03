@@ -48,7 +48,8 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_ipc_process.c
+                   hy_ipc_process.c     \
+                   ipc_link.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -67,17 +68,17 @@ if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 endif
 
-libhy_ipc_process_la_SOURCES        = $(_sources_com)
-libhy_ipc_process_la_CPPFLAGS       = $(_cppflags_com)
-libhy_ipc_process_la_CFLAGS         = $(_cflags_com)
-libhy_ipc_process_la_CXXFLAGS       = $(_cxxflags_com)
-libhy_ipc_process_la_LDFLAGS        = $(_ldflags_com)
-libhy_ipc_process_la_LIBADD         = $(_ldadd_com)
+libhy_ipc_process_la_SOURCES    = $(_sources_com)
+libhy_ipc_process_la_CPPFLAGS   = $(_cppflags_com)
+libhy_ipc_process_la_CFLAGS     = $(_cflags_com)
+libhy_ipc_process_la_CXXFLAGS   = $(_cxxflags_com)
+libhy_ipc_process_la_LDFLAGS    = $(_ldflags_com)
+libhy_ipc_process_la_LIBADD     = $(_ldadd_com)
 
-bin_PROGRAMS                        += hy_ipc_link_client_test
-hy_ipc_link_client_test_SOURCES     = $(_sources_com) ipc_link_client_test.c
-hy_ipc_link_client_test_CPPFLAGS    = $(_cppflags_com)
-hy_ipc_link_client_test_CFLAGS      = $(_cflags_com)
-hy_ipc_link_client_test_CXXFLAGS    = $(_cxxflags_com)
-hy_ipc_link_client_test_LDFLAGS     = $(_ldflags_com)
-hy_ipc_link_client_test_LDADD       = $(_ldadd_com)
+bin_PROGRAMS                    += hy_ipc_link_test
+hy_ipc_link_test_SOURCES        = $(_sources_com) ipc_link_test.c
+hy_ipc_link_test_CPPFLAGS       = $(_cppflags_com)
+hy_ipc_link_test_CFLAGS         = $(_cflags_com)
+hy_ipc_link_test_CXXFLAGS       = $(_cxxflags_com)
+hy_ipc_link_test_LDFLAGS        = $(_ldflags_com)
+hy_ipc_link_test_LDADD          = $(_ldadd_com) $(HY_HAL_LIBS)  $(top_builddir)/src/linux/ipc/ipc_socket/libhy_ipc_socket.la
