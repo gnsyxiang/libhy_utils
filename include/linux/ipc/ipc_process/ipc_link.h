@@ -35,6 +35,13 @@ typedef enum {
     IPC_LINK_TYPE_MAX,
 } ipc_link_type_e;
 
+typedef enum {
+    IPC_LINK_CONNECT_STATE_DISCONNECT,
+    IPC_LINK_CONNECT_STATE_CONNECT,
+
+    IPC_LINK_CONNECT_STATE_MAX,
+} ipc_link_connect_state_e;
+
 typedef void (*ipc_link_accept_cb_t)(void *ipc_socket_h, void *args);
 
 typedef struct {

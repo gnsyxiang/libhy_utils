@@ -24,6 +24,13 @@
 extern "C" {
 #endif
 
+#include "hy_list.h"
+
+typedef struct {
+    struct hy_list_head             entry;
+    void                            *ipc_link_h;
+} ipc_link_manager_client_s;
+
 typedef void (*ipc_link_manager_accept_cb_t)(void *ipc_link_h, void *args);
 
 typedef struct {

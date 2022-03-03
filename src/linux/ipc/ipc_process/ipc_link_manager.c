@@ -31,24 +31,70 @@
 typedef struct {
     ipc_link_manager_save_config_s  save_config;
 
+    struct hy_list_head             list;
+    pthread_mutex_t                 list_mutex;
+
     void                            *ipc_link_h;
     void                            *accept_thread_h;
     hy_s32_t                        exit_flag;
 } _ipc_link_manager_context_s;
 
-static hy_s32_t _ipc_link_manager_thread_accept_cb(void *args)
+static void _ipc_link_manager_accept_cb(void *ipc_socket_h, void *args)
 {
-    LOGT("ipc link manager thread accept cb, args: %p \n", args);
-    HY_ASSERT_RET_VAL(!args, -1);
+    LOGT("ipc_socket_h: %p, args: %p \n", ipc_socket_h, args);
+    HY_ASSERT_RET(!ipc_socket_h);
 
     _ipc_link_manager_context_s *context = args;
     ipc_link_manager_save_config_s *save_config = &context->save_config;
+    ipc_link_manager_client_s *ipc_link_client = NULL;
+
+    do {
+        ipc_link_client = HY_MEM_MALLOC_BREAK(ipc_link_manager_client_s *,
+                sizeof(*ipc_link_client));
+
+        ipc_link_client->ipc_link_h = ipc_link_create_m(NULL, NULL,
+                IPC_LINK_TYPE_MAX, ipc_socket_h);
+        if (!ipc_link_client->ipc_link_h) {
+            LOGE("ipc link create m failed \n");
+            break;
+        }
+
+        LOGI("ipc link manager add new ipc link to list \n");
+
+        pthread_mutex_lock(&context->list_mutex);
+        hy_list_add_tail(&ipc_link_client->entry, &context->list);
+        pthread_mutex_unlock(&context->list_mutex);
+
+        if (save_config->accept_cb) {
+            save_config->accept_cb(ipc_link_client->ipc_link_h,
+                    save_config->args);
+        }
+
+        return ;
+    } while (0);
+
+    LOGI("ipc link manager add new ipc link to list failed \n");
+
+    if (ipc_link_client) {
+        if (ipc_link_client->ipc_link_h) {
+            ipc_link_destroy(&ipc_link_client->ipc_link_h);
+        }
+        HY_MEM_FREE_PP(&ipc_link_client);
+    }
+}
+
+static hy_s32_t _ipc_link_manager_thread_accept_cb(void *args)
+{
+    LOGT("args: %p \n", args);
+    HY_ASSERT_RET_VAL(!args, -1);
+
+    _ipc_link_manager_context_s *context = args;
     hy_s32_t ret = 0;
 
     LOGI("ipc link manager thread accept cb start \n");
 
     ret = ipc_link_wait_accept(context->ipc_link_h,
-            save_config->accept_cb, save_config->args);
+            _ipc_link_manager_accept_cb, context);
 
     LOGI("ipc link manager thread accept cb stop \n");
     return ret;
@@ -61,11 +107,23 @@ void ipc_link_manager_destroy(void **ipc_link_manager_h)
     HY_ASSERT_RET(!ipc_link_manager_h || !*ipc_link_manager_h);
 
     _ipc_link_manager_context_s *context = *ipc_link_manager_h;
+    ipc_link_manager_client_s *pos, *n;
 
     ipc_link_destroy(&context->ipc_link_h);
 
     context->exit_flag = 1;
     HyThreadDestroy(&context->accept_thread_h);
+
+    pthread_mutex_lock(&context->list_mutex);
+    hy_list_for_each_entry_safe(pos, n, &context->list, entry) {
+        hy_list_del(&pos->entry);
+
+        ipc_link_destroy(&pos->ipc_link_h);
+        HY_MEM_FREE_PP(&pos);
+    }
+    pthread_mutex_unlock(&context->list_mutex);
+
+    pthread_mutex_destroy(&context->list_mutex);
 
     LOGI("ipc link manager destroy, context: %p \n", context);
     HY_MEM_FREE_PP(ipc_link_manager_h);
@@ -84,6 +142,10 @@ void *ipc_link_manager_create(ipc_link_manager_config_s *ipc_link_manager_c)
 
         HY_MEMCPY(&context->save_config, &ipc_link_manager_c->save_config,
                 sizeof(context->save_config));
+
+        HY_INIT_LIST_HEAD(&context->list);
+
+        pthread_mutex_init(&context->list_mutex, NULL);
 
         context->ipc_link_h = ipc_link_create_m(ipc_link_manager_c->ipc_name,
                 ipc_link_manager_c->tag, IPC_LINK_TYPE_SERVER, NULL);
