@@ -109,18 +109,18 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.user_cb       = _signal_user_cb;
     signal_config.save_config.args          = context;
 
-    ipc_link_manager_config_s ipc_link_manager_config;
-    HY_MEMSET(&ipc_link_manager_config, sizeof(ipc_link_manager_config));
-    ipc_link_manager_config.save_config.accept_cb   = _ipc_link_manager_accept_cb;
-    ipc_link_manager_config.save_config.args        = context;
-    ipc_link_manager_config.ipc_name                = _IPC_LINK_IPC_NAME;
-    ipc_link_manager_config.tag                     = "ipc_link_server";
+    ipc_link_manager_config_s ipc_link_manager_c;
+    HY_MEMSET(&ipc_link_manager_c, sizeof(ipc_link_manager_c));
+    ipc_link_manager_c.save_config.accept_cb    = _ipc_link_manager_accept_cb;
+    ipc_link_manager_c.save_config.args         = context;
+    ipc_link_manager_c.ipc_name                 = _IPC_LINK_IPC_NAME;
+    ipc_link_manager_c.tag                      = "ipc_link_server";
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",                 &context->log_handle,           &log_config,                (create_t)HyLogCreate,                  HyLogDestroy},
         {"signal",              &context->signal_handle,        &signal_config,             (create_t)HySignalCreate,               HySignalDestroy},
-        {"ipc link manager",    &context->ipc_link_manager_h,   &ipc_link_manager_config,   (create_t)ipc_link_manager_create,      ipc_link_manager_destroy},
+        {"ipc link manager",    &context->ipc_link_manager_h,   &ipc_link_manager_c,        (create_t)ipc_link_manager_create,      ipc_link_manager_destroy},
     };
 
     RUN_CREATE(module);
