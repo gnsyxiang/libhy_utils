@@ -87,7 +87,7 @@ typedef struct {
     hy_u32_t                        connect_timeout_s;
 } HyIpcProcessConfig_s;
 
-void *HyIpcProcessCreate(HyIpcProcessConfig_s *config);
+void *HyIpcProcessCreate(HyIpcProcessConfig_s *ipc_process_c);
 void HyIpcProcessDestroy(void **ipc_process_h);
 
 hy_s32_t HyIpcProcessDataSync(void *ipc_process_h, HyIpcProcessMsgId_e id,
