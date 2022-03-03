@@ -79,6 +79,7 @@ AC_CONFIG_FILES([Makefile
                  example/linux/Makefile
                  example/linux/ipc/Makefile
                  example/linux/ipc/ipc_socket/Makefile
+                 example/linux/ipc/ipc_socket/ipc-process/Makefile
                  example/linux/ipc/ipc_socket/ipc_process/Makefile
                  example/mac/Makefile
                  example/mcu/Makefile
@@ -88,6 +89,7 @@ AC_CONFIG_FILES([Makefile
                  include/linux/Makefile
                  include/linux/ipc/Makefile
                  include/linux/ipc/ipc_socket/Makefile
+                 include/linux/ipc/ipc_socket/ipc-process/Makefile
                  include/linux/ipc/ipc_socket/ipc_process/Makefile
                  include/mac/Makefile
                  include/mcu/Makefile
@@ -98,6 +100,7 @@ AC_CONFIG_FILES([Makefile
                  src/linux/Makefile
                  src/linux/ipc/Makefile
                  src/linux/ipc/ipc_socket/Makefile
+                 src/linux/ipc/ipc_socket/ipc-process/Makefile
                  src/linux/ipc/ipc_socket/ipc_process/Makefile
                  src/mac/Makefile
                  src/mcu/Makefile

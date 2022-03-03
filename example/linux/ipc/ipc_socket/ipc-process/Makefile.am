@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    19/01 2022 09:08
+# @date    03/03 2022 10:28
 # @version v0.0.1
 # 
 # @since    note
@@ -13,12 +13,10 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        19/01 2022      create the file
+#     00      zhenquan.qiu        03/03 2022      create the file
 # 
-#     last modified: 19/01 2022 09:08
+#     last modified: 03/03 2022 10:28
 # ===============================================================
-
-SUBDIRS =
 
 # ------------------
 # defining variables
@@ -42,8 +40,9 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc/ipc_socket     \
-                   -I$(top_srcdir)/include/linux                    \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket/ipc-process     \
+                   -I$(top_srcdir)/include/linux/ipc/ipc_socket                 \
+                   -I$(top_srcdir)/include/linux                                \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -71,18 +70,3 @@ _include_com    += $(LOG4CPLUS_INCS)
 _ldadd_com      += $(LOG4CPLUS_LIBS)
 endif
 
-bin_PROGRAMS                        += hy_ipc_socket_client_test
-hy_ipc_socket_client_test_SOURCES   = $(_sources_com) hy_ipc_socket_client_test.c
-hy_ipc_socket_client_test_CPPFLAGS  = $(_cppflags_com)
-hy_ipc_socket_client_test_CFLAGS    = $(_cflags_com)
-hy_ipc_socket_client_test_CXXFLAGS  = $(_cxxflags_com)
-hy_ipc_socket_client_test_LDFLAGS   = $(_ldflags_com)
-hy_ipc_socket_client_test_LDADD     = $(_ldadd_com)
-
-bin_PROGRAMS                        += hy_ipc_socket_server_test
-hy_ipc_socket_server_test_SOURCES   = $(_sources_com) hy_ipc_socket_server_test.c
-hy_ipc_socket_server_test_CPPFLAGS  = $(_cppflags_com)
-hy_ipc_socket_server_test_CFLAGS    = $(_cflags_com)
-hy_ipc_socket_server_test_CXXFLAGS  = $(_cxxflags_com)
-hy_ipc_socket_server_test_LDFLAGS   = $(_ldflags_com)
-hy_ipc_socket_server_test_LDADD     = $(_ldadd_com)
