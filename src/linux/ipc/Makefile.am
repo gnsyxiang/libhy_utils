@@ -20,7 +20,7 @@
 
 SUBDIRS = \
           ipc_socket    \
-          ipc-process
+          ipc_process
 
 noinst_LTLIBRARIES = libhy_ipc.la
 
@@ -62,7 +62,7 @@ _ldflags_com    +=
 _ipc_path       = $(top_builddir)/src/linux/ipc
 _ldadd_com      += \
                    $(_ipc_path)/ipc_socket/libhy_ipc_socket.la     \
-                   $(_ipc_path)/ipc-process/libhy_ipc_process.la
+                   $(_ipc_path)/ipc_process/libhy_ipc_process.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
