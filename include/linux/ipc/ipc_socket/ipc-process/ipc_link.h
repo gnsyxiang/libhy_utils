@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#include <time.h>
-
 #include "hy_hal/hy_type.h"
 
 #define IPC_LINK_IPC_NAME_LEN_MAX   (32)
@@ -46,6 +44,7 @@ typedef struct {
 
 typedef struct {
     void                    *ipc_socket_h; // 当有该参数时，直接赋值，无需创建
+
     const char              *ipc_name;
     const char              *tag;
 
@@ -62,7 +61,7 @@ hy_s32_t ipc_link_read(void *ipc_link_h, void **buf, hy_u32_t *len);
 void ipc_link_info_get(void *ipc_link_h, ipc_link_info_s **info);
 void ipc_link_info_set(void *ipc_link_h, ipc_link_info_s *info);
 
-hy_s32_t ipc_link_connect(void *ipc_link_h, time_t timeout_s);
+hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
         ipc_link_accept_cb_t accept_cb, void *args);
 

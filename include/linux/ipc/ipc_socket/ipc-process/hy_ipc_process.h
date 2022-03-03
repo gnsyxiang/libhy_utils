@@ -84,7 +84,7 @@ typedef struct {
     hy_u32_t                        func_cnt;
 
     // client
-    time_t                          connect_timeout_s;
+    hy_u32_t                        connect_timeout_s;
 } HyIpcProcessConfig_s;
 
 void *HyIpcProcessCreate(HyIpcProcessConfig_s *config);
