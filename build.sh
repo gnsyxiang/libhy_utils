@@ -67,6 +67,7 @@ if [ x$2 = x"release" ]; then
     _cppflags_com="${_cppflags_com} -g -O2"
 else
     _cppflags_com="${_cppflags_com} -g -O0"
+    _param_com="${_param_com} --enable-debug_info"
 fi
 
 # 3rd_lib path

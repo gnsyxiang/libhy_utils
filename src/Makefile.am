@@ -80,9 +80,12 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    += \
-                   -export-symbols-regex 'Hy*'                  \
-                   -version-info @current@:@revision@:@age@
+_ldflags_com    += -version-info @current@:@revision@:@age@
+
+if COMPILE_DEBUG_INFO
+else
+_ldflags_com    += -export-symbols-regex 'Hy*'
+endif
 
 _ldadd_com      += $(top_builddir)/src/$(select_target_os)/libhy_utils_os.la
 
