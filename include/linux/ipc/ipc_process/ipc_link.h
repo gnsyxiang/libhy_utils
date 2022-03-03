@@ -52,7 +52,7 @@ typedef struct {
     hy_s32_t                reserved;
 } ipc_link_config_s;
 
-void *ipc_link_create(ipc_link_config_s *config);
+void *ipc_link_create(ipc_link_config_s *ipc_link_c);
 void ipc_link_destroy(void **ipc_link_h);
 
 hy_s32_t ipc_link_write(void *ipc_link_h, void *buf, hy_u32_t len);
@@ -66,6 +66,17 @@ hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
         ipc_link_accept_cb_t accept_cb, void *args);
 
 void ipc_link_dump(void *ipc_link_h);
+
+#define ipc_link_create_m(_ipc_name, _tag, _type, _ipc_socket_h)    \
+    ({                                                              \
+        ipc_link_config_s _ipc_link_c;                              \
+        HY_MEMSET(&_ipc_link_c, sizeof(_ipc_link_c));               \
+        _ipc_link_c.ipc_name        = _ipc_name;                    \
+        _ipc_link_c.tag             = _tag;                         \
+        _ipc_link_c.type            = _type;                        \
+        _ipc_link_c.ipc_socket_h    = _ipc_socket_h;                \
+        ipc_link_create(&_ipc_link_c);                              \
+     })
 
 #ifdef __cplusplus
 }

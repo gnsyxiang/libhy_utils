@@ -29,15 +29,34 @@
 
 typedef struct {
     char    tag[IPC_LINK_IPC_NAME_LEN_MAX];
+
     void    *ipc_socket_h;
-} _ipc_link_context_t;
+} _ipc_link_context_s;
+
+hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s)
+{
+
+    return 0;
+}
+
+hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
+        ipc_link_accept_cb_t accept_cb, void *args)
+{
+    LOGT("ipc_link_h: %p, accept_cb: %p, args: %p \n",
+            ipc_link_h, accept_cb, args);
+    HY_ASSERT_RET_VAL(!ipc_link_h || !accept_cb, -1);
+
+    _ipc_link_context_s *context = ipc_link_h;
+
+    return HyIpcSocketAccept(context->ipc_socket_h, accept_cb, args);
+}
 
 void ipc_link_destroy(void **ipc_link_h)
 {
     LOGT("&ipc_link_h: %p, ipc_link_h: %p \n", ipc_link_h, *ipc_link_h);
     HY_ASSERT_RET(!ipc_link_h || !*ipc_link_h);
 
-    _ipc_link_context_t *context = *ipc_link_h;
+    _ipc_link_context_s *context = *ipc_link_h;
 
     HyIpcSocketDestroy(&context->ipc_socket_h);
 
@@ -45,27 +64,27 @@ void ipc_link_destroy(void **ipc_link_h)
     HY_MEM_FREE_PP(ipc_link_h);
 }
 
-void *ipc_link_create(ipc_link_config_s *config)
+void *ipc_link_create(ipc_link_config_s *ipc_link_c)
 {
-    LOGT("config: %p \n", config);
-    HY_ASSERT_RET_VAL(!config, NULL);
+    LOGT("ipc_link_c: %p \n", ipc_link_c);
+    HY_ASSERT_RET_VAL(!ipc_link_c, NULL);
 
-    _ipc_link_context_t *context = NULL;
+    _ipc_link_context_s *context = NULL;
     HyIpcSocketType_e ipc_socket_type[HY_IPC_SOCKET_TYPE_MAX] = {
         HY_IPC_SOCKET_TYPE_CLIENT, HY_IPC_SOCKET_TYPE_SERVER
     };
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_ipc_link_context_t *, sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(_ipc_link_context_s *, sizeof(*context));
 
-        if (config->ipc_socket_h) {
-            context->ipc_socket_h = config->ipc_socket_h;
+        if (ipc_link_c->ipc_socket_h) {
+            context->ipc_socket_h = ipc_link_c->ipc_socket_h;
         } else {
             HY_STRNCPY(context->tag, sizeof(context->tag),
-                    config->tag, HY_STRLEN(config->tag));
+                    ipc_link_c->tag, HY_STRLEN(ipc_link_c->tag));
 
-            context->ipc_socket_h = HyIpcSocketCreate_m(config->ipc_name,
-                    ipc_socket_type[config->type]);
+            context->ipc_socket_h = HyIpcSocketCreate_m(ipc_link_c->ipc_name,
+                    ipc_socket_type[ipc_link_c->type]);
             if (!context->ipc_socket_h) {
                 LOGE("hy ipc socket create failed \n");
                 break;

@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#include "ipc_link.h"
-
 typedef void (*ipc_link_manager_accept_cb_t)(void *ipc_link_h, void *args);
 
 typedef struct {
@@ -40,7 +38,7 @@ typedef struct {
     const char                      *tag;
 } ipc_link_manager_config_s;
 
-void *ipc_link_manager_create(ipc_link_manager_config_s *config);
+void *ipc_link_manager_create(ipc_link_manager_config_s *ipc_link_manager_c);
 void ipc_link_manager_destroy(void **ipc_link_manager_h);
 
 #ifdef __cplusplus

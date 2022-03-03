@@ -49,7 +49,8 @@ _include_com    += \
 
 _sources_com    += \
                    hy_ipc_process.c     \
-                   ipc_link.c
+                   ipc_link.c           \
+                   ipc_link_manager.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

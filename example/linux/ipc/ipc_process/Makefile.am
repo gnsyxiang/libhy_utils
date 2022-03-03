@@ -70,12 +70,20 @@ _ldadd_com      += $(LOG4CPLUS_LIBS)
 endif
 
 if COMPILE_DEBUG_INFO
-bin_PROGRAMS                += hy_ipc_link_test
-hy_ipc_link_test_SOURCES    = $(_sources_com) ipc_link_test.c
-hy_ipc_link_test_CPPFLAGS   = $(_cppflags_com)
-hy_ipc_link_test_CFLAGS     = $(_cflags_com)
-hy_ipc_link_test_CXXFLAGS   = $(_cxxflags_com)
-hy_ipc_link_test_LDFLAGS    = $(_ldflags_com)
-hy_ipc_link_test_LDADD      = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_link_test
+hy_ipc_link_test_SOURCES            = $(_sources_com) ipc_link_test.c
+hy_ipc_link_test_CPPFLAGS           = $(_cppflags_com)
+hy_ipc_link_test_CFLAGS             = $(_cflags_com)
+hy_ipc_link_test_CXXFLAGS           = $(_cxxflags_com)
+hy_ipc_link_test_LDFLAGS            = $(_ldflags_com)
+hy_ipc_link_test_LDADD              = $(_ldadd_com)
+
+bin_PROGRAMS                        += hy_ipc_link_manager_test
+hy_ipc_link_manager_test_SOURCES    = $(_sources_com) ipc_link_manager_test.c
+hy_ipc_link_manager_test_CPPFLAGS   = $(_cppflags_com)
+hy_ipc_link_manager_test_CFLAGS     = $(_cflags_com)
+hy_ipc_link_manager_test_CXXFLAGS   = $(_cxxflags_com)
+hy_ipc_link_manager_test_LDFLAGS    = $(_ldflags_com)
+hy_ipc_link_manager_test_LDADD      = $(_ldadd_com)
 endif
 
