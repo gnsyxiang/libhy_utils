@@ -132,6 +132,9 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
+    hy_s32_t ret = ipc_link_connect(context->ipc_link_h, 5);
+    LOGD("ret: %d \n", ret);
+
     while (!context->exit_flag) {
         sleep(1);
     }

@@ -35,8 +35,12 @@ typedef struct {
 
 hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s)
 {
+    LOGT("ipc_link_h: %p, timeout_s: %d \n", ipc_link_h, timeout_s);
+    HY_ASSERT_RET_VAL(!ipc_link_h, -1);
 
-    return 0;
+    _ipc_link_context_s *context = ipc_link_h;
+
+    return HyIpcSocketConnect(context->ipc_socket_h, timeout_s);
 }
 
 hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
