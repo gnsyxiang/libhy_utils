@@ -62,8 +62,8 @@ typedef struct {
 void *ipc_link_create(ipc_link_config_s *ipc_link_c);
 void ipc_link_destroy(void **ipc_link_h);
 
-hy_s32_t ipc_link_write(void *ipc_link_h, void *buf, hy_u32_t len);
-hy_s32_t ipc_link_read(void *ipc_link_h, void **buf, hy_u32_t *len);
+hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg);
+hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg);
 
 void ipc_link_info_get(void *ipc_link_h, ipc_link_info_s **info);
 void ipc_link_info_set(void *ipc_link_h, ipc_link_info_s *info);
