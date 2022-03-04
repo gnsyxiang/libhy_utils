@@ -54,7 +54,7 @@ typedef struct {
     const char  *tag;
 } HyIpcProcessInfo_s;
 
-typedef void (*HyIpcProcessStateChangeCb_t)(HyIpcProcessInfo_s *info,
+typedef void (*HyIpcProcessStateChangeCb_t)(HyIpcProcessInfo_s *ipc_process_info,
         HyIpcProcessConnectState_e is_connect, void *args);
 
 typedef hy_s32_t (*HyIpcProcessFuncCb_t)(void *recv, hy_u32_t recv_len,

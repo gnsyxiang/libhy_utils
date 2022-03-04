@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "hy_hal/hy_type.h"
+#include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_signal.h"
@@ -56,10 +57,19 @@ static hy_s32_t _audio_param_set_cb(void *recv, hy_u32_t recv_len,
     return 0;
 }
 
-static void _state_change_cb(HyIpcProcessInfo_s *info,
+static void _state_change_cb(HyIpcProcessInfo_s *ipc_process_info,
         HyIpcProcessConnectState_e is_connect, void *args)
 {
-    LOGD("state change \n");
+    LOGT("ipc_process_info: %p, is_connect: %d, args: %p \n",
+            ipc_process_info, is_connect, args);
+    HY_ASSERT_RET(!ipc_process_info || !args);
+
+    if (HY_IPC_PROCESS_CONNECT_STATE_CONNECT == is_connect) {
+        LOGD("ipc_name: %s, tag: %s, pid: %d \n", ipc_process_info->ipc_name,
+                ipc_process_info->tag, ipc_process_info->pid);
+    } else {
+        LOGD("client disconnect \n");
+    }
 }
 
 static void _signal_error_cb(void *args)
