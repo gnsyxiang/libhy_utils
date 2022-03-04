@@ -41,8 +41,7 @@ typedef struct {
 typedef struct {
     ipc_link_manager_save_config_s  save_config;
 
-    const char                      *ipc_name;
-    const char                      *tag;
+    void                            *ipc_link_h;
 } ipc_link_manager_config_s;
 
 void *ipc_link_manager_create(ipc_link_manager_config_s *ipc_link_manager_c);

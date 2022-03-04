@@ -31,6 +31,7 @@
 #include "hy_hal/hy_log.h"
 
 #include "ipc_link_manager.h"
+#include "ipc_link.h"
 
 #define _IPC_LINK_IPC_NAME "ipc_link"
 
@@ -38,6 +39,7 @@ typedef struct {
     void        *log_handle;
     void        *signal_handle;
 
+    void        *ipc_link_h;
     void        *ipc_link_manager_h;
 
     hy_s32_t    exit_flag;
@@ -84,6 +86,13 @@ static _main_context_t *_module_create(void)
 {
     _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
 
+    context->ipc_link_h = ipc_link_create_m(_IPC_LINK_IPC_NAME,
+            "ipc_link_server", IPC_LINK_TYPE_SERVER, NULL);
+    if (!context->ipc_link_h) {
+        LOGE("ipc link create m failed \n");
+        return NULL;
+    }
+
     HyLogConfig_s log_config;
     log_config.save_config.buf_len_min  = 512;
     log_config.save_config.buf_len_max  = 512;
@@ -113,8 +122,7 @@ static _main_context_t *_module_create(void)
     HY_MEMSET(&ipc_link_manager_c, sizeof(ipc_link_manager_c));
     ipc_link_manager_c.save_config.accept_cb    = _ipc_link_manager_accept_cb;
     ipc_link_manager_c.save_config.args         = context;
-    ipc_link_manager_c.ipc_name                 = _IPC_LINK_IPC_NAME;
-    ipc_link_manager_c.tag                      = "ipc_link_server";
+    ipc_link_manager_c.ipc_link_h               = context->ipc_link_h;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
@@ -141,6 +149,8 @@ int main(int argc, char *argv[])
     while (!context->exit_flag) {
         sleep(1);
     }
+
+    ipc_link_destroy(&context->ipc_link_h);
 
     _module_destroy(&context);
 

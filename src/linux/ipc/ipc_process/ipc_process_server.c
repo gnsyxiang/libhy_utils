@@ -26,10 +26,12 @@
 
 #include "ipc_process_server.h"
 #include "ipc_link_manager.h"
+#include "ipc_link.h"
 
 typedef struct {
     HyIpcProcessSaveConfig_s        save_config;// 必须放在前面，用于强制类型转换
 
+    void                            *ipc_link_h;
     void                            *ipc_link_manager_h;
 } _ipc_process_server_context_s;
 
@@ -45,6 +47,8 @@ void ipc_process_server_destroy(void **ipc_process_server_h)
     HY_ASSERT_RET(!ipc_process_server_h || !*ipc_process_server_h);
 
     _ipc_process_server_context_s *context = *ipc_process_server_h;
+
+    ipc_link_destroy(&context->ipc_link_h);
 
     ipc_link_manager_destroy(&context->ipc_link_manager_h);
 
@@ -66,13 +70,18 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
         HY_MEMCPY(&context->save_config,
                 &ipc_process_c->save_config, sizeof(context->save_config));
 
+        context->ipc_link_h = ipc_link_create_m(ipc_process_c->ipc_name,
+                ipc_process_c->tag, IPC_LINK_TYPE_SERVER, NULL);
+        if (!context->ipc_link_h) {
+            LOGE("ipc link create m failed \n");
+            break;
+        }
+
         ipc_link_manager_config_s ipc_link_manager_c;
         HY_MEMSET(&ipc_link_manager_c, sizeof(ipc_link_manager_c));
         ipc_link_manager_c.save_config.accept_cb    = _ipc_link_manager_accept_cb;
         ipc_link_manager_c.save_config.args         = context;
-        ipc_link_manager_c.ipc_name                 = ipc_process_c->ipc_name;
-        ipc_link_manager_c.tag                      = ipc_process_c->tag;
-
+        ipc_link_manager_c.ipc_link_h               = context->ipc_link_h;
         context->ipc_link_manager_h = ipc_link_manager_create(&ipc_link_manager_c);
         if (!context->ipc_link_manager_h) {
             LOGE("ipc link manager create faeild \n");

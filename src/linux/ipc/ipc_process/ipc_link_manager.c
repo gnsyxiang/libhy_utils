@@ -109,8 +109,6 @@ void ipc_link_manager_destroy(void **ipc_link_manager_h)
     _ipc_link_manager_context_s *context = *ipc_link_manager_h;
     ipc_link_manager_client_s *pos, *n;
 
-    ipc_link_destroy(&context->ipc_link_h);
-
     context->exit_flag = 1;
     HyThreadDestroy(&context->accept_thread_h);
 
@@ -147,12 +145,7 @@ void *ipc_link_manager_create(ipc_link_manager_config_s *ipc_link_manager_c)
 
         pthread_mutex_init(&context->list_mutex, NULL);
 
-        context->ipc_link_h = ipc_link_create_m(ipc_link_manager_c->ipc_name,
-                ipc_link_manager_c->tag, IPC_LINK_TYPE_SERVER, NULL);
-        if (!context->ipc_link_h) {
-            LOGE("ipc link create m failed \n");
-            break;
-        }
+        context->ipc_link_h = ipc_link_manager_c->ipc_link_h;
 
         context->accept_thread_h = HyThreadCreate_m("hy_i_l_m_accept",
                 _ipc_link_manager_thread_accept_cb, context);
