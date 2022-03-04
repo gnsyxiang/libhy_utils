@@ -81,6 +81,34 @@ hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag)
     return 0;
 }
 
+hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid)
+{
+    LOGT("ipc_link_h: %p, tag: %p, pid: %d \n", ipc_link_h, tag, pid);
+    HY_ASSERT_RET_VAL(!ipc_link_h || !tag, -1);
+
+    hy_u32_t len = 0;
+    hy_s32_t offset = 0;
+    ipc_link_msg_s *ipc_link_msg = NULL;
+    hy_u32_t total_len = sizeof(ipc_link_msg_s)
+        + HY_STRLEN(tag) + 1 + sizeof(pid_t);
+
+    ipc_link_msg = HY_MEM_MALLOC_RET_VAL(ipc_link_msg_s *, total_len, -1);
+
+    len = sizeof(pid);
+    HY_MEMCPY(ipc_link_msg->buf + offset, &pid, len);
+    offset += len;
+
+    len = HY_STRLEN(tag);
+    HY_MEMCPY(ipc_link_msg->buf + offset, tag, len);
+    offset += len;
+
+    ipc_link_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
+    ipc_link_msg->type       = IPC_LINK_MSG_TYPE_INFO;
+    ipc_link_msg->buf_len    = offset;
+
+    return ipc_link_write(ipc_link_h, ipc_link_msg);
+}
+
 hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
 {
     LOGT("ipc_link_h: %p, ipc_link_msg: %p, \n", ipc_link_h, ipc_link_msg);

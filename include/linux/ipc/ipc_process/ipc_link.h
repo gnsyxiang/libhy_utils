@@ -42,6 +42,13 @@ typedef enum {
     IPC_LINK_CONNECT_STATE_MAX,
 } ipc_link_connect_state_e;
 
+typedef enum {
+    IPC_LINK_MSG_TYPE_INFO,
+    IPC_LINK_MSG_TYPE_ACK,
+    IPC_LINK_MSG_TYPE_CB,
+    IPC_LINK_MSG_TYPE_CB_ID,
+} ipc_link_msg_type_e;
+
 typedef void (*ipc_link_accept_cb_t)(void *ipc_socket_h, void *args);
 
 typedef struct {
@@ -49,6 +56,16 @@ typedef struct {
     const char              *ipc_name;
     const char              *tag;
 } ipc_link_info_s;
+
+typedef struct {
+    hy_s32_t    total_len;
+    hy_s32_t    type;
+
+    void        *pipe_h;
+
+    hy_u32_t    buf_len;
+    char        buf[];
+} ipc_link_msg_s;
 
 typedef struct {
     void                    *ipc_socket_h; // 当有该参数时，直接赋值，无需创建
@@ -68,6 +85,7 @@ hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg);
 
 hy_s32_t ipc_link_info_get(void *ipc_link_h, ipc_link_info_s *ipc_link_info);
 hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag);
+hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid);
 
 hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
