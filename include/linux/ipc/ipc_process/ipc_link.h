@@ -46,6 +46,7 @@ typedef void (*ipc_link_accept_cb_t)(void *ipc_socket_h, void *args);
 
 typedef struct {
     hy_s32_t                fd;
+    const char              *ipc_name;
     const char              *tag;
 } ipc_link_info_s;
 
@@ -65,8 +66,8 @@ void ipc_link_destroy(void **ipc_link_h);
 hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg);
 hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg);
 
-void ipc_link_info_get(void *ipc_link_h, ipc_link_info_s **info);
-void ipc_link_info_set(void *ipc_link_h, ipc_link_info_s *info);
+hy_s32_t ipc_link_info_get(void *ipc_link_h, ipc_link_info_s *ipc_link_info);
+hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag);
 
 hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(void *ipc_link_h,

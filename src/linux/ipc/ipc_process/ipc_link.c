@@ -55,6 +55,32 @@ hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
     return HyIpcSocketAccept(context->ipc_socket_h, accept_cb, args);
 }
 
+hy_s32_t ipc_link_info_get(void *ipc_link_h, ipc_link_info_s *ipc_link_info)
+{
+    LOGT("ipc_link_h: %p, ipc_link_info: %p \n", ipc_link_h, ipc_link_info);
+    HY_ASSERT_RET_VAL(!ipc_link_h || !ipc_link_info, -1);
+
+    _ipc_link_context_s *context = ipc_link_h;
+
+    ipc_link_info->fd       = HyIpcSocketGetFD(context->ipc_socket_h);
+    ipc_link_info->ipc_name = HyIpcSocketGetName(context->ipc_socket_h);
+    ipc_link_info->tag      = context->tag;
+
+    return 0;
+}
+
+hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag)
+{
+    LOGT("ipc_link_h: %p, tag: %s \n", ipc_link_h, tag);
+    HY_ASSERT_RET_VAL(!ipc_link_h || !tag, -1);
+
+    _ipc_link_context_s *context = ipc_link_h;
+
+    HY_STRNCPY(context->tag, sizeof(context->tag), tag, HY_STRLEN(tag));
+
+    return 0;
+}
+
 hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
 {
     LOGT("ipc_link_h: %p, ipc_link_msg: %p, \n", ipc_link_h, ipc_link_msg);
