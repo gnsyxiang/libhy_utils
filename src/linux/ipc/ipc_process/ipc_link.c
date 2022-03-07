@@ -112,7 +112,7 @@ hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid)
     HY_MEMCPY(ipc_link_msg->buf + offset, tag, len);
     offset += len;
 
-    ipc_link_msg->total_len  = sizeof(ipc_link_msg_s) + offset;
+    ipc_link_msg->total_len  = total_len;
     ipc_link_msg->type       = IPC_LINK_MSG_TYPE_INFO;
     ipc_link_msg->buf_len    = offset;
 

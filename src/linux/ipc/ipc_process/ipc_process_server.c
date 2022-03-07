@@ -31,11 +31,21 @@
 #include "ipc_link.h"
 
 typedef struct {
+    struct hy_list_head             entry;
+
+    hy_u32_t                        cnt;
+    hy_u32_t                        *id;
+} _func_cb_id_s;
+
+typedef struct {
     HyIpcProcessSaveConfig_s        save_config;// 必须放在前面，用于强制类型转换
 
     pid_t                           pid;
     void                            *ipc_link_h;
     void                            *ipc_link_manager_h;
+
+    pthread_mutex_t                 func_id_mutex;
+    struct hy_list_head             func_id_list;
 
     void                            *pipe_h;
     void                            *read_ipc_link_msg_thread_h;
@@ -67,6 +77,30 @@ static void _handle_ipc_link_msg_info(_ipc_process_server_context_s *context,
     }
 }
 
+static void _handle_ipc_link_msg_cb_id(_ipc_process_server_context_s *context,
+        ipc_link_msg_s *ipc_msg)
+{
+    hy_u32_t cnt = 0;
+    hy_u32_t *id = NULL;
+    _func_cb_id_s *func_cb_id = NULL;
+
+    cnt = *(hy_u32_t *)ipc_msg->buf;
+
+    func_cb_id = HY_MEM_MALLOC_RET(_func_cb_id_s *, sizeof(*func_cb_id));
+    func_cb_id->id = HY_MEM_MALLOC_RET(hy_u32_t *, cnt * sizeof(hy_u32_t));
+
+    func_cb_id->cnt = cnt;
+
+    id = (hy_u32_t *)(ipc_msg->buf + sizeof(cnt));
+    for (hy_u32_t i = 0; i < cnt; ++i) {
+        func_cb_id->id[i] = id[i];
+    }
+
+    pthread_mutex_lock(&context->func_id_mutex);
+    hy_list_add_tail(&func_cb_id->entry, &context->func_id_list);
+    pthread_mutex_unlock(&context->func_id_mutex);
+}
+
 static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_client,
         _ipc_process_server_context_s *context)
 {
@@ -91,6 +125,10 @@ static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_cl
         case IPC_LINK_MSG_TYPE_CB:
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
+            _handle_ipc_link_msg_cb_id(context, ipc_msg);
+            if (ipc_msg) {
+                HY_MEM_FREE_P(ipc_msg);
+            }
             break;
         default:
             break;
@@ -183,12 +221,20 @@ void ipc_process_server_destroy(void **ipc_process_server_h)
     HY_ASSERT_RET(!ipc_process_server_h || !*ipc_process_server_h);
 
     _ipc_process_server_context_s *context = *ipc_process_server_h;
+    _func_cb_id_s *pos, *n;
 
     ipc_link_destroy(&context->ipc_link_h);
 
     context->exit_flag = 1;
     HyThreadDestroy(&context->read_ipc_link_msg_thread_h);
     ipc_link_manager_destroy(&context->ipc_link_manager_h);
+
+    hy_list_for_each_entry_safe(pos, n, &context->func_id_list, entry) {
+        hy_list_del(&pos->entry);
+
+        HY_MEM_FREE_P(pos->id);
+        HY_MEM_FREE_PP(&pos);
+    }
 
     HyPipeDestroy(&context->pipe_h);
 
@@ -211,6 +257,8 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
                 &ipc_process_c->save_config, sizeof(context->save_config));
 
         context->pid = getpid();
+        HY_INIT_LIST_HEAD(&context->func_id_list);
+        pthread_mutex_init(&context->func_id_mutex, NULL);
 
         context->pipe_h = HyPipeCreate_m(HY_PIPE_BLOCK_STATE_NOBLOCK);
         if (!context->pipe_h) {

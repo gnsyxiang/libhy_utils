@@ -31,6 +31,10 @@
 typedef struct {
     HyIpcProcessSaveConfig_s        save_c; // 必须放在前面，用于强制类型转换
 
+    HyIpcProcessFunc_s              *func;
+    void                            *func_args;
+    hy_u32_t                        func_cnt;
+
     pid_t                           pid;
     hy_u32_t                        connect_timeout_s;
     void                            *ipc_link_h;
@@ -111,6 +115,10 @@ static hy_s32_t _client_read_ipc_link_msg_thread_cb(void *args)
     struct timeval timeout = {0};
     hy_s32_t ret = 0;
 
+    while (!context->exit_wait_flag) {
+        usleep(10 * 1000);
+    }
+
     ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
 
     while (!context->exit_flag) {
@@ -144,6 +152,37 @@ static hy_s32_t _client_read_ipc_link_msg_thread_cb(void *args)
     return -1;
 }
 
+static hy_s32_t _ipc_process_client_send_cb_id(_ipc_process_client_context_s
+        *context)
+{
+    ipc_link_msg_s *ipc_link_msg = NULL;
+    hy_u32_t total_len = 0;
+    hy_u32_t len = 0;
+    hy_s32_t offset = 0;
+    hy_u32_t *id = NULL;
+
+    total_len = sizeof(ipc_link_msg_s) + sizeof(hy_u32_t)
+        + sizeof(hy_s32_t) * context->func_cnt;
+    ipc_link_msg = HY_MEM_MALLOC_RET_VAL(ipc_link_msg_s *, total_len, -1);
+
+    len = sizeof(hy_u32_t);
+    HY_MEMCPY(ipc_link_msg->buf + offset, &context->func_cnt, len);
+    offset += len;
+
+    len = sizeof(hy_s32_t) * context->func_cnt;
+    id = (hy_u32_t *)(ipc_link_msg->buf + offset);
+    for (hy_u32_t i = 0; i < context->func_cnt; ++i) {
+        id[i] = context->func[i].id;
+    }
+    offset += len;
+
+    ipc_link_msg->total_len  = total_len;
+    ipc_link_msg->type       = IPC_LINK_MSG_TYPE_CB_ID;
+    ipc_link_msg->buf_len    = offset;
+
+    return ipc_link_write(context->ipc_link_h, ipc_link_msg);
+}
+
 static hy_s32_t _ipc_process_client_connect_cb(void *args)
 {
     LOGT("args: %p \n", args);
@@ -164,7 +203,7 @@ static hy_s32_t _ipc_process_client_connect_cb(void *args)
     ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
     ipc_link_info_send(context->ipc_link_h, ipc_link_info.tag, context->pid);
 
-
+    _ipc_process_client_send_cb_id(context);
 
     return -1;
 }
@@ -181,8 +220,13 @@ void ipc_process_client_destroy(void **ipc_process_client_h)
         sleep(1);
     }
     HyThreadDestroy(&context->connect_thread_h);
+
     context->exit_flag = 1;
     HyThreadDestroy(&context->read_ipc_link_msg_thread_h);
+
+    if (context->func_cnt) {
+        HY_MEM_FREE_PP(&context->func);
+    }
 
     ipc_link_destroy(&context->ipc_link_h);
 
@@ -196,6 +240,7 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *ipc_process_c)
     HY_ASSERT_RET_VAL(!ipc_process_c, NULL);
 
     _ipc_process_client_context_s *context = NULL;
+    hy_u32_t len = 0;
 
     do {
         context = HY_MEM_MALLOC_BREAK(_ipc_process_client_context_s *,
@@ -206,6 +251,14 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *ipc_process_c)
 
         context->connect_timeout_s  = ipc_process_c->connect_timeout_s;
         context->pid                = getpid();
+
+        if (ipc_process_c->func_cnt) {
+            len = sizeof(HyIpcProcessFunc_s) * ipc_process_c->func_cnt;
+            context->func = HY_MEM_MALLOC_BREAK(HyIpcProcessFunc_s *, len);
+
+            HY_MEMCPY(context->func, ipc_process_c->func, len);
+            context->func_cnt = ipc_process_c->func_cnt;
+        }
 
         ipc_link_config_s ipc_link_c;
         HY_MEMSET(&ipc_link_c, sizeof(ipc_link_c));
