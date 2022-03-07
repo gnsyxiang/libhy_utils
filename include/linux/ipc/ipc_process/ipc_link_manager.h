@@ -47,6 +47,9 @@ typedef struct {
 void *ipc_link_manager_create(ipc_link_manager_config_s *ipc_link_manager_c);
 void ipc_link_manager_destroy(void **ipc_link_manager_h);
 
+struct hy_list_head *ipc_link_manager_list_get(void *ipc_link_manager_h);
+void ipc_link_manager_list_put(void *ipc_link_manager_h);
+
 #ifdef __cplusplus
 }
 #endif

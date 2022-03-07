@@ -62,13 +62,18 @@ static void _state_change_cb(HyIpcProcessInfo_s *ipc_process_info,
 {
     LOGT("ipc_process_info: %p, is_connect: %d, args: %p \n",
             ipc_process_info, is_connect, args);
-    HY_ASSERT_RET(!ipc_process_info || !args);
+    HY_ASSERT_RET(!args);
 
-    if (HY_IPC_PROCESS_CONNECT_STATE_CONNECT == is_connect) {
+    _main_context_t *context = args;
+
+    if (is_connect == HY_IPC_PROCESS_CONNECT_STATE_CONNECT) {
         LOGD("ipc_name: %s, tag: %s, pid: %d \n", ipc_process_info->ipc_name,
                 ipc_process_info->tag, ipc_process_info->pid);
+
+        LOGD("connect to server \n");
     } else {
-        LOGD("client disconnect \n");
+        context->exit_flag = 1;
+        LOGD("disconnect to server \n");
     }
 }
 

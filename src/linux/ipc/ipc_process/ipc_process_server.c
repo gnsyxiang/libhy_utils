@@ -39,8 +39,65 @@ typedef struct {
 
     void                            *pipe_h;
     void                            *read_ipc_link_msg_thread_h;
-    hy_s32_t                        exit_flag;
+    hy_s32_t                        exit_flag:1;
+    hy_s32_t                        reserved;
 } _ipc_process_server_context_s;
+
+static void _handle_ipc_link_msg_info(_ipc_process_server_context_s *context,
+        ipc_link_msg_s *ipc_msg)
+{
+    const char *tag = NULL;
+    pid_t pid;
+    ipc_link_info_s ipc_link_info;
+    HyIpcProcessInfo_s ipc_process_info;
+    HyIpcProcessSaveConfig_s *save_c = &context->save_config;
+
+    pid = *(pid_t *)ipc_msg->buf;
+    tag = (const char *)(ipc_msg->buf + sizeof(pid_t));
+
+    ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
+
+    ipc_process_info.pid        = pid;
+    ipc_process_info.tag        = tag;
+    ipc_process_info.ipc_name   = ipc_link_info.ipc_name;
+
+    if (save_c->state_change_cb) {
+        save_c->state_change_cb(&ipc_process_info,
+                HY_IPC_PROCESS_CONNECT_STATE_CONNECT, save_c->args);
+    }
+}
+
+static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_client,
+        _ipc_process_server_context_s *context)
+{
+    LOGT("ipc_link_client: %p, context: %p \n", ipc_link_client, context);
+    HY_ASSERT_RET_VAL(!ipc_link_client || !context, -1);
+    ipc_link_msg_s *ipc_msg = NULL;
+
+    if (0 != ipc_link_read(ipc_link_client->ipc_link_h, &ipc_msg)) {
+        LOGE("ipc link read failed \n");
+        return -1;
+    }
+
+    switch (ipc_msg->type) {
+        case IPC_LINK_MSG_TYPE_INFO:
+            _handle_ipc_link_msg_info(context, ipc_msg);
+            if (ipc_msg) {
+                HY_MEM_FREE_P(ipc_msg);
+            }
+            break;
+        case IPC_LINK_MSG_TYPE_ACK:
+            break;
+        case IPC_LINK_MSG_TYPE_CB:
+            break;
+        case IPC_LINK_MSG_TYPE_CB_ID:
+            break;
+        default:
+            break;
+    }
+
+    return 0;
+}
 
 static void _ipc_link_manager_accept_cb(void *ipc_link_h, void *args)
 {
@@ -64,13 +121,25 @@ static hy_s32_t _read_ipc_link_msg_thread_cb(void *args)
     void *ipc_link_h = NULL;
     _ipc_process_server_context_s *context = args;
     ipc_link_info_s ipc_link_info;
+    struct hy_list_head *ipc_link_list = NULL;
+    ipc_link_manager_client_s *pos, *n;
+    hy_s32_t fd = -1;
     hy_s32_t pipe_read_fd = -1;
 
     pipe_read_fd = HyPipeReadFdGet(context->pipe_h);
 
     while (!context->exit_flag) {
         FD_ZERO(&read_fs);
+
         FD_SET(pipe_read_fd, &read_fs);
+
+        ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
+        hy_list_for_each_entry(pos, ipc_link_list, entry) {
+            fd = ipc_link_get_fd(pos->ipc_link_h);
+
+            FD_SET(fd, &read_fs);
+        }
+        ipc_link_manager_list_put(context->ipc_link_manager_h);
 
         timeout.tv_sec = 1;
         if (select(FD_SETSIZE, &read_fs, NULL, NULL, &timeout) < 0) {
@@ -87,6 +156,21 @@ static hy_s32_t _read_ipc_link_msg_thread_cb(void *args)
 
             ipc_link_info_send(ipc_link_h, ipc_link_info.tag, context->pid);
         }
+
+        ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
+        hy_list_for_each_entry_safe(pos, n, ipc_link_list, entry) {
+            fd = ipc_link_get_fd(pos->ipc_link_h);
+
+            if (FD_ISSET(fd, &read_fs)) {
+                if (-1 == _process_server_parse_msg(pos, context)) {
+                    hy_list_del(&pos->entry);
+
+                    ipc_link_destroy(&pos->ipc_link_h);
+                    HY_MEM_FREE_PP(&pos);
+                }
+            }
+        }
+        ipc_link_manager_list_put(context->ipc_link_manager_h);
     }
 
     return -1;
@@ -102,10 +186,9 @@ void ipc_process_server_destroy(void **ipc_process_server_h)
 
     ipc_link_destroy(&context->ipc_link_h);
 
-    ipc_link_manager_destroy(&context->ipc_link_manager_h);
-
     context->exit_flag = 1;
     HyThreadDestroy(&context->read_ipc_link_msg_thread_h);
+    ipc_link_manager_destroy(&context->ipc_link_manager_h);
 
     HyPipeDestroy(&context->pipe_h);
 

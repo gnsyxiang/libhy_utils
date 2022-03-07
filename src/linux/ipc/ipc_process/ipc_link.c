@@ -33,6 +33,16 @@ typedef struct {
     void    *ipc_socket_h;
 } _ipc_link_context_s;
 
+hy_s32_t ipc_link_get_fd(void *ipc_link_h)
+{
+    LOGT("ipc_link_h: %p \n", ipc_link_h);
+    HY_ASSERT_RET_VAL(!ipc_link_h, -1);
+
+    _ipc_link_context_s *context = ipc_link_h;
+
+    return HyIpcSocketGetFD(context->ipc_socket_h);
+}
+
 hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s)
 {
     LOGT("ipc_link_h: %p, timeout_s: %d \n", ipc_link_h, timeout_s);

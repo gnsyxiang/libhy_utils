@@ -47,20 +47,19 @@ static void _handle_ipc_link_msg_info(_ipc_process_client_context_s *context,
         ipc_link_msg_s *ipc_msg)
 {
     const char *tag = NULL;
+    pid_t pid;
     ipc_link_info_s ipc_link_info;
     HyIpcProcessInfo_s ipc_process_info;
     HyIpcProcessSaveConfig_s *save_c = &context->save_c;
 
-    context->pid = *(pid_t *)ipc_msg->buf;
+    pid = *(pid_t *)ipc_msg->buf;
     tag = (const char *)(ipc_msg->buf + sizeof(pid_t));
-
-    ipc_link_info_set(context->ipc_link_h, tag);
 
     ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
 
-    ipc_process_info.pid        = context->pid;
+    ipc_process_info.pid        = pid;
+    ipc_process_info.tag        = tag;
     ipc_process_info.ipc_name   = ipc_link_info.ipc_name;
-    ipc_process_info.tag        = ipc_link_info.tag;
 
     if (save_c->state_change_cb) {
         save_c->state_change_cb(&ipc_process_info,
@@ -83,6 +82,9 @@ static hy_s32_t _handle_ipc_link_msg(_ipc_process_client_context_s *context)
     switch (ipc_msg->type) {
         case IPC_LINK_MSG_TYPE_INFO:
             _handle_ipc_link_msg_info(context, ipc_msg);
+            if (ipc_msg) {
+                HY_MEM_FREE_P(ipc_msg);
+            }
             break;
         case IPC_LINK_MSG_TYPE_ACK:
             break;
@@ -103,10 +105,11 @@ static hy_s32_t _client_read_ipc_link_msg_thread_cb(void *args)
     HY_ASSERT_RET_VAL(!args, -1);
 
     _ipc_process_client_context_s *context = args;
+    HyIpcProcessSaveConfig_s *save_c = &context->save_c;
+    ipc_link_info_s ipc_link_info;
     fd_set read_fs = {0};
     struct timeval timeout = {0};
     hy_s32_t ret = 0;
-    ipc_link_info_s ipc_link_info;
 
     ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
 
@@ -125,7 +128,13 @@ static hy_s32_t _client_read_ipc_link_msg_thread_cb(void *args)
             if (0 != _handle_ipc_link_msg(context)) {
                 LOGE("handle ipc link msg failed \n");
 
-                // 通知上层断开
+                ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
+
+                if (save_c->state_change_cb) {
+                    save_c->state_change_cb(NULL,
+                            HY_IPC_PROCESS_CONNECT_STATE_DISCONNECT,
+                            save_c->args);
+                }
 
                 break;
             }
@@ -153,8 +162,9 @@ static hy_s32_t _ipc_process_client_connect_cb(void *args)
     context->exit_wait_flag = 1;
 
     ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
-
     ipc_link_info_send(context->ipc_link_h, ipc_link_info.tag, context->pid);
+
+
 
     return -1;
 }
@@ -171,6 +181,7 @@ void ipc_process_client_destroy(void **ipc_process_client_h)
         sleep(1);
     }
     HyThreadDestroy(&context->connect_thread_h);
+    context->exit_flag = 1;
     HyThreadDestroy(&context->read_ipc_link_msg_thread_h);
 
     ipc_link_destroy(&context->ipc_link_h);
@@ -201,7 +212,6 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *ipc_process_c)
         ipc_link_c.ipc_name    = ipc_process_c->ipc_name;
         ipc_link_c.tag         = ipc_process_c->tag;
         ipc_link_c.type        = IPC_LINK_TYPE_CLIENT;
-
         context->ipc_link_h = ipc_link_create(&ipc_link_c);
         if (!context->ipc_link_h) {
             LOGE("ipc link create failed \n");

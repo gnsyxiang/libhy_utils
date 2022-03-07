@@ -24,6 +24,9 @@
 extern "C" {
 #endif
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "hy_hal/hy_type.h"
 
 #define IPC_LINK_IPC_NAME_LEN_MAX   (32)
@@ -90,6 +93,8 @@ hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid);
 hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
         ipc_link_accept_cb_t accept_cb, void *args);
+
+hy_s32_t ipc_link_get_fd(void *ipc_link_h);
 
 void ipc_link_dump(void *ipc_link_h);
 

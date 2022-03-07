@@ -39,14 +39,39 @@ typedef struct {
     hy_s32_t                        exit_flag;
 } _ipc_link_manager_context_s;
 
+struct hy_list_head *ipc_link_manager_list_get(void *ipc_link_manager_h)
+{
+    LOGT("ipc_link_manager_h: %p \n", ipc_link_manager_h);
+    HY_ASSERT_RET_VAL(!ipc_link_manager_h, NULL);
+
+    _ipc_link_manager_context_s *context = ipc_link_manager_h;
+
+    pthread_mutex_lock(&context->list_mutex);
+
+    return &context->list;
+}
+
+void ipc_link_manager_list_put(void *ipc_link_manager_h)
+{
+    LOGT("ipc_link_manager_h: %p \n", ipc_link_manager_h);
+    HY_ASSERT_RET(!ipc_link_manager_h);
+
+    _ipc_link_manager_context_s *context = ipc_link_manager_h;
+
+    pthread_mutex_unlock(&context->list_mutex);
+}
+
+#include "hy_ipc_socket.h"
+
 static void _ipc_link_manager_accept_cb(void *ipc_socket_h, void *args)
 {
-    LOGT("ipc_socket_h: %p, args: %p \n", ipc_socket_h, args);
+    LOGE("ipc_socket_h: %p, args: %p \n", ipc_socket_h, args);
     HY_ASSERT_RET(!ipc_socket_h);
 
     _ipc_link_manager_context_s *context = args;
     ipc_link_manager_save_config_s *save_config = &context->save_config;
     ipc_link_manager_client_s *ipc_link_client = NULL;
+
 
     do {
         ipc_link_client = HY_MEM_MALLOC_BREAK(ipc_link_manager_client_s *,
