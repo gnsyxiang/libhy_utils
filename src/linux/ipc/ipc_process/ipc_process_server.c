@@ -52,8 +52,8 @@ typedef struct {
     void                            *ipc_link_h;
     void                            *ipc_link_manager_h;
 
-    pthread_mutex_t                 func_id_mutex;
-    struct hy_list_head             func_id_list;
+    pthread_mutex_t                 cb_id_mutex;
+    struct hy_list_head             cb_id_list;
 
     sem_t                           cb_sem;
     void                            *cb_fifo_h;
@@ -64,28 +64,26 @@ typedef struct {
     void                            *handle_ack_thread_h;
 
     void                            *pipe_h;
-    void                            *read_ipc_link_msg_thread_h;
+    void                            *handle_ipc_link_msg_thread_h;
 
     hy_s32_t                        exit_flag:1;
     hy_s32_t                        reserved;
-} _ipc_process_server_context_s;
+} _ip_server_context_s;
 
-static void _handle_ipc_link_msg_info(_ipc_process_server_context_s *context,
+static void _server_handle_ipc_link_msg_info(_ip_server_context_s *context,
         ipc_link_msg_s *ipc_msg)
 {
-    const char *tag = NULL;
-    pid_t pid;
+    LOGT("context: %p, ipc_msg: %p \n", context, ipc_msg);
+    HY_ASSERT_RET(!context || !ipc_msg);
+
     ipc_link_info_s ipc_link_info;
     HyIpcProcessInfo_s ipc_process_info;
     HyIpcProcessSaveConfig_s *save_c = &context->save_config;
 
-    pid = *(pid_t *)ipc_msg->buf;
-    tag = (const char *)(ipc_msg->buf + sizeof(pid_t));
+    ipc_link_get_info(context->ipc_link_h, &ipc_link_info);
 
-    ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
-
-    ipc_process_info.pid        = pid;
-    ipc_process_info.tag        = tag;
+    ipc_process_info.pid        = *(pid_t *)ipc_msg->buf;
+    ipc_process_info.tag        = (const char *)(ipc_msg->buf + sizeof(pid_t));
     ipc_process_info.ipc_name   = ipc_link_info.ipc_name;
 
     if (save_c->state_change_cb) {
@@ -94,9 +92,12 @@ static void _handle_ipc_link_msg_info(_ipc_process_server_context_s *context,
     }
 }
 
-static void _handle_ipc_link_msg_cb_id(_ipc_process_server_context_s *context,
+static void _server_handle_ipc_link_msg_cb_info(_ip_server_context_s *context,
         ipc_link_msg_s *ipc_msg)
 {
+    LOGT("context: %p, ipc_msg: %p \n", context, ipc_msg);
+    HY_ASSERT_RET(!context || !ipc_msg);
+
     hy_u32_t cnt = 0;
     hy_u32_t *id = NULL;
     _func_cb_id_s *func_cb_id = NULL;
@@ -113,33 +114,34 @@ static void _handle_ipc_link_msg_cb_id(_ipc_process_server_context_s *context,
         func_cb_id->id[i] = id[i];
     }
 
-    pthread_mutex_lock(&context->func_id_mutex);
-    hy_list_add_tail(&func_cb_id->entry, &context->func_id_list);
-    pthread_mutex_unlock(&context->func_id_mutex);
+    pthread_mutex_lock(&context->cb_id_mutex);
+    hy_list_add_tail(&func_cb_id->entry, &context->cb_id_list);
+    pthread_mutex_unlock(&context->cb_id_mutex);
 }
 
-static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_client,
-        _ipc_process_server_context_s *context)
+static hy_s32_t _server_handle_ipc_link_msg(
+        ipc_link_manager_list_s *ipc_link_list,
+        _ip_server_context_s *context)
 {
-    LOGT("ipc_link_client: %p, context: %p \n", ipc_link_client, context);
-    HY_ASSERT_RET_VAL(!ipc_link_client || !context, -1);
+    LOGT("ipc_link_list: %p, context: %p \n", ipc_link_list, context);
+    HY_ASSERT_RET_VAL(!ipc_link_list || !context, -1);
+
     ipc_link_msg_s *ipc_msg = NULL;
     _func_cb_s func_cb;
+    hy_s32_t flag = 0;
 
-    if (0 != ipc_link_read(ipc_link_client->ipc_link_h, &ipc_msg)) {
+    if (0 != ipc_link_read(ipc_link_list->ipc_link_h, &ipc_msg)) {
         LOGE("ipc link read failed \n");
         return -1;
     }
 
     switch (ipc_msg->type) {
         case IPC_LINK_MSG_TYPE_INFO:
-            _handle_ipc_link_msg_info(context, ipc_msg);
-            if (ipc_msg) {
-                HY_MEM_FREE_P(ipc_msg);
-            }
+            _server_handle_ipc_link_msg_info(context, ipc_msg);
+            flag = 1;
             break;
         case IPC_LINK_MSG_TYPE_ACK:
-            func_cb.ipc_link_h  = ipc_link_client->ipc_link_h;
+            func_cb.ipc_link_h  = ipc_link_list->ipc_link_h;
             func_cb.ipc_msg     = ipc_msg;
             if (0 == HyFifoWrite(context->ack_fifo_h, &func_cb, sizeof(func_cb))) {
                 LOGE("hy fifo write failed, lost data \n");
@@ -149,7 +151,7 @@ static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_cl
             sem_post(&context->ack_sem);
             break;
         case IPC_LINK_MSG_TYPE_CB:
-            func_cb.ipc_link_h  = ipc_link_client->ipc_link_h;
+            func_cb.ipc_link_h  = ipc_link_list->ipc_link_h;
             func_cb.ipc_msg     = ipc_msg;
             if (0 == HyFifoWrite(context->cb_fifo_h, &func_cb, sizeof(func_cb))) {
                 LOGE("hy fifo write failed, lost data \n");
@@ -159,13 +161,17 @@ static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_cl
             sem_post(&context->cb_sem);
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
-            _handle_ipc_link_msg_cb_id(context, ipc_msg);
-            if (ipc_msg) {
-                HY_MEM_FREE_P(ipc_msg);
-            }
+            _server_handle_ipc_link_msg_cb_info(context, ipc_msg);
+            flag = 1;
             break;
         default:
             break;
+    }
+
+    if (flag) {
+        if (ipc_msg) {
+            HY_MEM_FREE_P(ipc_msg);
+        }
     }
 
     return 0;
@@ -176,9 +182,9 @@ static hy_s32_t _handle_cb_thread_cb(void *args)
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
 
-    _ipc_process_server_context_s *context = args;
+    _ip_server_context_s *context = args;
     struct hy_list_head *ipc_link_list = NULL;
-    ipc_link_manager_client_s *pos;
+    ipc_link_manager_list_s *pos;
     _func_cb_s func_cb;
     HyIpcProcessMsgId_e msg_id = 0;
     _func_cb_id_s *offset;
@@ -195,17 +201,18 @@ static hy_s32_t _handle_cb_thread_cb(void *args)
         ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
         hy_list_for_each_entry(pos, ipc_link_list, entry) {
             if (pos->ipc_link_h == func_cb.ipc_link_h) {
-                LOGD("save ipc link \n");
+                LOGT("save ipc link \n");
                 continue;
             }
 
             {
                 msg_id = *(HyIpcProcessMsgId_e *)func_cb.ipc_msg->buf;
 
-                hy_list_for_each_entry(offset, &context->func_id_list, entry) {
+                pthread_mutex_lock(&context->cb_id_mutex);
+                hy_list_for_each_entry(offset, &context->cb_id_list, entry) {
                     for (hy_u32_t i = 0; i < offset->cnt; ++i) {
                         if (msg_id == offset->id[i]) {
-                            LOGD("contain msg id, ipc_link_h: %p, msg id: %d \n",
+                            LOGT("contain msg id, ipc_link_h: %p, msg id: %d \n",
                                     pos->ipc_link_h, msg_id);
 
                             func_cb.ipc_msg->ipc_link_h = func_cb.ipc_link_h;
@@ -214,6 +221,7 @@ static hy_s32_t _handle_cb_thread_cb(void *args)
                         }
                     }
                 }
+                pthread_mutex_unlock(&context->cb_id_mutex);
             }
         }
         ipc_link_manager_list_put(context->ipc_link_manager_h);
@@ -231,9 +239,9 @@ static hy_s32_t _handle_ack_thread_cb(void *args)
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
 
-    _ipc_process_server_context_s *context = args;
+    _ip_server_context_s *context = args;
     struct hy_list_head *ipc_link_list = NULL;
-    ipc_link_manager_client_s *pos;
+    ipc_link_manager_list_s *pos;
     _func_cb_s func_cb;
 
     while (!context->exit_flag) {
@@ -248,7 +256,7 @@ static hy_s32_t _handle_ack_thread_cb(void *args)
         ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
         hy_list_for_each_entry(pos, ipc_link_list, entry) {
             if (pos->ipc_link_h != func_cb.ipc_msg->ipc_link_h) {
-                LOGD("can't find ipc link \n");
+                LOGT("can't find ipc link \n");
                 continue;
             }
 
@@ -267,12 +275,12 @@ static void _ipc_link_manager_accept_cb(void *ipc_link_h, void *args)
 
     LOGI("ipc process server accept new ipc_link: %p \n", ipc_link_h);
 
-    _ipc_process_server_context_s *context = args;
+    _ip_server_context_s *context = args;
 
     HyPipeWrite(context->pipe_h, &ipc_link_h, sizeof(ipc_link_h));
 }
 
-static hy_s32_t _read_ipc_link_msg_thread_cb(void *args)
+static hy_s32_t _server_handle_ipc_link_msg_thread_cb(void *args)
 {
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
@@ -280,19 +288,19 @@ static hy_s32_t _read_ipc_link_msg_thread_cb(void *args)
     fd_set read_fs = {0};
     struct timeval timeout = {0};
     void *ipc_link_h = NULL;
-    _ipc_process_server_context_s *context = args;
+    _ip_server_context_s *context = args;
     ipc_link_info_s ipc_link_info;
     struct hy_list_head *ipc_link_list = NULL;
-    ipc_link_manager_client_s *pos, *n;
+    ipc_link_manager_list_s *pos, *n;
     hy_s32_t fd = -1;
-    hy_s32_t pipe_read_fd = -1;
+    hy_s32_t pfd = -1;
 
-    pipe_read_fd = HyPipeReadFdGet(context->pipe_h);
+    pfd = HyPipeReadFdGet(context->pipe_h);
 
     while (!context->exit_flag) {
         FD_ZERO(&read_fs);
 
-        FD_SET(pipe_read_fd, &read_fs);
+        FD_SET(pfd, &read_fs);
 
         ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
         hy_list_for_each_entry(pos, ipc_link_list, entry) {
@@ -308,14 +316,12 @@ static hy_s32_t _read_ipc_link_msg_thread_cb(void *args)
             break;
         }
 
-        if (FD_ISSET(pipe_read_fd, &read_fs)) {
+        if (FD_ISSET(pfd, &read_fs)) {
             LOGI("ipc process server send info to client \n");
 
             HyPipeRead(context->pipe_h, &ipc_link_h, sizeof(ipc_link_h));
-
-            ipc_link_info_get(context->ipc_link_h, &ipc_link_info);
-
-            ipc_link_info_send(ipc_link_h, ipc_link_info.tag, context->pid);
+            ipc_link_get_info(context->ipc_link_h, &ipc_link_info);
+            ipc_link_send_info(ipc_link_h, ipc_link_info.tag, context->pid);
         }
 
         ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
@@ -323,7 +329,7 @@ static hy_s32_t _read_ipc_link_msg_thread_cb(void *args)
             fd = ipc_link_get_fd(pos->ipc_link_h);
 
             if (FD_ISSET(fd, &read_fs)) {
-                if (-1 == _process_server_parse_msg(pos, context)) {
+                if (-1 == _server_handle_ipc_link_msg(pos, context)) {
                     hy_list_del(&pos->entry);
 
                     ipc_link_destroy(&pos->ipc_link_h);
@@ -343,35 +349,34 @@ void ipc_process_server_destroy(void **ipc_process_server_h)
             ipc_process_server_h, *ipc_process_server_h);
     HY_ASSERT_RET(!ipc_process_server_h || !*ipc_process_server_h);
 
-    _ipc_process_server_context_s *context = *ipc_process_server_h;
+    _ip_server_context_s *context = *ipc_process_server_h;
     _func_cb_id_s *pos, *n;
 
     ipc_link_destroy(&context->ipc_link_h);
 
     context->exit_flag = 1;
 
-    sem_post(&context->cb_sem);
-    HyThreadDestroy(&context->handle_cb_thread_h);
-
     sem_post(&context->ack_sem);
     HyThreadDestroy(&context->handle_ack_thread_h);
+    sem_destroy(&context->ack_sem);
+    HyFifoDestroy(&context->ack_fifo_h);
 
-    HyThreadDestroy(&context->read_ipc_link_msg_thread_h);
+    HyThreadDestroy(&context->handle_ipc_link_msg_thread_h);
 
     ipc_link_manager_destroy(&context->ipc_link_manager_h);
 
-    hy_list_for_each_entry_safe(pos, n, &context->func_id_list, entry) {
+    sem_post(&context->cb_sem);
+    HyThreadDestroy(&context->handle_cb_thread_h);
+    sem_destroy(&context->cb_sem);
+    pthread_mutex_lock(&context->cb_id_mutex);
+    hy_list_for_each_entry_safe(pos, n, &context->cb_id_list, entry) {
         hy_list_del(&pos->entry);
 
         HY_MEM_FREE_P(pos->id);
         HY_MEM_FREE_PP(&pos);
     }
-
-    sem_destroy(&context->cb_sem);
+    pthread_mutex_unlock(&context->cb_id_mutex);
     HyFifoDestroy(&context->cb_fifo_h);
-
-    sem_destroy(&context->ack_sem);
-    HyFifoDestroy(&context->ack_fifo_h);
 
     HyPipeDestroy(&context->pipe_h);
 
@@ -384,18 +389,18 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
     LOGT("ipc_process_c: %p \n", ipc_process_c);
     HY_ASSERT_RET_VAL(!ipc_process_c, NULL);
 
-    _ipc_process_server_context_s *context = NULL;
+    _ip_server_context_s *context = NULL;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_ipc_process_server_context_s *,
-                sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(_ip_server_context_s *, sizeof(*context));
 
         HY_MEMCPY(&context->save_config,
                 &ipc_process_c->save_config, sizeof(context->save_config));
 
         context->pid = getpid();
-        HY_INIT_LIST_HEAD(&context->func_id_list);
-        pthread_mutex_init(&context->func_id_mutex, NULL);
+
+        HY_INIT_LIST_HEAD(&context->cb_id_list);
+        pthread_mutex_init(&context->cb_id_mutex, NULL);
 
         context->pipe_h = HyPipeCreate_m(HY_PIPE_BLOCK_STATE_NOBLOCK);
         if (!context->pipe_h) {
@@ -426,20 +431,16 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
             break;
         }
 
-        ipc_link_manager_config_s ipc_link_manager_c;
-        HY_MEMSET(&ipc_link_manager_c, sizeof(ipc_link_manager_c));
-        ipc_link_manager_c.save_config.accept_cb    = _ipc_link_manager_accept_cb;
-        ipc_link_manager_c.save_config.args         = context;
-        ipc_link_manager_c.ipc_link_h               = context->ipc_link_h;
-        context->ipc_link_manager_h = ipc_link_manager_create(&ipc_link_manager_c);
+        context->ipc_link_manager_h = ipc_link_manager_create_m(
+                _ipc_link_manager_accept_cb, context, context->ipc_link_h);
         if (!context->ipc_link_manager_h) {
             LOGE("ipc link manager create faeild \n");
             break;
         }
 
-        context->read_ipc_link_msg_thread_h = HyThreadCreate_m("hy_sv_r_ipc_msg",
-                _read_ipc_link_msg_thread_cb, context);
-        if (!context->read_ipc_link_msg_thread_h) {
+        context->handle_ipc_link_msg_thread_h = HyThreadCreate_m("HYIPS_handle_msg",
+                _server_handle_ipc_link_msg_thread_cb, context);
+        if (!context->handle_ipc_link_msg_thread_h) {
             LOGE("hy thread create m failed \n");
             break;
         }

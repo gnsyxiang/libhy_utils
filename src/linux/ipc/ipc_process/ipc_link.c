@@ -33,6 +33,19 @@ typedef struct {
     void    *ipc_socket_h;
 } _ipc_link_context_s;
 
+void ipc_link_dump(void *ipc_link_h)
+{
+    LOGT("ipc_link_h: %p \n", ipc_link_h);
+    HY_ASSERT_RET(!ipc_link_h);
+
+    _ipc_link_context_s *context = ipc_link_h;
+
+    LOGD("ipc_socket_h: %p \n",     context->ipc_socket_h);
+    LOGD("tag: %s \n",              context->tag);
+    LOGD("ipc_name: %s \n",         HyIpcSocketGetName(context->ipc_socket_h));
+    LOGD("fd: %d \n",               HyIpcSocketGetFD(context->ipc_socket_h));
+}
+
 hy_s32_t ipc_link_get_fd(void *ipc_link_h)
 {
     LOGT("ipc_link_h: %p \n", ipc_link_h);
@@ -65,7 +78,7 @@ hy_s32_t ipc_link_wait_accept(void *ipc_link_h,
     return HyIpcSocketAccept(context->ipc_socket_h, accept_cb, args);
 }
 
-hy_s32_t ipc_link_info_get(void *ipc_link_h, ipc_link_info_s *ipc_link_info)
+hy_s32_t ipc_link_get_info(void *ipc_link_h, ipc_link_info_s *ipc_link_info)
 {
     LOGT("ipc_link_h: %p, ipc_link_info: %p \n", ipc_link_h, ipc_link_info);
     HY_ASSERT_RET_VAL(!ipc_link_h || !ipc_link_info, -1);
@@ -79,7 +92,7 @@ hy_s32_t ipc_link_info_get(void *ipc_link_h, ipc_link_info_s *ipc_link_info)
     return 0;
 }
 
-hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag)
+hy_s32_t ipc_link_set_info(void *ipc_link_h, const char *tag)
 {
     LOGT("ipc_link_h: %p, tag: %s \n", ipc_link_h, tag);
     HY_ASSERT_RET_VAL(!ipc_link_h || !tag, -1);
@@ -91,7 +104,7 @@ hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag)
     return 0;
 }
 
-hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid)
+hy_s32_t ipc_link_send_info(void *ipc_link_h, const char *tag, pid_t pid)
 {
     LOGT("ipc_link_h: %p, tag: %p, pid: %d \n", ipc_link_h, tag, pid);
     HY_ASSERT_RET_VAL(!ipc_link_h || !tag, -1);
@@ -99,8 +112,9 @@ hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid)
     hy_u32_t len = 0;
     hy_s32_t offset = 0;
     ipc_link_msg_s *ipc_link_msg = NULL;
-    hy_u32_t total_len = sizeof(ipc_link_msg_s)
-        + HY_STRLEN(tag) + 1 + sizeof(pid_t);
+    hy_u32_t total_len = 0;
+
+    total_len = sizeof(ipc_link_msg_s) + HY_STRLEN(tag) + 1 + sizeof(pid_t);
 
     ipc_link_msg = HY_MEM_MALLOC_RET_VAL(ipc_link_msg_s *, total_len, -1);
 
@@ -122,8 +136,7 @@ hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid)
 hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
 {
     LOGT("ipc_link_h: %p, ipc_link_msg: %p, \n", ipc_link_h, ipc_link_msg);
-    HY_ASSERT(ipc_link_h);
-    HY_ASSERT(ipc_link_msg);
+    HY_ASSERT_RET_VAL(!ipc_link_h || !ipc_link_msg, -1);
 
     _ipc_link_context_s *context = ipc_link_h;
     ipc_link_msg_s *ipc_link_msg_tmp = NULL;
@@ -162,14 +175,13 @@ hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
     return -1;
 }
 
-hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg, hy_s32_t flag)
+hy_s32_t ipc_link_write(void *ipc_link_h,
+        ipc_link_msg_s *ipc_link_msg, hy_s32_t flag)
 {
     LOGT("ipc_link_h: %p, ipc_link_msg: %p \n", ipc_link_h, ipc_link_msg);
-    HY_ASSERT(ipc_link_h);
-    HY_ASSERT(ipc_link_msg);
+    HY_ASSERT_RET_VAL(!ipc_link_h || !ipc_link_msg, -1);
 
     _ipc_link_context_s *context = ipc_link_h;
-
     hy_s32_t ret = -1;
 
     do {
@@ -220,9 +232,7 @@ void *ipc_link_create(ipc_link_config_s *ipc_link_c)
     HY_ASSERT_RET_VAL(!ipc_link_c, NULL);
 
     _ipc_link_context_s *context = NULL;
-    HyIpcSocketType_e ipc_socket_type[HY_IPC_SOCKET_TYPE_MAX] = {
-        HY_IPC_SOCKET_TYPE_CLIENT, HY_IPC_SOCKET_TYPE_SERVER
-    };
+    HyIpcSocketType_e ipc_socket_type;
 
     do {
         context = HY_MEM_MALLOC_BREAK(_ipc_link_context_s *, sizeof(*context));
@@ -233,8 +243,14 @@ void *ipc_link_create(ipc_link_config_s *ipc_link_c)
             HY_STRNCPY(context->tag, sizeof(context->tag),
                     ipc_link_c->tag, HY_STRLEN(ipc_link_c->tag));
 
+            if (ipc_link_c->type == IPC_LINK_TYPE_SERVER) {
+                ipc_socket_type = HY_IPC_SOCKET_TYPE_SERVER;
+            } else {
+                ipc_socket_type = HY_IPC_SOCKET_TYPE_CLIENT;
+            }
+
             context->ipc_socket_h = HyIpcSocketCreate_m(ipc_link_c->ipc_name,
-                    ipc_socket_type[ipc_link_c->type]);
+                    ipc_socket_type);
             if (!context->ipc_socket_h) {
                 LOGE("hy ipc socket create failed \n");
                 break;

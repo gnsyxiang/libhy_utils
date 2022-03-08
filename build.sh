@@ -64,7 +64,7 @@ else
 fi
 
 if [ x$2 = x"release" ]; then
-    _cppflags_com="${_cppflags_com} -g -O2"
+    _cppflags_com="${_cppflags_com} -g -O2 -DNDEBUG"
 else
     _cppflags_com="${_cppflags_com} -g -O0"
     _param_com="${_param_com} --enable-debug_info"

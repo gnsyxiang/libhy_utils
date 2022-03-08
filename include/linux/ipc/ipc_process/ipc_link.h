@@ -62,13 +62,13 @@ typedef struct {
 } ipc_link_info_s;
 
 typedef struct {
-    hy_u32_t    total_len;
-    hy_s32_t    type;
+    hy_u32_t                total_len;
+    hy_s32_t                type;
 
-    void        *ipc_link_h;
+    void                    *ipc_link_h;
 
-    hy_u32_t    buf_len;
-    char        buf[];
+    hy_u32_t                buf_len;
+    char                    buf[];
 } UNPACKED ipc_link_msg_s;
 
 typedef struct {
@@ -87,9 +87,9 @@ void ipc_link_destroy(void **ipc_link_h);
 hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg);
 hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg, hy_s32_t flag);
 
-hy_s32_t ipc_link_info_get(void *ipc_link_h, ipc_link_info_s *ipc_link_info);
-hy_s32_t ipc_link_info_set(void *ipc_link_h, const char *tag);
-hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid);
+hy_s32_t ipc_link_get_info(void *ipc_link_h, ipc_link_info_s *ipc_link_info);
+hy_s32_t ipc_link_set_info(void *ipc_link_h, const char *tag);
+hy_s32_t ipc_link_send_info(void *ipc_link_h, const char *tag, pid_t pid);
 
 hy_s32_t ipc_link_connect(void *ipc_link_h, hy_u32_t timeout_s);
 hy_s32_t ipc_link_wait_accept(void *ipc_link_h,

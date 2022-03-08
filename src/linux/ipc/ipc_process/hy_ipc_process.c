@@ -76,7 +76,6 @@ void *HyIpcProcessCreate(HyIpcProcessConfig_s *ipc_process_c)
     LOGT("ipc_process_c: %p \n", ipc_process_c);
     HY_ASSERT_RET_VAL(!ipc_process_c, NULL);
 
-
     void *(*_create_cb[HY_IPC_PROCESS_TYPE_MAX])(
             HyIpcProcessConfig_s *config) = {
         ipc_process_client_create,
