@@ -241,31 +241,26 @@ static hy_s32_t _handle_ipc_link_msg(_ipc_process_client_context_s *context)
     switch (ipc_msg->type) {
         case IPC_LINK_MSG_TYPE_INFO:
             _handle_ipc_link_msg_info(context, ipc_msg);
-            if (ipc_msg) {
-                HY_MEM_FREE_P(ipc_msg);
-            }
             break;
         case IPC_LINK_MSG_TYPE_ACK:
-            LOGE("--------1------------ack \n");
             pthread_mutex_lock(&context->ack_mutex);
             HyFifoWrite(context->ack_fifo_h, ipc_msg, ipc_msg->total_len);
             pthread_mutex_unlock(&context->ack_mutex);
 
-            LOGE("--------2------------ack \n");
             pthread_cond_signal(&context->ack_cond);
-            LOGE("--------3------------ack \n");
-            if (ipc_msg) {
-                HY_MEM_FREE_P(ipc_msg);
-            }
             break;
         case IPC_LINK_MSG_TYPE_CB:
-            LOGE("-----------------cb\n");
             _handle_ipc_link_msg_cb(context, ipc_msg);
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
             break;
         default:
+            LOGE("error type \n");
             break;
+    }
+
+    if (ipc_msg) {
+        HY_MEM_FREE_P(ipc_msg);
     }
 
     return 0;
