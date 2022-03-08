@@ -24,7 +24,9 @@
 extern "C" {
 #endif
 
-#define HY_IPC_PROCESS_MSG_ID_SYNC_BASE         (0x0000)
+#include "hy_hal/hy_type.h"
+
+#define HY_IPC_PROCESS_MSG_ID_SYNC_BASE         (0x0000 + 100)
 #define HY_IPC_PROCESS_MSG_ID_BROADCAST_BASE    (0x8000)
 
 typedef enum {
@@ -34,11 +36,23 @@ typedef enum {
     HY_IPC_PROCESS_MSG_ID_BROADCAST_POWER_OFF = HY_IPC_PROCESS_MSG_ID_BROADCAST_BASE,
 } HyIpcProcessMsgId_e;
 
+// HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET
 typedef struct {
+    hy_s32_t type;
 } HyIpcProcessAudioParamGet_s;
 
 typedef struct {
+    hy_u32_t channel;
+    hy_u32_t sample_rate;
+    hy_u32_t bit_per_sample;
 } HyIpcProcessAudioParamGetResult_s;
+
+// HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET
+typedef struct {
+    hy_u32_t channel;
+    hy_u32_t sample_rate;
+    hy_u32_t bit_per_sample;
+} HyIpcProcessAudioParamSet_s;
 
 #ifdef __cplusplus
 }

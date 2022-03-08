@@ -243,7 +243,7 @@ hy_s32_t ipc_link_read(ipc_link_s *ipc_link, ipc_link_msg_s **ipc_msg)
     return -1;
 }
 
-hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg)
+hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg, hy_s32_t flag)
 {
     LOGT("ipc_link: %p, ipc_msg: %p \n", ipc_link, ipc_msg);
     HY_ASSERT(ipc_link);
@@ -273,7 +273,9 @@ hy_s32_t ipc_link_write(ipc_link_s *ipc_link, ipc_link_msg_s *ipc_msg)
         ret = 0;
     } while (0);
 
-    free(ipc_msg);
+    if (flag) {
+        HY_MEM_FREE_P(ipc_msg);
+    }
 
     return (ret == 0 ? 0 : -1);
 }

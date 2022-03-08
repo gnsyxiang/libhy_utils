@@ -18,6 +18,7 @@
  *     last modified: 03/03 2022 16:20
  */
 #include <stdio.h>
+#include <semaphore.h>
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
@@ -25,6 +26,8 @@
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_pipe.h"
+
+#include "hy_fifo.h"
 
 #include "ipc_process_server.h"
 #include "ipc_link_manager.h"
@@ -38,6 +41,11 @@ typedef struct {
 } _func_cb_id_s;
 
 typedef struct {
+    void                            *ipc_link_h;
+    ipc_link_msg_s                  *ipc_msg;
+} _func_cb_s;
+
+typedef struct {
     HyIpcProcessSaveConfig_s        save_config;// 必须放在前面，用于强制类型转换
 
     pid_t                           pid;
@@ -47,8 +55,17 @@ typedef struct {
     pthread_mutex_t                 func_id_mutex;
     struct hy_list_head             func_id_list;
 
+    sem_t                           cb_sem;
+    void                            *cb_fifo_h;
+    void                            *handle_cb_thread_h;
+
+    sem_t                           ack_sem;
+    void                            *ack_fifo_h;
+    void                            *handle_ack_thread_h;
+
     void                            *pipe_h;
     void                            *read_ipc_link_msg_thread_h;
+
     hy_s32_t                        exit_flag:1;
     hy_s32_t                        reserved;
 } _ipc_process_server_context_s;
@@ -107,6 +124,7 @@ static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_cl
     LOGT("ipc_link_client: %p, context: %p \n", ipc_link_client, context);
     HY_ASSERT_RET_VAL(!ipc_link_client || !context, -1);
     ipc_link_msg_s *ipc_msg = NULL;
+    _func_cb_s func_cb;
 
     if (0 != ipc_link_read(ipc_link_client->ipc_link_h, &ipc_msg)) {
         LOGE("ipc link read failed \n");
@@ -121,8 +139,24 @@ static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_cl
             }
             break;
         case IPC_LINK_MSG_TYPE_ACK:
+            func_cb.ipc_link_h  = ipc_link_client->ipc_link_h;
+            func_cb.ipc_msg     = ipc_msg;
+            if (0 == HyFifoWrite(context->ack_fifo_h, &func_cb, sizeof(func_cb))) {
+                LOGE("hy fifo write failed, lost data \n");
+                break;
+            }
+
+            sem_post(&context->ack_sem);
             break;
         case IPC_LINK_MSG_TYPE_CB:
+            func_cb.ipc_link_h  = ipc_link_client->ipc_link_h;
+            func_cb.ipc_msg     = ipc_msg;
+            if (0 == HyFifoWrite(context->cb_fifo_h, &func_cb, sizeof(func_cb))) {
+                LOGE("hy fifo write failed, lost data \n");
+                break;
+            }
+
+            sem_post(&context->cb_sem);
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
             _handle_ipc_link_msg_cb_id(context, ipc_msg);
@@ -135,6 +169,95 @@ static hy_s32_t _process_server_parse_msg(ipc_link_manager_client_s *ipc_link_cl
     }
 
     return 0;
+}
+
+static hy_s32_t _handle_cb_thread_cb(void *args)
+{
+    LOGT("args: %p \n", args);
+    HY_ASSERT_RET_VAL(!args, -1);
+
+    _ipc_process_server_context_s *context = args;
+    struct hy_list_head *ipc_link_list = NULL;
+    ipc_link_manager_client_s *pos;
+    _func_cb_s func_cb;
+    HyIpcProcessMsgId_e msg_id = 0;
+    _func_cb_id_s *offset;
+
+    while (!context->exit_flag) {
+        sem_wait(&context->cb_sem);
+
+        if (context->exit_flag) {
+            break;
+        }
+
+        HyFifoRead(context->cb_fifo_h, &func_cb, sizeof(func_cb));
+
+        ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
+        hy_list_for_each_entry(pos, ipc_link_list, entry) {
+            if (pos->ipc_link_h == func_cb.ipc_link_h) {
+                LOGD("save ipc link \n");
+                continue;
+            }
+
+            {
+                msg_id = *(HyIpcProcessMsgId_e *)func_cb.ipc_msg->buf;
+
+                hy_list_for_each_entry(offset, &context->func_id_list, entry) {
+                    for (hy_u32_t i = 0; i < offset->cnt; ++i) {
+                        if (msg_id == offset->id[i]) {
+                            LOGD("contain msg id, ipc_link_h: %p, msg id: %d \n",
+                                    pos->ipc_link_h, msg_id);
+
+                            func_cb.ipc_msg->ipc_link_h = func_cb.ipc_link_h;
+                            ipc_link_write(pos->ipc_link_h, func_cb.ipc_msg, 0);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ipc_link_manager_list_put(context->ipc_link_manager_h);
+
+        if (func_cb.ipc_msg) {
+            HY_MEM_FREE_P(func_cb.ipc_msg);
+        }
+    }
+
+    return -1;
+}
+
+static hy_s32_t _handle_ack_thread_cb(void *args)
+{
+    LOGT("args: %p \n", args);
+    HY_ASSERT_RET_VAL(!args, -1);
+
+    _ipc_process_server_context_s *context = args;
+    struct hy_list_head *ipc_link_list = NULL;
+    ipc_link_manager_client_s *pos;
+    _func_cb_s func_cb;
+
+    while (!context->exit_flag) {
+        sem_wait(&context->ack_sem);
+
+        if (context->exit_flag) {
+            break;
+        }
+
+        HyFifoRead(context->ack_fifo_h, &func_cb, sizeof(func_cb));
+
+        ipc_link_list = ipc_link_manager_list_get(context->ipc_link_manager_h);
+        hy_list_for_each_entry(pos, ipc_link_list, entry) {
+            if (pos->ipc_link_h != func_cb.ipc_msg->ipc_link_h) {
+                LOGD("can't find ipc link \n");
+                continue;
+            }
+
+            ipc_link_write(pos->ipc_link_h, func_cb.ipc_msg, 1);
+        }
+        ipc_link_manager_list_put(context->ipc_link_manager_h);
+    }
+
+    return -1;
 }
 
 static void _ipc_link_manager_accept_cb(void *ipc_link_h, void *args)
@@ -226,7 +349,15 @@ void ipc_process_server_destroy(void **ipc_process_server_h)
     ipc_link_destroy(&context->ipc_link_h);
 
     context->exit_flag = 1;
+
+    sem_post(&context->cb_sem);
+    HyThreadDestroy(&context->handle_cb_thread_h);
+
+    sem_post(&context->ack_sem);
+    HyThreadDestroy(&context->handle_ack_thread_h);
+
     HyThreadDestroy(&context->read_ipc_link_msg_thread_h);
+
     ipc_link_manager_destroy(&context->ipc_link_manager_h);
 
     hy_list_for_each_entry_safe(pos, n, &context->func_id_list, entry) {
@@ -235,6 +366,12 @@ void ipc_process_server_destroy(void **ipc_process_server_h)
         HY_MEM_FREE_P(pos->id);
         HY_MEM_FREE_PP(&pos);
     }
+
+    sem_destroy(&context->cb_sem);
+    HyFifoDestroy(&context->cb_fifo_h);
+
+    sem_destroy(&context->ack_sem);
+    HyFifoDestroy(&context->ack_fifo_h);
 
     HyPipeDestroy(&context->pipe_h);
 
@@ -266,6 +403,22 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
             break;
         }
 
+        sem_init(&context->cb_sem, 0, 0);
+        context->cb_fifo_h = HyFifoCreate_m(sizeof(_func_cb_s) * 1024,
+                HY_FIFO_MUTEX_LOCK);
+        if (!context->cb_fifo_h) {
+            LOGE("hy fifo create failed \n");
+            break;
+        }
+
+        sem_init(&context->ack_sem, 0, 0);
+        context->ack_fifo_h = HyFifoCreate_m(sizeof(_func_cb_s) * 1024,
+                HY_FIFO_MUTEX_LOCK);
+        if (!context->ack_fifo_h) {
+            LOGE("hy fifo create failed \n");
+            break;
+        }
+
         context->ipc_link_h = ipc_link_create_m(ipc_process_c->ipc_name,
                 ipc_process_c->tag, IPC_LINK_TYPE_SERVER, NULL);
         if (!context->ipc_link_h) {
@@ -287,6 +440,20 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
         context->read_ipc_link_msg_thread_h = HyThreadCreate_m("hy_sv_r_ipc_msg",
                 _read_ipc_link_msg_thread_cb, context);
         if (!context->read_ipc_link_msg_thread_h) {
+            LOGE("hy thread create m failed \n");
+            break;
+        }
+
+        context->handle_cb_thread_h = HyThreadCreate_m("HYIPS_handle_cb",
+                _handle_cb_thread_cb, context);
+        if (!context->handle_cb_thread_h) {
+            LOGE("hy thread create m failed \n");
+            break;
+        }
+
+        context->handle_ack_thread_h = HyThreadCreate_m("HYIPS_handle_ack",
+                _handle_ack_thread_cb, context);
+        if (!context->handle_ack_thread_h) {
             LOGE("hy thread create m failed \n");
             break;
         }

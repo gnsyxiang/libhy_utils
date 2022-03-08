@@ -116,7 +116,7 @@ hy_s32_t ipc_link_info_send(void *ipc_link_h, const char *tag, pid_t pid)
     ipc_link_msg->type       = IPC_LINK_MSG_TYPE_INFO;
     ipc_link_msg->buf_len    = offset;
 
-    return ipc_link_write(ipc_link_h, ipc_link_msg);
+    return ipc_link_write(ipc_link_h, ipc_link_msg, 1);
 }
 
 hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
@@ -162,7 +162,7 @@ hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
     return -1;
 }
 
-hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg)
+hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg, hy_s32_t flag)
 {
     LOGT("ipc_link_h: %p, ipc_link_msg: %p \n", ipc_link_h, ipc_link_msg);
     HY_ASSERT(ipc_link_h);
@@ -194,7 +194,9 @@ hy_s32_t ipc_link_write(void *ipc_link_h, ipc_link_msg_s *ipc_link_msg)
         ret = 0;
     } while (0);
 
-    HY_MEM_FREE_P(ipc_link_msg);
+    if (flag) {
+        HY_MEM_FREE_P(ipc_link_msg);
+    }
 
     return (ret == 0 ? 0 : -1);
 }

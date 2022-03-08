@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_ipc_process_client_test.c
+ * @file    hy_ipc_process_client_set_test.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    03/03 2022 17:05
+ * @date    07/03 2022 11:58
  * @version v0.0.1
  * 
  * @since    note
@@ -13,17 +13,17 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        03/03 2022      create the file
+ *     00      zhenquan.qiu        07/03 2022      create the file
  * 
- *     last modified: 03/03 2022 17:05
+ *     last modified: 07/03 2022 11:58
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_assert.h"
+#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_signal.h"
@@ -42,37 +42,8 @@ typedef struct {
 
     void        *ipc_process_client_h;
 
-    hy_u32_t    channel;
-    hy_u32_t    sample_rate;
-    hy_u32_t    bit_per_sample;
-
     hy_s32_t    exit_flag;
 } _main_context_t;
-
-static hy_s32_t _audio_param_get_cb(void *recv, hy_u32_t recv_len,
-        void *send, hy_u32_t send_len, void *args)
-{
-    HyIpcProcessAudioParamGet_s *audio_param_get = NULL;
-    HyIpcProcessAudioParamGetResult_s *audio_param_set = NULL;
-    _main_context_t *context = args;
-
-    audio_param_get = (HyIpcProcessAudioParamGet_s *)recv;
-    audio_param_set = (HyIpcProcessAudioParamGetResult_s *)send;
-
-    LOGD("audio_param_get.type: %d \n", audio_param_get->type);
-
-    audio_param_set->channel        = context->channel;
-    audio_param_set->sample_rate    = context->sample_rate;
-    audio_param_set->bit_per_sample = context->bit_per_sample;
-
-    return 0;
-}
-
-static hy_s32_t _audio_param_set_cb(void *recv, hy_u32_t recv_len,
-        void *send, hy_u32_t send_len, void *args)
-{
-    return 0;
-}
 
 static void _state_change_cb(HyIpcProcessInfo_s *ipc_process_info,
         HyIpcProcessConnectState_e is_connect, void *args)
@@ -87,10 +58,10 @@ static void _state_change_cb(HyIpcProcessInfo_s *ipc_process_info,
         LOGD("ipc_name: %s, tag: %s, pid: %d \n", ipc_process_info->ipc_name,
                 ipc_process_info->tag, ipc_process_info->pid);
 
-        LOGD("connect to server \n");
+        LOGD("client connect server \n");
     } else {
         context->exit_flag = 1;
-        LOGD("disconnect to server \n");
+        LOGD("server exit \n");
     }
 }
 
@@ -156,8 +127,6 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.args          = context;
 
     HyIpcProcessFunc_s func[] = {
-        {HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET,   _audio_param_get_cb},
-        {HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET,   _audio_param_set_cb},
     };
 
     HyIpcProcessConfig_s ipc_process_c;
@@ -166,22 +135,65 @@ static _main_context_t *_module_create(void)
     ipc_process_c.save_config.args              = context;
     ipc_process_c.save_config.type              = HY_IPC_PROCESS_TYPE_CLIENT;
     ipc_process_c.ipc_name                      = _IPC_PROCESS_IPC_NAME;
-    ipc_process_c.tag                           = "ipc_process_client";
+    ipc_process_c.tag                           = "ipc_process_set_client";
     ipc_process_c.func                          = func;
     ipc_process_c.func_args                     = context;
     ipc_process_c.func_cnt                      = HY_UTILS_ARRAY_CNT(func);
-    ipc_process_c.connect_timeout_s             = 5;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
-        {"log",                 &context->log_handle,               &log_config,        (create_t)HyLogCreate,          HyLogDestroy},
-        {"signal",              &context->signal_handle,            &signal_config,     (create_t)HySignalCreate,       HySignalDestroy},
-        {"ipc process client",  &context->ipc_process_client_h,     &ipc_process_c,     (create_t)HyIpcProcessCreate,   HyIpcProcessDestroy},
+        {"log",                     &context->log_handle,               &log_config,        (create_t)HyLogCreate,          HyLogDestroy},
+        {"signal",                  &context->signal_handle,            &signal_config,     (create_t)HySignalCreate,       HySignalDestroy},
+        {"ipc process client",      &context->ipc_process_client_h,     &ipc_process_c,     (create_t)HyIpcProcessCreate,   HyIpcProcessDestroy},
     };
 
     RUN_CREATE(module);
 
     return context;
+}
+
+static void _audio_param_get(_main_context_t *context)
+{
+    hy_s32_t ret = -1;
+    HyIpcProcessAudioParamGet_s audio_param_get;
+    HyIpcProcessAudioParamGetResult_s audio_param_get_ret;
+
+    HY_MEMSET(&audio_param_get, sizeof(audio_param_get));
+    HY_MEMSET(&audio_param_get_ret, sizeof(audio_param_get_ret));
+
+    audio_param_get.type = 0x01;
+
+    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+            HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET,
+            &audio_param_get, sizeof(audio_param_get),
+            &audio_param_get_ret, sizeof(audio_param_get_ret));
+    if (0 != ret) {
+        LOGE("HyIpcProcessDataSync failed, id: %d \n", HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET);
+        return ;
+    }
+
+    LOGD("channel: %d \n",          audio_param_get_ret.channel);
+    LOGD("sample_rate: %d \n",      audio_param_get_ret.sample_rate);
+    LOGD("bit_per_sample: %d \n",   audio_param_get_ret.bit_per_sample);
+}
+
+static void _audio_param_set(_main_context_t *context)
+{
+    hy_s32_t ret = -1;
+    HyIpcProcessAudioParamSet_s audio_param_set;
+
+    audio_param_set.channel         = 2;
+    audio_param_set.sample_rate     = 16 * 1000;
+    audio_param_set.bit_per_sample  = 16;
+
+    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+            HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET,
+            &audio_param_set, sizeof(audio_param_set),
+            NULL, 0);
+    if (0 != ret) {
+        LOGE("HyIpcProcessDataSync failed, id: %d \n", HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET);
+        return ;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -192,11 +204,12 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    context->channel        = 1;
-    context->sample_rate    = 8000;
-    context->bit_per_sample = 8;
-
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+    sleep(1);
+    _audio_param_get(context);
+    // _audio_param_set(context);
+    // _audio_param_get(context);
 
     while (!context->exit_flag) {
         sleep(1);

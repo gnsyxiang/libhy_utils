@@ -58,7 +58,7 @@ typedef void (*HyIpcProcessStateChangeCb_t)(HyIpcProcessInfo_s *ipc_process_info
         HyIpcProcessConnectState_e is_connect, void *args);
 
 typedef hy_s32_t (*HyIpcProcessFuncCb_t)(void *recv, hy_u32_t recv_len,
-        void **send, hy_u32_t *send_len);
+        void *send, hy_u32_t send_len, void *args);
 
 typedef struct {
     HyIpcProcessMsgId_e             id;
@@ -91,7 +91,7 @@ void *HyIpcProcessCreate(HyIpcProcessConfig_s *ipc_process_c);
 void HyIpcProcessDestroy(void **ipc_process_h);
 
 hy_s32_t HyIpcProcessDataSync(void *ipc_process_h, HyIpcProcessMsgId_e id,
-        void *send, hy_u32_t send_len, void **recv, hy_u32_t *recv_len);
+        void *send, hy_u32_t send_len, void *recv, hy_u32_t recv_len);
 hy_s32_t HyIpcProcessDataBroadcast(void *ipc_process_h, HyIpcProcessMsgId_e id,
         void *send, hy_u32_t send_len, void **recv, hy_u32_t *recv_len);
 

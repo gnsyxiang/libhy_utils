@@ -27,7 +27,11 @@ extern "C" {
 #include "hy_ipc_process.h"
 
 void *ipc_process_client_create(HyIpcProcessConfig_s *ipc_process_config);
-void ipc_process_client_destroy(void **ipc_process_server_h);
+void ipc_process_client_destroy(void **ipc_process_client_h);
+
+hy_s32_t ipc_process_client_data_sync(void *ipc_process_client_h,
+        HyIpcProcessMsgId_e id, void *send, hy_u32_t send_len,
+        void *recv, hy_u32_t recv_len);
 
 #ifdef __cplusplus
 }

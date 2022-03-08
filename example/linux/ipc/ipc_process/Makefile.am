@@ -95,6 +95,14 @@ hy_ipc_process_client_test_CXXFLAGS = $(_cxxflags_com)
 hy_ipc_process_client_test_LDFLAGS  = $(_ldflags_com)
 hy_ipc_process_client_test_LDADD    = $(_ldadd_com)
 
+bin_PROGRAMS                            += hy_ipc_process_client_set_test
+hy_ipc_process_client_set_test_SOURCES  = $(_sources_com) hy_ipc_process_client_set_test.c
+hy_ipc_process_client_set_test_CPPFLAGS = $(_cppflags_com)
+hy_ipc_process_client_set_test_CFLAGS   = $(_cflags_com)
+hy_ipc_process_client_set_test_CXXFLAGS = $(_cxxflags_com)
+hy_ipc_process_client_set_test_LDFLAGS  = $(_ldflags_com)
+hy_ipc_process_client_set_test_LDADD    = $(_ldadd_com)
+
 bin_PROGRAMS                        += hy_ipc_process_server_test
 hy_ipc_process_server_test_SOURCES  = $(_sources_com) hy_ipc_process_server_test.c
 hy_ipc_process_server_test_CPPFLAGS = $(_cppflags_com)
