@@ -46,6 +46,9 @@ typedef struct {
     hy_u32_t    sample_rate;
     hy_u32_t    bit_per_sample;
 
+    hy_u32_t    width;
+    hy_u32_t    height;
+
     hy_s32_t    exit_flag;
 } _main_context_t;
 
@@ -82,7 +85,33 @@ static hy_s32_t _audio_param_set_cb(void *recv, hy_u32_t recv_len,
     context->sample_rate    = audio_param_set->sample_rate;
     context->bit_per_sample = audio_param_set->bit_per_sample;
 
-    sleep(5);
+    sleep(1);
+
+    return 0;
+}
+
+static hy_s32_t _video_param_get_cb(void *recv, hy_u32_t recv_len,
+        void *send, hy_u32_t send_len, void *args)
+{
+    HyIpcProcessVideoParamGetResult_s *video_param_get_ret = NULL;
+    _main_context_t *context = args;
+
+    video_param_get_ret = (HyIpcProcessVideoParamGetResult_s *)send;
+
+    video_param_get_ret->width = context->width;
+    video_param_get_ret->height = context->height;
+
+    return 0;
+}
+
+static hy_s32_t _video_param_set_cb(void *recv, hy_u32_t recv_len,
+        void *send, hy_u32_t send_len, void *args)
+{
+    HyIpcProcessVideoParamSet_s *video_param_set = recv;
+    _main_context_t *context = args;
+
+    context->width = video_param_set->width;
+    context->height = video_param_set->height;
 
     return 0;
 }
@@ -169,8 +198,11 @@ static _main_context_t *_module_create(void)
     signal_config.save_config.args          = context;
 
     HyIpcProcessFunc_s func[] = {
-        {HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET,   _audio_param_get_cb},
-        {HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET,   _audio_param_set_cb},
+        {HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_GET,   _audio_param_get_cb},
+        {HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_SET,   _audio_param_set_cb},
+
+        {HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_GET,   _video_param_get_cb},
+        {HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_SET,   _video_param_set_cb},
     };
 
     HyIpcProcessConfig_s ipc_process_c;
@@ -208,6 +240,9 @@ int main(int argc, char *argv[])
     context->channel        = 1;
     context->sample_rate    = 8000;
     context->bit_per_sample = 8;
+
+    context->width = 1280;
+    context->height = 720;
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 

@@ -26,14 +26,23 @@ extern "C" {
 
 #include "hy_hal/hy_type.h"
 
-#define HY_IPC_PROCESS_MSG_ID_SYNC_BASE         (0x0000 + 100)
-#define HY_IPC_PROCESS_MSG_ID_BROADCAST_BASE    (0x8000)
+#define HY_IPC_PROCESS_MSG_ID_SYNC_START        (0x0000)
+#define HY_IPC_PROCESS_MSG_ID_BROADCAST_START   (0x8000)
 
 typedef enum {
-    HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET = HY_IPC_PROCESS_MSG_ID_SYNC_BASE,
-    HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET,
+    // sync data
+    HY_IPC_PROCESS_MSG_ID_SYNC_BASE = HY_IPC_PROCESS_MSG_ID_SYNC_START,
 
-    HY_IPC_PROCESS_MSG_ID_BROADCAST_POWER_OFF = HY_IPC_PROCESS_MSG_ID_BROADCAST_BASE,
+    HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_GET,
+    HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_SET,
+
+    HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_GET,
+    HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_SET,
+
+    // broadcast
+    HY_IPC_PROCESS_MSG_ID_BROADCAST_BASE = HY_IPC_PROCESS_MSG_ID_BROADCAST_START,
+
+    HY_IPC_PROCESS_MSG_ID_BROADCAST_POWER_OFF,
 } HyIpcProcessMsgId_e;
 
 // HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET
@@ -57,6 +66,26 @@ typedef struct {
 typedef struct {
     hy_u32_t reserved;
 } HyIpcProcessAudioParamSetResult_s;
+
+// HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_GET
+typedef struct {
+    hy_u32_t reserved;
+} HyIpcProcessVideoParamGet_s;
+
+typedef struct {
+    hy_u32_t width;
+    hy_u32_t height;
+} HyIpcProcessVideoParamGetResult_s;
+
+// HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_SET
+typedef struct {
+    hy_u32_t width;
+    hy_u32_t height;
+} HyIpcProcessVideoParamSet_s;
+
+typedef struct {
+    hy_u32_t reserved;
+} HyIpcProcessVideoParamSetResult_s;
 
 #ifdef __cplusplus
 }

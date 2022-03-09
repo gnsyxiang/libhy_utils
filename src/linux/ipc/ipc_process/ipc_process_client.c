@@ -87,10 +87,10 @@ static hy_s32_t _client_wait_ack(_ip_client_context_s *context,
             ret = pthread_cond_timedwait(&context->ack_cond,
                     &context->ack_mutex, &timeout);
             if (ret == ETIMEDOUT) {
-                LOGW("wait ack timeout\n");
+                LOGW("wait ack timeout, id: %d \n", id);
 
                 pthread_mutex_unlock(&context->ack_mutex);
-                return -1;
+                return id;
             }
         } else {
             hy_list_for_each_entry_safe(pos, n, &context->ack_list, entry) {
@@ -106,7 +106,7 @@ static hy_s32_t _client_wait_ack(_ip_client_context_s *context,
                 } else {
                     time_s = (tv.tv_sec - pos->tv.tv_sec);
                     if (time_s > 3) {
-                        LOGW("ack timeout\n");
+                        LOGD("ack timeout, id: %d \n", id);
 
                         hy_list_del(&pos->entry);
 

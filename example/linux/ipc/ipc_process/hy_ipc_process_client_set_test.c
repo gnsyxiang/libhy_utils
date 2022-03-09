@@ -30,6 +30,7 @@
 #include "hy_hal/hy_module.h"
 #include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_log.h"
+#include "hy_hal/hy_thread.h"
 
 #include "hy_ipc_process.h"
 #include "hy_utils.h"
@@ -41,6 +42,8 @@ typedef struct {
     void        *signal_handle;
 
     void        *ipc_process_client_h;
+    void        *audio_thread_h;
+    void        *video_thread_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
@@ -164,11 +167,11 @@ static void _audio_param_get(_main_context_t *context)
     audio_param_get.type = 0x01;
 
     ret = HyIpcProcessDataSync(context->ipc_process_client_h,
-            HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET,
+            HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_GET,
             &audio_param_get, sizeof(audio_param_get),
             &audio_param_get_ret, sizeof(audio_param_get_ret));
     if (0 != ret) {
-        LOGE("HyIpcProcessDataSync failed, id: %d \n", HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_GET);
+        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
         return ;
     }
 
@@ -191,13 +194,81 @@ static void _audio_param_set(_main_context_t *context)
     audio_param_set.bit_per_sample  = 16;
 
     ret = HyIpcProcessDataSync(context->ipc_process_client_h,
-            HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET,
+            HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_SET,
             &audio_param_set, sizeof(audio_param_set),
             &audio_param_set_ret, sizeof(audio_param_set_ret));
     if (0 != ret) {
-        LOGE("HyIpcProcessDataSync failed, id: %d \n", HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET);
+        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
         return ;
     }
+}
+
+static hy_s32_t _ipcst_audio_thread_cb(void *args)
+{
+    _main_context_t *context = args;
+
+    sleep(1);
+    _audio_param_get(context);
+    _audio_param_set(context);
+    _audio_param_get(context);
+
+    return -1;
+}
+
+static void _video_param_get(_main_context_t *context)
+{
+    hy_s32_t ret = -1;
+    HyIpcProcessVideoParamGet_s video_param_get;
+    HyIpcProcessVideoParamGetResult_s video_param_get_ret;
+
+    HY_MEMSET(&video_param_get, sizeof(video_param_get));
+    HY_MEMSET(&video_param_get_ret, sizeof(video_param_get_ret));
+
+    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+            HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_GET,
+            &video_param_get, sizeof(video_param_get),
+            &video_param_get_ret, sizeof(video_param_get_ret));
+    if (0 != ret) {
+        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
+        return ;
+    }
+
+    LOGD("width: %d \n",            video_param_get_ret.width);
+    LOGD("height: %d \n",           video_param_get_ret.height);
+}
+
+static void _video_param_set(_main_context_t *context)
+{
+    hy_s32_t ret = -1;
+    HyIpcProcessVideoParamSet_s video_param_set;
+    HyIpcProcessVideoParamSetResult_s video_param_set_ret;
+
+    HY_MEMSET(&video_param_set, sizeof(video_param_set));
+    HY_MEMSET(&video_param_set_ret, sizeof(video_param_set_ret));
+
+    video_param_set.width = 1920;
+    video_param_set.height = 1080;
+
+    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+            HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_SET,
+            &video_param_set, sizeof(video_param_set),
+            &video_param_set_ret, sizeof(video_param_set_ret));
+    if (0 != ret) {
+        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
+        return ;
+    }
+}
+
+static hy_s32_t _ipcst_video_thread_cb(void *args)
+{
+    _main_context_t *context = args;
+
+    sleep(1);
+    _video_param_get(context);
+    _video_param_set(context);
+    _video_param_get(context);
+
+    return -1;
 }
 
 int main(int argc, char *argv[])
@@ -210,14 +281,24 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    sleep(1);
-    _audio_param_get(context);
-    _audio_param_set(context);
-    _audio_param_get(context);
+    context->audio_thread_h = HyThreadCreate_m("HYIPCST_audio",
+            _ipcst_audio_thread_cb, context);
+    if (!context->audio_thread_h) {
+        LOGE("hy thread create m failed \n");
+    }
+
+    context->video_thread_h = HyThreadCreate_m("HYIPCST_video",
+            _ipcst_video_thread_cb, context);
+    if (!context->video_thread_h) {
+        LOGE("hy thread create m failed \n");
+    }
 
     while (!context->exit_flag) {
         sleep(1);
     }
+
+    HyThreadDestroy(&context->audio_thread_h);
+    HyThreadDestroy(&context->video_thread_h);
 
     _module_destroy(&context);
 
