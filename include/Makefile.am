@@ -61,7 +61,8 @@ _install_headers_com    += \
                            hy_math.h        \
                            hy_md5sum.h      \
                            hy_sort.h        \
-                           hy_utils.h
+                           hy_utils.h       \
+                           hy_video.h
 
 if COMPILE_LIBCJSON
 _no_install_headers_com += \
