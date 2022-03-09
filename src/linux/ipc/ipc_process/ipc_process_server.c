@@ -120,8 +120,7 @@ static void _server_handle_ipc_link_msg_cb_info(_ip_server_context_s *context,
 }
 
 static hy_s32_t _server_handle_ipc_link_msg(
-        ipc_link_manager_list_s *ipc_link_list,
-        _ip_server_context_s *context)
+        ipc_link_manager_list_s *ipc_link_list, _ip_server_context_s *context)
 {
     LOGT("ipc_link_list: %p, context: %p \n", ipc_link_list, context);
     HY_ASSERT_RET_VAL(!ipc_link_list || !context, -1);
@@ -186,7 +185,6 @@ static hy_s32_t _handle_cb_thread_cb(void *args)
     struct hy_list_head *ipc_link_list = NULL;
     ipc_link_manager_list_s *pos;
     _func_cb_s func_cb;
-    HyIpcProcessMsgId_e msg_id = 0;
     _func_cb_id_s *offset;
 
     while (!context->exit_flag) {
@@ -206,19 +204,18 @@ static hy_s32_t _handle_cb_thread_cb(void *args)
             }
 
             {
-                msg_id = *(HyIpcProcessMsgId_e *)func_cb.ipc_msg->buf;
-
                 pthread_mutex_lock(&context->cb_id_mutex);
                 hy_list_for_each_entry(offset, &context->cb_id_list, entry) {
                     for (hy_u32_t i = 0; i < offset->cnt; ++i) {
-                        if (msg_id == offset->id[i]) {
-                            LOGT("contain msg id, ipc_link_h: %p, msg id: %d \n",
-                                    pos->ipc_link_h, msg_id);
-
-                            func_cb.ipc_msg->ipc_link_h = func_cb.ipc_link_h;
-                            ipc_link_write(pos->ipc_link_h, func_cb.ipc_msg, 0);
-                            break;
+                        if (func_cb.ipc_msg->id != offset->id[i]) {
+                            continue;
                         }
+                        LOGT("contain msg id, ipc_link_h: %p, msg id: %d \n",
+                                pos->ipc_link_h, func_cb.ipc_msg->id);
+
+                        func_cb.ipc_msg->ipc_link_h = func_cb.ipc_link_h;
+                        ipc_link_write(pos->ipc_link_h, func_cb.ipc_msg, 0);
+                        break;
                     }
                 }
                 pthread_mutex_unlock(&context->cb_id_mutex);

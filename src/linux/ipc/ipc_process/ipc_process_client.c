@@ -18,6 +18,7 @@
  *     last modified: 03/03 2022 16:46
  */
 #include <stdio.h>
+#include <sys/time.h>
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_log.h"
@@ -26,9 +27,17 @@
 #include "hy_hal/hy_thread.h"
 
 #include "hy_fifo.h"
+#include "hy_list.h"
 
 #include "ipc_process_client.h"
 #include "ipc_link.h"
+
+typedef struct {
+    struct hy_list_head             entry;
+
+    struct timeval                  tv;
+    ipc_link_msg_s                  *ipc_msg;
+} _ack_node_s;
 
 typedef struct {
     HyIpcProcessSaveConfig_s        save_c; // 必须放在前面，用于强制类型转换
@@ -43,7 +52,7 @@ typedef struct {
 
     void                            *ipc_link_h;
 
-    void                            *ack_fifo_h;
+    struct hy_list_head             ack_list;
     pthread_cond_t                  ack_cond;
     pthread_mutex_t                 ack_mutex;
 
@@ -56,35 +65,58 @@ typedef struct {
 } _ip_client_context_s;
 
 static hy_s32_t _client_wait_ack(_ip_client_context_s *context,
-        void *recv, hy_u32_t recv_len)
+        HyIpcProcessMsgId_e id, void *recv, hy_u32_t recv_len)
 {
-    LOGT("context: %p, recv: %p recv_len: %d \n", context, recv, recv_len);
+    LOGT("context: %p, id: %d, recv: %p recv_len: %d \n",
+            context, id, recv, recv_len);
     HY_ASSERT_RET_VAL(!context || !recv, -1);
 
-    ipc_link_msg_s ipc_msg;
-    HyIpcProcessMsgId_e id;
-    hy_s32_t result = 0;
-    hy_u32_t offset = 0;
-    hy_u32_t len;
+    struct timespec timeout;
+    struct timeval tv;
+    hy_u32_t time_s;
+    hy_s32_t ret = 0;
+    _ack_node_s *pos, *n;
 
-    offset = sizeof(id) + sizeof(result) + sizeof(recv_len);
+    gettimeofday(&tv, NULL);
+    timeout.tv_sec = tv.tv_sec + 3;
+    timeout.tv_nsec = tv.tv_usec * 1000;
 
     pthread_mutex_lock(&context->ack_mutex);
+    while (!context->exit_flag) {
+        if (hy_list_empty(&context->ack_list)) {
+            ret = pthread_cond_timedwait(&context->ack_cond,
+                    &context->ack_mutex, &timeout);
+            if (ret == ETIMEDOUT) {
+                LOGW("wait ack timeout\n");
 
-    // @fixme 做超时处理
-    len = HyFifoGetInfo(context->ack_fifo_h, HY_FIFO_INFO_USED_LEN);
-    while (!context->exit_flag && len < sizeof(ipc_msg)) {
-        pthread_cond_wait(&context->ack_cond, &context->ack_mutex);
+                pthread_mutex_unlock(&context->ack_mutex);
+                return -1;
+            }
+        } else {
+            hy_list_for_each_entry_safe(pos, n, &context->ack_list, entry) {
+                if (pos->ipc_msg->id == id) {
+                    hy_list_del(&pos->entry);
 
-        HyFifoReadPeek(context->ack_fifo_h, &ipc_msg, sizeof(ipc_msg));
-        if (ipc_msg.buf_len == recv_len + offset) {
-            break;
+                    HY_MEMCPY(recv, pos->ipc_msg->buf + sizeof(hy_s32_t) * 2, recv_len);
+
+                    HY_MEM_FREE_PP(&pos->ipc_msg);
+                    HY_MEM_FREE_PP(&pos);
+                    pthread_mutex_unlock(&context->ack_mutex);
+                    return 0;
+                } else {
+                    time_s = (tv.tv_sec - pos->tv.tv_sec);
+                    if (time_s > 3) {
+                        LOGW("ack timeout\n");
+
+                        hy_list_del(&pos->entry);
+
+                        HY_MEM_FREE_PP(&pos->ipc_msg);
+                        HY_MEM_FREE_PP(&pos);
+                    }
+                }
+            }
         }
     }
-
-    HyFifoRead(context->ack_fifo_h, &ipc_msg, sizeof(ipc_msg));
-    HyFifoUpdateOut(context->ack_fifo_h, offset);
-    HyFifoRead(context->ack_fifo_h, recv, recv_len);
 
     pthread_mutex_unlock(&context->ack_mutex);
 
@@ -104,14 +136,11 @@ hy_s32_t ipc_process_client_data_sync(void *ipc_process_client_h,
     hy_u32_t len = 0;
     hy_s32_t offset = 0;
 
-    total_len = sizeof(ipc_link_msg_s) + sizeof(id)
-        + sizeof(send_len) + sizeof(recv_len) + send_len + recv_len;
+    total_len += sizeof(ipc_link_msg_s);
+    total_len += sizeof(send_len) + send_len;
+    total_len += sizeof(recv_len) + recv_len;
 
     ipc_link_msg = HY_MEM_MALLOC_RET_VAL(ipc_link_msg_s *, total_len, -1);
-
-    len = sizeof(id);
-    HY_MEMCPY(ipc_link_msg->buf + offset, &id, len);
-    offset += len;
 
     len = sizeof(send_len);
     HY_MEMCPY(ipc_link_msg->buf + offset, &send_len, len);
@@ -132,17 +161,22 @@ hy_s32_t ipc_process_client_data_sync(void *ipc_process_client_h,
     ipc_link_msg->total_len     = total_len;
     ipc_link_msg->type          = IPC_LINK_MSG_TYPE_CB;
     ipc_link_msg->buf_len       = offset;
+    ipc_link_msg->id            = id;
 
-    ipc_link_write(context->ipc_link_h, ipc_link_msg, 1);
-
-    return _client_wait_ack(context, recv, recv_len);
+    len = ipc_link_write(context->ipc_link_h, ipc_link_msg, 1);
+    if (0 != len) {
+        LOGE("ipc link write failed \n");
+        return -1;
+    } else {
+        return _client_wait_ack(context, id, recv, recv_len);
+    }
 }
 
 static hy_s32_t _client_send_ack(_ip_client_context_s *context,
         void *ipc_link_h, HyIpcProcessMsgId_e id,
         hy_s32_t result, const void *buf, hy_u32_t buf_len)
 {
-    LOGT("context: %p, ipc_link_h: %p, id: %d, result: %d, buf: %p, buf_len: %d\n",
+    LOGT("context: %p, ipc_link_h: %p, id: %d, result: %d, buf: %p, buf_len: %d \n",
             context, ipc_link_h, id, result, buf, buf_len);
     HY_ASSERT_RET_VAL(!context || !ipc_link_h || !buf, -1);
 
@@ -151,14 +185,11 @@ static hy_s32_t _client_send_ack(_ip_client_context_s *context,
     hy_u32_t len = 0;
     hy_s32_t offset = 0;
 
-    total_len = sizeof(ipc_link_msg_s) + sizeof(id)
-        + sizeof(result) + sizeof(buf_len) + buf_len;
+    total_len += sizeof(ipc_link_msg_s);
+    total_len += sizeof(result);
+    total_len += sizeof(buf_len) + buf_len;
 
     ipc_link_msg = HY_MEM_MALLOC_RET_VAL(ipc_link_msg_s *, total_len, -1);
-
-    len = sizeof(id);
-    HY_MEMCPY(ipc_link_msg->buf + offset, &id, len);
-    offset += len;
 
     len = sizeof(result);
     HY_MEMCPY(ipc_link_msg->buf + offset, &result, len);
@@ -176,6 +207,7 @@ static hy_s32_t _client_send_ack(_ip_client_context_s *context,
     ipc_link_msg->type          = IPC_LINK_MSG_TYPE_ACK;
     ipc_link_msg->buf_len       = offset;
     ipc_link_msg->ipc_link_h    = ipc_link_h;
+    ipc_link_msg->id            = id;
 
     return ipc_link_write(context->ipc_link_h, ipc_link_msg, 1);
 }
@@ -208,7 +240,6 @@ static void _client_handle_ipc_link_msg_cb(_ip_client_context_s *context,
     LOGT("context: %p, ipc_msg: %p \n", context, ipc_msg);
     HY_ASSERT_RET(!context || !ipc_msg);
 
-    HyIpcProcessMsgId_e id;
     hy_u32_t send_len;
     hy_u32_t recv_len = -1;
     void *send = NULL;
@@ -217,9 +248,6 @@ static void _client_handle_ipc_link_msg_cb(_ip_client_context_s *context,
     hy_u32_t offset = 0;
 
     offset += 0;
-    id = *(HyIpcProcessMsgId_e *)(ipc_msg->buf + offset);
-
-    offset += sizeof(id);
     send_len = *(hy_u32_t *)(ipc_msg->buf + offset);
 
     offset += sizeof(send_len);
@@ -231,15 +259,17 @@ static void _client_handle_ipc_link_msg_cb(_ip_client_context_s *context,
     offset += send_len;
     recv = (void *)(ipc_msg->buf + offset);
 
+
     for (hy_u32_t i = 0; i < context->func_cnt; ++i) {
-        if (id == context->func[i].id && context->func[i].func_cb) {
+        if (ipc_msg->id == context->func[i].id && context->func[i].func_cb) {
             ret = context->func[i].func_cb(send, send_len,
                     recv, recv_len, context->func_args);
             break;
         }
     }
 
-    _client_send_ack(context, ipc_msg->ipc_link_h, id, ret, recv, recv_len);
+    _client_send_ack(context, ipc_msg->ipc_link_h, ipc_msg->id,
+            ret, recv, recv_len);
 }
 
 static hy_s32_t _client_handle_ipc_link_msg(_ip_client_context_s *context)
@@ -248,6 +278,8 @@ static hy_s32_t _client_handle_ipc_link_msg(_ip_client_context_s *context)
     HY_ASSERT_RET_VAL(!context, -1);
 
     ipc_link_msg_s *ipc_msg = NULL;
+    hy_s32_t flag = 0;
+    _ack_node_s *ack_node = NULL;
 
     if (0 != ipc_link_read(context->ipc_link_h, &ipc_msg)) {
         LOGE("ipc link read failed \n");
@@ -257,16 +289,24 @@ static hy_s32_t _client_handle_ipc_link_msg(_ip_client_context_s *context)
     switch (ipc_msg->type) {
         case IPC_LINK_MSG_TYPE_INFO:
             _client_handle_ipc_link_msg_info(context, ipc_msg);
+            flag = 1;
             break;
         case IPC_LINK_MSG_TYPE_ACK:
+            ack_node = HY_MEM_MALLOC_RET_VAL(_ack_node_s *,
+                    sizeof(*ack_node), -1);
+
+            ack_node->ipc_msg = ipc_msg;
+            gettimeofday(&ack_node->tv, NULL);
+
             pthread_mutex_lock(&context->ack_mutex);
-            HyFifoWrite(context->ack_fifo_h, ipc_msg, ipc_msg->total_len);
+            hy_list_add_tail(&ack_node->entry, &context->ack_list);
             pthread_mutex_unlock(&context->ack_mutex);
 
             pthread_cond_signal(&context->ack_cond);
             break;
         case IPC_LINK_MSG_TYPE_CB:
             _client_handle_ipc_link_msg_cb(context, ipc_msg);
+            flag = 1;
             break;
         case IPC_LINK_MSG_TYPE_CB_ID:
             break;
@@ -275,7 +315,7 @@ static hy_s32_t _client_handle_ipc_link_msg(_ip_client_context_s *context)
             break;
     }
 
-    if (ipc_msg) {
+    if (flag && ipc_msg) {
         HY_MEM_FREE_P(ipc_msg);
     }
 
@@ -392,6 +432,7 @@ void ipc_process_client_destroy(void **ipc_process_client_h)
     HY_ASSERT_RET(!ipc_process_client_h || !*ipc_process_client_h);
 
     _ip_client_context_s *context = *ipc_process_client_h;
+    _ack_node_s *pos, *n;
 
     while (!context->exit_wait_flag) {
         usleep(10 * 1000);
@@ -408,7 +449,12 @@ void ipc_process_client_destroy(void **ipc_process_client_h)
     pthread_cond_signal(&context->ack_cond);
     pthread_cond_destroy(&context->ack_cond);
     pthread_mutex_destroy(&context->ack_mutex);
-    HyFifoDestroy(&context->ack_fifo_h);
+    hy_list_for_each_entry_safe(pos, n, &context->ack_list, entry) {
+        hy_list_del(&pos->entry);
+
+        HY_MEM_FREE_PP(&pos->ipc_msg);
+        HY_MEM_FREE_PP(&pos);
+    }
 
     ipc_link_destroy(&context->ipc_link_h);
 
@@ -435,11 +481,7 @@ void *ipc_process_client_create(HyIpcProcessConfig_s *ipc_process_c)
 
         pthread_mutex_init(&context->ack_mutex, NULL);
         pthread_cond_init(&context->ack_cond, NULL);
-        context->ack_fifo_h = HyFifoCreate_m(2 * 1024, HY_FIFO_MUTEX_UNLOCK);
-        if (!context->ack_fifo_h) {
-            LOGE("hy fifo create failed \n");
-            break;
-        }
+        HY_INIT_LIST_HEAD(&context->ack_list);
 
         if (ipc_process_c->func_cnt) {
             len = sizeof(HyIpcProcessFunc_s) * ipc_process_c->func_cnt;

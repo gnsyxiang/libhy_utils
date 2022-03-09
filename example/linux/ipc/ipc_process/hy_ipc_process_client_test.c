@@ -82,6 +82,8 @@ static hy_s32_t _audio_param_set_cb(void *recv, hy_u32_t recv_len,
     context->sample_rate    = audio_param_set->sample_rate;
     context->bit_per_sample = audio_param_set->bit_per_sample;
 
+    sleep(5);
+
     return 0;
 }
 

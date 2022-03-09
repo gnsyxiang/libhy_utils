@@ -64,6 +64,7 @@ typedef struct {
 typedef struct {
     hy_u32_t                total_len;
     hy_s32_t                type;
+    hy_u32_t                id;
 
     void                    *ipc_link_h;
 
