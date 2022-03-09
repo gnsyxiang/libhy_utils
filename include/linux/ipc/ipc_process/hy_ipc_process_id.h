@@ -54,6 +54,10 @@ typedef struct {
     hy_u32_t bit_per_sample;
 } HyIpcProcessAudioParamSet_s;
 
+typedef struct {
+    hy_u32_t reserved;
+} HyIpcProcessAudioParamSetResult_s;
+
 #ifdef __cplusplus
 }
 #endif

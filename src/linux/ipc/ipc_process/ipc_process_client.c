@@ -216,6 +216,7 @@ static void _client_handle_ipc_link_msg_cb(_ip_client_context_s *context,
     hy_s32_t ret = -1;
     hy_u32_t offset = 0;
 
+    offset += 0;
     id = *(HyIpcProcessMsgId_e *)(ipc_msg->buf + offset);
 
     offset += sizeof(id);

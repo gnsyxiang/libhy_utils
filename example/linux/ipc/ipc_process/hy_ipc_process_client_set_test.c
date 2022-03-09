@@ -181,6 +181,10 @@ static void _audio_param_set(_main_context_t *context)
 {
     hy_s32_t ret = -1;
     HyIpcProcessAudioParamSet_s audio_param_set;
+    HyIpcProcessAudioParamSetResult_s audio_param_set_ret;
+
+    HY_MEMSET(&audio_param_set, sizeof(audio_param_set));
+    HY_MEMSET(&audio_param_set_ret, sizeof(audio_param_set_ret));
 
     audio_param_set.channel         = 2;
     audio_param_set.sample_rate     = 16 * 1000;
@@ -189,7 +193,7 @@ static void _audio_param_set(_main_context_t *context)
     ret = HyIpcProcessDataSync(context->ipc_process_client_h,
             HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET,
             &audio_param_set, sizeof(audio_param_set),
-            NULL, 0);
+            &audio_param_set_ret, sizeof(audio_param_set_ret));
     if (0 != ret) {
         LOGE("HyIpcProcessDataSync failed, id: %d \n", HY_IPC_PROCESS_MSG_ID_SYNC_DATA_AUDIO_PARAM_SET);
         return ;
@@ -208,8 +212,8 @@ int main(int argc, char *argv[])
 
     sleep(1);
     _audio_param_get(context);
-    // _audio_param_set(context);
-    // _audio_param_get(context);
+    _audio_param_set(context);
+    _audio_param_get(context);
 
     while (!context->exit_flag) {
         sleep(1);

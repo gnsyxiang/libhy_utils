@@ -53,17 +53,17 @@ static hy_s32_t _audio_param_get_cb(void *recv, hy_u32_t recv_len,
         void *send, hy_u32_t send_len, void *args)
 {
     HyIpcProcessAudioParamGet_s *audio_param_get = NULL;
-    HyIpcProcessAudioParamGetResult_s *audio_param_set = NULL;
+    HyIpcProcessAudioParamGetResult_s *audio_param_get_ret = NULL;
     _main_context_t *context = args;
 
     audio_param_get = (HyIpcProcessAudioParamGet_s *)recv;
-    audio_param_set = (HyIpcProcessAudioParamGetResult_s *)send;
+    audio_param_get_ret = (HyIpcProcessAudioParamGetResult_s *)send;
 
     LOGD("audio_param_get.type: %d \n", audio_param_get->type);
 
-    audio_param_set->channel        = context->channel;
-    audio_param_set->sample_rate    = context->sample_rate;
-    audio_param_set->bit_per_sample = context->bit_per_sample;
+    audio_param_get_ret->channel        = context->channel;
+    audio_param_get_ret->sample_rate    = context->sample_rate;
+    audio_param_get_ret->bit_per_sample = context->bit_per_sample;
 
     return 0;
 }
@@ -71,6 +71,17 @@ static hy_s32_t _audio_param_get_cb(void *recv, hy_u32_t recv_len,
 static hy_s32_t _audio_param_set_cb(void *recv, hy_u32_t recv_len,
         void *send, hy_u32_t send_len, void *args)
 {
+    HyIpcProcessAudioParamSet_s *audio_param_set = recv;
+    _main_context_t *context = args;
+
+    LOGD("channel: %d \n",          audio_param_set->channel);
+    LOGD("sample_rate: %d \n",      audio_param_set->sample_rate);
+    LOGD("bit_per_sample: %d \n",   audio_param_set->bit_per_sample);
+
+    context->channel        = audio_param_set->channel;
+    context->sample_rate    = audio_param_set->sample_rate;
+    context->bit_per_sample = audio_param_set->bit_per_sample;
+
     return 0;
 }
 
