@@ -40,7 +40,8 @@ CHECK_VERSION_INFO
 CHECK_DOXYGEN
 # CHECK_JAVA
 
-SELECT_TARGET_OS
+SELECT_PLATFORM
+SELECT_MCU_CHIP
 
 # Checks for programs.
 AC_PROG_CXX
@@ -61,7 +62,7 @@ CHECK_LIBPROTOBUF_C
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -75,39 +76,36 @@ AC_TYPE_UINT32_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_CHECK_FUNCS([memset select socket strerror strstr])
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([gettimeofday memset select socket strerror strstr])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
+                 build-script/Makefile
+                 build-script/arterytek/Makefile
+                 build-script/arterytek/at32f4xx/Makefile
+                 build-script/eeasytech/Makefile
+                 build-script/pc/Makefile
                  doc/Makefile
                  example/Makefile
                  example/linux/Makefile
                  example/linux/ipc/Makefile
                  example/linux/ipc/ipc_process/Makefile
                  example/linux/ipc/ipc_socket/Makefile
-                 example/mac/Makefile
                  example/mcu/Makefile
-                 example/rtos/Makefile
-                 example/window/Makefile
                  include/Makefile
                  include/linux/Makefile
                  include/linux/ipc/Makefile
                  include/linux/ipc/ipc_process/Makefile
                  include/linux/ipc/ipc_socket/Makefile
-                 include/mac/Makefile
                  include/mcu/Makefile
-                 include/rtos/Makefile
-                 include/window/Makefile
                  res/Makefile
                  src/Makefile
                  src/linux/Makefile
                  src/linux/ipc/Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
-                 src/mac/Makefile
-                 src/mcu/Makefile
-                 src/rtos/Makefile
-                 src/window/Makefile])
+                 src/mcu/Makefile])
 AC_OUTPUT
 
 AC_MSG_RESULT([
