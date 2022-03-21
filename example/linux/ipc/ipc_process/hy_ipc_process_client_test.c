@@ -68,6 +68,7 @@ static hy_s32_t _audio_param_get_cb(void *recv, hy_u32_t recv_len,
     audio_param_get_ret->sample_rate    = context->sample_rate;
     audio_param_get_ret->bit_per_sample = context->bit_per_sample;
 
+    LOGI("audio param get ok \n");
     return 0;
 }
 
@@ -87,6 +88,7 @@ static hy_s32_t _audio_param_set_cb(void *recv, hy_u32_t recv_len,
 
     sleep(1);
 
+    LOGI("audio param set ok \n");
     return 0;
 }
 
@@ -101,6 +103,7 @@ static hy_s32_t _video_param_get_cb(void *recv, hy_u32_t recv_len,
     video_param_get_ret->width = context->width;
     video_param_get_ret->height = context->height;
 
+    LOGI("video param get ok \n");
     return 0;
 }
 
@@ -113,6 +116,7 @@ static hy_s32_t _video_param_set_cb(void *recv, hy_u32_t recv_len,
     context->width = video_param_set->width;
     context->height = video_param_set->height;
 
+    LOGI("video param set ok \n");
     return 0;
 }
 

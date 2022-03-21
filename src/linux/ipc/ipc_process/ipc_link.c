@@ -165,6 +165,9 @@ hy_s32_t ipc_link_read(void *ipc_link_h, ipc_link_msg_s **ipc_link_msg)
 
         *ipc_link_msg = ipc_link_msg_tmp;
 
+        LOGD("<<msg read>>, type: %d, id: %d \n",
+                ipc_link_msg_tmp->type, ipc_link_msg_tmp->id);
+
         return 0;
     } while (0);
 
@@ -202,6 +205,9 @@ hy_s32_t ipc_link_write(void *ipc_link_h,
             LOGE("ipc socket write failed \n");
             break;
         }
+
+        LOGD("msg send, type: %d, id: %d \n",
+                ipc_link_msg->type, ipc_link_msg->id);
 
         ret = 0;
     } while (0);

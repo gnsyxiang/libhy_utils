@@ -302,6 +302,7 @@ static hy_s32_t _client_handle_ipc_link_msg(_ip_client_context_s *context)
             hy_list_add_tail(&ack_node->entry, &context->ack_list);
             pthread_mutex_unlock(&context->ack_mutex);
 
+            LOGD("add ack to list, id: %d \n", ipc_msg->id);
             pthread_cond_signal(&context->ack_cond);
             break;
         case IPC_LINK_MSG_TYPE_CB:

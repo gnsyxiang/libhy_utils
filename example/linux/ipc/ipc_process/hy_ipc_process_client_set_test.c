@@ -166,18 +166,19 @@ static void _audio_param_get(_main_context_t *context)
 
     audio_param_get.type = 0x01;
 
-    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+    ret = HyIpcProcessDataSync_m(context->ipc_process_client_h,
             HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_GET,
-            &audio_param_get, sizeof(audio_param_get),
-            &audio_param_get_ret, sizeof(audio_param_get_ret));
+            &audio_param_get, &audio_param_get_ret, 3);
     if (0 != ret) {
-        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
+        LOGE("HyIpcProcessDataSync_m failed, id: %d \n", ret);
         return ;
     }
 
     LOGD("channel: %d \n",          audio_param_get_ret.channel);
     LOGD("sample_rate: %d \n",      audio_param_get_ret.sample_rate);
     LOGD("bit_per_sample: %d \n",   audio_param_get_ret.bit_per_sample);
+
+    LOGD("get audio \n");
 }
 
 static void _audio_param_set(_main_context_t *context)
@@ -193,14 +194,15 @@ static void _audio_param_set(_main_context_t *context)
     audio_param_set.sample_rate     = 16 * 1000;
     audio_param_set.bit_per_sample  = 16;
 
-    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+    ret = HyIpcProcessDataSync_m(context->ipc_process_client_h,
             HY_IPC_PROCESS_MSG_ID_SYNC_AUDIO_PARAM_SET,
-            &audio_param_set, sizeof(audio_param_set),
-            &audio_param_set_ret, sizeof(audio_param_set_ret));
+            &audio_param_set, &audio_param_set_ret, 3);
     if (0 != ret) {
-        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
+        LOGE("HyIpcProcessDataSync_m failed, id: %d \n", ret);
         return ;
     }
+
+    LOGD("set audio \n");
 }
 
 static hy_s32_t _ipcst_audio_thread_cb(void *args)
@@ -224,17 +226,18 @@ static void _video_param_get(_main_context_t *context)
     HY_MEMSET(&video_param_get, sizeof(video_param_get));
     HY_MEMSET(&video_param_get_ret, sizeof(video_param_get_ret));
 
-    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+    ret = HyIpcProcessDataSync_m(context->ipc_process_client_h,
             HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_GET,
-            &video_param_get, sizeof(video_param_get),
-            &video_param_get_ret, sizeof(video_param_get_ret));
+            &video_param_get, &video_param_get_ret, 3);
     if (0 != ret) {
-        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
+        LOGE("HyIpcProcessDataSync_m failed, id: %d \n", ret);
         return ;
     }
 
     LOGD("width: %d \n",            video_param_get_ret.width);
     LOGD("height: %d \n",           video_param_get_ret.height);
+
+    LOGD("get video \n");
 }
 
 static void _video_param_set(_main_context_t *context)
@@ -249,14 +252,15 @@ static void _video_param_set(_main_context_t *context)
     video_param_set.width = 1920;
     video_param_set.height = 1080;
 
-    ret = HyIpcProcessDataSync(context->ipc_process_client_h,
+    ret = HyIpcProcessDataSync_m(context->ipc_process_client_h,
             HY_IPC_PROCESS_MSG_ID_SYNC_VIDEO_PARAM_SET,
-            &video_param_set, sizeof(video_param_set),
-            &video_param_set_ret, sizeof(video_param_set_ret));
+            &video_param_set, &video_param_set_ret, 3);
     if (0 != ret) {
-        LOGE("HyIpcProcessDataSync failed, id: %d \n", ret);
+        LOGE("HyIpcProcessDataSync_m failed, id: %d \n", ret);
         return ;
     }
+
+    LOGD("set video \n");
 }
 
 static hy_s32_t _ipcst_video_thread_cb(void *args)

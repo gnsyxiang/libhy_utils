@@ -97,6 +97,9 @@ hy_s32_t HyIpcProcessDataBroadcast(void *ipc_process_h, HyIpcProcessMsgId_e id,
 
 HyIpcProcessInfo_s HyIpcProcessInfoGet(HyIpcProcessType_e type);
 
+#define HyIpcProcessDataSync_m(_ipc_process_h, _id, _send, _recv, _timeout) \
+    HyIpcProcessDataSync(_ipc_process_h, _id, _send, sizeof(*_send), _recv, sizeof(*_recv));
+
 #ifdef __cplusplus
 }
 #endif
