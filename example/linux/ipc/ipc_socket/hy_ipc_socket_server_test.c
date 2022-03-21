@@ -156,16 +156,16 @@ static void _accept_cb(void *handle, void *args)
     accept->args = args;
     accept->ipc_socket_h = handle;
 
-    HyThreadConfig_s thread_config;
-    HY_MEMSET(&thread_config, sizeof(thread_config));
-    thread_config.save_config.thread_loop_cb    = _socket_communication;
-    thread_config.save_config.args              = accept;
-    thread_config.save_config.destroy_flag      = HY_THREAD_DESTROY_FORCE;
-    thread_config.save_config.detach_flag       = HY_THREAD_DETACH_YES;
-    HY_STRNCPY(thread_config.save_config.name,
-            HY_THREAD_NAME_LEN_MAX, "hy_socket_communication", HY_STRLEN("hy_socket_communication"));
+    HyThreadConfig_s thread_c;
+    HY_MEMSET(&thread_c, sizeof(thread_c));
+    thread_c.save_c.thread_loop_cb    = _socket_communication;
+    thread_c.save_c.args              = accept;
+    thread_c.save_c.destroy_flag      = HY_THREAD_DESTROY_FORCE;
+    thread_c.save_c.detach_flag       = HY_THREAD_DETACH_YES;
+    HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
+            "hy_socket_communication", HY_STRLEN("hy_socket_communication"));
 
-    if (!HyThreadCreate(&thread_config)) {
+    if (!HyThreadCreate(&thread_c)) {
         LOGE("HyThreadCreate failed \n");
     }
 }

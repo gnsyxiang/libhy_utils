@@ -127,18 +127,20 @@ static _main_context_t *_module_create(void)
     fifo_config.save_config.len = 15;
     fifo_config.save_config.mutex_flag = HY_FIFO_MUTEX_LOCK;
 
-    HyThreadConfig_s thread_config;
-    thread_config.save_config.thread_loop_cb    = _get_fifo_loop_cb;
-    thread_config.save_config.args              = context;
+    HyThreadConfig_s thread_c;
+    HY_MEMSET(&thread_c, sizeof(thread_c));
+    thread_c.save_c.thread_loop_cb    = _get_fifo_loop_cb;
+    thread_c.save_c.args              = context;
     #define _THREAD_NAME "get_fifo"
-    HY_STRNCPY(thread_config.save_config.name, HY_THREAD_NAME_LEN_MAX, _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
+    HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
+            _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",         &context->log_handle,       &log_config,        (create_t)HyLogCreate,      HyLogDestroy},
         {"signal",      &context->signal_handle,    &signal_config,     (create_t)HySignalCreate,   HySignalDestroy},
         {"fifo",        &context->fifo_handle,      &fifo_config,       (create_t)HyFifoCreate,     HyFifoDestroy},
-        {"thread",      &context->thread_handle,    &thread_config,     (create_t)HyThreadCreate,   HyThreadDestroy},
+        {"thread",      &context->thread_handle,    &thread_c,     (create_t)HyThreadCreate,   HyThreadDestroy},
     };
 
     RUN_CREATE(module);
