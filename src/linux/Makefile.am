@@ -47,6 +47,7 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
+                   hy_fifo.c            \
                    hy_hash.c            \
                    hy_net.c             \
                    hy_net_wired.c       \

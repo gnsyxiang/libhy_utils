@@ -28,7 +28,7 @@
 
 #include "hy_utils.h"
 
-void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num)
+void HyUtilsIpStr2Int(const char *ip_str, hy_u32_t *ip_num)
 {
     HY_ASSERT_RET(!ip_str);
 
@@ -42,7 +42,7 @@ void HyUtilsIpStr2Int(const char *ip_str, uint32_t *ip_num)
     }
 }
 
-void HyUtilsIpInt2Str(uint32_t ip_num, char *ip_str, size_t ip_str_len)
+void HyUtilsIpInt2Str(hy_u32_t ip_num, char *ip_str, size_t ip_str_len)
 {
     HY_ASSERT_RET(!ip_str);
 
@@ -81,7 +81,7 @@ void HyUtilsStr2Int2Hex(char *str, size_t str_len, char *addr, size_t addr_len)
     }
 }
 
-uint32_t HyUtilsBitStr2Dec(char *bit_str, size_t len)
+hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len)
 {
     uint32_t num = 0;
 
@@ -96,7 +96,8 @@ uint32_t HyUtilsBitStr2Dec(char *bit_str, size_t len)
     return num;
 }
 
-void HyUtilsDec2BitStr(uint32_t num, size_t num_len, char *bit_str, size_t str_len)
+void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len,
+        char *bit_str, size_t str_len)
 {
     size_t len = 0;
     memset(bit_str, '\0', str_len);

@@ -24,8 +24,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
+#include "hy_hal/hy_type.h"
 
 /**
  * @brief 排序的回调函数
@@ -33,7 +32,7 @@ extern "C" {
  * @param src: 排序数src
  * @param dst: 排序数dst
  */
-typedef int32_t (*HySortSwapCb_t)(void *src, void *dst);
+typedef hy_s32_t (*HySortSwapCb_t)(void *src, void *dst);
 
 /**
  * @brief 冒泡排序
@@ -55,8 +54,8 @@ void HySortBubble(void *array, size_t len, size_t item_len,
  * @param item_len: 单个数据结构的长度
  * @param swap_cb: 用户提供的比较函数
  */
-void HySortQuick(void *array, int32_t low, int32_t high, size_t item_len,
-        HySortSwapCb_t swap_cb);
+void HySortQuick(void *array, hy_s32_t low, hy_s32_t high,
+        size_t item_len, HySortSwapCb_t swap_cb);
 
 #ifdef __cplusplus
 }

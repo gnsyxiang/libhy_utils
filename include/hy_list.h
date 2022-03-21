@@ -778,10 +778,10 @@ static inline void hy_hlist_move_list(struct hy_hlist_head *old,
      })
 
 #define HY_LIST_GET_NODE_DATA(list, index, type, member) \
-    ((hy_list_entry(HY_LIST_GET_NODE_PTR(list, index), type, list))->member)
+    ((hy_list_entry(HY_LIST_GET_NODE_PTR(list, index), type, entry))->member)
 
 #define HY_LIST_SET_NODE_DATA(list, index, type, member, val) \
-    (((hy_list_entry(HY_LIST_GET_NODE_PTR(list, index), type, list))->member) = val)
+    (((hy_list_entry(HY_LIST_GET_NODE_PTR(list, index), type, entry))->member) = val)
 
 static inline void list_swap_node_ptr(struct hy_list_head *list, int index_a, int index_b)
 {

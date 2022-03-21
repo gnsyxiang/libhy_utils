@@ -107,7 +107,7 @@ void HyUtilsStr2Int2Hex(char *str, size_t str_len, char *addr, size_t addr_len);
  *
  * @return 返回整数
  */
-hy_u32_t HyUtilsBitStr2Dec(char *binary_str, size_t len);
+hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len);
 
 /**
  * @brief 把整数转化成bit数组
@@ -117,7 +117,8 @@ hy_u32_t HyUtilsBitStr2Dec(char *binary_str, size_t len);
  * @param bit_str bit数组地址
  * @param str_len bit数组长度
  */
-void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len, char *bit_str, size_t str_len);
+void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len,
+        char *bit_str, size_t str_len);
 
 #ifdef __cplusplus
 }

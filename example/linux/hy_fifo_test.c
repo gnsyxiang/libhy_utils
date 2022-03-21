@@ -140,7 +140,7 @@ static _main_context_t *_module_create(void)
         {"log",         &context->log_handle,       &log_config,        (create_t)HyLogCreate,      HyLogDestroy},
         {"signal",      &context->signal_handle,    &signal_config,     (create_t)HySignalCreate,   HySignalDestroy},
         {"fifo",        &context->fifo_handle,      &fifo_config,       (create_t)HyFifoCreate,     HyFifoDestroy},
-        {"thread",      &context->thread_handle,    &thread_c,     (create_t)HyThreadCreate,   HyThreadDestroy},
+        {"thread",      &context->thread_handle,    &thread_c,          (create_t)HyThreadCreate,   HyThreadDestroy},
     };
 
     RUN_CREATE(module);
