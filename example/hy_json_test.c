@@ -142,7 +142,7 @@ static void _test_json(HyJson_t *root)
 
 static void _test_json_file(void)
 {
-    HyJson_t *root = HyJsonFileCreate("../res/hy_utils/json.rc");
+    HyJson_t *root = HyJsonFileCreate("../res/hy_utils/demo.json");
 
     if (root) {
         _test_json(root);
