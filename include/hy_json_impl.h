@@ -26,6 +26,8 @@ extern "C" {
 
 #include <stdio.h>
 
+#include "hy_hal/hy_type.h"
+
 typedef enum {
     HY_JSON_OBJECT,
     HY_JSON_ARRAY,
@@ -45,11 +47,15 @@ typedef struct {
     void *(*item_get)(const void *root, const char *key);
     int (*item_add)(void *root, const char *field, void *item);
 
-    char (*item_to_bool)(const void *item);
-    long long (*item_to_int)(const void *item);
-    double (*item_to_real)(const void *item);
-    const char *(*item_to_str)(const void *item);
-    size_t (*item_to_str_len)(const void *item);
+    char (*item_get_bool)(const void *item);
+    long long (*item_get_int)(const void *item);
+    double (*item_get_real)(const void *item);
+    const char *(*item_get_str)(const void *item);
+
+    hy_s32_t (*item_set_bool)(const void *item, char val);
+    hy_s32_t (*item_set_int)(const void *item, long long val);
+    hy_s32_t (*item_set_real)(const void *item, double val);
+    hy_s32_t (*item_set_str)(const void *item, const char *val);
 
     void *(*item_from_bool)(char val);
     void *(*item_from_int)(long long val);

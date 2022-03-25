@@ -25,6 +25,7 @@
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
+#include "hy_hal/hy_mem.h"
 
 #include "hy_cjson_impl.h"
 
@@ -54,29 +55,63 @@ static hy_s32_t _cjson_item_add(void *root, const char *field, void *item)
     return 0;
 }
 
-static char _cjson_item_to_bool(const void *item)
+static char _cjson_item_get_bool(const void *item)
 {
     return ((cJSON *)item)->type == cJSON_True;
 }
 
-static long long _cjson_item_to_int(const void *item)
+static long long _cjson_item_get_int(const void *item)
 {
     return ((cJSON *)item)->valueint;
 }
 
-static double _cjson_item_to_real(const void *item)
+static double _cjson_item_get_real(const void *item)
 {
     return ((cJSON *)item)->valuedouble;
 }
 
-static const char *_cjson_item_to_str(const void *item)
+static const char *_cjson_item_get_str(const void *item)
 {
     return cJSON_GetStringValue((cJSON *)item);
 }
 
-static size_t _cjson_item_to_str_len(const void *item)
+static hy_s32_t _cjson_item_set_bool(const void *item, char val)
 {
-    return strlen(cJSON_GetStringValue((cJSON *)item));
+    cJSON *root = (cJSON *)item;
+
+    if (val == 1) {
+        root->type = cJSON_True;
+    } else {
+        root->type = cJSON_False;
+    }
+
+    return 0;
+}
+
+static hy_s32_t _cjson_item_set_int(const void *item, long long val)
+{
+    cJSON *root = (cJSON *)item;
+    root->valueint = val;
+    return 0;
+}
+
+static hy_s32_t _cjson_item_set_real(const void *item, double val)
+{
+    cJSON *root = (cJSON *)item;
+    root->valuedouble = val;
+    return 0;
+}
+
+static hy_s32_t _cjson_item_set_str(const void *item, const char *val)
+{
+    cJSON *root = (cJSON *)item;
+    hy_u32_t len = HY_STRLEN(val) + 1;
+
+    HY_MEM_FREE_PP(&root->valuestring);
+    root->valuestring = HY_MEM_MALLOC_RET_VAL(char *, len, -1);
+    HY_STRCPY(root->valuestring, val);
+
+    return 0;
 }
 
 static void *_cjson_item_from_bool(char val)
@@ -159,11 +194,15 @@ json_impl_t json_impl = {
     .item_get           = _cjson_item_get,
     .item_add           = _cjson_item_add,
 
-    .item_to_bool       = _cjson_item_to_bool,
-    .item_to_int        = _cjson_item_to_int,
-    .item_to_real       = _cjson_item_to_real,
-    .item_to_str        = _cjson_item_to_str,
-    .item_to_str_len    = _cjson_item_to_str_len,
+    .item_get_bool       = _cjson_item_get_bool,
+    .item_get_int        = _cjson_item_get_int,
+    .item_get_real       = _cjson_item_get_real,
+    .item_get_str        = _cjson_item_get_str,
+
+    .item_set_bool       = _cjson_item_set_bool,
+    .item_set_int        = _cjson_item_set_int,
+    .item_set_real       = _cjson_item_set_real,
+    .item_set_str        = _cjson_item_set_str,
 
     .item_from_bool     = _cjson_item_from_bool,
     .item_from_int      = _cjson_item_from_int,

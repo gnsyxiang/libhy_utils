@@ -35,28 +35,37 @@
 
 #if (HY_JSON_USE_TYPE == 1)
 
-#define _get_item(_error_val, root, n, _type, _cb)      \
-    ({                                                  \
-        void *item;                                     \
-        \
-        do {                                            \
-            if (!root) {                                \
-                LOGE("the root is NULL \n");            \
-                item = NULL;                            \
-                break;                                  \
-            }                                           \
-            va_list list;                               \
-            \
-            va_start(list, n);                          \
-            item = _get_item_va_list(root, n, list);    \
-            va_end(list);                               \
-            \
-        } while (0);                                    \
-        \
-        if (_type == json_impl.item_typeof(item)) {     \
-            _error_val = _cb(item);                     \
-        }                                               \
-        _error_val;                                     \
+#define _get_item_com(_root, _n, _item)                         \
+    do {                                                        \
+        if (!_root) {                                           \
+            LOGE("the root is NULL \n");                        \
+            break;                                              \
+        }                                                       \
+        va_list list;                                           \
+        va_start(list, _n);                                     \
+        _item = _get_item_va_list(_root, n, list);              \
+        va_end(list);                                           \
+    } while (0);
+
+#define _get_item(_error_val, _root, _n, _type, _cb)            \
+    ({                                                          \
+        void *item = NULL;                                      \
+        _get_item_com(_root, _n, item);                         \
+        if (item && _type == json_impl.item_typeof(item)) {     \
+            _error_val = _cb(item);                             \
+        }                                                       \
+        _error_val;                                             \
+     })
+
+#define _set_item(_val, _root, _n, _type, _cb)                  \
+    ({                                                          \
+        void *item = NULL;                                      \
+        hy_s32_t ret = -1;                                      \
+        _get_item_com(_root, _n, item);                         \
+        if (item && _type == json_impl.item_typeof(item)) {     \
+            ret = _cb(item, _val);                              \
+        }                                                       \
+        ret;                                                    \
      })
 
 static void *_get_item_va_list(void *root, hy_s32_t n, va_list list)
@@ -85,20 +94,36 @@ static void *_get_item_va_list(void *root, hy_s32_t n, va_list list)
     return item;
 }
 
-hy_s32_t HyJsonGetItemInt_va(hy_s32_t error_val, void *root, hy_s32_t n, ...)
+hy_s32_t HyJsonOperItemInt_va(hy_s32_t type, hy_s32_t val,
+        void *root, hy_s32_t n, ...)
 {
-    return _get_item(error_val, root, n, HY_JSON_REAL, json_impl.item_to_int);
+    if (type == 0) {
+        return _get_item(val, root, n, HY_JSON_REAL, json_impl.item_get_int);
+    } else {
+        return _set_item(val, root, n, HY_JSON_REAL, json_impl.item_set_int);
+    }
 }
 
-double HyJsonGetItemReal_va(double error_val, void *root, hy_s32_t n, ...)
+double HyJsonOperItemReal_va(hy_s32_t type, double val,
+        void *root, hy_s32_t n, ...)
 {
-    return _get_item(error_val, root, n, HY_JSON_REAL, json_impl.item_to_real);
+    if (type == 0) {
+        return _get_item(val, root, n, HY_JSON_REAL, json_impl.item_get_real);
+    } else {
+        return _set_item(val, root, n, HY_JSON_REAL, json_impl.item_set_real);
+    }
 }
 
-const char *HyJsonGetItemStr_va(const char *error_val, void *root, hy_s32_t n, ...)
+const char *HyJsonGetItemStr_va(const char *val, void *root, hy_s32_t n, ...)
 {
-    return _get_item(error_val, root, n, HY_JSON_STR, json_impl.item_to_str);
+    return _get_item(val, root, n, HY_JSON_STR, json_impl.item_get_str);
 }
+
+hy_s32_t HyJsonSetItemStr_va(const char *val, void *root, hy_s32_t n, ...)
+{
+    return _set_item(val, root, n, HY_JSON_STR, json_impl.item_set_str);
+}
+
 #endif
 
 #if (HY_JSON_USE_TYPE == 2)

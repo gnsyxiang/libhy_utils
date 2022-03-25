@@ -115,13 +115,26 @@ static _main_context_t *_module_create(void)
 #if (HY_JSON_USE_TYPE == 1)
 static void _test_json(void *root)
 {
-    hy_s32_t height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
+    hy_s32_t height;
+    double d;
+    const char *buf;
+
+    height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
+    LOGD("Height: %d \n", height);
+    HyJsonSetItemInt(200, root, "image", "thumbnail", "height");
+    height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
     LOGD("Height: %d \n", height);
 
-    double d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
+    d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
+    LOGD("d: %f \n", d);
+    HyJsonSetItemReal(6.6, root, "image", "double", 1);
+    d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
     LOGD("d: %f \n", d);
 
-    const char *buf = HyJsonGetItemStr("haha", root, "image", "title");
+    buf = HyJsonGetItemStr("haha", root, "image", "title");
+    LOGD("buf: %s \n", buf);
+     HyJsonSetItemStr("hello world", root, "image", "title");
+    buf = HyJsonGetItemStr("haha", root, "image", "title");
     LOGD("buf: %s \n", buf);
 }
 #endif

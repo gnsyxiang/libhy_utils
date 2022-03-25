@@ -93,7 +93,6 @@ void *HyJsonFileCreate(const char *name);
 void HyJsonFileDestroy(void *root);
 
 #if (HY_JSON_USE_TYPE == 1)
-#if 1
 /**
  * @brief 计算参数的个数
  */
@@ -126,59 +125,96 @@ void HyJsonFileDestroy(void *root);
 #define comac_argc(...) comac_get_args_cnt(0, ##__VA_ARGS__, comac_args_seqs())
 
 /**
- * @brief 根据可变参数获取int值
+ * @brief 根据可变参数获取item，然后操作
  *
- * @param error_val 用户指定出错的返回值
+ * @param type 操作类型，0为获取，1为设置
+ * @param val 值
  * @param root json根节点
- * @param n 参数个数
+ * @param n 可变参数的个数
  * @param ... 可变参数
  *
- * @return 成功返回item中的值，失败返回用户指定的error_val
+ * @return
+ * 当type为0，成功返回对应值，失败返回val
+ * 当type为1，成功返回0，失败返回-1
  */
-hy_s32_t HyJsonGetItemInt_va(hy_s32_t error_val, void *root, hy_s32_t n, ...);
+hy_s32_t HyJsonOperItemInt_va(hy_s32_t type, hy_s32_t val,
+        void *root, hy_s32_t n, ...);
 
 /**
- * @brief 根据可变参数获取double值
+ * @brief 根据可变参数获取item的int值，失败返回error_val
+ */
+#define HyJsonGetItemInt(error_val, item, x...) \
+    HyJsonOperItemInt_va(0, error_val, item, comac_argc(x), x)
+
+/**
+ * @brief 根据可变参数设置item的int值，失败返回-1
+ */
+#define HyJsonSetItemInt(val, item, x...) \
+    HyJsonOperItemInt_va(1, val, item, comac_argc(x), x)
+
+/**
+ * @brief 根据可变参数获取item，然后操作
  *
- * @param error_val 用户指定出错的返回值
+ * @param type 操作类型，0为获取，1为设置
+ * @param val 值
  * @param root json根节点
- * @param n 参数个数
+ * @param n 可变参数的个数
  * @param ... 可变参数
  *
- * @return 成功返回item中的值，失败返回用户指定的error_val
+ * @return
+ * 当type为0，成功返回对应值，失败返回val
+ * 当type为1，成功返回0，失败返回-1
  */
-double HyJsonGetItemReal_va(double error_val, void *root, hy_s32_t n, ...);
+double HyJsonOperItemReal_va(hy_s32_t type, double val,
+        void *root, hy_s32_t n, ...);
+
+/**
+ * @brief 根据可变参数获取item的double值，失败返回error_val
+ */
+#define HyJsonGetItemReal(error_val, item, x...) \
+    HyJsonOperItemReal_va(0, error_val, item, comac_argc(x), x)
+
+/**
+ * @brief 根据可变参数设置item的double值，失败返回-1
+ */
+#define HyJsonSetItemReal(val, item, x...) \
+    HyJsonOperItemReal_va(1, val, item, comac_argc(x), x)
 
 /**
  * @brief 根据可变参数获取char *值
  *
- * @param error_val 用户指定出错的返回值
+ * @param val 用户指定出错的返回值
  * @param root json根节点
  * @param n 参数个数
  * @param ... 可变参数
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-const char *HyJsonGetItemStr_va(const char *error_val, void *root, hy_s32_t n, ...);
-#endif
+const char *HyJsonGetItemStr_va(const char *val, void *root, hy_s32_t n, ...);
 
 /**
- * @brief 获取item中的int值，详见HyJsonGetItemInt_va
+ * @brief 根据可变参数获取item的char *值，失败返回error_val
  */
-#define HyJsonGetItemInt(error_val, root, x...) \
-    HyJsonGetItemInt_va(error_val, root, comac_argc(x), x)
+#define HyJsonGetItemStr(error_val, item, x...) \
+    HyJsonGetItemStr_va(error_val, item, comac_argc(x), x)
 
 /**
- * @brief 获取item中的double值，详见HyJsonGetItemReal_va
+ * @brief 根据可变参数设置char *值
+ *
+ * @param val 值
+ * @param root json根节点
+ * @param n 参数个数
+ * @param ... 可变参数
+ *
+ * @return 成功返回0，失败返回-1
  */
-#define HyJsonGetItemReal(error_val, root, x...) \
-    HyJsonGetItemReal_va(error_val, root, comac_argc(x), x)
+hy_s32_t HyJsonSetItemStr_va(const char *val, void *root, hy_s32_t n, ...);
 
 /**
- * @brief 获取item中的char *值，详见HyJsonGetItemStr_va
+ * @brief 根据可变参数设置item的char *值，失败返回-1
  */
-#define HyJsonGetItemStr(error_val, root, x...) \
-    HyJsonGetItemStr_va(error_val, root, comac_argc(x), x)
+#define HyJsonSetItemStr(val, item, x...) \
+    HyJsonSetItemStr_va(val, item, comac_argc(x), x)
 
 #endif
 
