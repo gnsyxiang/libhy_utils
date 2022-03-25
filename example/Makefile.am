@@ -18,15 +18,23 @@
 #     last modified: 05/03 2021 10:38
 # ===============================================================
 
-if COMPILE_SELECT_PLATFORM_LINUX
-select_platform = linux
+if COMPILE_SELECT_VENDER_PC
+_select_vender = linux
 endif
 
-if COMPILE_SELECT_PLATFORM_MCU
-select_platform = mcu
+if COMPILE_SELECT_VENDER_EEASYTECH
+_select_vender = linux
 endif
 
-SUBDIRS = $(select_platform)
+if COMPILE_SELECT_VENDER_ARTERYTEK
+_select_vender = mcu
+endif
+
+if COMPILE_SELECT_VENDER_HDHC
+_select_vender = mcu
+endif
+
+SUBDIRS = $(_select_vender)
 
 # ------------------
 # defining variables

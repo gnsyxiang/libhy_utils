@@ -18,5 +18,20 @@
 #     last modified: 21/03 2022 19:15
 # ===============================================================
 
-SUBDIRS = $(chip)
+# ------------------
+# defining variables
+# ------------------
+_dist_file_com  =
+
+# ------------------
+# make install files
+# ------------------
+
+
+# ---------------
+# make dist files
+# ---------------
+_dist_file_com  += config.sh
+
+EXTRA_DIST      = $(_dist_file_com)
 

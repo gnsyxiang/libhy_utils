@@ -40,8 +40,10 @@ CHECK_VERSION_INFO
 CHECK_DOXYGEN
 # CHECK_JAVA
 
-SELECT_PLATFORM
-SELECT_MCU_CHIP
+SELECT_VENDER
+SELECT_CHIP
+SELECT_PRODUCT
+SELECT_LANGUAGE
 
 # Checks for programs.
 AC_PROG_CXX
@@ -85,7 +87,9 @@ AC_CONFIG_FILES([Makefile
                  build-script/arterytek/Makefile
                  build-script/arterytek/at32f4xx/Makefile
                  build-script/eeasytech/Makefile
+                 build-script/eeasytech/SV823/Makefile
                  build-script/pc/Makefile
+                 build-script/pc/pc-chip/Makefile
                  doc/Makefile
                  example/Makefile
                  example/linux/Makefile
