@@ -24,9 +24,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-
-#define HyJson_t void
+#include "hy_hal/hy_type.h"
 
 /**
  * @brief 提供两种解析json的方法
@@ -45,14 +43,14 @@ extern "C" {
  *
  * @return 成功返回root节点，失败返回NULL
  */
-HyJson_t *HyJsonCreate(const char *buf);
+void *HyJsonCreate(const char *buf);
 
 /**
  * @brief 销毁从buf中创建的json
  *
  * @param root root根节点
  */
-void HyJsonDestroy(HyJson_t *root);
+void HyJsonDestroy(void *root);
 
 /**
  * @brief 打印root中的信息
@@ -63,7 +61,7 @@ void HyJsonDestroy(HyJson_t *root);
  *
  * @note 成功返回内容后，需要用户释放内容的空间
  */
-char *HyJsonDump(HyJson_t *root);
+char *HyJsonDump(void *root);
 
 /**
  * @brief 打印root中信息的宏
@@ -85,14 +83,14 @@ char *HyJsonDump(HyJson_t *root);
  *
  * @return 成功返回root节点，失败返回NULL
  */
-HyJson_t *HyJsonFileCreate(const char *name);
+void *HyJsonFileCreate(const char *name);
 
 /**
  * @brief 销毁从文件中创建json
  *
  * @param root root根节点
  */
-void HyJsonFileDestroy(HyJson_t *root);
+void HyJsonFileDestroy(void *root);
 
 #if (HY_JSON_USE_TYPE == 1)
 #if 1
@@ -137,7 +135,7 @@ void HyJsonFileDestroy(HyJson_t *root);
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-int HyJsonGetItemInt_va(int error_val, HyJson_t *root, int n, ...);
+hy_s32_t HyJsonGetItemInt_va(hy_s32_t error_val, void *root, hy_s32_t n, ...);
 
 /**
  * @brief 根据可变参数获取double值
@@ -149,7 +147,7 @@ int HyJsonGetItemInt_va(int error_val, HyJson_t *root, int n, ...);
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-double HyJsonGetItemReal_va(double error_val, HyJson_t *root, int n, ...);
+double HyJsonGetItemReal_va(double error_val, void *root, hy_s32_t n, ...);
 
 /**
  * @brief 根据可变参数获取char *值
@@ -161,7 +159,7 @@ double HyJsonGetItemReal_va(double error_val, HyJson_t *root, int n, ...);
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-const char *HyJsonGetItemStr_va(const char *error_val, HyJson_t *root, int n, ...);
+const char *HyJsonGetItemStr_va(const char *error_val, void *root, hy_s32_t n, ...);
 #endif
 
 /**
@@ -196,7 +194,7 @@ const char *HyJsonGetItemStr_va(const char *error_val, HyJson_t *root, int n, ..
  *
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
-int HyJsonGetItemInt2(int err_val, HyJson_t *root, char *fmt, size_t fmt_len);
+hy_s32_t HyJsonGetItemInt2(hy_s32_t err_val, void *root, char *fmt, size_t fmt_len);
 
 /**
  * @brief 根据可变参数获取double值
@@ -209,7 +207,7 @@ int HyJsonGetItemInt2(int err_val, HyJson_t *root, char *fmt, size_t fmt_len);
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
 double HyJsonGetItemReal2(double err_val,
-        HyJson_t *root, char *fmt, size_t fmt_len);
+        void *root, char *fmt, size_t fmt_len);
 
 /**
  * @brief 根据可变参数获取char *值
@@ -222,7 +220,7 @@ double HyJsonGetItemReal2(double err_val,
  * @return 成功返回item中的值，失败返回用户指定的error_val
  */
 const char *HyJsonGetItemStr2(const char *err_val,
-        HyJson_t *root, char *fmt, size_t fmt_len);
+        void *root, char *fmt, size_t fmt_len);
 
 #endif
 

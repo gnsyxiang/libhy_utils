@@ -35,36 +35,42 @@
 
 #if (HY_JSON_USE_TYPE == 1)
 
-#define _get_a_item(root, n, item, _type)           \
-    do {                                            \
-        if (!root) {                                \
-            LOGE("the root is NULL \n");            \
-            item = NULL;                            \
-            break;                                  \
-        }                                           \
-        va_list list;                               \
+#define _get_item(_error_val, root, n, _type, _cb)      \
+    ({                                                  \
+        void *item;                                     \
         \
-        va_start(list, n);                          \
-        item = _get_item_va_list(root, n, list);    \
-        va_end(list);                               \
+        do {                                            \
+            if (!root) {                                \
+                LOGE("the root is NULL \n");            \
+                item = NULL;                            \
+                break;                                  \
+            }                                           \
+            va_list list;                               \
+            \
+            va_start(list, n);                          \
+            item = _get_item_va_list(root, n, list);    \
+            va_end(list);                               \
+            \
+        } while (0);                                    \
         \
-        if (_type != json_impl.item_typeof(item)) { \
-            item = NULL;                            \
-        }                                           \
-    } while (0);
+        if (_type == json_impl.item_typeof(item)) {     \
+            _error_val = _cb(item);                     \
+        }                                               \
+        _error_val;                                     \
+     })
 
-static HyJson_t *_get_item_va_list(HyJson_t *root, int n, va_list list)
+static void *_get_item_va_list(void *root, hy_s32_t n, va_list list)
 {
-    HyJson_t *item = root;
+    void *item = root;
     HyJsonType_t type;
 
-    for (int i = 0; i < n; i++) {
-        int index;
+    for (hy_s32_t i = 0; i < n; i++) {
+        hy_s32_t index;
         const char *str;
         type = json_impl.item_typeof(item);
 
         if (type == HY_JSON_ARRAY) {
-            index = va_arg(list, int);
+            index = va_arg(list, hy_s32_t);
             item = json_impl.item_array_get(item, index);
         } else {
             str = va_arg(list, const char *);
@@ -79,36 +85,27 @@ static HyJson_t *_get_item_va_list(HyJson_t *root, int n, va_list list)
     return item;
 }
 
-int HyJsonGetItemInt_va(int error_val, HyJson_t *root, int n, ...)
+hy_s32_t HyJsonGetItemInt_va(hy_s32_t error_val, void *root, hy_s32_t n, ...)
 {
-    HyJson_t *item;
-    _get_a_item(root, n, item, HY_JSON_REAL);
-
-    return (item != NULL) ? json_impl.item_to_int(item) : error_val;
+    return _get_item(error_val, root, n, HY_JSON_REAL, json_impl.item_to_int);
 }
 
-double HyJsonGetItemReal_va(double error_val, HyJson_t *root, int n, ...)
+double HyJsonGetItemReal_va(double error_val, void *root, hy_s32_t n, ...)
 {
-    HyJson_t *item;
-    _get_a_item(root, n, item, HY_JSON_REAL);
-
-    return (item != NULL) ? json_impl.item_to_real(item) : error_val;
+    return _get_item(error_val, root, n, HY_JSON_REAL, json_impl.item_to_real);
 }
 
-const char *HyJsonGetItemStr_va(const char *error_val, HyJson_t *root, int n, ...)
+const char *HyJsonGetItemStr_va(const char *error_val, void *root, hy_s32_t n, ...)
 {
-    HyJson_t *item;
-    _get_a_item(root, n, item, HY_JSON_STR);
-
-    return (item != NULL) ? json_impl.item_to_str(item) : error_val;
+    return _get_item(error_val, root, n, HY_JSON_STR, json_impl.item_to_str);
 }
 #endif
 
 #if (HY_JSON_USE_TYPE == 2)
 
-static int32_t _get_index(char *fmt)
+static hy_s32_t _get_index(char *fmt)
 {
-    int32_t index;
+    hy_s32_t index;
 
     char *start = strstr(fmt, "[");
     if (NULL != start) {
@@ -126,14 +123,14 @@ static int32_t _get_index(char *fmt)
     return -1;
 }
 
-static HyJson_t *_get_item(HyJson_t *root, char *fmt, size_t fmt_len)
+static void *_get_item(void *root, char *fmt, size_t fmt_len)
 {
     size_t i;
     size_t offset = 0;
-    int32_t index = 0;
-    HyJson_t *child = NULL;
-    HyJson_t *parent = root;
-    int32_t fmt_len_tmp = (int32_t)fmt_len;
+    hy_s32_t index = 0;
+    void *child = NULL;
+    void *parent = root;
+    hy_s32_t fmt_len_tmp = (hy_s32_t)fmt_len;
 
     for (i = 0; i < fmt_len; ++i) {
         if ('.' == fmt[i]) {
@@ -165,9 +162,9 @@ static HyJson_t *_get_item(HyJson_t *root, char *fmt, size_t fmt_len)
     return child;
 }
 
-static HyJson_t *_get_item_com(HyJson_t *root, const char *fmt, size_t fmt_len)
+static void *_get_item_com(void *root, const char *fmt, size_t fmt_len)
 {
-    HyJson_t *item = NULL;
+    void *item = NULL;
     char *cp_fmt, *cp_fmt_tmp;
     size_t len;
 
@@ -185,25 +182,25 @@ static HyJson_t *_get_item_com(HyJson_t *root, const char *fmt, size_t fmt_len)
     return item;
 }
 
-int HyJsonGetItemInt2(int error_val, HyJson_t *root, char *fmt, size_t fmt_len)
+hy_s32_t HyJsonGetItemInt2(hy_s32_t error_val, void *root, char *fmt, size_t fmt_len)
 {
-    HyJson_t *item = _get_item_com(root, fmt, fmt_len);
+    void *item = _get_item_com(root, fmt, fmt_len);
 
     return (item != NULL) ? json_impl.item_to_int(item) : error_val;
 }
 
 double HyJsonGetItemReal2(double error_val,
-        HyJson_t *root, char *fmt, size_t fmt_len)
+        void *root, char *fmt, size_t fmt_len)
 {
-    HyJson_t *item = _get_item_com(root, fmt, fmt_len);
+    void *item = _get_item_com(root, fmt, fmt_len);
 
     return (item != NULL) ? json_impl.item_to_real(item) : error_val;
 }
 
 const char *HyJsonGetItemStr2(const char *error_val,
-        HyJson_t *root, char *fmt, size_t fmt_len)
+        void *root, char *fmt, size_t fmt_len)
 {
-    HyJson_t *item = _get_item_com(root, fmt, fmt_len);
+    void *item = _get_item_com(root, fmt, fmt_len);
 
     return (item != NULL) ? json_impl.item_to_str(item) : error_val;
 }
@@ -217,18 +214,18 @@ static inline void _file_content_destroy(char **buf)
 
 static size_t _file_content_create(const char *name, char **buf)
 {
-    int fd;
+    hy_s32_t fd;
     off_t offset = 0;
 
     do {
         if (0 != access(name, 0)) {
-            LOGE("the %s file not exist \n", name);
+            LOGES("the %s file not exist \n", name);
             break;
         }
 
         fd = open(name, O_RDONLY, 0644);
         if (fd < 0) {
-            LOGE("open %s file failed \n", name);
+            LOGES("open %s file failed \n", name);
             break;
         }
 
@@ -251,51 +248,53 @@ static size_t _file_content_create(const char *name, char **buf)
     return 0;
 }
 
-void HyJsonFileDestroy(HyJson_t *root)
+void HyJsonFileDestroy(void *root)
 {
     HY_ASSERT_RET(!root);
+
     json_impl.item_destroy(root);
 }
 
-HyJson_t *HyJsonFileCreate(const char *name)
+void *HyJsonFileCreate(const char *name)
 {
     HY_ASSERT_RET_VAL(!name, NULL);
 
     size_t len;
     char *buf = NULL;
-    HyJson_t *root = NULL;
+    void *root = NULL;
 
     len = _file_content_create(name, &buf);
     if (len > 0) {
-        root = json_impl.item_create(buf, len);
+        root = json_impl.item_create(buf);
         _file_content_destroy((char **)&buf);
     }
 
     return root;
 }
 
-char *HyJsonDump(HyJson_t *root)
+char *HyJsonDump(void *root)
 {
     HY_ASSERT_RET_VAL(!root, NULL);
 
     return json_impl.item_print_str(root);
 }
 
-void HyJsonDestroy(HyJson_t *root)
+void HyJsonDestroy(void *root)
 {
     HY_ASSERT_RET(!root);
 
     json_impl.item_destroy(root);
 }
 
-HyJson_t *HyJsonCreate(const char *buf)
+void *HyJsonCreate(const char *buf)
 {
     HY_ASSERT_RET_VAL(!buf, NULL);
 
-    HyJson_t *root = json_impl.item_create(buf, 0);
+    void *root = json_impl.item_create(buf);
     if (!root) {
         LOGE("create json failed \n");
     }
 
     return root;
 }
+

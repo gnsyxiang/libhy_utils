@@ -21,109 +21,110 @@
 
 #include <cjson/cJSON.h>
 
+#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
 
 #include "hy_cjson_impl.h"
 
-HyJson_t *_cjson_item_create(const char *buf, size_t len)
+static void *_cjson_item_create(const char *buf)
 {
     return cJSON_Parse(buf);
 }
 
-void _cjson_item_destroy(HyJson_t *root)
+static void _cjson_item_destroy(void *root)
 {
-    cJSON_Delete((cJSON*)root);
+    cJSON_Delete((cJSON *)root);
 }
 
-HyJson_t *_cjson_item_new(void)
+static void *_cjson_item_new(void)
 {
     return cJSON_CreateObject();
 }
 
-HyJson_t *_cjson_item_get(const HyJson_t *root, const char *key)
+static void *_cjson_item_get(const void *root, const char *key)
 {
-    return cJSON_GetObjectItem((cJSON*)root, key);
+    return cJSON_GetObjectItem((cJSON *)root, key);
 }
 
-int _cjson_item_add(HyJson_t *root, const char *field, HyJson_t *item)
+static hy_s32_t _cjson_item_add(void *root, const char *field, void *item)
 {
-    cJSON_AddItemToObject((cJSON*)root, field, (cJSON*)item);
+    cJSON_AddItemToObject((cJSON *)root, field, (cJSON *)item);
     return 0;
 }
 
-char _cjson_item_to_bool(const HyJson_t *item)
+static char _cjson_item_to_bool(const void *item)
 {
-    return ((cJSON*)item)->type == cJSON_True;
+    return ((cJSON *)item)->type == cJSON_True;
 }
 
-long long _cjson_item_to_int(const HyJson_t *item)
+static long long _cjson_item_to_int(const void *item)
 {
-    return ((cJSON*)item)->valueint;
+    return ((cJSON *)item)->valueint;
 }
 
-double _cjson_item_to_real(const HyJson_t *item)
+static double _cjson_item_to_real(const void *item)
 {
-    return ((cJSON*)item)->valuedouble;
+    return ((cJSON *)item)->valuedouble;
 }
 
-const char *_cjson_item_to_str(const HyJson_t *item)
+static const char *_cjson_item_to_str(const void *item)
 {
-    return cJSON_GetStringValue((cJSON*)item);
+    return cJSON_GetStringValue((cJSON *)item);
 }
 
-size_t _cjson_item_to_str_len(const HyJson_t *item)
+static size_t _cjson_item_to_str_len(const void *item)
 {
-    return strlen(cJSON_GetStringValue((cJSON*)item));
+    return strlen(cJSON_GetStringValue((cJSON *)item));
 }
 
-HyJson_t *_cjson_item_from_bool(char val)
+static void *_cjson_item_from_bool(char val)
 {
     return cJSON_CreateBool(val);
 }
 
-HyJson_t *_cjson_item_from_int(long long val)
+static void *_cjson_item_from_int(long long val)
 {
-    cJSON* tmp = cJSON_CreateNumber(0);
+    cJSON * tmp = cJSON_CreateNumber(0);
     cJSON_SetNumberValue(tmp, val);
     return tmp;
 }
 
-HyJson_t *_cjson_item_from_real(double val)
+static void *_cjson_item_from_real(double val)
 {
     return cJSON_CreateNumber(val);
 }
 
-HyJson_t *_cjson_item_from_str(const char *val)
+static void *_cjson_item_from_str(const char *val)
 {
     return cJSON_CreateString(val);
 }
 
-HyJson_t *_cjson_item_array_new(void)
+static void *_cjson_item_array_new(void)
 {
     return cJSON_CreateArray();
 }
 
-int _cjson_item_array_add(HyJson_t *array, HyJson_t *item)
+static hy_s32_t _cjson_item_array_add(void *array, void *item)
 {
-    cJSON_AddItemToArray((cJSON*)array, (cJSON*)item);
+    cJSON_AddItemToArray((cJSON *)array, (cJSON *)item);
     return 0;
 }
 
-HyJson_t *_cjson_item_array_get(const HyJson_t *array, size_t index)
+static void *_cjson_item_array_get(const void *array, size_t index)
 {
-    return cJSON_GetArrayItem((cJSON*)array, index);
+    return cJSON_GetArrayItem((cJSON *)array, index);
 }
 
-size_t _cjson_item_array_size(const HyJson_t *array)
+static size_t _cjson_item_array_size(const void *array)
 {
-    return cJSON_GetArraySize((cJSON*)array);
+    return cJSON_GetArraySize((cJSON *)array);
 }
 
-HyJsonType_t _cjson_item_typeof(const HyJson_t *item)
+static HyJsonType_t _cjson_item_typeof(const void *item)
 {
-    switch(((cJSON*)item)->type){
+    switch(((cJSON *)item)->type){
         case cJSON_Invalid:
         case cJSON_NULL:
             return HY_JSON_NULL;
@@ -145,9 +146,9 @@ HyJsonType_t _cjson_item_typeof(const HyJson_t *item)
     }
 }
 
-char *_cjson_item_print_str(const HyJson_t *root)
+static char *_cjson_item_print_str(const void *root)
 {
-    return cJSON_Print((cJSON*)root);
+    return cJSON_Print((cJSON *)root);
 }
 
 json_impl_t json_impl = {

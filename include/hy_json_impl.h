@@ -26,8 +26,6 @@ extern "C" {
 
 #include <stdio.h>
 
-#include "hy_json.h"
-
 typedef enum {
     HY_JSON_OBJECT,
     HY_JSON_ARRAY,
@@ -40,31 +38,31 @@ typedef enum {
 } HyJsonType_t;
 
 typedef struct {
-    HyJson_t *(*item_create)(const char *buf, size_t len);
-    void (*item_destroy)(HyJson_t *root);
+    void *(*item_create)(const char *buf);
+    void (*item_destroy)(void *root);
 
-    HyJson_t *(*item_new)(void);
-    HyJson_t *(*item_get)(const HyJson_t *root, const char *key);
-    int (*item_add)(HyJson_t *root, const char *field, HyJson_t *item);
+    void *(*item_new)(void);
+    void *(*item_get)(const void *root, const char *key);
+    int (*item_add)(void *root, const char *field, void *item);
 
-    char (*item_to_bool)(const HyJson_t *item);
-    long long (*item_to_int)(const HyJson_t *item);
-    double (*item_to_real)(const HyJson_t *item);
-    const char *(*item_to_str)(const HyJson_t *item);
-    size_t (*item_to_str_len)(const HyJson_t *item);
+    char (*item_to_bool)(const void *item);
+    long long (*item_to_int)(const void *item);
+    double (*item_to_real)(const void *item);
+    const char *(*item_to_str)(const void *item);
+    size_t (*item_to_str_len)(const void *item);
 
-    HyJson_t *(*item_from_bool)(char val);
-    HyJson_t *(*item_from_int)(long long val);
-    HyJson_t *(*item_from_real)(double val);
-    HyJson_t *(*item_from_str)(const char *val);
+    void *(*item_from_bool)(char val);
+    void *(*item_from_int)(long long val);
+    void *(*item_from_real)(double val);
+    void *(*item_from_str)(const char *val);
 
-    HyJson_t *(*item_array_new)(void);
-    int (*item_array_add)(HyJson_t *array, HyJson_t *item);
-    HyJson_t *(*item_array_get)(const HyJson_t *array, size_t index);
-    size_t (*item_array_size)(const HyJson_t *array);
+    void *(*item_array_new)(void);
+    int (*item_array_add)(void *array, void *item);
+    void *(*item_array_get)(const void *array, size_t index);
+    size_t (*item_array_size)(const void *array);
 
-    HyJsonType_t (*item_typeof)(const HyJson_t *item);
-    char *(*item_print_str)(const HyJson_t *root);
+    HyJsonType_t (*item_typeof)(const void *item);
+    char *(*item_print_str)(const void *root);
 } json_impl_t;
 
 #ifdef __cplusplus

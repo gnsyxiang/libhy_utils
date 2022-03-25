@@ -113,9 +113,9 @@ static _main_context_t *_module_create(void)
 }
 
 #if (HY_JSON_USE_TYPE == 1)
-static void _test_json(HyJson_t *root)
+static void _test_json(void *root)
 {
-    int height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
+    hy_s32_t height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
     LOGD("Height: %d \n", height);
 
     double d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
@@ -127,9 +127,9 @@ static void _test_json(HyJson_t *root)
 #endif
 
 #if (HY_JSON_USE_TYPE == 2)
-static void _test_json(HyJson_t *root)
+static void _test_json(void *root)
 {
-    int height = HyJsonGetItemInt2(-1, root, "image.thumbnail.height", HY_STRLEN("image.thumbnail.height"));
+    hy_s32_t height = HyJsonGetItemInt2(-1, root, "image.thumbnail.height", HY_STRLEN("image.thumbnail.height"));
     LOGD("Height: %d \n", height);
 
     double d = HyJsonGetItemReal2(5.5, root, "image.double[1]", HY_STRLEN("image.double[1]"));
@@ -142,7 +142,7 @@ static void _test_json(HyJson_t *root)
 
 static void _test_json_file(void)
 {
-    HyJson_t *root = HyJsonFileCreate("../res/hy_utils/demo.json");
+    void *root = HyJsonFileCreate("../res/hy_utils/demo.json");
 
     if (root) {
         _test_json(root);
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
         }\n\
     }";
 
-    HyJson_t *root = HyJsonCreate(text_json);
+    void *root = HyJsonCreate(text_json);
     _test_json(root);
     HyJsonDestroy(root);
 
