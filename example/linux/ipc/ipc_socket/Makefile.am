@@ -64,6 +64,11 @@ _include_com    += $(HY_HAL_INCS)
 _ldadd_com      += $(HY_HAL_LIBS)
 endif
 
+if COMPILE_LIBCJSON
+_include_com    += $(CJSON_INCS)
+_ldadd_com      += $(CJSON_LIBS)
+endif
+
 if COMPILE_LIBLOG4CPLUS
 _include_com    += $(LOG4CPLUS_INCS)
 _ldadd_com      += $(LOG4CPLUS_LIBS)
