@@ -120,22 +120,22 @@ static void _test_json(void *root)
     const char *buf;
 
     height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
-    LOGD("Height: %d \n", height);
-    HyJsonSetItemInt(200, root, "image", "thumbnail", "height");
+    LOGD("image.thumbnail.height: %d \n", height);
+    HyJsonSetItemInt(400, root, "image", "thumbnail", "height");
     height = HyJsonGetItemInt(-1, root, "image", "thumbnail", "height");
-    LOGD("Height: %d \n", height);
+    LOGD("image.thumbnail.height: %d \n", height);
 
     d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
-    LOGD("d: %f \n", d);
+    LOGD("image.double: %f \n", d);
     HyJsonSetItemReal(6.6, root, "image", "double", 1);
     d = HyJsonGetItemReal(5.5, root, "image", "double", 1);
-    LOGD("d: %f \n", d);
+    LOGD("image.double: %f \n", d);
 
     buf = HyJsonGetItemStr("haha", root, "image", "title");
-    LOGD("buf: %s \n", buf);
-     HyJsonSetItemStr("hello world", root, "image", "title");
+    LOGD("image.title: %s \n", buf);
+    HyJsonSetItemStr("hello world", root, "image", "title");
     buf = HyJsonGetItemStr("haha", root, "image", "title");
-    LOGD("buf: %s \n", buf);
+    LOGD("image.title: %s \n", buf);
 }
 #endif
 
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
             \"height\": 600,\n\
             \"title\":  \"View from 15th Floor\",\n\
             \"thumbnail\": {\n\
-                \"url\":    \"http:/*www.example.com/image/481989943\",\n\
+                \"url\":    \"http://www.example.com/image/481989943\",\n\
                 \"height\": 125,\n\
                 \"width\":  100\n\
             },\n\

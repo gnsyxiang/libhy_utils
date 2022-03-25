@@ -18,6 +18,7 @@
  *     last modified: 03/11 2021 10:50
  */
 #include <stdio.h>
+#include <limits.h>
 
 #include <cjson/cJSON.h>
 
@@ -88,10 +89,17 @@ static hy_s32_t _cjson_item_set_bool(const void *item, char val)
     return 0;
 }
 
-static hy_s32_t _cjson_item_set_int(const void *item, long long val)
+static hy_s32_t _cjson_item_set_int(const void *item, hy_s32_t val)
 {
     cJSON *root = (cJSON *)item;
-    root->valueint = val;
+    root->valuedouble = val;
+    if (val >= INT_MAX) {
+        root->valueint = INT_MAX;
+    } else if (val <= (double)INT_MIN) {
+        root->valueint = INT_MIN;
+    } else {
+        root->valueint = (int)val;
+    }
     return 0;
 }
 

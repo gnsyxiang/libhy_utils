@@ -53,7 +53,7 @@ typedef struct {
     const char *(*item_get_str)(const void *item);
 
     hy_s32_t (*item_set_bool)(const void *item, char val);
-    hy_s32_t (*item_set_int)(const void *item, long long val);
+    hy_s32_t (*item_set_int)(const void *item, hy_s32_t val);
     hy_s32_t (*item_set_real)(const void *item, double val);
     hy_s32_t (*item_set_str)(const void *item, const char *val);
 
