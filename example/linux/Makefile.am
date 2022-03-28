@@ -114,7 +114,7 @@ _include_com    += $(LIBPROTOBUF_C_INCS)
 _ldadd_com      += $(LIBPROTOBUF_C_LIBS)
 
 bin_PROGRAMS                += hy_protobuf-c_test
-hy_protobuf_c_test_SOURCES  = $(_sources_com) hy_protobuf-c_test.c address_book.pb-c.c
+hy_protobuf_c_test_SOURCES  = $(_sources_com) hy_protobuf-c_test.c
 hy_protobuf_c_test_CPPFLAGS = $(_cppflags_com)
 hy_protobuf_c_test_CFLAGS   = $(_cflags_com)
 hy_protobuf_c_test_CXXFLAGS = $(_cxxflags_com)
