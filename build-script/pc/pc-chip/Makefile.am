@@ -40,8 +40,29 @@ dist-hook:
 		\
 		sed -i 's/product=.*/product=$(product)/g' $(top_distdir)/build-script/$(vender)/$(chip)/config.sh; \
 		\
-		sed -i '/build-script/d' $(top_distdir)/configure.ac; \
+		sed -i '/ build-script\//d' $(top_distdir)/configure.ac; \
 		sed -i '/project_name.pc/a build-script/$(vender)/$(chip)/Makefile' $(top_distdir)/configure.ac; \
 		sed -i '/project_name.pc/a build-script/$(vender)/Makefile' $(top_distdir)/configure.ac; \
-		sed -i '/project_name.pc/a build-script/Makefile' $(top_distdir)/configure.ac
+		sed -i '/project_name.pc/a build-script/Makefile' $(top_distdir)/configure.ac; \
+		\
+		sed -i '/ example\//d' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a example/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a example/$(run_os)/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a example/$(run_os)/ipc/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a example/$(run_os)/ipc/ipc_process/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a example/$(run_os)/ipc/ipc_socket/Makefile' $(top_distdir)/configure.ac; \
+		\
+		sed -i '/ include\//d' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a include/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a include/$(run_os)/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a include/$(run_os)/ipc/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a include/$(run_os)/ipc/ipc_process/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a include/$(run_os)/ipc/ipc_socket/Makefile' $(top_distdir)/configure.ac; \
+		\
+		sed -i '/ src\//d' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a src/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a src/$(run_os)/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a src/$(run_os)/ipc/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a src/$(run_os)/ipc/ipc_process/Makefile' $(top_distdir)/configure.ac; \
+		sed -i '/ doc\/Makefile/a src/$(run_os)/ipc/ipc_socket/Makefile' $(top_distdir)/configure.ac
 

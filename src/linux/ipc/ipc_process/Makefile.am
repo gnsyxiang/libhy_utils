@@ -42,9 +42,9 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc/ipc_socket     \
-                   -I$(top_srcdir)/include/linux/ipc/ipc_process    \
-                   -I$(top_srcdir)/include/linux                    \
+                   -I$(top_srcdir)/include/$(run_os)/ipc/ipc_socket     \
+                   -I$(top_srcdir)/include/$(run_os)/ipc/ipc_process    \
+                   -I$(top_srcdir)/include/$(run_os)                    \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
@@ -78,3 +78,4 @@ libhy_ipc_process_la_CFLAGS     = $(_cflags_com)
 libhy_ipc_process_la_CXXFLAGS   = $(_cxxflags_com)
 libhy_ipc_process_la_LDFLAGS    = $(_ldflags_com)
 libhy_ipc_process_la_LIBADD     = $(_ldadd_com)
+

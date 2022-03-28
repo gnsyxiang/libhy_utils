@@ -41,7 +41,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/mcu  \
+                   -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -69,3 +69,4 @@ libhy_utils_os_la_CFLAGS     = $(_cflags_com)
 libhy_utils_os_la_CXXFLAGS   = $(_cxxflags_com)
 libhy_utils_os_la_LDFLAGS    = $(_ldflags_com)
 libhy_utils_os_la_LIBADD     = $(_ldadd_com)
+

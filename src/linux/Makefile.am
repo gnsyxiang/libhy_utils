@@ -43,7 +43,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux    \
+                   -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
@@ -71,7 +71,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/linux/ipc/libhy_ipc.la
+_ldadd_com      += $(top_builddir)/src/$(run_os)/ipc/libhy_ipc.la
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
@@ -83,3 +83,4 @@ libhy_utils_os_la_CFLAGS     = $(_cflags_com)
 libhy_utils_os_la_CXXFLAGS   = $(_cxxflags_com)
 libhy_utils_os_la_LDFLAGS    = $(_ldflags_com)
 libhy_utils_os_la_LIBADD     = $(_ldadd_com)
+

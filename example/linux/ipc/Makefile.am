@@ -44,8 +44,8 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc    \
-                   -I$(top_srcdir)/include/linux        \
+                   -I$(top_srcdir)/include/$(run_os)/ipc    \
+                   -I$(top_srcdir)/include/$(run_os)        \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -72,3 +72,4 @@ if COMPILE_LIBLOG4CPLUS
 _include_com    += $(LOG4CPLUS_INCS)
 _ldadd_com      += $(LOG4CPLUS_LIBS)
 endif
+

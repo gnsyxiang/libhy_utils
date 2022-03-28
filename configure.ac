@@ -109,7 +109,8 @@ AC_CONFIG_FILES([Makefile
                  src/linux/ipc/Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
-                 src/mcu/Makefile])
+                 src/mcu/Makefile
+                 ]) # for make dist
 AC_OUTPUT
 
 AC_MSG_RESULT([

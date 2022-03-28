@@ -40,8 +40,8 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/linux/ipc/ipc_socket     \
-                   -I$(top_srcdir)/include/linux                    \
+                   -I$(top_srcdir)/include/$(run_os)/ipc/ipc_socket     \
+                   -I$(top_srcdir)/include/$(run_os)                    \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -89,3 +89,4 @@ hy_ipc_socket_server_test_CFLAGS    = $(_cflags_com)
 hy_ipc_socket_server_test_CXXFLAGS  = $(_cxxflags_com)
 hy_ipc_socket_server_test_LDFLAGS   = $(_ldflags_com)
 hy_ipc_socket_server_test_LDADD     = $(_ldadd_com)
+

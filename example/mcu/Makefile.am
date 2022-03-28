@@ -40,7 +40,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/mcu  \
+                   -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -62,3 +62,4 @@ if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
 _ldadd_com      += $(HY_HAL_LIBS)
 endif
+
