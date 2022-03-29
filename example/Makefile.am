@@ -58,22 +58,9 @@ _ldflags_com    +=
 
 _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
-                   $(LIB_COM)
-
-if COMPILE_LIBHY_HAL
-_include_com    += $(HY_HAL_INCS)
-_ldadd_com      += $(HY_HAL_LIBS)
-endif
-
-if COMPILE_LIBLOG4CPLUS
-_include_com    += $(LOG4CPLUS_INCS)
-_ldadd_com      += $(LOG4CPLUS_LIBS)
-endif
+                   $(ldadd_com)
 
 if COMPILE_LIBCJSON
-_include_com    += $(CJSON_INCS)
-_ldadd_com      += $(CJSON_LIBS)
-
 bin_PROGRAMS                += hy_json_test
 hy_json_test_SOURCES        = $(_sources_com) hy_json_test.c
 hy_json_test_CPPFLAGS       = $(_cppflags_com)

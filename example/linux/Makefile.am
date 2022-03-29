@@ -25,7 +25,7 @@ SUBDIRS = ipc
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    =
+_include_com    = $(include_com)
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
@@ -62,22 +62,7 @@ _ldflags_com    +=
 
 _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
-                   $(LIB_COM)
-
-if COMPILE_LIBHY_HAL
-_include_com    += $(HY_HAL_INCS)
-_ldadd_com      += $(HY_HAL_LIBS)
-endif
-
-if COMPILE_LIBCJSON
-_include_com    += $(CJSON_INCS)
-_ldadd_com      += $(CJSON_LIBS)
-endif
-
-if COMPILE_LIBLOG4CPLUS
-_include_com    += $(LOG4CPLUS_INCS)
-_ldadd_com      += $(LOG4CPLUS_LIBS)
-endif
+                   $(ldadd_com)
 
 bin_PROGRAMS                += hy_fifo_test
 hy_fifo_test_SOURCES        = $(_sources_com) hy_fifo_test.c
@@ -112,9 +97,6 @@ hy_net_wired_test_LDFLAGS   = $(_ldflags_com)
 hy_net_wired_test_LDADD     = $(_ldadd_com)
 
 if COMPILE_LIBPROTOBUF_C
-_include_com    += $(LIBPROTOBUF_C_INCS)
-_ldadd_com      += $(LIBPROTOBUF_C_LIBS)
-
 bin_PROGRAMS                += hy_protobuf-c_test
 hy_protobuf_c_test_SOURCES  = $(_sources_com) hy_protobuf-c_test.c
 hy_protobuf_c_test_CPPFLAGS = $(_cppflags_com)

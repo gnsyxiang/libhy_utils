@@ -27,7 +27,7 @@ SUBDIRS = \
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    =
+_include_com    = $(include_com)
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
@@ -61,15 +61,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
-
-if COMPILE_LIBHY_HAL
-_include_com    += $(HY_HAL_INCS)
-_ldadd_com      += $(HY_HAL_LIBS)
-endif
-
-if COMPILE_LIBLOG4CPLUS
-_include_com    += $(LOG4CPLUS_INCS)
-_ldadd_com      += $(LOG4CPLUS_LIBS)
-endif
+_ldadd_com      += \
+                   $(top_builddir)/src/lib@project_name@.la \
+                   $(ldadd_com)
 

@@ -33,19 +33,39 @@ SUBDIRS = \
 # ------------------
 _install_files_com  =
 _dist_files_com     =
-INCLUDE_COM         =
-LIB_COM             =
+include_com         =
+ldadd_com           =
 
 ACLOCAL_AMFLAGS     = -I m4
-INCLUDE_COM         += $(ACLOCAL_AMFLAGS)
+include_com         += $(ACLOCAL_AMFLAGS)
 
-if COMPILE_LIBCURL
-INCLUDE_COM         += $(CURL_INCS)
-LIB_COM             += $(CURL_LIBS)
+if COMPILE_LIBHY_HAL
+include_com         += $(HY_HAL_INCS)
+ldadd_com           += $(HY_HAL_LIBS)
 endif
 
-export INCLUDE_COM
-export LIB_COM
+if COMPILE_LIBCURL
+include_com         += $(CURL_INCS)
+ldadd_com           += $(CURL_LIBS)
+endif
+
+if COMPILE_LIBPROTOBUF_C
+include_com         += $(LIBPROTOBUF_C_INCS)
+ldadd_com           += $(LIBPROTOBUF_C_LIBS)
+endif
+
+if COMPILE_LIBLOG4CPLUS
+include_com         += $(LOG4CPLUS_INCS)
+ldadd_com           += $(LOG4CPLUS_LIBS)
+endif
+
+if COMPILE_LIBCJSON
+include_com         += $(CJSON_INCS)
+ldadd_com           += $(CJSON_LIBS)
+endif
+
+export include_com
+export ldadd_com 
 
 # ---------------------
 # add necessary content

@@ -75,11 +75,9 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/$(run_os)/ipc/libhy_ipc.la
-
-if COMPILE_LIBHY_HAL
-_include_com    += $(HY_HAL_INCS)
-endif
+_ldadd_com      += \
+                   $(top_builddir)/src/$(run_os)/ipc/libhy_ipc.la \
+                   $(ldadd_com)
 
 libhy_utils_os_la_SOURCES    = $(_sources_com)
 libhy_utils_os_la_CPPFLAGS   = $(_cppflags_com)

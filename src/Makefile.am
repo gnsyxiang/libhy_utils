@@ -27,7 +27,7 @@ lib_LTLIBRARIES = lib@project_name@.la
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    =
+_include_com    = $(include_com)
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
@@ -66,17 +66,14 @@ else
 _ldflags_com    += -export-symbols-regex 'Hy*'
 endif
 
-_ldadd_com      += $(top_builddir)/src/$(run_os)/libhy_utils_os.la
-
-if COMPILE_LIBHY_HAL
-_include_com    += $(HY_HAL_INCS)
-endif
+_ldadd_com      += \
+                   $(top_builddir)/src/$(run_os)/libhy_utils_os.la \
+                   $(ldadd_com)
 
 if COMPILE_LIBCJSON
 _sources_com    += \
                    hy_json.c        \
                    hy_cjson_impl.c
-_include_com    += $(CJSON_INCS)
 endif
 
 lib@project_name@_la_SOURCES    = $(_sources_com)

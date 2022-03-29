@@ -25,7 +25,7 @@ noinst_LTLIBRARIES = libhy_utils_os.la
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    =
+_include_com    = $(include_com)
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
@@ -57,11 +57,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      +=
-
-if COMPILE_LIBHY_HAL
-_include_com    += $(HY_HAL_INCS)
-endif
+_ldadd_com      += $(ldadd_com)
 
 libhy_utils_os_la_SOURCES    = $(_sources_com)
 libhy_utils_os_la_CPPFLAGS   = $(_cppflags_com)
