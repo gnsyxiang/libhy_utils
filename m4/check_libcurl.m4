@@ -24,13 +24,13 @@ dnl ===============================================================
 
 AC_DEFUN([CHECK_LIBCURL], [
 
-    AC_ARG_ENABLE([ssl],
-        [AS_HELP_STRING([--enable-ssl], [enable support for ssl])],
-            [], [enable_ssl=no])
+    AC_ARG_ENABLE([curl],
+        [AS_HELP_STRING([--enable-curl], [enable support for curl])],
+            [], [enable_curl=no])
 
-    case "$enable_ssl" in
+    case "$enable_curl" in
         yes)
-            have_ssl=no
+            have_curl=no
 
             case "$PKG_CONFIG" in
                 '') ;;
@@ -41,7 +41,7 @@ AC_DEFUN([CHECK_LIBCURL], [
                         '') ;;
                         *)
                             CURL_LIBS="$CURL_LIBS"
-                            have_ssl=yes
+                            have_curl=yes
                         ;;
                     esac
 
@@ -49,7 +49,7 @@ AC_DEFUN([CHECK_LIBCURL], [
                 ;;
             esac
 
-            case "$have_ssl" in
+            case "$have_curl" in
                 yes) ;;
                 *)
                     save_LIBS="$LIBS"
@@ -59,9 +59,9 @@ AC_DEFUN([CHECK_LIBCURL], [
                     # clear cache
                     unset ac_cv_search_curl_version
                     AC_SEARCH_LIBS([curl_version], [curl],
-                            [have_ssl=yes
+                            [have_curl=yes
                                 CURL_LIBS="$LIBS"],
-                            [have_ssl=no],
+                            [have_curl=no],
                             [])
                     LIBS="$save_LIBS"
                 ;;
@@ -69,27 +69,27 @@ AC_DEFUN([CHECK_LIBCURL], [
 
             CPPFLAGS_SAVE=$CPPFLAGS
             CPPFLAGS="$CPPFLAGS $CURL_INCS"
-            AC_CHECK_HEADERS([curl/curl.h], [], [have_ssl=no])
+            AC_CHECK_HEADERS([curl/curl.h], [], [have_curl=no])
 
             CPPFLAGS=$CPPFLAGS_SAVE
             AC_SUBST(CURL_INCS)
             AC_SUBST(CURL_LIBS)
 
-            case "$have_ssl" in
+            case "$have_curl" in
                 yes)
-                    AC_DEFINE(HAVE_CURL, 1, [Define if the system has ssl])
+                    AC_DEFINE(HAVE_CURL, 1, [Define if the system has curl])
                 ;;
                 *)
-                    AC_MSG_ERROR([ssl is a must but can not be found. You should add the \
+                    AC_MSG_ERROR([curl is a must but can not be found. You should add the \
 directory containing `libcurl.pc' to the `PKG_CONFIG_PATH' environment variable, \
-or set `CPPFLAGS' and `LDFLAGS' directly for ssl, or use `--disable-ssl' \
-to disable support for ssl encryption])
+or set `CPPFLAGS' and `LDFLAGS' directly for curl, or use `--disable-curl' \
+to disable support for curl encryption])
                 ;;
             esac
         ;;
     esac
 
-    # check if we have and should use ssl
-    AM_CONDITIONAL(COMPILE_LIBCURL, [test "$enable_ssl" != "no" && test "$have_ssl" = "yes"])
+    # check if we have and should use curl
+    AM_CONDITIONAL(COMPILE_LIBCURL, [test "$enable_curl" != "no" && test "$have_curl" = "yes"])
 ])
 

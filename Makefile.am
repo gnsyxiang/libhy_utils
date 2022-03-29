@@ -33,8 +33,19 @@ SUBDIRS = \
 # ------------------
 _install_files_com  =
 _dist_files_com     =
+INCLUDE_COM         =
+LIB_COM             =
 
 ACLOCAL_AMFLAGS     = -I m4
+INCLUDE_COM         += $(ACLOCAL_AMFLAGS)
+
+if COMPILE_LIBCURL
+INCLUDE_COM         += $(CURL_INCS)
+LIB_COM             += $(CURL_LIBS)
+endif
+
+export INCLUDE_COM
+export LIB_COM
 
 # ---------------------
 # add necessary content

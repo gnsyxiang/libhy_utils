@@ -23,7 +23,7 @@
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    =
+_include_com    = $(INCLUDE_COM)
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
@@ -57,7 +57,9 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
+_ldadd_com      += \
+                   $(top_builddir)/src/lib@project_name@.la \
+                   $(LIB_COM)
 
 if COMPILE_LIBHY_HAL
 _include_com    += $(HY_HAL_INCS)
