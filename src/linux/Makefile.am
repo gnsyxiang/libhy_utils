@@ -60,6 +60,10 @@ else
 _sources_com    +=
 endif
 
+if COMPILE_LIBCURL
+_sources_com    += hy_curl.c
+endif
+
 _cppflags_com   += \
                    $(_no_error_com) \
                    $(_include_com)  \
