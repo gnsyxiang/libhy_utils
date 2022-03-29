@@ -10,7 +10,7 @@ gcc_version=x86_64-linux-gnu
 host=
 cross_gcc_path=
 
-configure_param=--enable-cjson --enable-libz --enable-ssl --enable-curl
+configure_param=
 
 cppflag=-fstack-protector-all
 cflag=

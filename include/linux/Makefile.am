@@ -34,13 +34,16 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
-                           hy_curl.h        \
                            hy_fifo.h        \
                            hy_hash.h        \
                            hy_net.h         \
                            hy_net_wired.h   \
                            hy_thread_pool.h \
                            hy_timer.h
+
+if COMPILE_LIBCURL
+_install_headers_com    += hy_curl.h
+endif
 
 # ------------------
 # make install files
