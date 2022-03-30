@@ -37,9 +37,9 @@
 
 typedef struct {
     void        *log_h;
-    void        *fifo_handle;
     void        *signal_h;
-    void        *thread_handle;
+    void        *fifo_h;
+    void        *thread_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
@@ -51,9 +51,9 @@ static hy_s32_t _get_fifo_loop_cb(void *args)
     hy_u32_t len;
     char c;
     while (!context->exit_flag) {
-        len = HyFifoGetInfo(context->fifo_handle, HY_FIFO_INFO_USED_LEN);
+        len = HyFifoGetInfo(context->fifo_h, HY_FIFO_INFO_USED_LEN);
         if (len > 0) {
-            HyFifoRead(context->fifo_handle, &c, 1);
+            HyFifoRead(context->fifo_h, &c, 1);
             LOGD("c: %c \n", c);
         }
 
@@ -85,10 +85,10 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"thread",      &context->thread_handle,    HyThreadDestroy},
-        {"fifo",        &context->fifo_handle,      HyFifoDestroy},
-        {"signal",      &context->signal_h,         HySignalDestroy},
-        {"log",         &context->log_h,            HyLogDestroy},
+        {"thread",      &context->thread_h,     HyThreadDestroy},
+        {"fifo",        &context->fifo_h,       HyFifoDestroy},
+        {"signal",      &context->signal_h,     HySignalDestroy},
+        {"log",         &context->log_h,        HyLogDestroy},
     };
 
     RUN_DESTROY(module);
@@ -103,7 +103,7 @@ static _main_context_t *_module_create(void)
     HyLogConfig_s log_c;
     log_c.save_c.buf_len_min  = 512;
     log_c.save_c.buf_len_max  = 512;
-    log_c.save_c.level        = HY_LOG_LEVEL_DEBUG;
+    log_c.save_c.level        = HY_LOG_LEVEL_TRACE;
     log_c.save_c.color_enable = HY_TYPE_FLAG_ENABLE;
 
     hy_s8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
@@ -139,10 +139,10 @@ static _main_context_t *_module_create(void)
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
-        {"log",         &context->log_h,            &log_c,             (create_t)HyLogCreate,      HyLogDestroy},
-        {"signal",      &context->signal_h,         &signal_c,          (create_t)HySignalCreate,   HySignalDestroy},
-        {"fifo",        &context->fifo_handle,      &fifo_config,       (create_t)HyFifoCreate,     HyFifoDestroy},
-        {"thread",      &context->thread_handle,    &thread_c,          (create_t)HyThreadCreate,   HyThreadDestroy},
+        {"log",         &context->log_h,        &log_c,             (create_t)HyLogCreate,      HyLogDestroy},
+        {"signal",      &context->signal_h,     &signal_c,          (create_t)HySignalCreate,   HySignalDestroy},
+        {"fifo",        &context->fifo_h,       &fifo_config,       (create_t)HyFifoCreate,     HyFifoDestroy},
+        {"thread",      &context->thread_h,     &thread_c,          (create_t)HyThreadCreate,   HyThreadDestroy},
     };
 
     RUN_CREATE(module);
@@ -164,10 +164,10 @@ int main(int argc, char *argv[])
     char c = 'a';
     hy_u32_t ret = 0;
     while (!context->exit_flag) {
-        ret = HyFifoWrite(context->fifo_handle, &c, 1);
+        ret = HyFifoWrite(context->fifo_h, &c, 1);
         while (!context->exit_flag && ret == 0) {
             usleep(500 * 1000);
-            ret = HyFifoWrite(context->fifo_handle, &c, 1);
+            ret = HyFifoWrite(context->fifo_h, &c, 1);
         }
         cnt += 1;
 
@@ -181,11 +181,12 @@ int main(int argc, char *argv[])
         usleep(500 * 1000);
     }
 
-    HyFifoDump(context->fifo_handle, HY_FIFO_DUMP_CONTENT);
+    HyFifoDump(context->fifo_h, HY_FIFO_DUMP_CONTENT);
 
-    HyFifoDump(context->fifo_handle, HY_FIFO_DUMP_ALL);
+    HyFifoDump(context->fifo_h, HY_FIFO_DUMP_ALL);
 
     _module_destroy(&context);
 
     return 0;
 }
+

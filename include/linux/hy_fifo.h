@@ -24,7 +24,6 @@
 extern "C" {
 #endif
 
-#include "hy_hal/hy_string.h"
 #include "hy_hal/hy_type.h"
 
 /**
