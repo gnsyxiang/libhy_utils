@@ -61,44 +61,44 @@ _ldadd_com      += \
                    $(ldadd_com)
 
 if COMPILE_LIBCJSON
-bin_PROGRAMS                += hy_json_test
-hy_json_test_SOURCES        = $(_sources_com) hy_json_test.c
-hy_json_test_CPPFLAGS       = $(_cppflags_com)
-hy_json_test_CFLAGS         = $(_cflags_com)
-hy_json_test_CXXFLAGS       = $(_cxxflags_com)
-hy_json_test_LDFLAGS        = $(_ldflags_com)
-hy_json_test_LDADD          = $(_ldadd_com)
+bin_PROGRAMS                += hy_json_demo
+hy_json_demo_SOURCES        = $(_sources_com) hy_json_demo.c
+hy_json_demo_CPPFLAGS       = $(_cppflags_com)
+hy_json_demo_CFLAGS         = $(_cflags_com)
+hy_json_demo_CXXFLAGS       = $(_cxxflags_com)
+hy_json_demo_LDFLAGS        = $(_ldflags_com)
+hy_json_demo_LDADD          = $(_ldadd_com)
 endif
 
-bin_PROGRAMS                += hy_list_test
-hy_list_test_SOURCES        = $(_sources_com) hy_list_test.c
-hy_list_test_CPPFLAGS       = $(_cppflags_com)
-hy_list_test_CFLAGS         = $(_cflags_com)
-hy_list_test_CXXFLAGS       = $(_cxxflags_com)
-hy_list_test_LDFLAGS        = $(_ldflags_com)
-hy_list_test_LDADD          = $(_ldadd_com)
+bin_PROGRAMS                += hy_list_demo
+hy_list_demo_SOURCES        = $(_sources_com) hy_list_demo.c
+hy_list_demo_CPPFLAGS       = $(_cppflags_com)
+hy_list_demo_CFLAGS         = $(_cflags_com)
+hy_list_demo_CXXFLAGS       = $(_cxxflags_com)
+hy_list_demo_LDFLAGS        = $(_ldflags_com)
+hy_list_demo_LDADD          = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_md5sum_test
-hy_md5sum_test_SOURCES      = $(_sources_com) hy_md5sum_test.c
-hy_md5sum_test_CPPFLAGS     = $(_cppflags_com)
-hy_md5sum_test_CFLAGS       = $(_cflags_com)
-hy_md5sum_test_CXXFLAGS     = $(_cxxflags_com)
-hy_md5sum_test_LDFLAGS      = $(_ldflags_com)
-hy_md5sum_test_LDADD        = $(_ldadd_com)
+bin_PROGRAMS                += hy_md5sum_demo
+hy_md5sum_demo_SOURCES      = $(_sources_com) hy_md5sum_demo.c
+hy_md5sum_demo_CPPFLAGS     = $(_cppflags_com)
+hy_md5sum_demo_CFLAGS       = $(_cflags_com)
+hy_md5sum_demo_CXXFLAGS     = $(_cxxflags_com)
+hy_md5sum_demo_LDFLAGS      = $(_ldflags_com)
+hy_md5sum_demo_LDADD        = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_sort_test
-hy_sort_test_SOURCES        = $(_sources_com) hy_sort_test.c
-hy_sort_test_CPPFLAGS       = $(_cppflags_com)
-hy_sort_test_CFLAGS         = $(_cflags_com)
-hy_sort_test_CXXFLAGS       = $(_cxxflags_com)
-hy_sort_test_LDFLAGS        = $(_ldflags_com)
-hy_sort_test_LDADD          = $(_ldadd_com)
+bin_PROGRAMS                += hy_sort_demo
+hy_sort_demo_SOURCES        = $(_sources_com) hy_sort_demo.c
+hy_sort_demo_CPPFLAGS       = $(_cppflags_com)
+hy_sort_demo_CFLAGS         = $(_cflags_com)
+hy_sort_demo_CXXFLAGS       = $(_cxxflags_com)
+hy_sort_demo_LDFLAGS        = $(_ldflags_com)
+hy_sort_demo_LDADD          = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_utils_test
-hy_utils_test_SOURCES       = $(_sources_com) hy_utils_test.c
-hy_utils_test_CPPFLAGS      = $(_cppflags_com)
-hy_utils_test_CFLAGS        = $(_cflags_com)
-hy_utils_test_CXXFLAGS      = $(_cxxflags_com)
-hy_utils_test_LDFLAGS       = $(_ldflags_com)
-hy_utils_test_LDADD         = $(_ldadd_com)
+bin_PROGRAMS                += hy_utils_demo
+hy_utils_demo_SOURCES       = $(_sources_com) hy_utils_demo.c
+hy_utils_demo_CPPFLAGS      = $(_cppflags_com)
+hy_utils_demo_CFLAGS        = $(_cflags_com)
+hy_utils_demo_CXXFLAGS      = $(_cxxflags_com)
+hy_utils_demo_LDFLAGS       = $(_ldflags_com)
+hy_utils_demo_LDADD         = $(_ldadd_com)
 

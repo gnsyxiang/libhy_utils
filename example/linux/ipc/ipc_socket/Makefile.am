@@ -61,19 +61,19 @@ _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
                    $(ldadd_com)
 
-bin_PROGRAMS                        += hy_ipc_socket_client_test
-hy_ipc_socket_client_test_SOURCES   = $(_sources_com) hy_ipc_socket_client_test.c
-hy_ipc_socket_client_test_CPPFLAGS  = $(_cppflags_com)
-hy_ipc_socket_client_test_CFLAGS    = $(_cflags_com)
-hy_ipc_socket_client_test_CXXFLAGS  = $(_cxxflags_com)
-hy_ipc_socket_client_test_LDFLAGS   = $(_ldflags_com)
-hy_ipc_socket_client_test_LDADD     = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_socket_client_demo
+hy_ipc_socket_client_demo_SOURCES   = $(_sources_com) hy_ipc_socket_client_demo.c
+hy_ipc_socket_client_demo_CPPFLAGS  = $(_cppflags_com)
+hy_ipc_socket_client_demo_CFLAGS    = $(_cflags_com)
+hy_ipc_socket_client_demo_CXXFLAGS  = $(_cxxflags_com)
+hy_ipc_socket_client_demo_LDFLAGS   = $(_ldflags_com)
+hy_ipc_socket_client_demo_LDADD     = $(_ldadd_com)
 
-bin_PROGRAMS                        += hy_ipc_socket_server_test
-hy_ipc_socket_server_test_SOURCES   = $(_sources_com) hy_ipc_socket_server_test.c
-hy_ipc_socket_server_test_CPPFLAGS  = $(_cppflags_com)
-hy_ipc_socket_server_test_CFLAGS    = $(_cflags_com)
-hy_ipc_socket_server_test_CXXFLAGS  = $(_cxxflags_com)
-hy_ipc_socket_server_test_LDFLAGS   = $(_ldflags_com)
-hy_ipc_socket_server_test_LDADD     = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_socket_server_demo
+hy_ipc_socket_server_demo_SOURCES   = $(_sources_com) hy_ipc_socket_server_demo.c
+hy_ipc_socket_server_demo_CPPFLAGS  = $(_cppflags_com)
+hy_ipc_socket_server_demo_CFLAGS    = $(_cflags_com)
+hy_ipc_socket_server_demo_CXXFLAGS  = $(_cxxflags_com)
+hy_ipc_socket_server_demo_LDFLAGS   = $(_ldflags_com)
+hy_ipc_socket_server_demo_LDADD     = $(_ldadd_com)
 

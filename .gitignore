@@ -81,10 +81,9 @@ doxygen/
 *.o
 *.lo
 *.la
-hy_*_test
-
-hy_utils.pc
-example/main
+hy_*_demo
 example/linux/*.pb-c.c
 example/linux/*.pb-c.h
+
+hy_utils.pc
 

@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_utils_test.c
+ * @file    hy_utils_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 14:16
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        uint32_t ip_num = 3232235886;
+        hy_u32_t ip_num = 3232235886;
         char ip_str[IP_STR_DOT_LEN] = {0};
 
         HyUtilsIpInt2Str(ip_num, ip_str, sizeof(ip_str));
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        uint32_t dec = 0xaa;
+        hy_u32_t dec = 0xaa;
         char buf[BUF_LEN] = {0};
 
         HyUtilsDec2BitStr(dec, 8, buf, sizeof(buf));

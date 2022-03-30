@@ -62,44 +62,44 @@ _ldadd_com      += \
                    $(ldadd_com)
 
 if COMPILE_DEBUG_INFO
-bin_PROGRAMS                        += hy_ipc_link_test
-hy_ipc_link_test_SOURCES            = $(_sources_com) ipc_link_test.c
-hy_ipc_link_test_CPPFLAGS           = $(_cppflags_com)
-hy_ipc_link_test_CFLAGS             = $(_cflags_com)
-hy_ipc_link_test_CXXFLAGS           = $(_cxxflags_com)
-hy_ipc_link_test_LDFLAGS            = $(_ldflags_com)
-hy_ipc_link_test_LDADD              = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_link_demo
+hy_ipc_link_demo_SOURCES            = $(_sources_com) ipc_link_demo.c
+hy_ipc_link_demo_CPPFLAGS           = $(_cppflags_com)
+hy_ipc_link_demo_CFLAGS             = $(_cflags_com)
+hy_ipc_link_demo_CXXFLAGS           = $(_cxxflags_com)
+hy_ipc_link_demo_LDFLAGS            = $(_ldflags_com)
+hy_ipc_link_demo_LDADD              = $(_ldadd_com)
 
-bin_PROGRAMS                        += hy_ipc_link_manager_test
-hy_ipc_link_manager_test_SOURCES    = $(_sources_com) ipc_link_manager_test.c
-hy_ipc_link_manager_test_CPPFLAGS   = $(_cppflags_com)
-hy_ipc_link_manager_test_CFLAGS     = $(_cflags_com)
-hy_ipc_link_manager_test_CXXFLAGS   = $(_cxxflags_com)
-hy_ipc_link_manager_test_LDFLAGS    = $(_ldflags_com)
-hy_ipc_link_manager_test_LDADD      = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_link_manager_demo
+hy_ipc_link_manager_demo_SOURCES    = $(_sources_com) ipc_link_manager_demo.c
+hy_ipc_link_manager_demo_CPPFLAGS   = $(_cppflags_com)
+hy_ipc_link_manager_demo_CFLAGS     = $(_cflags_com)
+hy_ipc_link_manager_demo_CXXFLAGS   = $(_cxxflags_com)
+hy_ipc_link_manager_demo_LDFLAGS    = $(_ldflags_com)
+hy_ipc_link_manager_demo_LDADD      = $(_ldadd_com)
 endif
 
-bin_PROGRAMS                        += hy_ipc_process_client_test
-hy_ipc_process_client_test_SOURCES  = $(_sources_com) hy_ipc_process_client_test.c
-hy_ipc_process_client_test_CPPFLAGS = $(_cppflags_com)
-hy_ipc_process_client_test_CFLAGS   = $(_cflags_com)
-hy_ipc_process_client_test_CXXFLAGS = $(_cxxflags_com)
-hy_ipc_process_client_test_LDFLAGS  = $(_ldflags_com)
-hy_ipc_process_client_test_LDADD    = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_process_client_demo
+hy_ipc_process_client_demo_SOURCES  = $(_sources_com) hy_ipc_process_client_demo.c
+hy_ipc_process_client_demo_CPPFLAGS = $(_cppflags_com)
+hy_ipc_process_client_demo_CFLAGS   = $(_cflags_com)
+hy_ipc_process_client_demo_CXXFLAGS = $(_cxxflags_com)
+hy_ipc_process_client_demo_LDFLAGS  = $(_ldflags_com)
+hy_ipc_process_client_demo_LDADD    = $(_ldadd_com)
 
-bin_PROGRAMS                            += hy_ipc_process_client_set_test
-hy_ipc_process_client_set_test_SOURCES  = $(_sources_com) hy_ipc_process_client_set_test.c
-hy_ipc_process_client_set_test_CPPFLAGS = $(_cppflags_com)
-hy_ipc_process_client_set_test_CFLAGS   = $(_cflags_com)
-hy_ipc_process_client_set_test_CXXFLAGS = $(_cxxflags_com)
-hy_ipc_process_client_set_test_LDFLAGS  = $(_ldflags_com)
-hy_ipc_process_client_set_test_LDADD    = $(_ldadd_com)
+bin_PROGRAMS                            += hy_ipc_process_client_set_demo
+hy_ipc_process_client_set_demo_SOURCES  = $(_sources_com) hy_ipc_process_client_set_demo.c
+hy_ipc_process_client_set_demo_CPPFLAGS = $(_cppflags_com)
+hy_ipc_process_client_set_demo_CFLAGS   = $(_cflags_com)
+hy_ipc_process_client_set_demo_CXXFLAGS = $(_cxxflags_com)
+hy_ipc_process_client_set_demo_LDFLAGS  = $(_ldflags_com)
+hy_ipc_process_client_set_demo_LDADD    = $(_ldadd_com)
 
-bin_PROGRAMS                        += hy_ipc_process_server_test
-hy_ipc_process_server_test_SOURCES  = $(_sources_com) hy_ipc_process_server_test.c
-hy_ipc_process_server_test_CPPFLAGS = $(_cppflags_com)
-hy_ipc_process_server_test_CFLAGS   = $(_cflags_com)
-hy_ipc_process_server_test_CXXFLAGS = $(_cxxflags_com)
-hy_ipc_process_server_test_LDFLAGS  = $(_ldflags_com)
-hy_ipc_process_server_test_LDADD    = $(_ldadd_com)
+bin_PROGRAMS                        += hy_ipc_process_server_demo
+hy_ipc_process_server_demo_SOURCES  = $(_sources_com) hy_ipc_process_server_demo.c
+hy_ipc_process_server_demo_CPPFLAGS = $(_cppflags_com)
+hy_ipc_process_server_demo_CFLAGS   = $(_cflags_com)
+hy_ipc_process_server_demo_CXXFLAGS = $(_cxxflags_com)
+hy_ipc_process_server_demo_LDFLAGS  = $(_ldflags_com)
+hy_ipc_process_server_demo_LDADD    = $(_ldadd_com)
 

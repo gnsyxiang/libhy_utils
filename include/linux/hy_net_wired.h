@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include "hy_hal/hy_type.h"
 
 #define HY_NET_WIRED_DEV_NAME_LEN_MAX   (16)
 #define HY_NET_WIRED_REG_VAL_GROUP      (2)
@@ -57,15 +57,15 @@ typedef enum {
  * @brief 寄存器结构
  */
 typedef struct {
-    uint32_t reg;                           ///< 寄存器地址
-    uint32_t val;                           ///< 寄存器值
+    hy_u32_t reg;                           ///< 寄存器地址
+    hy_u32_t val;                           ///< 寄存器值
 } HyNetWiredRegVal_t;
 
 /**
  * @brief led模式与寄存器对应
  */
 typedef struct {
-    int32_t mode;                                               ///< 模式，详见HY_NET_WIRED_LED_MODE_t
+    hy_s32_t mode;                                               ///< 模式，详见HY_NET_WIRED_LED_MODE_t
     HyNetWiredRegVal_t reg_val[HY_NET_WIRED_REG_VAL_GROUP];     ///< 寄存器，详见HyNetWiredRegVal_t
 } HyNetWiredLed_t;
 
@@ -106,7 +106,7 @@ void HyNetWiredDestroy(void **handle);
  * @param led led，详见HY_NET_WIRED_LED_t
  * @param mode led模式，详见HY_NET_WIRED_LED_MODE_t
  */
-void HyNetWiredSetLed(int32_t led, int32_t mode);
+void HyNetWiredSetLed(hy_s32_t led, hy_s32_t mode);
 
 #ifdef __cplusplus
 }

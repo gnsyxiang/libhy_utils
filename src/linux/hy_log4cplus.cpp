@@ -65,7 +65,7 @@ void HyLogWrite(LogLevel level, const char *file,
     }
 }
 
-void HyLogHex(const char *name, uint32_t line,
+void HyLogHex(const char *name, hy_u32_t line,
         void *_buf, size_t len, int8_t flag)
 {
     if (len <= 0) {

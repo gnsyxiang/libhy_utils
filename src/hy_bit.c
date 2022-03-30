@@ -24,7 +24,7 @@
 
 #include "hy_bit.h"
 
-void HyBitSet(char *byte, uint32_t index)
+void HyBitSet(char *byte, hy_u32_t index)
 {
     HY_ASSERT_RET(!byte);
 
@@ -34,7 +34,7 @@ void HyBitSet(char *byte, uint32_t index)
     byte[byte_index] = byte[byte_index] | 1 << (7 - bit_index);
 }
 
-int32_t HyBitVal(char *byte, uint32_t index)
+hy_s32_t HyBitVal(char *byte, hy_u32_t index)
 {
     HY_ASSERT_RET_VAL(!byte, -1);
 

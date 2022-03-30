@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_md5sum_test.h
+ * @file    hy_md5sum_demo.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 13:56
@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "hy_hal/hy_type.h"
+
 #include "hy_md5sum.h"
 
 int main(int argc, const char *argv[])
@@ -35,7 +37,7 @@ int main(int argc, const char *argv[])
 
     HyMd5sum(msg, strlen((char *)msg), digest);
 
-    for (int32_t i = 0; i < 16; i++) {
+    for (hy_s32_t i = 0; i < 16; i++) {
         printf("%2.2x", digest[i]);
     }
     printf("\n");

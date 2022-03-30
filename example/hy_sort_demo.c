@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_sort_test.c
+ * @file    hy_sort_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 13:45
@@ -31,7 +31,7 @@
 #include "hy_sort.h"
 
 typedef struct {
-    void *log_h;
+    void    *log_h;
 } _main_context_t;
 
 static hy_s32_t _swap_int_cb(void *src, void *dst)

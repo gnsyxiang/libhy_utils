@@ -82,9 +82,9 @@ static _net_wired_context_t *context = NULL;
         }                                                               \
     } while (0);
 
-static int32_t _led_set(_led_mode_t *led_mode)
+static hy_s32_t _led_set(_led_mode_t *led_mode)
 {
-    int32_t skfd = -1;
+    hy_s32_t skfd = -1;
     struct ifreq ifr;
     HyNetWiredLed_t *led = context->save_config.led[led_mode->led];
     HyNetWiredRegVal_t *reg_val = led[led_mode->mode].reg_val;

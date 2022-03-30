@@ -83,7 +83,7 @@ void HyUtilsStr2Int2Hex(char *str, size_t str_len, char *addr, size_t addr_len)
 
 hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len)
 {
-    uint32_t num = 0;
+    hy_u32_t num = 0;
 
     for (size_t i = 0; i < len; i++) {
         char buf[2] = {0};

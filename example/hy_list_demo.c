@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_list_test.c
+ * @file    hy_list_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    30/10 2021 10:43
@@ -31,17 +31,17 @@
 #include "hy_list.h"
 
 typedef struct {
-    char name[HY_STRING_BUF_MAX_LEN_32];
-    hy_s32_t id;
+    char                    name[HY_STRING_BUF_MAX_LEN_32];
+    hy_s32_t                id;
 
-    struct hy_list_head entry;
+    struct hy_list_head     entry;
 } _student_t;
 
 typedef struct {
-    void *log_h;
+    void                    *log_h;
 
-    struct hy_list_head list;
-    hy_u32_t list_cnt;
+    struct hy_list_head     list;
+    hy_u32_t                list_cnt;
 } _main_context_t;
 
 static void _dump_list(struct hy_list_head *list, const char *tag)
