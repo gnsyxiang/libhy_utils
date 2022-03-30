@@ -52,7 +52,8 @@ _sources_com    += \
                    hy_net.c             \
                    hy_net_wired.c       \
                    hy_thread_pool.c     \
-                   hy_timer.c
+                   hy_timer.c           \
+                   hy_utils_linux.c
 
 if COMPILE_LIBLOG4CPLUS
 _sources_com    += hy_log4cplus.cpp

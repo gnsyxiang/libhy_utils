@@ -39,7 +39,8 @@ _install_headers_com    += \
                            hy_net.h         \
                            hy_net_wired.h   \
                            hy_thread_pool.h \
-                           hy_timer.h
+                           hy_timer.h       \
+                           hy_utils_linux.h
 
 if COMPILE_LIBCURL
 _install_headers_com    += hy_curl.h
