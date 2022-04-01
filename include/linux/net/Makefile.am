@@ -29,7 +29,8 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 # add necessary content
 # ---------------------
-_no_install_headers_com +=
+_no_install_headers_com += \
+                           net_wifi_config.h
 
 _install_headers_com    +=
 
