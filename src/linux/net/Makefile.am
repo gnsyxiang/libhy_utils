@@ -46,7 +46,8 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   net_wifi_config.c
+                   net_wifi_config.c    \
+                   hy_net_wifi.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

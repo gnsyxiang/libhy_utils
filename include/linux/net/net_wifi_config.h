@@ -24,29 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_hal/hy_type.h"
-
-#define NET_WIFI_CONFIG_DEV_NAME_LEN_MAX    (8)
-#define NET_WIFI_CONFIG_SSID_LEN_MAX        (32)
-#define NET_WIFI_CONFIG_PWD_LEN_MAX         (32)
-
-typedef struct {
-    char        name[NET_WIFI_CONFIG_DEV_NAME_LEN_MAX];
-    hy_s32_t    enable;
-    hy_s32_t    dhcp;
-
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
-
-    char        ssid[NET_WIFI_CONFIG_SSID_LEN_MAX];
-    char        pwd[NET_WIFI_CONFIG_PWD_LEN_MAX];
-
-    hy_u32_t    wpa_version;
-    hy_s32_t    encrypt;
-} net_wifi_config_s;
+#include "hy_net_wifi.h"
 
 typedef void (*net_wifi_config_set_default_cb_t)(
         net_wifi_config_s *net_wifi_c, void *args);
@@ -66,6 +44,16 @@ void net_wifi_config_destroy(void **handle);
 
 hy_s32_t net_wifi_config_load(void *handle, net_wifi_config_s *net_wifi_c);
 hy_s32_t net_wifi_config_save(void *handle, net_wifi_config_s *net_wifi_c);
+
+#define net_wifi_config_create_m(_file_path, _set_default_cb, _args)        \
+    ({                                                                      \
+        net_wifi_config_config_s net_wifi_config_c;                         \
+        HY_MEMSET(&net_wifi_config_c, sizeof(net_wifi_config_c));           \
+        net_wifi_config_c.save_c.file_path          = _file_path;           \
+        net_wifi_config_c.save_c.set_default_cb     = _set_default_cb;      \
+        net_wifi_config_c.save_c.args               = _args;                \
+        net_wifi_config_create(&net_wifi_config_c);                         \
+     })
 
 #ifdef __cplusplus
 }
