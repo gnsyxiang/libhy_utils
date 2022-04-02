@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_net_wifi.c
+ * @file    net_wifi.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    01/04 2022 16:36
@@ -25,18 +25,18 @@
 #include "hy_hal/hy_log.h"
 
 #include "net_wifi_config.h"
-#include "hy_net_wifi.h"
+#include "net_wifi.h"
 
 #define _WIFI_CONFIG_PATH   "./wifi_config.json"
 
 typedef struct {
-    HyNetWifiSaveConfig_t   save_c;
+    NetWifiSaveConfig_t     save_c;
 
     net_wifi_config_s       net_wifi_config;
     void                    *net_wifi_config_h;
 } _net_wifi_s;
 
-void HyNetWifiDestroy(void **handle)
+void NetWifiDestroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
@@ -49,7 +49,7 @@ void HyNetWifiDestroy(void **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *HyNetWifiCreate(HyNetWifiConfig_t *net_wifi_c)
+void *NetWifiCreate(NetWifiConfig_t *net_wifi_c)
 {
     LOGT("net_wifi_c: %p \n", net_wifi_c);
     HY_ASSERT_RET_VAL(!net_wifi_c, NULL);
@@ -76,7 +76,7 @@ void *HyNetWifiCreate(HyNetWifiConfig_t *net_wifi_c)
     } while (0);
 
     LOGE("net wifi create failed \n");
-    HyNetWifiDestroy((void **)&context);
+    NetWifiDestroy((void **)&context);
     return NULL;
 }
 

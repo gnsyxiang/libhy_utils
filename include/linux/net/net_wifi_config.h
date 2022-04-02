@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_net_wifi.h"
+#include "net_wifi.h"
 
 typedef void (*net_wifi_config_set_default_cb_t)(
         net_wifi_config_s *net_wifi_c, void *args);

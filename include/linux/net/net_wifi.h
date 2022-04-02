@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_net_wifi.h
+ * @file    net_wifi.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    01/04 2022 11:44
@@ -17,8 +17,8 @@
  * 
  *     last modified: 01/04 2022 11:44
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_NET_WIFI_H_
-#define __LIBHY_UTILS_INCLUDE_HY_NET_WIFI_H_
+#ifndef __LIBHY_UTILS_INCLUDE_NET_WIFI_H_
+#define __LIBHY_UTILS_INCLUDE_NET_WIFI_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,30 +48,30 @@ typedef struct {
     hy_s32_t    cipher;
 } net_wifi_config_s;
 
-typedef void (*HyNetWifiStartCb_t)(void *args);
-typedef void (*HyNetWifiStopCb_t)(void *args);
+typedef void (*NetWifiStartCb_t)(void *args);
+typedef void (*NetWifiStopCb_t)(void *args);
 
-typedef void (*HyNetWifiSetDefaultCb_t)(net_wifi_config_s *net_wifi_c, void *args);
+typedef void (*NetWifiSetDefaultCb_t)(net_wifi_config_s *net_wifi_c, void *args);
 
 typedef struct {
     const char                  *name;
 
-    HyNetWifiStartCb_t          start_cb;
-    HyNetWifiStopCb_t           stop_cb;
+    NetWifiStartCb_t          start_cb;
+    NetWifiStopCb_t           stop_cb;
     void                        *args;
-} HyNetWifiSaveConfig_t;
+} NetWifiSaveConfig_t;
 
 typedef struct {
-    HyNetWifiSaveConfig_t       save_c;
+    NetWifiSaveConfig_t       save_c;
 
-    HyNetWifiSetDefaultCb_t     set_default_cb;
+    NetWifiSetDefaultCb_t     set_default_cb;
     void                        *args;
-} HyNetWifiConfig_t;
+} NetWifiConfig_t;
 
-void *HyNetWifiCreate(HyNetWifiConfig_t *net_wifi_c);
-void HyNetWifiDestroy(void **handle);
+void *NetWifiCreate(NetWifiConfig_t *net_wifi_c);
+void NetWifiDestroy(void **handle);
 
-hy_s32_t HyNetWifiIsEnable();
+hy_s32_t NetWifiIsEnable();
 
 #ifdef __cplusplus
 }
