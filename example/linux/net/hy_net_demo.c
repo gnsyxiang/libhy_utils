@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
@@ -46,6 +47,28 @@ typedef struct {
 static void _eth_state_cb(HyNetState_e state, void *args)
 {
 
+}
+
+static void _eth_set_default_cb(HyNetEthConfig_s *eth_c, void *args)
+{
+
+}
+
+static void _wifi_power_gpio_cb(HyGpio_s *gpio)
+{
+
+}
+
+static void _wifi_set_default_cb(HyNetWifiConfig_s *wifi_c, void *args)
+{
+    HY_ASSERT_RET(!wifi_c);
+
+    HY_STRCPY(wifi_c->name, "wlan0");
+    HY_STRCPY(wifi_c->ssid, "ipctest");
+    HY_STRCPY(wifi_c->pwd,  "12345678");
+
+    wifi_c->enable = 1;
+    wifi_c->dhcp = 1;
 }
 
 static void _wifi_state_cb(HyNetState_e state, void *args)
@@ -128,12 +151,16 @@ static _main_context_t *_module_create(void)
     net_c.save_c.wifi_state_cb  = _wifi_state_cb;
     net_c.save_c.eth_state_cb   = _eth_state_cb;
     net_c.save_c.args           = context;
+    net_c.wifi_set_default_cb   = _wifi_set_default_cb;
+    net_c.eth_set_default_cb    = _eth_set_default_cb;
+    net_c.wifi_power_gpio       = _wifi_power_gpio_cb;
+    net_c.args                  = context;
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",         &context->log_h,        &log_c,         (create_t)HyLogCreate,          HyLogDestroy},
         {"signal",      &context->signal_h,     &signal_c,      (create_t)HySignalCreate,       HySignalDestroy},
-        {"net",         &context->net_h,        &signal_c,      (create_t)HyNetCreate,          HyNetDestroy},
+        {"net",         &context->net_h,        &net_c,         (create_t)HyNetCreate,          HyNetDestroy},
     };
 
     RUN_CREATE(module);

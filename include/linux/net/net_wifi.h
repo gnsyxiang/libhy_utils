@@ -24,54 +24,28 @@
 extern "C" {
 #endif
 
-#include "hy_hal/hy_type.h"
-
-#define NET_WIFI_DEV_NAME_LEN_MAX    (8)
-#define NET_WIFI_SSID_LEN_MAX        (32)
-#define NET_WIFI_PWD_LEN_MAX         (32)
+#include "hy_net.h"
 
 typedef struct {
-    char        name[NET_WIFI_DEV_NAME_LEN_MAX];
-    hy_s32_t    enable;
-    hy_s32_t    dhcp;
-
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
-
-    char        ssid[NET_WIFI_SSID_LEN_MAX];
-    char        pwd[NET_WIFI_PWD_LEN_MAX];
-
-    hy_u32_t    wpa_version;
-    hy_s32_t    cipher;
-} net_wifi_config_s;
-
-typedef void (*NetWifiStartCb_t)(void *args);
-typedef void (*NetWifiStopCb_t)(void *args);
-
-typedef void (*NetWifiSetDefaultCb_t)(net_wifi_config_s *net_wifi_c, void *args);
-
-typedef struct {
-    const char                  *name;
-
-    NetWifiStartCb_t          start_cb;
-    NetWifiStopCb_t           stop_cb;
-    void                        *args;
+    HyNetWifiConfig_s       *wifi_c;
+    HyGpio_s                gpio;
 } NetWifiSaveConfig_t;
 
 typedef struct {
-    NetWifiSaveConfig_t       save_c;
-
-    NetWifiSetDefaultCb_t     set_default_cb;
-    void                        *args;
+    NetWifiSaveConfig_t     save_c;
 } NetWifiConfig_t;
 
-void *NetWifiCreate(NetWifiConfig_t *net_wifi_c);
-void NetWifiDestroy(void **handle);
+void *net_wifi_create(NetWifiConfig_t *net_wifi_c);
+void net_wifi_destroy(void **handle);
 
-hy_s32_t NetWifiIsEnable();
+#define net_wifi_create_m(_gpio, _wifi_c)                               \
+    ({                                                                  \
+        NetWifiConfig_t net_wifi_c;                                     \
+        HY_MEMSET(&net_wifi_c, sizeof(net_wifi_c));                     \
+        HY_MEMCPY(&net_wifi_c.save_c.gpio, _gpio, sizeof(*_gpio));        \
+        net_wifi_c.save_c.wifi_c    = _wifi_c;                          \
+        net_wifi_create(&net_wifi_c);                                   \
+     })
 
 #ifdef __cplusplus
 }
