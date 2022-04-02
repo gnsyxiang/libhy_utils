@@ -47,8 +47,8 @@ _include_com    += \
 
 _sources_com    += \
                    hy_net.c             \
-                   net_wifi.c           \
-                   net_wifi_config.c
+                   net_config.c         \
+                   net_wifi.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

@@ -30,8 +30,8 @@ install_includedir      = $(includedir)/@project_name@
 # add necessary content
 # ---------------------
 _no_install_headers_com += \
-                           net_wifi.h           \
-                           net_wifi_config.h
+                           net_config.h         \
+                           net_wifi.h
 
 _install_headers_com    += \
                            hy_net.h
