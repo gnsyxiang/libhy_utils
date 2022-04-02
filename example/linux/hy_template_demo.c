@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
