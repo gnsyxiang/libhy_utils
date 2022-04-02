@@ -45,7 +45,7 @@ typedef struct {
     char        pwd[NET_WIFI_PWD_LEN_MAX];
 
     hy_u32_t    wpa_version;
-    hy_s32_t    encrypt;
+    hy_s32_t    cipher;
 } net_wifi_config_s;
 
 typedef void (*HyNetWifiStartCb_t)(void *args);
