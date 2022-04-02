@@ -104,15 +104,16 @@ typedef struct {
 
 typedef void (*HyNetStateCb_t)(HyNetState_e state, void *args);
 
-typedef void (*HyNetWifiScanCb_t)(HyNetWifiScanInfo_s scan_info[], void *args);
+typedef void (*HyNetWifiScanResultCb_t)(HyNetWifiScanInfo_s *scan_info,
+        void *args);
 
 typedef struct {
-    char                config_path[HY_NET_CONFIG_PATH_LEN_MAX];
+    char                        config_path[HY_NET_CONFIG_PATH_LEN_MAX];
 
-    HyNetStateCb_t      eth_state_cb;
-    HyNetStateCb_t      wifi_state_cb;
-    HyNetWifiScanCb_t   scan_cb;
-    void                *args;
+    HyNetStateCb_t              eth_state_cb;
+    HyNetStateCb_t              wifi_state_cb;
+    HyNetWifiScanResultCb_t     scan_result_cb;
+    void                        *args;
 } PACKED_4 HyNetSaveConfig_s;
 
 typedef struct {
