@@ -49,7 +49,8 @@ static void _eth_state_cb(HyNetState_e state, void *args)
 
 }
 
-static void _eth_set_default_cb(HyNetEthConfig_s *eth_c, void *args)
+static void _eth_set_default_cb(HyNetEthConfig_s *eth_c,
+        HyNetIpInfo_s *ip_info, void *args)
 {
 
 }
@@ -59,16 +60,24 @@ static void _wifi_power_gpio_cb(HyGpio_s *gpio)
 
 }
 
-static void _wifi_set_default_cb(HyNetWifiConfig_s *wifi_c, void *args)
+static void _wifi_set_default_cb(HyNetWifiConfig_s *wifi_c,
+        HyNetIpInfo_s *ip_info, void *args)
 {
     HY_ASSERT_RET(!wifi_c);
 
-    HY_STRCPY(wifi_c->name, "wlan0");
-    HY_STRCPY(wifi_c->ssid, "ipctest");
-    HY_STRCPY(wifi_c->pwd,  "12345678");
+    HY_STRCPY(wifi_c->name,         "wlan0");
+    HY_STRCPY(wifi_c->ssid,         "ipctest");
+    HY_STRCPY(wifi_c->pwd,          "12345678");
+    HY_STRCPY(wifi_c->driver_name,  "wext");
 
     wifi_c->enable = 1;
-    wifi_c->dhcp = 1;
+    wifi_c->dhcp = 0;
+
+    ip_info->ip = 3232235880;
+    ip_info->gw = 3232235777;
+    ip_info->mask = 4294967040;
+    ip_info->dns1 = 3232235777;
+    ip_info->dns2 = 1920103026;
 }
 
 static void _wifi_state_cb(HyNetState_e state, void *args)

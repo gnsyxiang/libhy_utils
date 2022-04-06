@@ -28,6 +28,7 @@ extern "C" {
 
 typedef struct {
     HyNetWifiConfig_s       *wifi_c;
+    HyNetIpInfo_s           *wifi_ip_info;
     HyGpio_s                gpio;
 } NetWifiSaveConfig_t;
 
@@ -38,12 +39,13 @@ typedef struct {
 void *net_wifi_create(NetWifiConfig_t *net_wifi_c);
 void net_wifi_destroy(void **handle);
 
-#define net_wifi_create_m(_gpio, _wifi_c)                               \
+#define net_wifi_create_m(_gpio, _wifi_c, _wifi_ip_info)                \
     ({                                                                  \
         NetWifiConfig_t net_wifi_c;                                     \
         HY_MEMSET(&net_wifi_c, sizeof(net_wifi_c));                     \
-        HY_MEMCPY(&net_wifi_c.save_c.gpio, _gpio, sizeof(*_gpio));        \
-        net_wifi_c.save_c.wifi_c    = _wifi_c;                          \
+        HY_MEMCPY(&net_wifi_c.save_c.gpio, _gpio, sizeof(*_gpio));      \
+        net_wifi_c.save_c.wifi_c        = _wifi_c;                      \
+        net_wifi_c.save_c.wifi_ip_info  = _wifi_ip_info;                \
         net_wifi_create(&net_wifi_c);                                   \
      })
 

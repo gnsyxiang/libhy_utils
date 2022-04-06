@@ -26,7 +26,16 @@
 #include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_gpio.h"
 
+#include "hy_utils.h"
+
 #include "net_wifi.h"
+
+#define _WIFI_CONFIG_PATH "/tmp/wifi.conf"
+#define _EXEC_CMD(_cmd)                     \
+    do {                                    \
+        LOGI("execute cmd: %s\n", _cmd);    \
+        system(_cmd);                       \
+    } while (0)
 
 typedef struct {
     NetWifiSaveConfig_t     save_c;
@@ -34,51 +43,92 @@ typedef struct {
     void                    *thread_h;
 } _wifi_context_s;
 
+static hy_s32_t _connect_wifi(_wifi_context_s *context,
+        HyNetIpInfo_s *wifi_ip_info)
+{
+    HyNetWifiConfig_s *wifi_c = context->save_c.wifi_c;
+    char cmd[512] = {0};
+    hy_s32_t ret = -1;
+
+    do {
+        HY_MEMSET(cmd, sizeof(cmd));
+        snprintf(cmd, sizeof(cmd), "ifconfig %s up", wifi_c->name);
+        _EXEC_CMD(cmd);
+
+        HY_MEMSET(cmd, sizeof(cmd));
+        snprintf(cmd, sizeof(cmd), "%s", "killall wpa_supplicant");
+        _EXEC_CMD(cmd);
+
+        HY_MEMSET(cmd, sizeof(cmd));
+        snprintf(cmd, sizeof(cmd),
+                "wpa_passphrase \"%s\" \"%s\" > "_WIFI_CONFIG_PATH
+                " && sed -i '2i \tscan_ssid=1' "_WIFI_CONFIG_PATH
+#ifdef NDEBUG
+                " && sed -i '/#psk=/d' "_WIFI_CONFIG_PATH
+#endif
+                " && wpa_supplicant -B -D%s -i%s -c "_WIFI_CONFIG_PATH,
+                wifi_c->ssid, wifi_c->pwd, wifi_c->driver_name, wifi_c->name);
+        _EXEC_CMD(cmd);
+
+        HY_MEMSET(cmd, sizeof(cmd));
+        snprintf(cmd, sizeof(cmd), "%s", "killall udhcpc");
+        _EXEC_CMD(cmd);
+
+        if (wifi_c->dhcp) {
+            HY_MEMSET(cmd, sizeof(cmd));
+            snprintf(cmd, sizeof(cmd), "udhcpc -i %s &", wifi_c->name);
+            _EXEC_CMD(cmd);
+        } else {
+            char ip[HY_UTILS_IP_STR_LEN_MAX] = {0};
+            char mask[HY_UTILS_IP_STR_LEN_MAX] = {0};
+            char gw[HY_UTILS_IP_STR_LEN_MAX] = {0};
+            char dns1[HY_UTILS_IP_STR_LEN_MAX] = {0};
+            char dns2[HY_UTILS_IP_STR_LEN_MAX] = {0};
+
+            HyUtilsIpInt2Str(wifi_ip_info->ip, ip, HY_UTILS_IP_STR_LEN_MAX);
+            HyUtilsIpInt2Str(wifi_ip_info->mask, mask, HY_UTILS_IP_STR_LEN_MAX);
+            HyUtilsIpInt2Str(wifi_ip_info->gw, gw, HY_UTILS_IP_STR_LEN_MAX);
+            HyUtilsIpInt2Str(wifi_ip_info->dns1, dns1, HY_UTILS_IP_STR_LEN_MAX);
+            HyUtilsIpInt2Str(wifi_ip_info->dns2, dns2, HY_UTILS_IP_STR_LEN_MAX);
+
+            HY_MEMSET(cmd, sizeof(cmd));
+            snprintf(cmd, sizeof(cmd),
+                    "ifconfig %s %s netmask %s", wifi_c->name, ip, mask);
+            _EXEC_CMD(cmd);
+
+            HY_MEMSET(cmd, sizeof(cmd));
+            snprintf(cmd, sizeof(cmd), "route add default gw %s", gw);
+            _EXEC_CMD(cmd);
+
+            HY_MEMSET(cmd, sizeof(cmd));
+            snprintf(cmd, sizeof(cmd),
+                    "echo 'nameserver %s\nnameserver %s' > /etc/resolv.conf",
+                    dns1, dns2);
+            _EXEC_CMD(cmd);
+        }
+
+        ret = 0;
+    } while (0);
+
+    return ret;
+}
+
 static hy_s32_t _thread_cb(void *args)
 {
     _wifi_context_s *context = args;
-    HyNetWifiConfig_s *wifi_c = context->save_c.wifi_c;
-    char cmd[256] = {0};
+    HyNetIpInfo_s *wifi_ip_info = NULL;
 
     HyGpioSetVal(&context->save_c.gpio, HY_GPIO_VAL_OFF);
     sleep(3);
     HyGpioSetVal(&context->save_c.gpio, HY_GPIO_VAL_ON);
     sleep(1);
 
-    do {
-        memset(cmd, '\0', sizeof(cmd));
-        snprintf(cmd, sizeof(cmd), "ifconfig %s up", wifi_c->name);
-        LOGI("execute cmd: %s\n", cmd);
-        system(cmd);
-
-        memset(cmd, '\0', sizeof(cmd));
-        snprintf(cmd, sizeof(cmd), "%s", "killall wpa_supplicant");
-        LOGI("execute cmd: %s\n", cmd);
-        system(cmd);
-
-        memset(cmd, '\0', sizeof(cmd));
-        snprintf(cmd, sizeof(cmd),
-                "wpa_passphrase \"%s\" \"%s\" > /tmp/wifi.conf;"
-                "sed -i '2i scan_ssid=1' /tmp/wifi.conf;"
-                "wpa_supplicant -Dwext -i%s -c /tmp/wifi.conf &",
-                wifi_c->ssid, wifi_c->pwd, wifi_c->name);
-        LOGI("execute cmd: %s\n", cmd);
-        system(cmd);
-
-        memset(cmd, '\0', sizeof(cmd));
-        snprintf(cmd, sizeof(cmd), "%s", "killall udhcpc");
-        LOGI("execute cmd: %s\n", cmd);
-        system(cmd);
-
-        if (wifi_c->dhcp) {
-            memset(cmd, '\0', sizeof(cmd));
-            snprintf(cmd, sizeof(cmd), "udhcpc -i %s &", wifi_c->name);
-            LOGI("execute cmd: %s\n", cmd);
-            system(cmd);
+    for (int i = 0; i < HY_NET_WIFI_CONFIG_CNT_MAX; ++i) {
+        wifi_ip_info = &context->save_c.wifi_ip_info[i];
+        if (0 == _connect_wifi(context, wifi_ip_info)) {
             break;
-        } else {
         }
-    } while (0);
+    }
 
     return -1;
 }
@@ -89,6 +139,16 @@ void net_wifi_destroy(void **handle)
     HY_ASSERT_RET(!handle || !*handle);
 
     _wifi_context_s *context = *handle;
+    HyNetWifiConfig_s *wifi_c = context->save_c.wifi_c;
+    char cmd[128] = {0};
+
+    HY_MEMSET(cmd, sizeof(cmd));
+    snprintf(cmd, sizeof(cmd), "%s", "killall udhcpc wpa_supplicant");
+    _EXEC_CMD(cmd);
+
+    HY_MEMSET(cmd, sizeof(cmd));
+    snprintf(cmd, sizeof(cmd), "ifconfig %s down", wifi_c->name);
+    _EXEC_CMD(cmd);
 
     LOGI("net wifi create, context: %p \n", context);
     HY_MEM_FREE_PP(handle);

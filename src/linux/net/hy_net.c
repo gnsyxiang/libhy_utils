@@ -34,11 +34,14 @@ typedef struct {
     HyNetSaveConfig_s   save_c;
 
     void                *config_path_mutex_h;
-    HyNetEthConfig_s    eth_c;
-    HyNetWifiConfig_s   wifi_c;
 
     void                *eth_h;
+    HyNetEthConfig_s    eth_c;
+    HyNetIpInfo_s       eth_ip_info;
+
     void                *wifi_h;
+    HyNetWifiConfig_s   wifi_c;
+    HyNetIpInfo_s       wifi_ip_info[HY_NET_WIFI_CONFIG_CNT_MAX];
 } _net_context_s;
 
 void HyNetDestroy(void **handle)
@@ -85,11 +88,13 @@ void *HyNetCreate(HyNetConfig_s *net_c)
             }
 
             if (net_c->wifi_set_default_cb) {
-                net_c->wifi_set_default_cb(&context->wifi_c, net_c->args);
+                net_c->wifi_set_default_cb(&context->wifi_c,
+                        &context->wifi_ip_info[0], net_c->args);
             }
 
             if (net_c->eth_set_default_cb) {
-                net_c->eth_set_default_cb(&context->eth_c, net_c->args);
+                net_c->eth_set_default_cb(&context->eth_c,
+                        &context->eth_ip_info, net_c->args);
             }
         } else {
             HyThreadMutexLock_m(context->config_path_mutex_h);
@@ -104,7 +109,8 @@ void *HyNetCreate(HyNetConfig_s *net_c)
                 if (net_c->wifi_power_gpio) {
                     net_c->wifi_power_gpio(&gpio);
                 }
-                context->wifi_h = net_wifi_create_m(&gpio, &context->wifi_c);
+                context->wifi_h = net_wifi_create_m(&gpio,
+                        &context->wifi_c, context->wifi_ip_info);
                 if (!context->wifi_h) {
                     LOGE("net_wifi_create_m failed \n");
                     break;

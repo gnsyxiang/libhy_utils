@@ -33,6 +33,9 @@ extern "C" {
 #define HY_NET_WIFI_SSID_LEN_MAX    (64)
 #define HY_NET_WIFI_PWD_LEN_MAX     (64)
 #define HY_NET_MAC_LEN_MAX          (24)
+#define HY_NET_DRIVER_NAME_LEN_MAX  (16)
+
+#define HY_NET_WIFI_CONFIG_CNT_MAX  (4)
 
 typedef enum {
     HY_NET_TYPE_ETH,
@@ -54,92 +57,77 @@ typedef enum {
 } HyNetState_e;
 
 typedef struct {
-    char        name[HY_NET_DEV_NAME_LEN_MAX];
-    hy_s32_t    enable;
-    hy_s32_t    dhcp;
+    hy_u32_t        ip;
+    hy_u32_t        mask;
+    hy_u32_t        gw;
+    hy_u32_t        dns1;
+    hy_u32_t        dns2;
+} HyNetIpInfo_s;
 
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
+typedef struct {
+    char            name[HY_NET_DEV_NAME_LEN_MAX];
+    hy_s32_t        enable;
+    hy_s32_t        dhcp;
 } HyNetEthConfig_s;
 
 typedef struct {
-    char        name[HY_NET_DEV_NAME_LEN_MAX];
-    hy_s32_t    enable;
-    hy_s32_t    dhcp;
+    char            name[HY_NET_DEV_NAME_LEN_MAX];
+    hy_s32_t        enable;
+    hy_s32_t        dhcp;
 
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
+    char            ssid[HY_NET_WIFI_SSID_LEN_MAX];
+    char            pwd[HY_NET_WIFI_PWD_LEN_MAX];
 
-    char        ssid[HY_NET_WIFI_SSID_LEN_MAX];
-    char        pwd[HY_NET_WIFI_PWD_LEN_MAX];
-
-    hy_u32_t    wpa_version;
-    hy_s32_t    cipher;
+    char            driver_name[HY_NET_DRIVER_NAME_LEN_MAX];
+    hy_u32_t        wpa_version;
+    hy_s32_t        cipher;
 } HyNetWifiConfig_s;
 
 typedef struct {
-    char        name[HY_NET_DEV_NAME_LEN_MAX];
-    hy_s32_t    enable;
-    hy_s32_t    dhcp;
+    char            name[HY_NET_DEV_NAME_LEN_MAX];
+    hy_s32_t        enable;
+    hy_s32_t        dhcp;
 
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
+    HyNetIpInfo_s   ip_info;
 } PACKED_4 HyNetParam_s;
 
 typedef struct {
-    char        enable;
-    char        is_link;
-    char        is_dhcp;
+    char            enable;
+    char            is_link;
+    char            is_dhcp;
 
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
+    HyNetIpInfo_s   ip_info;
 
-    char        mac[HY_NET_MAC_LEN_MAX];
+    char            mac[HY_NET_MAC_LEN_MAX];
 } PACKED_4 HyNetEthState_s;
 
 typedef struct {
-    char        enable;
-    char        signal;
-    char        is_dhcp;
-
-    hy_u32_t    ip;
-    hy_u32_t    mask;
-    hy_u32_t    gw;
-    hy_u32_t    dns1;
-    hy_u32_t    dns2;
-
-    char        ssid[HY_NET_WIFI_SSID_LEN_MAX];
-    char        mac[HY_NET_MAC_LEN_MAX];
-} PACKED_4 HyNetWifiState_s;
+    char            ssid[HY_NET_WIFI_SSID_LEN_MAX];
+} PACKED_4 HyNetWifiScanInfo_s;
 
 typedef struct {
-    char        ssid[HY_NET_WIFI_SSID_LEN_MAX];
-    char        pwd[HY_NET_WIFI_PWD_LEN_MAX];
+    char            ssid[HY_NET_WIFI_SSID_LEN_MAX];
+    char            pwd[HY_NET_WIFI_PWD_LEN_MAX];
 } PACKED_4 HyNetWifiInfo_s;
 
 typedef struct {
-    char        ssid[HY_NET_WIFI_SSID_LEN_MAX];
-} PACKED_4 HyNetWifiScanInfo_s;
+    char            enable;
+    char            signal;
+    char            is_dhcp;
+
+    HyNetIpInfo_s   ip_info;
+    HyNetWifiInfo_s wifi_info;
+} PACKED_4 HyNetWifiState_s;
 
 typedef void (*HyNetStateCb_t)(HyNetState_e state, void *args);
 
-typedef void (*HyNetEthSetDefaultCb_t)(HyNetEthConfig_s *eth_c, void *args);
+typedef void (*HyNetEthSetDefaultCb_t)(HyNetEthConfig_s *eth_c,
+        HyNetIpInfo_s *ip_info, void *args);
 
 typedef void (*HyNetWifiPowerGpioCb_t)(HyGpio_s *gpio);
 
-typedef void (*HyNetWifiSetDefaultCb_t)(HyNetWifiConfig_s *wifi_c, void *args);
+typedef void (*HyNetWifiSetDefaultCb_t)(HyNetWifiConfig_s *wifi_c,
+        HyNetIpInfo_s *ip_info, void *args);
 
 typedef void (*HyNetWifiScanResultCb_t)(HyNetWifiScanInfo_s *scan_info,
         void *args);
