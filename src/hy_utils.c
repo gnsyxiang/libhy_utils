@@ -32,12 +32,12 @@ void HyUtilsIpStr2Int(const char *ip_str, hy_u32_t *ip_num)
 {
     HY_ASSERT_RET(!ip_str);
 
-    int num[IP_INT_DOT_LEN];
+    int num[HY_UTILS_IP_INT_LEN_MAX];
 
 	sscanf(ip_str, "%d.%d.%d.%d", &num[0], &num[1], &num[2], &num[3]);
 
     *ip_num  = 0;
-    for (int i = 0; i < IP_INT_DOT_LEN; i++) {
+    for (int i = 0; i < HY_UTILS_IP_INT_LEN_MAX; i++) {
         *ip_num += (num[i] & 0xff) << (8 * (3 - i));
     }
 }
@@ -51,9 +51,9 @@ void HyUtilsIpInt2Str(hy_u32_t ip_num, char *ip_str, size_t ip_str_len)
 
     memset(ip_str, '\0', ip_str_len);
 
-    for (int i = 0; i < IP_INT_DOT_LEN; i++) {
+    for (int i = 0; i < HY_UTILS_IP_INT_LEN_MAX; i++) {
         len += snprintf(ip_str + len, ip_str_len - len,
-                "%d.", *(tmp + IP_INT_DOT_LEN - 1 - i));
+                "%d.", *(tmp + HY_UTILS_IP_INT_LEN_MAX - 1 - i));
     }
     ip_str[len - 1] = '\0';
 }

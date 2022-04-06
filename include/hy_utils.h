@@ -29,8 +29,8 @@ extern "C" {
 
 #include "hy_hal/hy_type.h"
 
-#define IP_INT_DOT_LEN (4)
-#define IP_STR_DOT_LEN (16)
+#define HY_UTILS_IP_INT_LEN_MAX         (4)
+#define HY_UTILS_IP_STR_LEN_MAX         (16)
 
 #define HY_UTILS_MIN(x, y)              ((x) < (y) ? (x) : (y))                             ///< 求最小值
 #define HY_UTILS_MAX(x, y)              ((x) > (y) ? (x) : (y))                             ///< 求最大值

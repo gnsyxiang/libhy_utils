@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     {
         hy_u32_t ip_num = 3232235886;
-        char ip_str[IP_STR_DOT_LEN] = {0};
+        char ip_str[HY_UTILS_IP_STR_LEN_MAX] = {0};
 
         HyUtilsIpInt2Str(ip_num, ip_str, sizeof(ip_str));
         LOGE("ip_str: %s \n", ip_str);
