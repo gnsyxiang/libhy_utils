@@ -173,6 +173,8 @@ hy_s32_t HyNetWifiConnect(void *handle, HyNetWifiInfo_s *wifi_info);
 
 hy_s32_t HyNetWifiStateGet(void *handle, HyNetWifiState_s *wifi_state);
 
+hy_s32_t HyNetIsConnect(const char *dst);
+
 #ifdef __cplusplus
 }
 #endif

@@ -44,6 +44,48 @@ typedef struct {
     HyNetIpInfo_s       wifi_ip_info[HY_NET_WIFI_CONFIG_CNT_MAX];
 } _net_context_s;
 
+static hy_s32_t _get_cmd_ret(const char *cmd_buf, hy_s32_t ret)
+{
+    HY_ASSERT(cmd_buf);
+
+    FILE *fp = popen(cmd_buf, "r");
+    if (!fp) {
+        LOGES("popen failed \n");
+        return -1;
+    }
+
+    char buf[8] = {0};
+    fread(buf, sizeof(char), sizeof(buf) - 1, fp);
+
+    pclose(fp);
+
+    return (atoi(buf) == ret) ? 0 : -1;
+}
+
+hy_s32_t HyNetIsConnect(const char *dst)
+{
+    HY_ASSERT(dst);
+
+    char cmd_buf[256] = {0};
+    #define _PING_FORMAT "ping %s -c1 -w2 %s | grep time= | wc -l"
+
+    for (int i = 0; i < 2; ++i) {
+        HY_MEMSET(cmd_buf, sizeof(cmd_buf));
+        snprintf(cmd_buf, sizeof(cmd_buf), _PING_FORMAT, dst, "-4");
+        if (0 == _get_cmd_ret(cmd_buf, 1)) {
+            return 1;
+        }
+
+        HY_MEMSET(cmd_buf, sizeof(cmd_buf));
+        snprintf(cmd_buf, sizeof(cmd_buf), _PING_FORMAT, dst, "-6");
+        if (0 == _get_cmd_ret(cmd_buf, 1)) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 void HyNetDestroy(void **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);

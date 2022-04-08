@@ -51,7 +51,6 @@ _include_com    += \
 _sources_com    += \
                    hy_fifo.c            \
                    hy_hash.c            \
-                   hy_net.c             \
                    hy_net_wired.c       \
                    hy_thread_pool.c     \
                    hy_timer.c           \
