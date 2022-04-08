@@ -90,14 +90,6 @@ hy_template_demo_CXXFLAGS   = $(_cxxflags_com)
 hy_template_demo_LDFLAGS    = $(_ldflags_com)
 hy_template_demo_LDADD      = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_net_wired_demo
-hy_net_wired_demo_SOURCES   = $(_sources_com) hy_net_wired_demo.c
-hy_net_wired_demo_CPPFLAGS  = $(_cppflags_com)
-hy_net_wired_demo_CFLAGS    = $(_cflags_com)
-hy_net_wired_demo_CXXFLAGS  = $(_cxxflags_com)
-hy_net_wired_demo_LDFLAGS   = $(_ldflags_com)
-hy_net_wired_demo_LDADD     = $(_ldadd_com)
-
 if COMPILE_LIBPROTOBUF_C
 bin_PROGRAMS                += hy_protobuf-c_demo
 hy_protobuf_c_demo_SOURCES  = $(_sources_com) hy_protobuf-c_demo.c

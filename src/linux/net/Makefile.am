@@ -47,6 +47,7 @@ _include_com    += \
 
 _sources_com    += \
                    hy_net.c             \
+                   hy_phy_led.c         \
                    net_config.c         \
                    net_wifi.c
 

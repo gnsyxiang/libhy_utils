@@ -61,11 +61,19 @@ _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
                    $(ldadd_com)
 
-bin_PROGRAMS            += hy_net_demo
-hy_net_demo_SOURCES     = $(_sources_com) hy_net_demo.c
-hy_net_demo_CPPFLAGS    = $(_cppflags_com)
-hy_net_demo_CFLAGS      = $(_cflags_com)
-hy_net_demo_CXXFLAGS    = $(_cxxflags_com)
-hy_net_demo_LDFLAGS     = $(_ldflags_com)
-hy_net_demo_LDADD       = $(_ldadd_com)
+bin_PROGRAMS                += hy_net_demo
+hy_net_demo_SOURCES         = $(_sources_com) hy_net_demo.c
+hy_net_demo_CPPFLAGS        = $(_cppflags_com)
+hy_net_demo_CFLAGS          = $(_cflags_com)
+hy_net_demo_CXXFLAGS        = $(_cxxflags_com)
+hy_net_demo_LDFLAGS         = $(_ldflags_com)
+hy_net_demo_LDADD           = $(_ldadd_com)
+
+bin_PROGRAMS                += hy_phy_led_demo
+hy_phy_led_demo_SOURCES     = $(_sources_com) hy_phy_led_demo.c
+hy_phy_led_demo_CPPFLAGS    = $(_cppflags_com)
+hy_phy_led_demo_CFLAGS      = $(_cflags_com)
+hy_phy_led_demo_CXXFLAGS    = $(_cxxflags_com)
+hy_phy_led_demo_LDFLAGS     = $(_ldflags_com)
+hy_phy_led_demo_LDADD       = $(_ldadd_com)
 
