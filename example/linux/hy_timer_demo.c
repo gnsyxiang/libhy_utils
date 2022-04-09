@@ -37,7 +37,6 @@
 typedef struct {
     void        *log_h;
     void        *signal_h;
-    void        *timer_service_handle;
     void        *timer_handle;
 
     hy_s32_t    exit_flag;
@@ -77,7 +76,6 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"timer",   &context->timer_service_handle,     HyTimerDestroy},
         {"signal",  &context->signal_h,                 HySignalDestroy},
         {"log",     &context->log_h,                    HyLogDestroy},
     };
@@ -116,15 +114,10 @@ static _main_context_t *_module_create(void)
     signal_c.save_c.user_cb       = _signal_user_cb;
     signal_c.save_c.args          = context;
 
-    HyTimerServiceConfig_s timer_service_config;
-    timer_service_config.save_config.slot_interval_ms   = 1;
-    timer_service_config.save_config.slot_num           = 1000;
-
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",     &context->log_h,                    &log_c,                 (create_t)HyLogCreate,      HyLogDestroy},
         {"signal",  &context->signal_h,                 &signal_c,              (create_t)HySignalCreate,   HySignalDestroy},
-        {"timer",   &context->timer_service_handle,     &timer_service_config,  (create_t)HyTimerCreate,    HyTimerDestroy},
     };
 
     RUN_CREATE(module);
@@ -141,6 +134,8 @@ int main(int argc, char *argv[])
     }
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+    HyTimerCreate(1, 1000);
 
     context->timer_handle = HyTimerAdd_m(500, HY_TYPE_FLAG_ENABLE, _timer_cb, context);
     if (!context->timer_handle) {
