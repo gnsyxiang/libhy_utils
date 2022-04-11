@@ -80,7 +80,7 @@ AC_TYPE_UINT8_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([gettimeofday memset select socket strerror strstr])
+AC_CHECK_FUNCS([gettimeofday memset select socket strstr])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -98,6 +98,7 @@ AC_CONFIG_FILES([Makefile
                  example/linux/ipc/ipc_process/Makefile
                  example/linux/ipc/ipc_socket/Makefile
                  example/linux/net/Makefile
+                 example/linux/timer/Makefile
                  example/mcu/Makefile
                  include/Makefile
                  include/linux/Makefile
@@ -105,6 +106,7 @@ AC_CONFIG_FILES([Makefile
                  include/linux/ipc/ipc_process/Makefile
                  include/linux/ipc/ipc_socket/Makefile
                  include/linux/net/Makefile
+                 include/linux/timer/Makefile
                  include/mcu/Makefile
                  res/Makefile
                  src/Makefile
@@ -113,6 +115,7 @@ AC_CONFIG_FILES([Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
                  src/linux/net/Makefile
+                 src/linux/timer/Makefile
                  src/mcu/Makefile
                  ]) # for make dist
 AC_OUTPUT
