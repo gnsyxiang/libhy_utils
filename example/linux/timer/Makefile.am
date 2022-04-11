@@ -61,3 +61,11 @@ _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
                    $(ldadd_com)
 
+bin_PROGRAMS                        += hy_timer_multi_wheel_demo
+hy_timer_multi_wheel_demo_SOURCES   = $(_sources_com) hy_timer_multi_wheel_demo.c
+hy_timer_multi_wheel_demo_CPPFLAGS  = $(_cppflags_com)
+hy_timer_multi_wheel_demo_CFLAGS    = $(_cflags_com)
+hy_timer_multi_wheel_demo_CXXFLAGS  = $(_cxxflags_com)
+hy_timer_multi_wheel_demo_LDFLAGS   = $(_ldflags_com)
+hy_timer_multi_wheel_demo_LDADD     = $(_ldadd_com)
+

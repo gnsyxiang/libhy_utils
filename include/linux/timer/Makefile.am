@@ -31,7 +31,7 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    +=
+_install_headers_com    += hy_timer_multi_wheel.h
 
 # ------------------
 # make install files

@@ -45,7 +45,7 @@ _include_com    += \
                    -I$(top_srcdir)/include/$(run_os)        \
                    -I$(top_srcdir)/include
 
-_sources_com    +=
+_sources_com    += hy_timer_multi_wheel.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
