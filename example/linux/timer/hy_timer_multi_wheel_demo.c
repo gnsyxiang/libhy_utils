@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
     HyTimerMultiWheelConfig_s timer_c;
     HY_MEMSET(&timer_c, sizeof(timer_c));
-    timer_c.expires     = 1000;
+    timer_c.expires     = 1 * 1000;
     timer_c.timer_cb    = _timer_cb;
     HyTimerMultiWheelAdd(&timer_c);
     LOGD("-----------haha: \n");

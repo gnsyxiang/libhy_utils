@@ -18,11 +18,7 @@
  *     last modified: 11/04 2022 13:59
  */
 #include <stdio.h>
-
-/* According to POSIX.1-2001, POSIX.1-2008 */
 #include <sys/select.h>
-
-/* According to earlier standards */
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -38,18 +34,21 @@
 
 #include "hy_timer_multi_wheel.h"
 
-#define _LIST_BASE_BIT      (8)
-#define _LIST_BASE_SIZE     (0x1U << _LIST_BASE_BIT)
-#define _LIST_BASE_MASK     (_LIST_BASE_SIZE - 1)
+#define _MULTI_WHEEL_CNT        (4)
 
-#define _LIST_BIT           (6)
-#define _LIST_SIZE          (0x1U << _LIST_BIT)
-#define _LIST_MASK          (_LIST_SIZE - 1)
+#define _LIST_BASE_BIT          (8)
+#define _LIST_BASE_SIZE         (0x1UL << _LIST_BASE_BIT)
+#define _LIST_BASE_MASK         (_LIST_BASE_SIZE - 1)
 
-#define _SELECT_TIME_MS     (1)
+#define _LIST_BIT               (6)
+#define _LIST_SIZE              (0x1UL << _LIST_BIT)
+#define _LIST_MASK              (_LIST_SIZE - 1)
 
-#define _INDEX(_cur_ms, _n) \
-    (((_cur_ms) >> (_LIST_BASE_BIT + (_n) * _LIST_BIT)) & _LIST_MASK)
+#define _SELECT_TIME_MS         (1)
+
+#define _SHIFT_BIT(_n)          (_LIST_BASE_BIT + (_n) * _LIST_BIT)
+#define _SHIFT_LEFT(_n)         (0x1UL << _SHIFT_BIT(_n))
+#define _INDEX(_cur_ms, _n)     (((_cur_ms) >> _SHIFT_BIT(_n)) & _LIST_MASK)
 
 typedef struct {
     HyTimerMultiWheelConfig_s   timer_c;
@@ -59,15 +58,7 @@ typedef struct {
 
 typedef struct {
     struct hy_list_head         list_base[_LIST_BASE_SIZE];
-} _timer_list_base_s;
-
-typedef struct {
-    struct hy_list_head         list[_LIST_SIZE];
-} _timer_list_s;
-
-typedef struct {
-    _timer_list_base_s          list_base;
-    _timer_list_s               list[4];
+    struct hy_list_head         list[_LIST_SIZE][_MULTI_WHEEL_CNT];
 
     hy_u64_t                    cur_ms;
 
@@ -80,7 +71,7 @@ static _timer_context_s *context = NULL;
 
 static hy_s32_t _timer_add(_timer_s *timer, hy_u64_t expires)
 {
-    struct hy_list_head *list;
+    struct hy_list_head *list = NULL;
     hy_u32_t index = 0;
     hy_u32_t expires_time = timer->timer_c.expires;
     hy_u64_t idx = expires - context->cur_ms;
@@ -88,27 +79,26 @@ static hy_s32_t _timer_add(_timer_s *timer, hy_u64_t expires)
     if ((hy_s64_t)idx < 0) {
         // 定时器已经超时，放在当前位置直接忽略
         index = context->cur_ms & _LIST_BASE_MASK;
-        list = context->list_base.list_base + index;
-    } else if (idx < (0x1UL << (_LIST_BASE_BIT + 0 * _LIST_BIT))) {
+        list = context->list_base + index;
+    } else if (idx < _SHIFT_LEFT(0)) {
         index = expires_time & _LIST_BASE_MASK;
-        list = context->list_base.list_base + index;
-    } else if (idx < (0x1UL << (_LIST_BASE_BIT + 1 * _LIST_BIT))) {
-        index = (expires_time >> (_LIST_BASE_BIT + 0 * _LIST_BIT)) & _LIST_MASK;
-        list = context->list[0].list + index;
-    } else if (idx < (0x1UL << (_LIST_BASE_BIT + 2 * _LIST_BIT))) {
-        index = (expires_time >> (_LIST_BASE_BIT + 1 * _LIST_BIT)) & _LIST_MASK;
-        list = context->list[1].list + index;
-    } else if (idx < (0x1UL << (_LIST_BASE_BIT + 3 * _LIST_BIT))) {
-        index = (expires_time >> (_LIST_BASE_BIT + 2 * _LIST_BIT)) & _LIST_MASK;
-        list = context->list[2].list + index;
+        list = context->list_base + index;
+    } else if (idx < _SHIFT_LEFT(1)) {
+        index = _INDEX(expires_time, 0);
+        list = context->list[0] + index;
+    } else if (idx < _SHIFT_LEFT(2)) {
+        index = _INDEX(expires_time, 1);
+        list = context->list[1] + index;
+    } else if (idx < _SHIFT_LEFT(3)) {
+        index = _INDEX(expires_time, 2);
+        list = context->list[2] + index;
     } else {
         if (idx > 0xffffffffUL) {
-            idx = 0xffffffffUL;
-            expires_time = idx + context->cur_ms;
+            expires_time = 0xffffffffUL + context->cur_ms;
         }
 
-        index = (expires_time >> (_LIST_BASE_BIT + 3 * _LIST_BIT)) & _LIST_MASK;
-        list = context->list[3].list + index;
+        index = _INDEX(expires_time, 3);
+        list = context->list[3] + index;
     }
 
     /* @fixme: <22-04-11, uos> 加锁处理 */
@@ -120,6 +110,7 @@ static hy_s32_t _timer_add(_timer_s *timer, hy_u64_t expires)
 void *HyTimerMultiWheelAdd(HyTimerMultiWheelConfig_s *timer_c)
 {
     HY_ASSERT(timer_c);
+
     _timer_s *timer = NULL;
     hy_u64_t expires = 0;
 
@@ -154,18 +145,17 @@ void *HyTimerMultiWheelAdd(HyTimerMultiWheelConfig_s *timer_c)
     return NULL;
 }
 
-static int _tw_cascade(_timer_list_s *list, int index)
+static int _tw_cascade(struct hy_list_head *list, int index)
 {
-    struct hy_list_head *pos, *tmp;
     struct hy_list_head list_tmp;
-    _timer_s *timer;
+    _timer_s *pos, *n;
 
-    /* re calc timewheel all task */
-    hy_list_replace_init(list->list + index, &list_tmp);
+    // 上一级移除链表
+    hy_list_replace_init(list + index, &list_tmp);
 
-    hy_list_for_each_safe(pos, tmp, &list_tmp) {
-        timer = hy_list_entry(pos, _timer_s, entry);
-        _timer_add(timer, timer->timer_c.expires);
+    // 重新加入下一级链表
+    hy_list_for_each_entry_safe(pos, n, &list_tmp, entry) {
+        _timer_add(pos, pos->timer_c.expires);
     }
 
     return index;
@@ -176,24 +166,24 @@ static hy_s32_t _timer_thread_cb(void *args)
     hy_u64_t ms;
     _timer_s *pos, *n;
     HyTimerMultiWheelConfig_s *timer_c = NULL;
+    struct hy_list_head work_list;
+    struct hy_list_head *head = &work_list;
+    hy_s32_t index = 0;
 
     ms = HyTimeGetUTCMs();
     do {
         while (context->cur_ms <= ms) {
-            /* some timer expire */
-            struct hy_list_head work_list;
-            struct hy_list_head *head = &work_list;
-            hy_s32_t index = context->cur_ms & _LIST_BASE_MASK;
+            HY_MEMSET(&work_list, sizeof(work_list));
+            index = context->cur_ms & _LIST_BASE_MASK;
 
-            if (!index
-                    && (!_tw_cascade(&context->list[0], _INDEX(context->cur_ms, 0)))
-                    && (!_tw_cascade(&context->list[1], _INDEX(context->cur_ms, 1)))
-                    && (!_tw_cascade(&context->list[2], _INDEX(context->cur_ms, 2)))) {
-                _tw_cascade(&context->list[3], _INDEX(context->cur_ms, 3));
+            for (hy_s32_t i = 0; i < _MULTI_WHEEL_CNT && !index; ++i) {
+                if (_tw_cascade(context->list[i], _INDEX(context->cur_ms, i))) {
+                    break;
+                }
             }
 
             context->cur_ms += 1;
-            hy_list_replace_init(context->list_base.list_base + index, &work_list);
+            hy_list_replace_init(context->list_base + index, &work_list);
 
             while (!hy_list_empty(head)) {
                 hy_list_for_each_entry_safe(pos, n, head, entry) {
@@ -209,13 +199,6 @@ static hy_s32_t _timer_thread_cb(void *args)
     } while (!context->exit_flag && (ms = HyTimeGetUTCMs()));
 
     return -1;
-}
-
-static void _init_list(struct hy_list_head *list, hy_u32_t cnt)
-{
-    for (hy_u32_t i = 0; i < cnt; ++i) {
-        HY_INIT_LIST_HEAD(list + i);
-    }
 }
 
 void HyTimerMultiWheelDestroy(void)
@@ -239,9 +222,14 @@ void HyTimerMultiWheelCreate(void)
 
         context->cur_ms = HyTimeGetUTCMs();
 
-        _init_list(context->list_base.list_base, _LIST_BASE_SIZE);
-        for (int i = 0; i < 4; ++i) {
-            _init_list(context->list[i].list, _LIST_SIZE);
+        for (hy_u32_t i = 0; i < _LIST_BASE_SIZE; ++i) {
+            HY_INIT_LIST_HEAD(context->list_base + i);
+        }
+
+        for (int i = 0; i < _MULTI_WHEEL_CNT; ++i) {
+            for (hy_u32_t j = 0; j < _LIST_SIZE; ++j) {
+                HY_INIT_LIST_HEAD(context->list[i] + j);
+            }
         }
 
         context->thread_h = HyThreadCreate_m("HY_MW_timer",
