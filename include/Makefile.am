@@ -36,6 +36,7 @@ _no_install_headers_com +=
 _install_headers_com    += \
                            hy_audio.h       \
                            hy_bit.h         \
+                           hy_hex.h         \
                            hy_list.h        \
                            hy_math.h        \
                            hy_md5sum.h      \
