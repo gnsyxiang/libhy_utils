@@ -115,7 +115,7 @@ static _main_context_t *_module_create(void)
 
 static void _timer_cb(void *args)
 {
-    LOGD("-------------haha\n");
+    LOGD("----1---------haha \n");
 }
 
 int main(int argc, char *argv[])
@@ -130,12 +130,15 @@ int main(int argc, char *argv[])
 
     HyTimerMultiWheelCreate();
 
+    LOGD("----2---------haha \n");
     HyTimerMultiWheelConfig_s timer_c;
     HY_MEMSET(&timer_c, sizeof(timer_c));
-    timer_c.expires     = 1 * 1000;
     timer_c.timer_cb    = _timer_cb;
-    HyTimerMultiWheelAdd(&timer_c);
-    LOGD("-----------haha: \n");
+
+    for (hy_s32_t i = 1; i <= 10; ++i) {
+        timer_c.expires = i * 1000;
+        HyTimerMultiWheelAdd(&timer_c);
+    }
 
     while (!context->exit_flag) {
         sleep(1);

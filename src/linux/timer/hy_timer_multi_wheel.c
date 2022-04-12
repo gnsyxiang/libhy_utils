@@ -178,86 +178,81 @@ static int _tw_cascade(struct hy_list_head *list, int index)
     return index;
 }
 
-static hy_s32_t _timer_thread_cb(void *args)
+static void _handle_timer(_timer_context_s *context)
 {
+    hy_s32_t index = 0;
     _timer_s *pos, *n;
-    HyTimerMultiWheelConfig_s *timer_c = NULL;
     struct hy_list_head work_list;
     struct hy_list_head *head = &work_list;
-    hy_s32_t index = 0;
+    HyTimerMultiWheelConfig_s *timer_c = NULL;
 
-#define EPL_TOUT 3000
+    HY_MEMSET(&work_list, sizeof(work_list));
+    index = context->cur_ms & _LIST_BASE_MASK;
+
+    for (hy_s32_t i = 0; i < _MULTI_WHEEL_CNT && !index; ++i) {
+        if (_tw_cascade(context->list[i], _INDEX(context->cur_ms, i))) {
+            break;
+        }
+    }
+
+    context->cur_ms += 1;
+    hy_list_replace_init(context->list_base + index, &work_list);
+
+    while (!hy_list_empty(head)) {
+        hy_list_for_each_entry_safe(pos, n, head, entry) {
+            hy_list_del(&pos->entry);
+
+            timer_c = &pos->timer_c;
+            if (timer_c->timer_cb) {
+                timer_c->timer_cb(timer_c->args);
+            }
+
+            _timer_destroy(pos);
+        }
+    }
+}
+
+static hy_s32_t _timer_thread_cb(void *args)
+{
 #define MX_EVNTS 10
     struct epoll_event evnts[MX_EVNTS];
     hy_s32_t ret = -1;
-    _timer_context_s *ctx = NULL;
     struct itimerspec *its = &context->its;
     struct epoll_event ev;
 
     while (!context->exit_flag) {
         ret = epoll_wait(context->eplfd, evnts, MX_EVNTS, -1);
-        if (ret == -1) {
+        if (-1 == ret) {
             LOGES("epoll_wait failed \n");
             break;
         }
 
-        if (1 != ret) {
-            LOGE("epoll_wait failed \n");
+        ret = epoll_ctl(context->eplfd, EPOLL_CTL_DEL, context->tfd, NULL);
+        if (-1 == ret) {
+            LOGES("epoll_ctl failed \n");
             break;
         }
 
-        for (hy_s32_t i = 0; i < ret; ++i) {
-            ctx = (_timer_context_s *)(evnts[i].data.ptr);
-            if (-1 == epoll_ctl(ctx->eplfd, EPOLL_CTL_DEL, ctx->tfd, NULL)) {
-                LOGES("epoll_ctl failed \n");
-                break;
-            }
-#if 1
-            HY_MEMSET(&work_list, sizeof(work_list));
-            index = context->cur_ms & _LIST_BASE_MASK;
+        _handle_timer(context);
 
-            for (hy_s32_t i = 0; i < _MULTI_WHEEL_CNT && !index; ++i) {
-                if (_tw_cascade(context->list[i], _INDEX(context->cur_ms, i))) {
-                    break;
-                }
-            }
+        its->it_value.tv_sec    = its->it_value.tv_sec  + context->its.it_interval.tv_sec;
+        its->it_value.tv_nsec   = its->it_value.tv_nsec + context->its.it_interval.tv_nsec;
+        if (its->it_value.tv_nsec >= _TIMER_NS_TO_S) {
+            its->it_value.tv_sec++;
+            its->it_value.tv_nsec -= _TIMER_NS_TO_S;
+        }
+        ret = timerfd_settime(context->tfd, TFD_TIMER_ABSTIME, its, NULL);
+        if (-1 == ret) {
+            LOGES("timerfd_settime failed \n");
+            break;
+        }
 
-            context->cur_ms += 1;
-            hy_list_replace_init(context->list_base + index, &work_list);
-
-            while (!hy_list_empty(head)) {
-                hy_list_for_each_entry_safe(pos, n, head, entry) {
-                    hy_list_del(&pos->entry);
-
-                    timer_c = &pos->timer_c;
-                    if (timer_c->timer_cb) {
-                        timer_c->timer_cb(timer_c->args);
-                    }
-
-                    _timer_destroy(pos);
-                }
-            }
-#endif
-
-            its->it_value.tv_sec    = its->it_value.tv_sec + ctx->its.it_interval.tv_sec;
-            its->it_value.tv_nsec   = its->it_value.tv_nsec + ctx->its.it_interval.tv_nsec;
-            if (its->it_value.tv_nsec >= _TIMER_NS_TO_S) {
-                its->it_value.tv_sec++;
-                its->it_value.tv_nsec -= _TIMER_NS_TO_S;
-            }
-            // LOGE("%ld, %ld, %ld, %ld \n", its->it_value.tv_sec, its->it_value.tv_nsec, its->it_interval.tv_sec, its->it_interval.tv_nsec);
-            if (-1 == timerfd_settime(context->tfd, TFD_TIMER_ABSTIME, its, NULL)) {
-                LOGES("timerfd_settime failed \n");
-                break;
-            }
-
-            ev.events   = EPOLLIN | EPOLLET;
-            ev.data.ptr = context;
-            if (-1 == epoll_ctl(context->eplfd, EPOLL_CTL_ADD, context->tfd, &ev)) {
-                LOGES("epoll_ctl failed \n");
-                break;
-            }
-
+        ev.events   = EPOLLIN | EPOLLET;
+        ev.data.ptr = context;
+        ret = epoll_ctl(context->eplfd, EPOLL_CTL_ADD, context->tfd, &ev);
+        if (-1 == ret) {
+            LOGES("epoll_ctl failed \n");
+            break;
         }
     }
 
