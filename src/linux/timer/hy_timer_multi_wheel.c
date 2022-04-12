@@ -22,6 +22,8 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/epoll.h>
+#include <sys/timerfd.h>
 
 #include "hy_hal/hy_assert.h"
 #include "hy_hal/hy_mem.h"
@@ -50,6 +52,9 @@
 #define _SHIFT_LEFT(_n)         (0x1UL << _SHIFT_BIT(_n))
 #define _INDEX(_cur_ms, _n)     (((_cur_ms) >> _SHIFT_BIT(_n)) & _LIST_MASK)
 
+#define _TIMER_NS_TO_S          (1000000000U)
+#define _TIMER_MS_TO_NS         (1000000U)
+
 typedef struct {
     HyTimerMultiWheelConfig_s   timer_c;
 
@@ -61,6 +66,9 @@ typedef struct {
     struct hy_list_head         list[_LIST_SIZE][_MULTI_WHEEL_CNT];
 
     hy_u64_t                    cur_ms;
+    hy_s32_t                    tfd;
+    hy_s32_t                    eplfd;
+    struct itimerspec           its;
 
     hy_s32_t                    exit_flag;
     void                        *thread_h;
@@ -172,16 +180,39 @@ static int _tw_cascade(struct hy_list_head *list, int index)
 
 static hy_s32_t _timer_thread_cb(void *args)
 {
-    hy_u64_t ms;
     _timer_s *pos, *n;
     HyTimerMultiWheelConfig_s *timer_c = NULL;
     struct hy_list_head work_list;
     struct hy_list_head *head = &work_list;
     hy_s32_t index = 0;
 
-    ms = HyTimeGetUTCMs();
-    do {
-        while (context->cur_ms <= ms) {
+#define EPL_TOUT 3000
+#define MX_EVNTS 10
+    struct epoll_event evnts[MX_EVNTS];
+    hy_s32_t ret = -1;
+    _timer_context_s *ctx = NULL;
+    struct itimerspec *its = &context->its;
+    struct epoll_event ev;
+
+    while (!context->exit_flag) {
+        ret = epoll_wait(context->eplfd, evnts, MX_EVNTS, -1);
+        if (ret == -1) {
+            LOGES("epoll_wait failed \n");
+            break;
+        }
+
+        if (1 != ret) {
+            LOGE("epoll_wait failed \n");
+            break;
+        }
+
+        for (hy_s32_t i = 0; i < ret; ++i) {
+            ctx = (_timer_context_s *)(evnts[i].data.ptr);
+            if (-1 == epoll_ctl(ctx->eplfd, EPOLL_CTL_DEL, ctx->tfd, NULL)) {
+                LOGES("epoll_ctl failed \n");
+                break;
+            }
+#if 1
             HY_MEMSET(&work_list, sizeof(work_list));
             index = context->cur_ms & _LIST_BASE_MASK;
 
@@ -206,9 +237,108 @@ static hy_s32_t _timer_thread_cb(void *args)
                     _timer_destroy(pos);
                 }
             }
-        }
-    } while (!context->exit_flag && (ms = HyTimeGetUTCMs()));
+#endif
 
+            its->it_value.tv_sec    = its->it_value.tv_sec + ctx->its.it_interval.tv_sec;
+            its->it_value.tv_nsec   = its->it_value.tv_nsec + ctx->its.it_interval.tv_nsec;
+            if (its->it_value.tv_nsec >= _TIMER_NS_TO_S) {
+                its->it_value.tv_sec++;
+                its->it_value.tv_nsec -= _TIMER_NS_TO_S;
+            }
+            // LOGE("%ld, %ld, %ld, %ld \n", its->it_value.tv_sec, its->it_value.tv_nsec, its->it_interval.tv_sec, its->it_interval.tv_nsec);
+            if (-1 == timerfd_settime(context->tfd, TFD_TIMER_ABSTIME, its, NULL)) {
+                LOGES("timerfd_settime failed \n");
+                break;
+            }
+
+            ev.events   = EPOLLIN | EPOLLET;
+            ev.data.ptr = context;
+            if (-1 == epoll_ctl(context->eplfd, EPOLL_CTL_ADD, context->tfd, &ev)) {
+                LOGES("epoll_ctl failed \n");
+                break;
+            }
+
+        }
+    }
+
+    return -1;
+}
+
+static void _timerfd_destroy(hy_s32_t tfd)
+{
+    if (tfd > 0) {
+        close(tfd);
+    }
+}
+
+static hy_s32_t _timerfd_create(_timer_context_s *context, hy_u32_t expires_ms)
+{
+    struct timespec nw;
+
+    do {
+        context->tfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK);
+        if (-1 == context->tfd) {
+            LOGES("timerfd_create failed \n");
+            break;
+        }
+
+        if (-1 == clock_gettime(CLOCK_MONOTONIC, &nw)) {
+            LOGES("clock_gettime failed \n");
+            break;
+        }
+
+        context->its.it_value.tv_sec     = nw.tv_sec + expires_ms / 1000;
+        context->its.it_value.tv_nsec    = nw.tv_nsec + (expires_ms * _TIMER_MS_TO_NS);
+        if (context->its.it_value.tv_nsec >= _TIMER_NS_TO_S) {
+            context->its.it_value.tv_sec++;
+            context->its.it_value.tv_nsec -= _TIMER_NS_TO_S;
+        }
+        context->its.it_interval.tv_sec  = expires_ms / 1000;
+        context->its.it_interval.tv_nsec = expires_ms * _TIMER_MS_TO_NS;
+
+        if (-1 == timerfd_settime(context->tfd, TFD_TIMER_ABSTIME,
+                    &context->its, NULL)) {
+            LOGES("timerfd_settime failed \n");
+            break;
+        }
+
+        LOGI("tfd: %d \n", context->tfd);
+        return 0;
+    } while (0);
+
+    _timerfd_destroy(context->tfd);
+    return -1;
+}
+
+static void _epoll_destroy(hy_s32_t epfd)
+{
+    if (epfd) {
+        close(epfd);
+    }
+}
+
+static hy_s32_t _epoll_create(_timer_context_s *context)
+{
+    struct epoll_event ev;
+
+    do {
+        context->eplfd = epoll_create1(0);
+        if(-1 == context->eplfd){
+            LOGES("epoll_create1 failed \n");
+            break;
+        }
+
+        ev.events   = EPOLLIN | EPOLLET;
+        ev.data.ptr = context;
+        if(-1 == epoll_ctl(context->eplfd, EPOLL_CTL_ADD, context->tfd, &ev)) {
+            LOGES("epoll_ctl failed \n");
+            break;
+        }
+
+        return 0;
+    } while (0);
+
+    _epoll_destroy(context->eplfd);
     return -1;
 }
 
@@ -216,6 +346,9 @@ void HyTimerMultiWheelDestroy(void)
 {
     context->exit_flag = 1;
     HyThreadDestroy(&context->thread_h);
+
+    _timerfd_destroy(context->tfd);
+    _epoll_destroy(context->eplfd);
 
     LOGI("timer multi wheel destroy, context: %p \n", context);
     HY_MEM_FREE_PP(&context);
@@ -241,6 +374,16 @@ void HyTimerMultiWheelCreate(void)
             for (hy_u32_t j = 0; j < _LIST_SIZE; ++j) {
                 HY_INIT_LIST_HEAD(context->list[i] + j);
             }
+        }
+
+        if (-1 == _timerfd_create(context, 1)) {
+            LOGE("create timer fd failed \n");
+            break;
+        }
+
+        if (-1 == _epoll_create(context)) {
+            LOGE("create epoll failed \n");
+            break;
         }
 
         context->thread_h = HyThreadCreate_m("HY_MW_timer",
