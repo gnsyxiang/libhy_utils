@@ -46,6 +46,7 @@ _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
                    hy_bit.c         \
+                   hy_hex.c         \
                    hy_md5sum.c      \
                    hy_sort.c        \
                    hy_utils.c
