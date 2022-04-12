@@ -49,14 +49,14 @@ typedef void (*HyTimerMultiWheelCb_t)(void *args);
  * @brief 创建当个定时器结构体
  */
 typedef struct {
-    hy_u64_t                    expires;   ///< 
+    hy_u32_t                    expires;   ///< 
     HyTimerMultiWheelMode_e     mode; 
 
     HyTimerMultiWheelCb_t       timer_cb;
     void                        *args;
 } HyTimerMultiWheelConfig_s;
 
-void HyTimerMultiWheelCreate(void);
+void HyTimerMultiWheelCreate(hy_u32_t tick_ms);
 void HyTimerMultiWheelDestroy(void);
 
 void *HyTimerMultiWheelAdd(HyTimerMultiWheelConfig_s *timer_c);

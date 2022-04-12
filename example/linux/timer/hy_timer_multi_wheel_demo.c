@@ -118,6 +118,8 @@ static void _timer_cb(void *args)
     LOGD("----1---------haha \n");
 }
 
+#define _TICK_MS (10)
+
 int main(int argc, char *argv[])
 {
     _main_context_t *context = _module_create();
@@ -128,7 +130,7 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    HyTimerMultiWheelCreate();
+    HyTimerMultiWheelCreate(_TICK_MS);
 
     LOGD("----2---------haha \n");
     HyTimerMultiWheelConfig_s timer_c;

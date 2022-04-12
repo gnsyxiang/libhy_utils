@@ -36,6 +36,7 @@
 
 #include "hy_timer_multi_wheel.h"
 
+// 2^32 = 2^8 + 4 * 2^6
 #define _MULTI_WHEEL_CNT        (4)
 
 #define _LIST_BASE_BIT          (8)
@@ -45,8 +46,6 @@
 #define _LIST_BIT               (6)
 #define _LIST_SIZE              (0x1UL << _LIST_BIT)
 #define _LIST_MASK              (_LIST_SIZE - 1)
-
-#define _SELECT_TIME_MS         (1)
 
 #define _SHIFT_BIT(_n)          (_LIST_BASE_BIT + (_n) * _LIST_BIT)
 #define _SHIFT_LEFT(_n)         (0x1UL << _SHIFT_BIT(_n))
@@ -65,7 +64,8 @@ typedef struct {
     struct hy_list_head         list_base[_LIST_BASE_SIZE];
     struct hy_list_head         list[_LIST_SIZE][_MULTI_WHEEL_CNT];
 
-    hy_u64_t                    cur_ms;
+    hy_u32_t                    tick_ms;
+    hy_u32_t                    cur_ms;
     hy_s32_t                    tfd;
     hy_s32_t                    eplfd;
     struct itimerspec           its;
@@ -77,14 +77,14 @@ typedef struct {
 static hy_s32_t is_init = 0;
 static _timer_context_s *context = NULL;
 
-static hy_s32_t _timer_add(_timer_s *timer, hy_u64_t expires)
+static hy_s32_t _timer_add(_timer_s *timer, hy_u32_t expires)
 {
     struct hy_list_head *list = NULL;
     hy_u32_t index = 0;
     hy_u32_t expires_time = timer->timer_c.expires;
-    hy_u64_t idx = expires - context->cur_ms;
+    hy_u32_t idx = expires - context->cur_ms;
 
-    if ((hy_s64_t)idx < 0) {
+    if ((hy_s32_t)idx < 0) {
         // 定时器已经超时，放在当前位置直接忽略
         index = context->cur_ms & _LIST_BASE_MASK;
         list = context->list_base + index;
@@ -101,8 +101,8 @@ static hy_s32_t _timer_add(_timer_s *timer, hy_u64_t expires)
         index = _INDEX(expires_time, 2);
         list = context->list[2] + index;
     } else {
-        if (idx > 0xffffffffUL) {
-            expires_time = 0xffffffffUL + context->cur_ms;
+        if (idx > 0xffffffffU) {
+            expires_time = 0xffffffffU + context->cur_ms;
         }
 
         index = _INDEX(expires_time, 3);
@@ -125,12 +125,13 @@ static void _timer_destroy(_timer_s *timer)
 static void *_timer_create(HyTimerMultiWheelConfig_s *timer_c)
 {
     _timer_s *timer = NULL;
-    hy_u64_t expires = 0;
+    hy_u32_t expires = 0;
 
     do {
         timer = HY_MEM_MALLOC_BREAK(_timer_s *, sizeof(*timer));
         HY_MEMCPY(&timer->timer_c, timer_c, sizeof(timer->timer_c));
 
+        timer->timer_c.expires /= context->tick_ms;
         timer->timer_c.expires += context->cur_ms;
         if (timer->timer_c.expires == expires) {
             // 此时context->cur_ms等于0，线程调度引起的
@@ -349,7 +350,7 @@ void HyTimerMultiWheelDestroy(void)
     HY_MEM_FREE_PP(&context);
 }
 
-void HyTimerMultiWheelCreate(void)
+void HyTimerMultiWheelCreate(hy_u32_t tick_ms)
 {
     if (is_init) {
         LOGI("There is no need to initialize the timer repeatedly \n");
@@ -359,7 +360,8 @@ void HyTimerMultiWheelCreate(void)
     do {
         context = HY_MEM_MALLOC_BREAK(_timer_context_s *, sizeof(*context));
 
-        context->cur_ms = HyTimeGetUTCMs();
+        context->cur_ms = 0;
+        context->tick_ms = tick_ms;
 
         for (hy_u32_t i = 0; i < _LIST_BASE_SIZE; ++i) {
             HY_INIT_LIST_HEAD(context->list_base + i);
@@ -371,7 +373,7 @@ void HyTimerMultiWheelCreate(void)
             }
         }
 
-        if (-1 == _timerfd_create(context, 1)) {
+        if (-1 == _timerfd_create(context, tick_ms)) {
             LOGE("create timer fd failed \n");
             break;
         }
