@@ -82,13 +82,13 @@ hy_hash_demo_CXXFLAGS       = $(_cxxflags_com)
 hy_hash_demo_LDFLAGS        = $(_ldflags_com)
 hy_hash_demo_LDADD          = $(_ldadd_com)
 
-bin_PROGRAMS                += hy_template_demo
-hy_template_demo_SOURCES    = $(_sources_com) hy_template_demo.c
-hy_template_demo_CPPFLAGS   = $(_cppflags_com)
-hy_template_demo_CFLAGS     = $(_cflags_com)
-hy_template_demo_CXXFLAGS   = $(_cxxflags_com)
-hy_template_demo_LDFLAGS    = $(_ldflags_com)
-hy_template_demo_LDADD      = $(_ldadd_com)
+bin_PROGRAMS                        += hy_template_linux_demo
+hy_template_linux_demo_SOURCES      = $(_sources_com) hy_template_linux_demo.c
+hy_template_linux_demo_CPPFLAGS     = $(_cppflags_com)
+hy_template_linux_demo_CFLAGS       = $(_cflags_com)
+hy_template_linux_demo_CXXFLAGS     = $(_cxxflags_com)
+hy_template_linux_demo_LDFLAGS      = $(_ldflags_com)
+hy_template_linux_demo_LDADD        = $(_ldadd_com)
 
 if COMPILE_LIBPROTOBUF_C
 bin_PROGRAMS                += hy_protobuf-c_demo

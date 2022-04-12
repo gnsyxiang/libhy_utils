@@ -5,7 +5,7 @@
  * @file    hy_template_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    30/10 2021 10:29
+ * @date    12/04 2022 10:11
  * @version v0.0.1
  * 
  * @since    note
@@ -13,9 +13,9 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        30/10 2021      create the file
+ *     00      zhenquan.qiu        12/04 2022      create the file
  * 
- *     last modified: 30/10 2021 10:29
+ *     last modified: 12/04 2022 10:11
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +26,6 @@
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_signal.h"
 #include "hy_hal/hy_module.h"
 #include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_log.h"
@@ -35,26 +34,9 @@
 
 typedef struct {
     void        *log_h;
-    void        *signal_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
-
-static void _signal_error_cb(void *args)
-{
-    LOGE("------error cb\n");
-
-    _main_context_t *context = args;
-    context->exit_flag = 1;
-}
-
-static void _signal_user_cb(void *args)
-{
-    LOGW("------user cb\n");
-
-    _main_context_t *context = args;
-    context->exit_flag = 1;
-}
 
 static void _module_destroy(_main_context_t **context_pp)
 {
@@ -62,7 +44,6 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"signal",      &context->signal_h,        HySignalDestroy},
         {"log",         &context->log_h,           HyLogDestroy},
     };
 
@@ -81,29 +62,9 @@ static _main_context_t *_module_create(void)
     log_c.save_c.level        = HY_LOG_LEVEL_TRACE;
     log_c.save_c.color_enable = HY_TYPE_FLAG_ENABLE;
 
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
-        SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
-        SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
-    };
-
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
-        SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
-    };
-
-    HySignalConfig_t signal_c;
-    HY_MEMSET(&signal_c, sizeof(signal_c));
-    HY_MEMCPY(signal_c.error_num, signal_error_num, sizeof(signal_error_num));
-    HY_MEMCPY(signal_c.user_num, signal_user_num, sizeof(signal_user_num));
-    signal_c.save_c.app_name      = _APP_NAME;
-    signal_c.save_c.coredump_path = "./";
-    signal_c.save_c.error_cb      = _signal_error_cb;
-    signal_c.save_c.user_cb       = _signal_user_cb;
-    signal_c.save_c.args          = context;
-
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
         {"log",         &context->log_h,           &log_c,        (create_t)HyLogCreate,          HyLogDestroy},
-        {"signal",      &context->signal_h,        &signal_c,     (create_t)HySignalCreate,       HySignalDestroy},
     };
 
     RUN_CREATE(module);
@@ -121,11 +82,10 @@ int main(int argc, char *argv[])
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+    sleep(3);
 
     _module_destroy(&context);
 
     return 0;
 }
+
