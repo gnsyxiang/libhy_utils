@@ -107,10 +107,15 @@ static hy_s32_t _timer_add(_timer_s *timer, hy_u64_t expires)
     return 0;
 }
 
-void *HyTimerMultiWheelAdd(HyTimerMultiWheelConfig_s *timer_c)
+static void _timer_destroy(_timer_s *timer)
 {
-    HY_ASSERT(timer_c);
+    if (timer) {
+        HY_MEM_FREE_PP(&timer);
+    }
+}
 
+static void *_timer_create(HyTimerMultiWheelConfig_s *timer_c)
+{
     _timer_s *timer = NULL;
     hy_u64_t expires = 0;
 
@@ -138,11 +143,15 @@ void *HyTimerMultiWheelAdd(HyTimerMultiWheelConfig_s *timer_c)
         return timer;
     } while (0);
 
-    if (timer) {
-        HY_MEM_FREE_PP(&timer);
-    }
-
+    _timer_destroy(timer);
     return NULL;
+}
+
+void *HyTimerMultiWheelAdd(HyTimerMultiWheelConfig_s *timer_c)
+{
+    HY_ASSERT(timer_c);
+
+    return _timer_create(timer_c);
 }
 
 static int _tw_cascade(struct hy_list_head *list, int index)
@@ -193,6 +202,8 @@ static hy_s32_t _timer_thread_cb(void *args)
                     if (timer_c->timer_cb) {
                         timer_c->timer_cb(timer_c->args);
                     }
+
+                    _timer_destroy(pos);
                 }
             }
         }
