@@ -127,16 +127,15 @@ int main(int argc, char *argv[])
     HyZoneInfo_s zone_info;
     HY_MEMSET(&zone_info, sizeof(zone_info));
 #if 1
-    #define _ZONEINFO_PATH "Asia/Shanghai"
-    // #define _ZONEINFO_PATH "Africa/Cairo"
-    // #define _ZONEINFO_PATH "America/Chicago"
+    // #define _ZONEINFO_PATH "Asia/Shanghai"
+    #define _ZONEINFO_PATH "America/Chicago"
     HY_STRNCPY(zone_info.zoneinfo_path, sizeof(zone_info.zoneinfo_path),
             _ZONEINFO_PATH, HY_STRLEN(_ZONEINFO_PATH));
 #endif
 
 #if 0
     // #define _ZONEINFO_NAME "CST-8"
-    #define _ZONEINFO_NAME "EET-2"
+    #define _ZONEINFO_NAME "CST6CDT"
     HY_STRNCPY(zone_info.zoneinfo_name, sizeof(zone_info.zoneinfo_name),
             _ZONEINFO_NAME, sizeof(_ZONEINFO_NAME));
 #endif
@@ -144,8 +143,6 @@ int main(int argc, char *argv[])
 #if 1
     // zone_info.type = HY_ZONE_TYPE_EAST;
     // zone_info.num = HY_ZONE_NUM_8;
-    zone_info.type = HY_ZONE_TYPE_EAST;
-    zone_info.num = HY_ZONE_NUM_2;
     zone_info.type = HY_ZONE_TYPE_WEST;
     zone_info.num = HY_ZONE_NUM_6;
 #endif

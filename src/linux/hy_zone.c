@@ -204,6 +204,7 @@ static hy_s32_t _zone_set(const char *zoneinfo_path)
     LOGI("tzname[0]: %s \n", tzname[0]);
     LOGI("tzname[1]: %s \n", tzname[1]);
 
+    /* @note: <22-04-14, uos> 这之后获取的时间就是更改时区之后的 */
     return 0;
 }
 
