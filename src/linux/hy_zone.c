@@ -29,6 +29,8 @@
 
 #include "hy_zone.h"
 
+// 链接文件在res/zoneinfo目录下
+
 // 东时区为正，西时区为负
 
 // CAT	东部非洲时间

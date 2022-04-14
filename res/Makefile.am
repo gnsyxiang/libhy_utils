@@ -42,6 +42,7 @@ endif
 # make dist files
 # ---------------
 _dist_file_com  += \
+                   zoneinfo             \
                    Doxyfile             \
                    get_project_info.sh
 
