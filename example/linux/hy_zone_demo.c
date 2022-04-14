@@ -108,7 +108,7 @@ static _main_context_t *_module_create(void)
 
     HyZoneConfig_s zone_c;
     HY_MEMSET(&zone_c, sizeof(zone_c));
-    HY_STRCPY(zone_c.save_c.zone_file_paht, "/data/nfs/bin");
+    HY_STRCPY(zone_c.save_c.zone_file_paht, "/data/nfs/bin/zoneinfo");
 
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
