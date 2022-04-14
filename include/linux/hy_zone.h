@@ -29,6 +29,8 @@ extern "C" {
 #define HY_ZONE_INFO_PATH_LEN_MAX   (64)
 #define HY_ZONE_INFO_NAME_LEN_MAX   (32)
 
+/* @fixme: <22-04-14, uos> 只增加了几个时区，在正式使用前需要补全所有时区 */
+
 /**
  * @brief 时区
  */
