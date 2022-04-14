@@ -65,12 +65,48 @@ typedef enum {
  * 3，最后使用指定时区及其夏令时
  */
 typedef struct {
-    HyZoneType_e    type;                                       ///< 时区
-    HyZoneNum_e     num;                                        ///< 时区号
-    hy_s32_t        daylight;                                   ///< 夏令时
-    char            zoneinfo_path[HY_ZONE_INFO_PATH_LEN_MAX];   ///< 链接文件
-    char            zoneinfo_name[HY_ZONE_INFO_NAME_LEN_MAX];   ///< 各地标准时间
+    HyZoneType_e        type;                                       ///< 时区
+    HyZoneNum_e         num;                                        ///< 时区号
+    hy_s32_t            daylight;                                   ///< 夏令时
+    hy_s32_t            utc_s;                                      ///< 对应时区转化到秒
+    char                zoneinfo_path[HY_ZONE_INFO_PATH_LEN_MAX];   ///< 链接文件
+    char                zoneinfo_name[HY_ZONE_INFO_NAME_LEN_MAX];   ///< 各地标准时间
 } HyZoneInfo_s;
+
+/**
+ * @brief 配置结构体
+ */
+typedef struct {
+    HyZoneInfo_s        zone_info;                                  ///< 时区结构体
+    char                zone_file_paht[HY_ZONE_INFO_PATH_LEN_MAX];  ///< 链接文件路径
+} HyZoneSaveConfig_s;
+
+/**
+ * @brief 配置结构体
+ */
+typedef struct {
+    HyZoneSaveConfig_s  save_c;                                     ///< 配置结构体
+} HyZoneConfig_s;
+
+/**
+ * @brief 创建模块
+ *
+ * @param zone_c 配置结构体
+ *
+ * @return 成功返回句柄，失败返回NULL
+ *
+ * @note 句柄没有用到，这样定义接口是为了与其他接口兼容
+ */
+void *HyZoneCreate(HyZoneConfig_s *zone_c);
+
+/**
+ * @brief 销毁模块
+ *
+ * @param handle 句柄的地址(二级指针)
+ *
+ * @note 句柄没有用到，这样定义接口是为了与其他接口兼容，可以直接传NULL
+ */
+void HyZoneDestroy(void **handle);
 
 /**
  * @brief 设置时区

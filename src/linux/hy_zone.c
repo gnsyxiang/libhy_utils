@@ -38,18 +38,24 @@
 // USZ1	加里宁格勒时间
 // WAST	西部非洲夏令时间
 typedef struct {
-    const char *zoneinfo_path;      // 配置文件路径
-    const char *zoneinfo_name;      // 各地标准时间缩写，用于putenv("TZ=CST6CDT");设置环境变量
+    const char          *zoneinfo_path;      // 配置文件路径
+    const char          *zoneinfo_name;      // 各地标准时间缩写，用于putenv("TZ=CST6CDT");设置环境变量
 } _zone_s;
 
 typedef struct {
-    HyZoneType_e    type;
-    HyZoneNum_e     num;
-    const char      *GMT_path;
+    HyZoneType_e        type;
+    HyZoneNum_e         num;
+    const char          *GMT_path;
 
-    _zone_s         *zone;
-    hy_u32_t        zone_cnt;
+    _zone_s             *zone;
+    hy_u32_t            zone_cnt;
 } _time_zone_s;
+
+typedef struct {
+    HyZoneSaveConfig_s  save_c;
+} _zone_context_s;
+
+static _zone_context_s *context = NULL;
 
 static _zone_s zone_east_0[] = {
 };
@@ -188,7 +194,8 @@ static hy_s32_t _zone_set(const char *zoneinfo_path)
     }
 
     HY_MEMSET(cmd, sizeof(cmd));
-    snprintf(cmd, sizeof(cmd), "ln -s /data/nfs/bin/%s /tmp/localtime", zoneinfo_path);
+    snprintf(cmd, sizeof(cmd), "ln -s %s/%s /tmp/localtime",
+            context->save_c.zone_file_paht, zoneinfo_path);
     ret = HyUtilsSystemCmd_m(cmd, 0);
     if (0 != ret) {
         return -1;
@@ -204,8 +211,26 @@ static hy_s32_t _zone_set(const char *zoneinfo_path)
     LOGI("tzname[0]: %s \n", tzname[0]);
     LOGI("tzname[1]: %s \n", tzname[1]);
 
+    context->save_c.zone_info.daylight = daylight;
+    context->save_c.zone_info.utc_s = timezone;
+
     /* @note: <22-04-14, uos> 这之后获取的时间就是更改时区之后的 */
     return 0;
+}
+
+static void _save_zone_info(_time_zone_s *time_zone, _zone_s *zone)
+{
+    HyZoneInfo_s *zone_info_tmp = &context->save_c.zone_info;
+
+    HY_MEMSET(zone_info_tmp, sizeof(*zone_info_tmp));
+    zone_info_tmp->type = time_zone->type;
+    zone_info_tmp->num = time_zone->num;
+    if (zone && HY_STRLEN(zone->zoneinfo_path) > 0) {
+        HY_STRCPY(zone_info_tmp->zoneinfo_path, zone->zoneinfo_path);
+    }
+    if (zone && HY_STRLEN(zone->zoneinfo_name) > 0) {
+        HY_STRCPY(zone_info_tmp->zoneinfo_name, zone->zoneinfo_name);
+    }
 }
 
 hy_s32_t HyZoneSet(HyZoneInfo_s *zone_info)
@@ -224,6 +249,7 @@ hy_s32_t HyZoneSet(HyZoneInfo_s *zone_info)
             if (HY_STRLEN(zone_info->zoneinfo_path) > 0
                     && 0 == HY_STRCMP(zone_info->zoneinfo_path,
                         zone[j].zoneinfo_path)) {
+                _save_zone_info(&time_zone[i], &zone[j]);
                 return  _zone_set(time_zone[i].zone[j].zoneinfo_path);
             }
 
@@ -231,6 +257,7 @@ hy_s32_t HyZoneSet(HyZoneInfo_s *zone_info)
             if (HY_STRLEN(zone_info->zoneinfo_name) > 0
                     && 0 == HY_STRCMP(zone_info->zoneinfo_name,
                         zone[j].zoneinfo_name)) {
+                _save_zone_info(&time_zone[i], &zone[j]);
                 return  _zone_set(time_zone[i].zone[j].zoneinfo_path);
             }
         }
@@ -240,6 +267,7 @@ hy_s32_t HyZoneSet(HyZoneInfo_s *zone_info)
         // 3, 指定GMT时区
         if (time_zone[i].type == zone_info->type
                 && time_zone[i].num == zone_info->num) {
+            _save_zone_info(&time_zone[i], NULL);
             return  _zone_set(time_zone[i].GMT_path);
         }
     }
@@ -252,6 +280,31 @@ hy_s32_t HyZoneGet(HyZoneInfo_s *zone_info)
 {
     HY_ASSERT_RET_VAL(!zone_info, -1);
 
+    HY_MEMCPY(zone_info, &context->save_c.zone_info, sizeof(*zone_info));
+
     return 0;
+}
+
+void HyZoneDestroy(void **handle)
+{
+    LOGI("zone destroy, context: %p \n", context);
+    HY_MEM_FREE_PP(&context);
+}
+
+void *HyZoneCreate(HyZoneConfig_s *zone_c)
+{
+    HY_ASSERT_RET_VAL(!zone_c, NULL);
+
+    do {
+        context = HY_MEM_MALLOC_BREAK(_zone_context_s *, sizeof(*context));
+        HY_MEMCPY(&context->save_c, &zone_c->save_c, sizeof(context->save_c));
+
+        LOGI("zone create, context: %p \n", context);
+        return context;
+    } while (0);
+
+    LOGE("zone create failed \n");
+    HyZoneDestroy((void **)&context);
+    return NULL;
 }
 

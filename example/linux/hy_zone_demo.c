@@ -40,6 +40,8 @@ typedef struct {
     void        *log_h;
     void        *signal_h;
 
+    void        *zone_h;
+
     hy_s32_t    exit_flag;
 } _main_context_t;
 
@@ -65,8 +67,9 @@ static void _module_destroy(_main_context_t **context_pp)
 
     // note: 增加或删除要同步到module_create_t中
     module_destroy_t module[] = {
-        {"signal",      &context->signal_h,        HySignalDestroy},
-        {"log",         &context->log_h,           HyLogDestroy},
+        {"zone",        &context->zone_h,       HyZoneDestroy},
+        {"signal",      &context->signal_h,     HySignalDestroy},
+        {"log",         &context->log_h,        HyLogDestroy},
     };
 
     RUN_DESTROY(module);
@@ -103,10 +106,15 @@ static _main_context_t *_module_create(void)
     signal_c.save_c.user_cb       = _signal_user_cb;
     signal_c.save_c.args          = context;
 
+    HyZoneConfig_s zone_c;
+    HY_MEMSET(&zone_c, sizeof(zone_c));
+    HY_STRCPY(zone_c.save_c.zone_file_paht, "/data/nfs/bin");
+
     // note: 增加或删除要同步到module_destroy_t中
     module_create_t module[] = {
-        {"log",         &context->log_h,           &log_c,        (create_t)HyLogCreate,          HyLogDestroy},
-        {"signal",      &context->signal_h,        &signal_c,     (create_t)HySignalCreate,       HySignalDestroy},
+        {"log",         &context->log_h,        &log_c,         (create_t)HyLogCreate,          HyLogDestroy},
+        {"signal",      &context->signal_h,     &signal_c,      (create_t)HySignalCreate,       HySignalDestroy},
+        {"zone",        &context->zone_h,       &zone_c,        (create_t)HyZoneCreate,         HyZoneDestroy},
     };
 
     RUN_CREATE(module);
@@ -127,29 +135,38 @@ int main(int argc, char *argv[])
     HyZoneInfo_s zone_info;
     HY_MEMSET(&zone_info, sizeof(zone_info));
 #if 1
-    // #define _ZONEINFO_PATH "Asia/Shanghai"
-    #define _ZONEINFO_PATH "America/Chicago"
+    #define _ZONEINFO_PATH "Asia/Shanghai"
+    // #define _ZONEINFO_PATH "America/Chicago"
     HY_STRNCPY(zone_info.zoneinfo_path, sizeof(zone_info.zoneinfo_path),
             _ZONEINFO_PATH, HY_STRLEN(_ZONEINFO_PATH));
 #endif
 
 #if 0
-    // #define _ZONEINFO_NAME "CST-8"
-    #define _ZONEINFO_NAME "CST6CDT"
+    #define _ZONEINFO_NAME "CST-8"
+    // #define _ZONEINFO_NAME "CST6CDT"
     HY_STRNCPY(zone_info.zoneinfo_name, sizeof(zone_info.zoneinfo_name),
             _ZONEINFO_NAME, sizeof(_ZONEINFO_NAME));
 #endif
 
-#if 1
-    // zone_info.type = HY_ZONE_TYPE_EAST;
-    // zone_info.num = HY_ZONE_NUM_8;
-    zone_info.type = HY_ZONE_TYPE_WEST;
-    zone_info.num = HY_ZONE_NUM_6;
+#if 0
+    zone_info.type = HY_ZONE_TYPE_EAST;
+    zone_info.num = HY_ZONE_NUM_8;
+    // zone_info.type = HY_ZONE_TYPE_WEST;
+    // zone_info.num = HY_ZONE_NUM_6;
 #endif
 
     if (0 != HyZoneSet(&zone_info)) {
         LOGE("HyZoneSet failed \n");
     }
+
+    HyZoneInfo_s zone_info_get;
+    HyZoneGet(&zone_info_get);
+    LOGI("type: %d \n", zone_info_get.type);
+    LOGI("num: %d \n", zone_info_get.num);
+    LOGI("daylight: %d \n", zone_info_get.daylight);
+    LOGI("utc_s: %d \n", zone_info_get.utc_s);
+    LOGI("zoneinfo_path: %s \n", zone_info_get.zoneinfo_path);
+    LOGI("zoneinfo_name: %s \n", zone_info_get.zoneinfo_name);
 
     char time_buf[BUF_LEN] = {0};
     HyTimeFormatLocalTime(time_buf, sizeof(time_buf));
