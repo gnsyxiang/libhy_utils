@@ -54,7 +54,7 @@ static hy_s32_t _get_fifo_loop_cb(void *args)
         len = HyFifoGetInfo(context->fifo_h, HY_FIFO_INFO_USED_LEN);
         if (len > 0) {
             HyFifoRead(context->fifo_h, &c, 1);
-            LOGD("c: %c \n", c);
+            LOGI("--read---------, c: %c \n", c);
         }
 
         sleep(1);
@@ -125,9 +125,9 @@ static _main_context_t *_module_create(void)
     signal_c.save_c.user_cb       = _signal_user_cb;
     signal_c.save_c.args          = context;
 
-    HyFifoConfig_s fifo_config;
-    fifo_config.save_config.len = 15;
-    fifo_config.save_config.mutex_flag = HY_FIFO_MUTEX_LOCK;
+    HyFifoConfig_s fifo_c;
+    fifo_c.save_c.len           = 25;
+    fifo_c.save_c.is_lock       = HY_FIFO_MUTEX_LOCK;
 
     HyThreadConfig_s thread_c;
     HY_MEMSET(&thread_c, sizeof(thread_c));
@@ -141,7 +141,7 @@ static _main_context_t *_module_create(void)
     module_create_t module[] = {
         {"log",         &context->log_h,        &log_c,             (create_t)HyLogCreate,      HyLogDestroy},
         {"signal",      &context->signal_h,     &signal_c,          (create_t)HySignalCreate,   HySignalDestroy},
-        {"fifo",        &context->fifo_h,       &fifo_config,       (create_t)HyFifoCreate,     HyFifoDestroy},
+        {"fifo",        &context->fifo_h,       &fifo_c,            (create_t)HyFifoCreate,     HyFifoDestroy},
         {"thread",      &context->thread_h,     &thread_c,          (create_t)HyThreadCreate,   HyThreadDestroy},
     };
 
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
         }
         cnt += 1;
 
-        LOGD("c: %c, cnt: %d \n", c, cnt);
+        LOGD("--write--, c: %c, cnt: %d \n", c, cnt);
 
         c += 1;
         if (c - 'a' >= 26) {
