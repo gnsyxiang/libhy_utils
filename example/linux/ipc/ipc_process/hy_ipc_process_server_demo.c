@@ -93,6 +93,12 @@ static void _module_destroy(_main_context_t **context_pp)
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
 
+    HyModuleDestroyBool_s bool_module[] = {
+        {"log",     HyLogDeInit},
+    };
+
+    HY_MODULE_RUN_DESTROY_BOOL(bool_module);
+
     HY_MEM_FREE_PP(context_pp);
 }
 
