@@ -54,7 +54,8 @@ _sources_com    += \
                    hy_hash.c            \
                    hy_thread_pool.c     \
                    hy_timer.c           \
-                   hy_utils_linux.c
+                   hy_utils_linux.c     \
+                   hy_zone.c
 
 if COMPILE_LIBLOG4CPLUS
 _sources_com    += hy_log4cplus.cpp

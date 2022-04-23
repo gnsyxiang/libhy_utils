@@ -126,3 +126,11 @@ hy_timer_demo_CXXFLAGS              = $(_cxxflags_com)
 hy_timer_demo_LDFLAGS               = $(_ldflags_com)
 hy_timer_demo_LDADD                 = $(_ldadd_com)
 
+bin_PROGRAMS                        += hy_zone_demo
+hy_zone_demo_SOURCES                = $(_sources_com) hy_zone_demo.c
+hy_zone_demo_CPPFLAGS               = $(_cppflags_com)
+hy_zone_demo_CFLAGS                 = $(_cflags_com)
+hy_zone_demo_CXXFLAGS               = $(_cxxflags_com)
+hy_zone_demo_LDFLAGS                = $(_ldflags_com)
+hy_zone_demo_LDADD                  = $(_ldadd_com)
+
