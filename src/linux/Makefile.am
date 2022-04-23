@@ -20,7 +20,8 @@
 
 SUBDIRS = \
           ipc   \
-          net
+          net   \
+          timer
 
 noinst_LTLIBRARIES = libhy_utils_os.la
 
@@ -77,8 +78,9 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += \
-                   $(top_builddir)/src/$(run_os)/ipc/libhy_ipc.la   \
-                   $(top_builddir)/src/$(run_os)/net/libhy_net.la   \
+                   $(top_builddir)/src/$(run_os)/ipc/libhy_ipc.la       \
+                   $(top_builddir)/src/$(run_os)/net/libhy_net.la       \
+                   $(top_builddir)/src/$(run_os)/timer/libhy_timer.la   \
                    $(ldadd_com)
 
 libhy_utils_os_la_SOURCES    = $(_sources_com)

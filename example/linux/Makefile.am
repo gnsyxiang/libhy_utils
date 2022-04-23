@@ -20,7 +20,8 @@
 
 SUBDIRS = \
           ipc   \
-          net
+          net   \
+          timer
 
 # ------------------
 # defining variables

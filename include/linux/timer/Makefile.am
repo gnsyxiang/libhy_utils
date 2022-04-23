@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    30/10 2021 11:42
+# @date    11/04 2022 10:48
 # @version v0.0.1
 # 
 # @since    note
@@ -13,15 +13,10 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        30/10 2021      create the file
+#     00      zhenquan.qiu        11/04 2022      create the file
 # 
-#     last modified: 30/10 2021 11:42
+#     last modified: 11/04 2022 10:48
 # ===============================================================
-
-SUBDIRS = \
-          ipc   \
-          net   \
-          timer
 
 # ------------------
 # defining variables
@@ -36,16 +31,7 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    += \
-                           hy_fifo.h        \
-                           hy_hash.h        \
-                           hy_thread_pool.h \
-                           hy_timer.h       \
-                           hy_utils_linux.h
-
-if COMPILE_LIBCURL
-_install_headers_com    += hy_curl.h
-endif
+_install_headers_com    += hy_timer_multi_wheel.h
 
 # ------------------
 # make install files
