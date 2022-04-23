@@ -30,10 +30,6 @@
 
 #include "hy_sort.h"
 
-typedef struct {
-    void    *log_h;
-} _main_context_t;
-
 static hy_s32_t _swap_int_cb(void *src, void *dst)
 {
     hy_s32_t  *a = src;
@@ -101,24 +97,14 @@ static void _test_struct(void)
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *,
-            sizeof(*context), -1);
-
-    context->log_h = HyLogCreate_m(512, 512,
-            HY_LOG_LEVEL_TRACE, HY_TYPE_FLAG_ENABLE);
-    if (!context->log_h) {
-        LOGE("HyLogCreate_m failed \n");
-        return -1;
-    }
+    HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
     _test_int();
     _test_struct();
 
-    HyLogDestroy(&context->log_h);
-
-    HY_MEM_FREE_PP(&context);
+    HyLogDeInit();
 
     return 0;
 }

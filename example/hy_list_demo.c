@@ -38,8 +38,6 @@ typedef struct {
 } _student_t;
 
 typedef struct {
-    void                    *log_h;
-
     struct hy_list_head     list;
     hy_u32_t                list_cnt;
 } _main_context_t;
@@ -106,12 +104,7 @@ int main(int argc, char *argv[])
     _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *,
             sizeof(*context), -1);
 
-    context->log_h = HyLogCreate_m(512, 512,
-            HY_LOG_LEVEL_TRACE, HY_TYPE_FLAG_ENABLE);
-    if (!context->log_h) {
-        LOGE("HyLogCreate_m failed \n");
-        return -1;
-    }
+    HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
 
     LOGI("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
@@ -162,7 +155,7 @@ int main(int argc, char *argv[])
         hy_list_del(&pos->entry);
     }
 
-    HyLogDestroy(&context->log_h);
+    HyLogDeInit();
 
     HY_MEM_FREE_PP(&context);
 

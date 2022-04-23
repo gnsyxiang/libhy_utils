@@ -36,7 +36,6 @@
 #define _APP_NAME "hy_net_demo"
 
 typedef struct {
-    void        *log_h;
     void        *signal_h;
 
     void        *net_h;
@@ -110,14 +109,13 @@ static void _module_destroy(_main_context_t **context_pp)
 {
     _main_context_t *context = *context_pp;
 
-    // note: 增加或删除要同步到module_create_t中
-    module_destroy_t module[] = {
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
         {"net",         &context->net_h,        HyNetDestroy},
         {"signal",      &context->signal_h,     HySignalDestroy},
-        {"log",         &context->log_h,        HyLogDestroy},
     };
 
-    RUN_DESTROY(module);
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
 
     HY_MEM_FREE_PP(context_pp);
 }
@@ -127,10 +125,17 @@ static _main_context_t *_module_create(void)
     _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
 
     HyLogConfig_s log_c;
-    log_c.save_c.buf_len_min  = 512;
-    log_c.save_c.buf_len_max  = 512;
-    log_c.save_c.level        = HY_LOG_LEVEL_TRACE;
-    log_c.save_c.color_enable = HY_TYPE_FLAG_ENABLE;
+    HY_MEMSET(&log_c, sizeof(log_c));
+    log_c.fifo_len                  = 10 * 1024;
+    log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
+    log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
+    log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
+
+    HyModuleCreateBool_s bool_module[] = {
+        {"log",     &log_c,     (HyModuleCreateBoolCb_t)HyLogInit,  HyLogDeInit},
+    };
+
+    HY_MODULE_RUN_CREATE_BOOL(bool_module);
 
     int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
@@ -165,14 +170,13 @@ static _main_context_t *_module_create(void)
     net_c.wifi_power_gpio       = _wifi_power_gpio_cb;
     net_c.args                  = context;
 
-    // note: 增加或删除要同步到module_destroy_t中
-    module_create_t module[] = {
-        {"log",         &context->log_h,        &log_c,         (create_t)HyLogCreate,          HyLogDestroy},
-        {"signal",      &context->signal_h,     &signal_c,      (create_t)HySignalCreate,       HySignalDestroy},
-        {"net",         &context->net_h,        &net_c,         (create_t)HyNetCreate,          HyNetDestroy},
+    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
+    HyModuleCreateHandle_s module[] = {
+        {"signal",      &context->signal_h,     &signal_c,      (HyModuleCreateHandleCb_t)HySignalCreate,       HySignalDestroy},
+        {"net",         &context->net_h,        &net_c,         (HyModuleCreateHandleCb_t)HyNetCreate,          HyNetDestroy},
     };
 
-    RUN_CREATE(module);
+    HY_MODULE_RUN_CREATE_HANDLE(module);
 
     return context;
 }

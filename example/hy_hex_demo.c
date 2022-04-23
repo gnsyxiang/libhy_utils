@@ -34,55 +34,9 @@
 
 #define _APP_NAME "hy_hex_demo"
 
-typedef struct {
-    void        *log_h;
-
-    hy_s32_t    exit_flag;
-} _main_context_t;
-
-static void _module_destroy(_main_context_t **context_pp)
-{
-    _main_context_t *context = *context_pp;
-
-    // note: 增加或删除要同步到module_create_t中
-    module_destroy_t module[] = {
-        {"log",         &context->log_h,           HyLogDestroy},
-    };
-
-    RUN_DESTROY(module);
-
-    HY_MEM_FREE_PP(context_pp);
-}
-
-static _main_context_t *_module_create(void)
-{
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
-    HyLogConfig_s log_c;
-    log_c.save_c.buf_len_min  = 512;
-    log_c.save_c.buf_len_max  = 512;
-    log_c.save_c.level        = HY_LOG_LEVEL_TRACE;
-    log_c.save_c.color_enable = HY_TYPE_FLAG_ENABLE;
-
-    // note: 增加或删除要同步到module_destroy_t中
-    module_create_t module[] = {
-        {"log",         &context->log_h,           &log_c,        (create_t)HyLogCreate,          HyLogDestroy},
-    };
-
-    RUN_CREATE(module);
-
-    return context;
-}
-
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
-
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+    HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
 
     char *buf = "1234567890abcdefghi";
     HY_HEX_ASCII(buf, HY_STRLEN(buf));
@@ -90,7 +44,7 @@ int main(int argc, char *argv[])
 
     sleep(3);
 
-    _module_destroy(&context);
+    HyLogDeInit();
 
     return 0;
 }
