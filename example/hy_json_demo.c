@@ -25,86 +25,9 @@
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_signal.h"
-#include "hy_hal/hy_module.h"
-#include "hy_hal/hy_hal_utils.h"
 #include "hy_hal/hy_log.h"
 
 #include "hy_json.h"
-
-#define _APP_NAME "hy_json_demo"
-
-typedef struct {
-    void        *signal_h;
-
-    hy_s32_t    exit_flag;
-} _main_context_t;
-
-static void _signal_error_cb(void *args)
-{
-    LOGE("------error cb\n");
-
-    _main_context_t *context = args;
-    context->exit_flag = 1;
-}
-
-static void _signal_user_cb(void *args)
-{
-    LOGI("------user cb\n");
-
-    _main_context_t *context = args;
-    context->exit_flag = 1;
-}
-
-static void _module_destroy(_main_context_t **context_pp)
-{
-    _main_context_t *context = *context_pp;
-
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"signal",  &context->signal_h,    HySignalDestroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
-
-    HY_MEM_FREE_PP(context_pp);
-}
-
-static _main_context_t *_module_create(void)
-{
-    _main_context_t *context;
-
-    context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
-
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
-        SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
-        SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
-    };
-
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
-        SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
-    };
-
-    HySignalConfig_t signal_c;
-    memset(&signal_c, 0, sizeof(signal_c));
-    HY_MEMCPY(signal_c.error_num, signal_error_num, sizeof(signal_error_num));
-    HY_MEMCPY(signal_c.user_num, signal_user_num, sizeof(signal_user_num));
-    signal_c.save_c.app_name      = _APP_NAME;
-    signal_c.save_c.coredump_path = "./";
-    signal_c.save_c.error_cb      = _signal_error_cb;
-    signal_c.save_c.user_cb       = _signal_user_cb;
-    signal_c.save_c.args          = context;
-
-    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
-    HyModuleCreateHandle_s module[] = {
-        {"signal",  &context->signal_h,    &signal_c,     (HyModuleCreateHandleCb_t)HySignalCreate,   HySignalDestroy},
-    };
-
-    HY_MODULE_RUN_CREATE_HANDLE(module);
-
-    return context;
-}
 
 #if (HY_JSON_USE_TYPE == 1)
 static void _test_json(void *root)
@@ -160,11 +83,7 @@ static void _test_json_file(void)
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
 
     LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
@@ -190,11 +109,9 @@ int main(int argc, char *argv[])
 
     _test_json_file();
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+    sleep(3);
 
-    _module_destroy(&context);
+    HyLogDeInit();
 
 return 0;
 }

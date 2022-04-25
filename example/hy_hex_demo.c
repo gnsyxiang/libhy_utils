@@ -23,16 +23,12 @@
 #include <unistd.h>
 
 #include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
-#include "hy_hal/hy_module.h"
-#include "hy_hal/hy_hal_utils.h"
+#include "hy_hal/hy_type.h"
 #include "hy_hal/hy_log.h"
 
 #include "hy_hex.h"
-
-#define _APP_NAME "hy_hex_demo"
 
 int main(int argc, char *argv[])
 {

@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "hy_hal/hy_mem.h"
+#include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_hal_utils.h"

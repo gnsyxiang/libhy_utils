@@ -39,8 +39,6 @@
 #define _IPC_PROCESS_IPC_NAME "ipc_process"
 
 typedef struct {
-    void        *signal_h;
-
     void        *ipc_process_client_h;
     void        *audio_thread_h;
     void        *video_thread_h;
@@ -91,13 +89,13 @@ static void _module_destroy(_main_context_t **context_pp)
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
         {"ipc process client",  &context->ipc_process_client_h,     HyIpcProcessDestroy},
-        {"signal",              &context->signal_h,                 HySignalDestroy},
     };
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
 
     HyModuleDestroyBool_s bool_module[] = {
-        {"log",     HyLogDeInit},
+        {"signal",          HySignalDestroy },
+        {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
@@ -116,12 +114,6 @@ static _main_context_t *_module_create(void)
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
 
-    HyModuleCreateBool_s bool_module[] = {
-        {"log",     &log_c,     (HyModuleCreateBoolCb_t)HyLogInit,  HyLogDeInit},
-    };
-
-    HY_MODULE_RUN_CREATE_BOOL(bool_module);
-
     int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
         SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
@@ -132,14 +124,21 @@ static _main_context_t *_module_create(void)
     };
 
     HySignalConfig_t signal_c;
-    HY_MEMSET(&signal_c, sizeof(signal_c));
+    memset(&signal_c, 0, sizeof(signal_c));
     HY_MEMCPY(signal_c.error_num, signal_error_num, sizeof(signal_error_num));
     HY_MEMCPY(signal_c.user_num, signal_user_num, sizeof(signal_user_num));
-    signal_c.save_c.app_name      = _APP_NAME;
-    signal_c.save_c.coredump_path = "./";
-    signal_c.save_c.error_cb      = _signal_error_cb;
-    signal_c.save_c.user_cb       = _signal_user_cb;
-    signal_c.save_c.args          = context;
+    signal_c.save_c.app_name        = _APP_NAME;
+    signal_c.save_c.coredump_path   = "./";
+    signal_c.save_c.error_cb        = _signal_error_cb;
+    signal_c.save_c.user_cb         = _signal_user_cb;
+    signal_c.save_c.args            = context;
+
+    HyModuleCreateBool_s bool_module[] = {
+        {"log",         &log_c,         (HyModuleCreateBoolCb_t)HyLogInit,          HyLogDeInit},
+        {"signal",      &signal_c,      (HyModuleCreateBoolCb_t)HySignalCreate,     HySignalDestroy},
+    };
+
+    HY_MODULE_RUN_CREATE_BOOL(bool_module);
 
     HyIpcProcessFunc_s func[] = {
     };
@@ -157,7 +156,6 @@ static _main_context_t *_module_create(void)
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
-        {"signal",                  &context->signal_h,                 &signal_c,          (HyModuleCreateHandleCb_t)HySignalCreate,       HySignalDestroy},
         {"ipc process client",      &context->ipc_process_client_h,     &ipc_process_c,     (HyModuleCreateHandleCb_t)HyIpcProcessCreate,   HyIpcProcessDestroy},
     };
 
