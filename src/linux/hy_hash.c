@@ -24,8 +24,7 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_log.h"
-
-#include "hy_list.h"
+#include "hy_hal/hy_list.h"
 
 #include "hy_hash.h"
 

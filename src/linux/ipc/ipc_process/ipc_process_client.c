@@ -25,9 +25,9 @@
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
 #include "hy_hal/hy_thread.h"
+#include "hy_hal/hy_list.h"
 
 #include "hy_fifo.h"
-#include "hy_list.h"
 
 #include "ipc_process_client.h"
 #include "ipc_link.h"

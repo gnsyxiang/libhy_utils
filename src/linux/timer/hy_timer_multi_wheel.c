@@ -31,8 +31,7 @@
 #include "hy_hal/hy_log.h"
 #include "hy_hal/hy_thread.h"
 #include "hy_hal/hy_time.h"
-
-#include "hy_list.h"
+#include "hy_hal/hy_list.h"
 
 #include "hy_timer_multi_wheel.h"
 
