@@ -63,31 +63,18 @@ static void _signal_user_cb(void *args)
     context->exit_flag = 1;
 }
 
-static void _module_destroy(_main_context_t **context_pp)
+static void _bool_module_destroy(void)
 {
-    _main_context_t *context = *context_pp;
-
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"hash",    &context->hash_handle,      HyHashDestroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
-
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
         {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _bool_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.fifo_len                  = 10 * 1024;
@@ -120,7 +107,20 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
+}
 
+static void _handle_module_destroy(_main_context_t *context)
+{
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {"hash",    &context->hash_handle,      HyHashDestroy},
+    };
+
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
+}
+
+static hy_s32_t _handle_module_create(_main_context_t *context)
+{
     HyHashConfig_t hash_config;
     hash_config.save_config.bucket_cnt = 32;
 
@@ -130,8 +130,6 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
-
-    return context;
 }
 
 static void _hash_dump_item_cb(void *val, void *args)
@@ -142,60 +140,72 @@ static void _hash_dump_item_cb(void *val, void *args)
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
-
-    {
-        HyHashItem_t h_item;
-        _student_t *st = malloc(sizeof(*st));
-
-        for (int i = 0; i < 4; ++i) {
-            HY_MEMSET(st, sizeof(*st));
-            snprintf(st->name, 32, "jim%d", i);
-            st->age = 10 + i;
-            st->score = 80 + i;
-
-            h_item.key      = st->name;
-            h_item.val      = st;
-            h_item.val_len  = sizeof(*st);
-
-            HyHashItemAdd(context->hash_handle, &h_item);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
         }
 
-        free(st);
-
-        HyHashDump(context->hash_handle, _hash_dump_item_cb, context);
-    }
-
-    {
-        HyHashItem_t h_item;
-        _student_t *st = malloc(sizeof(*st));
-
-        for (int i = 0; i < 4; ++i) {
-            HY_MEMSET(st, sizeof(*st));
-            snprintf(st->name, 32, "jim%d", i);
-
-            h_item.key      = st->name;
-            h_item.val      = st;
-
-            HyHashItemGet(context->hash_handle, &h_item);
-
-            LOGD("name: %s, age: %d, score: %d \n", st->name, st->age, st->score);
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
+            break;
         }
 
-        free(st);
-    }
+        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+        {
+            HyHashItem_t h_item;
+            _student_t *st = malloc(sizeof(*st));
 
-    _module_destroy(&context);
+            for (int i = 0; i < 4; ++i) {
+                HY_MEMSET(st, sizeof(*st));
+                snprintf(st->name, 32, "jim%d", i);
+                st->age = 10 + i;
+                st->score = 80 + i;
+
+                h_item.key      = st->name;
+                h_item.val      = st;
+                h_item.val_len  = sizeof(*st);
+
+                HyHashItemAdd(context->hash_handle, &h_item);
+            }
+
+            free(st);
+
+            HyHashDump(context->hash_handle, _hash_dump_item_cb, context);
+        }
+
+        {
+            HyHashItem_t h_item;
+            _student_t *st = malloc(sizeof(*st));
+
+            for (int i = 0; i < 4; ++i) {
+                HY_MEMSET(st, sizeof(*st));
+                snprintf(st->name, 32, "jim%d", i);
+
+                h_item.key      = st->name;
+                h_item.val      = st;
+
+                HyHashItemGet(context->hash_handle, &h_item);
+
+                LOGD("name: %s, age: %d, score: %d \n", st->name, st->age, st->score);
+            }
+
+            free(st);
+        }
+
+        while (!context->exit_flag) {
+            sleep(1);
+        }
+
+    } while (0);
+
+    _handle_module_destroy(context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }

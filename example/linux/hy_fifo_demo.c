@@ -42,25 +42,6 @@ typedef struct {
     hy_s32_t    exit_flag;
 } _main_context_t;
 
-static hy_s32_t _get_fifo_loop_cb(void *args)
-{
-    _main_context_t *context = args;
-
-    hy_u32_t len;
-    char c;
-    while (!context->exit_flag) {
-        len = HyFifoGetInfo(context->fifo_h, HY_FIFO_INFO_USED_LEN);
-        if (len > 0) {
-            HyFifoRead(context->fifo_h, &c, 1);
-            LOGI("--read---------, c: %c \n", c);
-        }
-
-        sleep(1);
-    }
-
-    return -1;
-}
-
 static void _signal_error_cb(void *args)
 {
     LOGE("------error cb\n");
@@ -77,32 +58,18 @@ static void _signal_user_cb(void *args)
     context->exit_flag = 1;
 }
 
-static void _module_destroy(_main_context_t **context_pp)
+static void _bool_module_destroy(void)
 {
-    _main_context_t *context = *context_pp;
-
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"thread",      &context->thread_h,     HyThreadDestroy},
-        {"fifo",        &context->fifo_h,       HyFifoDestroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
-
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
         {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _bool_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.fifo_len                  = 10 * 1024;
@@ -135,7 +102,40 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
+}
 
+static hy_s32_t _get_fifo_loop_cb(void *args)
+{
+    _main_context_t *context = args;
+
+    hy_u32_t len;
+    char c;
+    while (!context->exit_flag) {
+        len = HyFifoGetInfo(context->fifo_h, HY_FIFO_INFO_USED_LEN);
+        if (len > 0) {
+            HyFifoRead(context->fifo_h, &c, 1);
+            LOGI("--read---------, c: %c \n", c);
+        }
+
+        sleep(1);
+    }
+
+    return -1;
+}
+
+static void _handle_module_destroy(_main_context_t *context)
+{
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {"thread",      &context->thread_h,     HyThreadDestroy},
+        {"fifo",        &context->fifo_h,       HyFifoDestroy},
+    };
+
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
+}
+
+static hy_s32_t _handle_module_create(_main_context_t *context)
+{
     HyFifoConfig_s fifo_c;
     fifo_c.save_c.len           = 25;
     fifo_c.save_c.is_lock       = HY_FIFO_MUTEX_LOCK;
@@ -155,46 +155,55 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
-
-    return context;
 }
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGI("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
+        }
 
-    hy_u32_t cnt = 0;
-    char c = 'a';
-    hy_u32_t ret = 0;
-    while (!context->exit_flag) {
-        ret = HyFifoWrite(context->fifo_h, &c, 1);
-        while (!context->exit_flag && ret == 0) {
-            usleep(500 * 1000);
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
+            break;
+        }
+
+        LOGI("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+        hy_u32_t cnt = 0;
+        char c = 'a';
+        hy_u32_t ret = 0;
+        while (!context->exit_flag) {
             ret = HyFifoWrite(context->fifo_h, &c, 1);
+            while (!context->exit_flag && ret == 0) {
+                usleep(500 * 1000);
+                ret = HyFifoWrite(context->fifo_h, &c, 1);
+            }
+            cnt += 1;
+
+            LOGD("--write--, c: %c, cnt: %d \n", c, cnt);
+
+            c += 1;
+            if (c - 'a' >= 26) {
+                c = 'a';
+            }
+
+            usleep(500 * 1000);
         }
-        cnt += 1;
-
-        LOGD("--write--, c: %c, cnt: %d \n", c, cnt);
-
-        c += 1;
-        if (c - 'a' >= 26) {
-            c = 'a';
-        }
-
-        usleep(500 * 1000);
-    }
+    } while (0);
 
     HyFifoDump(context->fifo_h, HY_FIFO_DUMP_CONTENT);
 
     HyFifoDump(context->fifo_h, HY_FIFO_DUMP_ALL);
 
-    _module_destroy(&context);
+    _handle_module_destroy(context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }

@@ -68,24 +68,18 @@ static void _signal_user_cb(void *args)
     context->exit_flag = 1;
 }
 
-static void _module_destroy(_main_context_t **context_pp)
+static void _bool_module_destroy(void)
 {
-    _main_context_t *context = *context_pp;
-
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
         {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _bool_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.fifo_len                  = 10 * 1024;
@@ -118,34 +112,39 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
-
-    return context;
 }
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
+        }
 
-    HyTimerCreate(1, 1000);
+        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    context->timer_handle = HyTimerAdd_m(500, HY_TYPE_FLAG_ENABLE, _timer_cb, context);
-    if (!context->timer_handle) {
-        LOGE("HyTimerAdd failed \n");
-    }
+        HyTimerCreate(1, 1000);
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+        context->timer_handle = HyTimerAdd_m(500, HY_TYPE_FLAG_ENABLE, _timer_cb, context);
+        if (!context->timer_handle) {
+            LOGE("HyTimerAdd failed \n");
+        }
+
+        while (!context->exit_flag) {
+            sleep(1);
+        }
+
+    } while (0);
 
     HyTimerDel(&context->timer_handle);
 
-    _module_destroy(&context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }
+

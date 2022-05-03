@@ -53,24 +53,18 @@ static void _signal_user_cb(void *args)
     context->exit_flag = 1;
 }
 
-static void _module_destroy(_main_context_t **context_pp)
+static void _bool_module_destroy(void)
 {
-    _main_context_t *context = *context_pp;
-
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
         {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _bool_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.fifo_len                  = 10 * 1024;
@@ -103,8 +97,6 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
-
-    return context;
 }
 
 static hy_s32_t _do_pack(uint8_t *buf)
@@ -164,27 +156,40 @@ static hy_s32_t _do_unpack(const uint8_t *buf, size_t len)
 
 int main(int argc, char const* argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGI("version: %s, date: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
+        }
 
-    uint8_t buf[1024] = {0};
-    hy_s32_t len = 0;
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
+            break;
+        }
 
-    len = _do_pack(buf);
-    LOGI("len: %d \n", len);
+        LOGI("version: %s, date: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-    _do_unpack(buf, len);
+        uint8_t buf[1024] = {0};
+        hy_s32_t len = 0;
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+        len = _do_pack(buf);
+        LOGI("len: %d \n", len);
 
-    _module_destroy(&context);
+        _do_unpack(buf, len);
+
+        while (!context->exit_flag) {
+            sleep(1);
+        }
+
+    } while (0);
+
+    _handle_module_destroy(context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }
+

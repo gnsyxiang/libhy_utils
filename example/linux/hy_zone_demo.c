@@ -58,31 +58,18 @@ static void _signal_user_cb(void *args)
     context->exit_flag = 1;
 }
 
-static void _module_destroy(_main_context_t **context_pp)
+static void _bool_module_destroy(void)
 {
-    _main_context_t *context = *context_pp;
-
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"zone",        &context->zone_h,       HyZoneDestroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
-
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
         {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _bool_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.fifo_len                  = 10 * 1024;
@@ -114,6 +101,21 @@ static _main_context_t *_module_create(void)
         {"signal",      &signal_c,      (HyModuleCreateBoolCb_t)HySignalCreate,     HySignalDestroy},
     };
 
+    HY_MODULE_RUN_CREATE_BOOL(bool_module);
+}
+
+static void _handle_module_destroy(_main_context_t *context)
+{
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {"zone",        &context->zone_h,       HyZoneDestroy},
+    };
+
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
+}
+
+static hy_s32_t _handle_module_create(_main_context_t *context)
+{
     HyZoneConfig_s zone_c;
     HY_MEMSET(&zone_c, sizeof(zone_c));
     HY_STRCPY(zone_c.save_c.zone_file_paht, "/data/nfs/bin/zoneinfo");
@@ -124,65 +126,75 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
-
-    return context;
 }
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
+        }
 
-    HyZoneInfo_s zone_info;
-    HY_MEMSET(&zone_info, sizeof(zone_info));
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
+            break;
+        }
+
+        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+        HyZoneInfo_s zone_info;
+        HY_MEMSET(&zone_info, sizeof(zone_info));
 #if 1
-    #define _ZONEINFO_PATH "Asia/Shanghai"
-    // #define _ZONEINFO_PATH "America/Chicago"
-    HY_STRNCPY(zone_info.zoneinfo_path, sizeof(zone_info.zoneinfo_path),
-            _ZONEINFO_PATH, HY_STRLEN(_ZONEINFO_PATH));
+#define _ZONEINFO_PATH "Asia/Shanghai"
+        // #define _ZONEINFO_PATH "America/Chicago"
+        HY_STRNCPY(zone_info.zoneinfo_path, sizeof(zone_info.zoneinfo_path),
+                _ZONEINFO_PATH, HY_STRLEN(_ZONEINFO_PATH));
 #endif
 
 #if 0
-    #define _ZONEINFO_NAME "CST-8"
-    // #define _ZONEINFO_NAME "CST6CDT"
-    HY_STRNCPY(zone_info.zoneinfo_name, sizeof(zone_info.zoneinfo_name),
-            _ZONEINFO_NAME, sizeof(_ZONEINFO_NAME));
+#define _ZONEINFO_NAME "CST-8"
+        // #define _ZONEINFO_NAME "CST6CDT"
+        HY_STRNCPY(zone_info.zoneinfo_name, sizeof(zone_info.zoneinfo_name),
+                _ZONEINFO_NAME, sizeof(_ZONEINFO_NAME));
 #endif
 
 #if 0
-    zone_info.type = HY_ZONE_TYPE_EAST;
-    zone_info.num = HY_ZONE_NUM_8;
-    // zone_info.type = HY_ZONE_TYPE_WEST;
-    // zone_info.num = HY_ZONE_NUM_6;
+        zone_info.type = HY_ZONE_TYPE_EAST;
+        zone_info.num = HY_ZONE_NUM_8;
+        // zone_info.type = HY_ZONE_TYPE_WEST;
+        // zone_info.num = HY_ZONE_NUM_6;
 #endif
 
-    if (0 != HyZoneSet(&zone_info)) {
-        LOGE("HyZoneSet failed \n");
-    }
+        if (0 != HyZoneSet(&zone_info)) {
+            LOGE("HyZoneSet failed \n");
+        }
 
-    HyZoneInfo_s zone_info_get;
-    HyZoneGet(&zone_info_get);
-    LOGI("type: %d \n", zone_info_get.type);
-    LOGI("num: %d \n", zone_info_get.num);
-    LOGI("daylight: %d \n", zone_info_get.daylight);
-    LOGI("utc_s: %d \n", zone_info_get.utc_s);
-    LOGI("zoneinfo_path: %s \n", zone_info_get.zoneinfo_path);
-    LOGI("zoneinfo_name: %s \n", zone_info_get.zoneinfo_name);
+        HyZoneInfo_s zone_info_get;
+        HyZoneGet(&zone_info_get);
+        LOGI("type: %d \n", zone_info_get.type);
+        LOGI("num: %d \n", zone_info_get.num);
+        LOGI("daylight: %d \n", zone_info_get.daylight);
+        LOGI("utc_s: %d \n", zone_info_get.utc_s);
+        LOGI("zoneinfo_path: %s \n", zone_info_get.zoneinfo_path);
+        LOGI("zoneinfo_name: %s \n", zone_info_get.zoneinfo_name);
 
-    char time_buf[BUF_LEN] = {0};
-    HyTimeFormatLocalTime(time_buf, sizeof(time_buf));
-    LOGI("time_buf: %s \n", time_buf);
+        char time_buf[BUF_LEN] = {0};
+        HyTimeFormatLocalTime(time_buf, sizeof(time_buf));
+        LOGI("time_buf: %s \n", time_buf);
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+        while (!context->exit_flag) {
+            sleep(1);
+        }
 
-    _module_destroy(&context);
+    } while (0);
+
+    _handle_module_destroy(context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }

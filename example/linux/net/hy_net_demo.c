@@ -41,6 +41,68 @@ typedef struct {
     hy_s32_t    exit_flag;
 } _main_context_t;
 
+static void _signal_error_cb(void *args)
+{
+    LOGE("------error cb\n");
+
+    _main_context_t *context = args;
+    context->exit_flag = 1;
+}
+
+static void _signal_user_cb(void *args)
+{
+    LOGW("------user cb\n");
+
+    _main_context_t *context = args;
+    context->exit_flag = 1;
+}
+
+static void _bool_module_destroy(void)
+{
+    HyModuleDestroyBool_s bool_module[] = {
+        {"signal",          HySignalDestroy },
+        {"log",             HyLogDeInit     },
+    };
+
+    HY_MODULE_RUN_DESTROY_BOOL(bool_module);
+}
+
+static hy_s32_t _bool_module_create(_main_context_t *context)
+{
+    HyLogConfig_s log_c;
+    HY_MEMSET(&log_c, sizeof(log_c));
+    log_c.fifo_len                  = 10 * 1024;
+    log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
+    log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
+    log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
+
+    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
+        SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
+        SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
+    };
+
+    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
+        SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
+    };
+
+    HySignalConfig_t signal_c;
+    memset(&signal_c, 0, sizeof(signal_c));
+    HY_MEMCPY(signal_c.error_num, signal_error_num, sizeof(signal_error_num));
+    HY_MEMCPY(signal_c.user_num, signal_user_num, sizeof(signal_user_num));
+    signal_c.save_c.app_name        = _APP_NAME;
+    signal_c.save_c.coredump_path   = "./";
+    signal_c.save_c.error_cb        = _signal_error_cb;
+    signal_c.save_c.user_cb         = _signal_user_cb;
+    signal_c.save_c.args            = context;
+
+    HyModuleCreateBool_s bool_module[] = {
+        {"log",         &log_c,         (HyModuleCreateBoolCb_t)HyLogInit,          HyLogDeInit},
+        {"signal",      &signal_c,      (HyModuleCreateBoolCb_t)HySignalCreate,     HySignalDestroy},
+    };
+
+    HY_MODULE_RUN_CREATE_BOOL(bool_module);
+}
+
 static void _eth_state_cb(HyNetState_e state, void *args)
 {
 
@@ -87,80 +149,18 @@ static void _wifi_scan_result_cb(HyNetWifiScanInfo_s *scan_info, void *args)
 
 }
 
-static void _signal_error_cb(void *args)
+static void _handle_module_destroy(_main_context_t *context)
 {
-    LOGE("------error cb\n");
-
-    _main_context_t *context = args;
-    context->exit_flag = 1;
-}
-
-static void _signal_user_cb(void *args)
-{
-    LOGW("------user cb\n");
-
-    _main_context_t *context = args;
-    context->exit_flag = 1;
-}
-
-static void _module_destroy(_main_context_t **context_pp)
-{
-    _main_context_t *context = *context_pp;
-
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
         {"net",         &context->net_h,        HyNetDestroy},
     };
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
-
-    HyModuleDestroyBool_s bool_module[] = {
-        {"signal",          HySignalDestroy },
-        {"log",             HyLogDeInit     },
-    };
-
-    HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _handle_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
-    HyLogConfig_s log_c;
-    HY_MEMSET(&log_c, sizeof(log_c));
-    log_c.fifo_len                  = 10 * 1024;
-    log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
-    log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
-    log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
-
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
-        SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
-        SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
-    };
-
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
-        SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
-    };
-
-    HySignalConfig_t signal_c;
-    memset(&signal_c, 0, sizeof(signal_c));
-    HY_MEMCPY(signal_c.error_num, signal_error_num, sizeof(signal_error_num));
-    HY_MEMCPY(signal_c.user_num, signal_user_num, sizeof(signal_user_num));
-    signal_c.save_c.app_name        = _APP_NAME;
-    signal_c.save_c.coredump_path   = "./";
-    signal_c.save_c.error_cb        = _signal_error_cb;
-    signal_c.save_c.user_cb         = _signal_user_cb;
-    signal_c.save_c.args            = context;
-
-    HyModuleCreateBool_s bool_module[] = {
-        {"log",         &log_c,         (HyModuleCreateBoolCb_t)HyLogInit,          HyLogDeInit},
-        {"signal",      &signal_c,      (HyModuleCreateBoolCb_t)HySignalCreate,     HySignalDestroy},
-    };
-
-    HY_MODULE_RUN_CREATE_BOOL(bool_module);
-
     HyNetConfig_s net_c;
     HY_MEMSET(&net_c, sizeof(net_c));
     #define _NET_WIFI_CONFIG_PATH "./net_wifi_config.json"
@@ -181,25 +181,34 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
-
-    return context;
 }
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
+        }
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
+            break;
+        }
 
-    _module_destroy(&context);
+        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+        while (!context->exit_flag) {
+            sleep(1);
+        }
+    } while (0);
+
+    _handle_module_destroy(context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }

@@ -43,11 +43,6 @@ typedef struct {
     hy_s32_t    exit_flag;
 } _main_context_t;
 
-static void _ipc_link_manager_accept_cb(void *ipc_link_h, void *args)
-{
-    LOGD("ipc_link_h: %p \n", ipc_link_h);
-}
-
 static void _signal_error_cb(void *args)
 {
     LOGE("------error cb\n");
@@ -64,36 +59,23 @@ static void _signal_user_cb(void *args)
     context->exit_flag = 1;
 }
 
-static void _module_destroy(_main_context_t **context_pp)
+static void _bool_module_destroy(void)
 {
-    _main_context_t *context = *context_pp;
-
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"ipc link manager",    &context->ipc_link_manager_h,   ipc_link_manager_destroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
-
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
         {"log",             HyLogDeInit     },
     };
 
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
-
-    HY_MEM_FREE_PP(context_pp);
 }
 
-static _main_context_t *_module_create(void)
+static hy_s32_t _bool_module_create(_main_context_t *context)
 {
-    _main_context_t *context = HY_MEM_MALLOC_RET_VAL(_main_context_t *, sizeof(*context), NULL);
-
     context->ipc_link_h = ipc_link_create_m(_IPC_LINK_IPC_NAME,
             "ipc_link_server", IPC_LINK_TYPE_SERVER, NULL);
     if (!context->ipc_link_h) {
         LOGE("ipc link create m failed \n");
-        return NULL;
+        return -1;
     }
 
     HyLogConfig_s log_c;
@@ -128,7 +110,25 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
+}
 
+static void _ipc_link_manager_accept_cb(void *ipc_link_h, void *args)
+{
+    LOGD("ipc_link_h: %p \n", ipc_link_h);
+}
+
+static void _handle_module_destroy(_main_context_t *context)
+{
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {"ipc link manager",    &context->ipc_link_manager_h,   ipc_link_manager_destroy},
+    };
+
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
+}
+
+static hy_s32_t _handle_module_create(_main_context_t *context)
+{
     ipc_link_manager_config_s ipc_link_manager_c;
     HY_MEMSET(&ipc_link_manager_c, sizeof(ipc_link_manager_c));
     ipc_link_manager_c.save_config.accept_cb    = _ipc_link_manager_accept_cb;
@@ -141,27 +141,37 @@ static _main_context_t *_module_create(void)
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
-
-    return context;
 }
 
 int main(int argc, char *argv[])
 {
-    _main_context_t *context = _module_create();
-    if (!context) {
-        LOGE("_module_create faild \n");
-        return -1;
-    }
+    _main_context_t *context = NULL;
+    do {
+        context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        if (0 != _bool_module_create(context)) {
+            printf("_bool_module_create failed \n");
+            break;
+        }
 
-    while (!context->exit_flag) {
-        sleep(1);
-    }
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
+            break;
+        }
+
+        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+
+        while (!context->exit_flag) {
+            sleep(1);
+        }
+
+    } while (0);
 
     ipc_link_destroy(&context->ipc_link_h);
 
-    _module_destroy(&context);
+    _handle_module_destroy(context);
+    _bool_module_destroy();
+    HY_MEM_FREE_PP(&context);
 
     return 0;
 }
