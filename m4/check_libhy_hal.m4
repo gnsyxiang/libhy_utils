@@ -57,8 +57,8 @@ AC_DEFUN([CHECK_LIBHY_HAL], [
                     HY_HAL_LIBS=""
 
                     # clear cache
-                    unset ac_cv_search_HyLogCreate
-                    AC_SEARCH_LIBS([HyLogCreate], [hy_hal],
+                    unset ac_cv_search_HyLogInit
+                    AC_SEARCH_LIBS([HyLogInit], [hy_hal],
                             [have_hy_hal=yes
                                 HY_HAL_LIBS="$LIBS"],
                             [have_hy_hal=no],
