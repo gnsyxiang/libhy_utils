@@ -330,8 +330,10 @@ static hy_s32_t _client_handle_ipc_link_msg_thread_cb(void *args)
 
     _ip_client_context_s *context = args;
     struct timeval timeout = {0};
-    fd_set read_fs = {0};
+    fd_set read_fs;
     hy_s32_t fd = -1;
+
+    memset(&read_fs, '\0', sizeof(read_fs));
 
     while (HY_IPC_PROCESS_CONNECT_STATE_CONNECT != context->is_connect) {
         usleep(10 * 1000);
