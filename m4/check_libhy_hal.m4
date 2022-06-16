@@ -22,74 +22,76 @@ dnl ===============================================================
 # --------------------------------------------------------------
 # check libhy_hal
 
-AC_DEFUN([CHECK_LIBHY_HAL], [
+AC_DEFUN([CHECK_LIBHY_HAL],
+    [
 
-    AC_ARG_ENABLE([hy_hal],
-        [AS_HELP_STRING([--disable-hy_hal], [disable support for hy_hal])],
-            [], [enable_hy_hal=yes])
+        AC_ARG_ENABLE([hy_hal],
+            [AS_HELP_STRING([--disable-hy_hal],
+                [disable support for hy_hal])],
+                [],
+                [enable_hy_hal=yes])
 
-    case "$enable_hy_hal" in
-        yes)
-            have_hy_hal=no
+        case "$enable_hy_hal" in
+            yes)
+                have_hy_hal=no
 
-            case "$PKG_CONFIG" in
-                '') ;;
-                *)
-                    HY_HAL_LIBS=`$PKG_CONFIG --libs hy_hal 2>/dev/null`
+                case "$PKG_CONFIG" in
+                    '') ;;
+                    *)
+                        HY_HAL_LIBS=`$PKG_CONFIG --libs hy_hal 2>/dev/null`
 
-                    case "$HY_HAL_LIBS" in
-                        '') ;;
-                        *)
-                            HY_HAL_LIBS="$HY_HAL_LIBS"
-                            have_hy_hal=yes
-                        ;;
-                    esac
+                        case "$HY_HAL_LIBS" in
+                            '') ;;
+                            *)
+                                HY_HAL_LIBS="$HY_HAL_LIBS"
+                                HY_HAL_INCS=`$PKG_CONFIG --cflags hy_hal 2>/dev/null`
+                                have_hy_hal=yes
+                            ;;
+                        esac
+                    ;;
+                esac
 
-                    HY_HAL_INCS=`$PKG_CONFIG --cflags hy_hal 2>/dev/null`
-                ;;
-            esac
+                case "$have_hy_hal" in
+                    yes) ;;
+                    *)
+                        save_LIBS="$LIBS"
+                        LIBS=""
+                        HY_HAL_LIBS=""
 
-            case "$have_hy_hal" in
-                yes) ;;
-                *)
-                    save_LIBS="$LIBS"
-                    LIBS=""
-                    HY_HAL_LIBS=""
+                        # clear cache
+                        unset ac_cv_search_HyLogInit
+                        AC_SEARCH_LIBS([HyLogInit],
+                                [hy_hal],
+                                [have_hy_hal=yes HY_HAL_LIBS="$LIBS"],
+                                [have_hy_hal=no],
+                                [])
+                        LIBS="$save_LIBS"
+                    ;;
+                esac
 
-                    # clear cache
-                    unset ac_cv_search_HyLogInit
-                    AC_SEARCH_LIBS([HyLogInit], [hy_hal],
-                            [have_hy_hal=yes
-                                HY_HAL_LIBS="$LIBS"],
-                            [have_hy_hal=no],
-                            [])
-                    LIBS="$save_LIBS"
-                ;;
-            esac
+                CPPFLAGS_SAVE=$CPPFLAGS
+                CPPFLAGS="$CPPFLAGS $HY_HAL_INCS"
+                AC_CHECK_HEADERS([hy_hal/hy_log.h], [], [have_hy_hal=no])
 
-            CPPFLAGS_SAVE=$CPPFLAGS
-            CPPFLAGS="$CPPFLAGS $HY_HAL_INCS"
-            AC_CHECK_HEADERS([hy_hal/hy_log.h], [], [have_hy_hal=no])
+                CPPFLAGS=$CPPFLAGS_SAVE
+                AC_SUBST(HY_HAL_INCS)
+                AC_SUBST(HY_HAL_LIBS)
 
-            CPPFLAGS=$CPPFLAGS_SAVE
-            AC_SUBST(HY_HAL_INCS)
-            AC_SUBST(HY_HAL_LIBS)
-
-            case "$have_hy_hal" in
-                yes)
-                    AC_DEFINE(HAVE_HY_HAL, 1, [Define if the system has hy_hal])
-                ;;
-                *)
-                    AC_MSG_ERROR([hy_hal is a must but can not be found. You should add the \
+                case "$have_hy_hal" in
+                    yes)
+                        AC_DEFINE(HAVE_HY_HAL, 1, [Define if the system has hy_hal])
+                    ;;
+                    *)
+                        AC_MSG_ERROR([hy_hal is a must but can not be found. You should add the \
 directory containing `hy_hal.pc' to the `PKG_CONFIG_PATH' environment variable, \
 or set `CPPFLAGS' and `LDFLAGS' directly for hy_hal, or use `--disable-hy_hal' \
 to disable support for hy_hal encryption])
-                ;;
-            esac
-        ;;
-    esac
+                    ;;
+                esac
+            ;;
+        esac
 
-    # check if we have and should use hy_hal
-    AM_CONDITIONAL(COMPILE_LIBHY_HAL, [test "$enable_hy_hal" != "no" && test "$have_hy_hal" = "yes"])
-])
+        # check if we have and should use hy_hal
+        AM_CONDITIONAL(COMPILE_LIBHY_HAL, [test "$enable_hy_hal" != "no" && test "$have_hy_hal" = "yes"])
+    ])
 

@@ -18,21 +18,7 @@ AM_PROG_AR
 LT_INIT
 
 PKG_PROG_PKG_CONFIG([0.24])
-
-PKG_PROG_PKG_CONFIG
-if test -n "$PKG_CONFIG"; then
-    # Horrible hack for systems where the pkg-config install directory is simply wrong!
-    if $PKG_CONFIG --variable=pc_path pkg-config 2>/dev/null | grep -q /lib/; then
-        PKG_INSTALLDIR(['${prefix}/lib/pkgconfig'])
-        else
-            PKG_INSTALLDIR
-    fi
-fi
-
-AC_ARG_ENABLE([debug_info],
-              [AS_HELP_STRING([--enable-debug_info], [enable support for output debug info])],
-              [], [enable_debug_info=no])
-AM_CONDITIONAL(COMPILE_DEBUG_INFO, [test "$enable_debug_info" = "yes"])
+PKG_INSTALLDIR
 
 # check m4 macro
 CHECK_PROJECT_INFO
@@ -42,8 +28,13 @@ CHECK_DOXYGEN
 
 SELECT_VENDER
 SELECT_CHIP
-SELECT_PRODUCT
-SELECT_LANGUAGE
+# SELECT_PRODUCT
+# SELECT_LANGUAGE
+
+AC_ARG_ENABLE([debug_info],
+              [AS_HELP_STRING([--enable-debug_info], [enable support for output debug info])],
+              [], [enable_debug_info=no])
+AM_CONDITIONAL(COMPILE_DEBUG_INFO, [test "$enable_debug_info" = "yes"])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -80,7 +71,7 @@ AC_TYPE_UINT8_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([gettimeofday memset select socket strstr])
+AC_CHECK_FUNCS([clock_gettime gettimeofday memset putenv select socket strstr tzset])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -89,6 +80,8 @@ AC_CONFIG_FILES([Makefile
                  build-script/arterytek/at32f4xx/Makefile
                  build-script/eeasytech/Makefile
                  build-script/eeasytech/SV823/Makefile
+                 build-script/fullhan/MC6810E/Makefile
+                 build-script/fullhan/Makefile
                  build-script/pc/Makefile
                  build-script/pc/pc-chip/Makefile
                  doc/Makefile

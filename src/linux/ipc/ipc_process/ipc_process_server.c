@@ -282,7 +282,7 @@ static hy_s32_t _server_handle_ipc_link_msg_thread_cb(void *args)
     LOGT("args: %p \n", args);
     HY_ASSERT_RET_VAL(!args, -1);
 
-    fd_set read_fs = {0};
+    fd_set read_fs;
     struct timeval timeout = {0};
     void *ipc_link_h = NULL;
     _ip_server_context_s *context = args;
@@ -291,6 +291,8 @@ static hy_s32_t _server_handle_ipc_link_msg_thread_cb(void *args)
     ipc_link_manager_list_s *pos, *n;
     hy_s32_t fd = -1;
     hy_s32_t pfd = -1;
+
+    memset(&read_fs, '\0', sizeof(read_fs));
 
     pfd = HyPipeReadFdGet(context->pipe_h);
 
