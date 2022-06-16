@@ -50,8 +50,8 @@
 #define _SHIFT_LEFT(_n)         (0x1UL << _SHIFT_BIT(_n))
 #define _INDEX(_cur_ms, _n)     (((_cur_ms) >> _SHIFT_BIT(_n)) & _LIST_MASK)
 
-#define _TIMER_NS_TO_S          (1000000000U)
-#define _TIMER_MS_TO_NS         (1000000U)
+#define _TIMER_NS_TO_S          (1000000000)
+#define _TIMER_MS_TO_NS         (1000000)
 
 typedef struct {
     HyTimerMultiWheelConfig_s   timer_c;
