@@ -23,6 +23,7 @@
 #---------------
 .SpaceVim.d/
 .clang
+.cache/
 .ccls
 .ccls-cache
 .clang-format

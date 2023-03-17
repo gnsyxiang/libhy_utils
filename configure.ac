@@ -46,6 +46,9 @@ AC_PROG_MKDIR_P
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
+                 build-script/Makefile
+                 build-script/pc/Makefile
+                 build-script/pc/pc-chip/Makefile
                  doc/Makefile
                  example/Makefile
                  include/Makefile
