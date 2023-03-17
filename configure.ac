@@ -39,10 +39,15 @@ AC_PROG_MKDIR_P
 # Checks for libraries.
 
 # Checks for header files.
+AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_INT8_T
 
 # Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([memset])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -52,6 +57,8 @@ AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  example/Makefile
                  include/Makefile
+                 include/thread/Makefile
                  res/Makefile
-                 src/Makefile])
+                 src/Makefile
+                 src/thread/Makefile])
 AC_OUTPUT

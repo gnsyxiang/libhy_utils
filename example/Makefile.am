@@ -51,7 +51,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
+_ldadd_com      += $(top_builddir)/src/lib@project_name@.la -lpthread
 
 bin_PROGRAMS    			+= hy_log_demo
 hy_log_demo_SOURCES    		= $(_sources_com) hy_log_demo.c

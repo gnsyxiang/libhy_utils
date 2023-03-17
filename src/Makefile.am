@@ -20,6 +20,8 @@
 
 lib_LTLIBRARIES = lib@project_name@.la
 
+SUBDIRS = thread
+
 # ------------------
 # defining variables
 # ------------------
@@ -57,10 +59,10 @@ _cflags_com     +=
 _cxxflags_com   +=
 
 _ldflags_com    += \
-                   -export-symbols-regex 'Hy*' \
-                   -version-info @current@:@revision@:@age@
+				   -export-symbols-regex 'Hy*' \
+				   -version-info @current@:@revision@:@age@
 
-_ldadd_com      +=
+_ldadd_com      += $(top_builddir)/src/thread/libhy_thread.la
 
 lib@project_name@_la_SOURCES    = $(_sources_com)
 lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)
