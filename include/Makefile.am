@@ -32,6 +32,7 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+						   hy_time.h \
 						   hy_string.h \
 						   hy_signal.h \
 						   hy_module.h \
