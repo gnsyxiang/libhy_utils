@@ -48,6 +48,36 @@ extern "C" {
 #define HY_MEMSET(ptr, size)                    memset(ptr, '\0', size)
 #define HY_MEMCPY(dst, src, size)               memcpy(dst, src, size)
 
+#define HY_MEM_CALLOC_BREAK(type, size)     \
+({                                          \
+    void *ptr = calloc(1, size);            \
+if (!ptr) {                                 \
+    LOGE("calloc failed \n");               \
+    break;                                  \
+}                                           \
+(type)ptr;                                  \
+})
+
+#define HY_MEM_CALLOC_RETURN(type, size)    \
+({                                          \
+    void *prt = calloc(1, size);            \
+if (!ptr) {                                 \
+    LOGE("calloc failed \n");               \
+    return;                                 \
+}                                           \
+(type)ptr;                                  \
+})
+
+#define HY_MEM_CALLOC_RETURN_VAL(type, size, val)   \
+({                                                  \
+    void *prt = calloc(1, size);                    \
+if (!ptr) {                                         \
+    LOGE("calloc failed \n");                       \
+    return val;                                     \
+}                                                   \
+(type)ptr;                                          \
+})
+
 #define HY_MEM_MALLOC_BREAK(type, size)     \
 ({                                          \
     void *ptr = malloc((size));             \
@@ -61,7 +91,7 @@ if (!ptr) {                                 \
      })
 
 #define HY_MEM_MALLOC_RET(type, size)       \
-    ({                                          \
+({                                          \
     void *ptr = malloc((size));             \
 if (!ptr) {                                 \
     LOGES("malloc failed \n");              \

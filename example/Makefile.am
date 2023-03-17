@@ -53,11 +53,19 @@ _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
-bin_PROGRAMS    		+= hy_log_demo
-hy_log_demo_SOURCES    	= $(_sources_com) hy_log_demo.c
-hy_log_demo_CPPFLAGS   	= $(_cppflags_com)
-hy_log_demo_CFLAGS     	= $(_cflags_com)
-hy_log_demo_CXXFLAGS   	= $(_cxxflags_com)
-hy_log_demo_LDFLAGS    	= $(_ldflags_com)
-hy_log_demo_LDADD      	= $(_ldadd_com)
+bin_PROGRAMS    			+= hy_log_demo
+hy_log_demo_SOURCES    		= $(_sources_com) hy_log_demo.c
+hy_log_demo_CPPFLAGS   		= $(_cppflags_com)
+hy_log_demo_CFLAGS     		= $(_cflags_com)
+hy_log_demo_CXXFLAGS   		= $(_cxxflags_com)
+hy_log_demo_LDFLAGS    		= $(_ldflags_com)
+hy_log_demo_LDADD      		= $(_ldadd_com)
+
+bin_PROGRAMS    				+= hy_dynamic_array_demo
+hy_dynamic_array_demo_SOURCES  	= $(_sources_com) hy_dynamic_array_demo.c
+hy_dynamic_array_demo_CPPFLAGS 	= $(_cppflags_com)
+hy_dynamic_array_demo_CFLAGS   	= $(_cflags_com)
+hy_dynamic_array_demo_CXXFLAGS 	= $(_cxxflags_com)
+hy_dynamic_array_demo_LDFLAGS  	= $(_ldflags_com)
+hy_dynamic_array_demo_LDADD    	= $(_ldadd_com)
 
