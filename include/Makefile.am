@@ -32,6 +32,7 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+						   hy_module.h \
 						   hy_barrier.h \
 						   hy_dynamic_array.h \
 						   hy_mem.h \
