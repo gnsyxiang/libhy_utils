@@ -19,13 +19,13 @@
  */
 #include <stdio.h>
 
-#include "module_a.h"
+#include "hy_log.h"
 
 int main(int argc, char const* argv[])
 {
     printf("hello world \n");
 
-    HyModuleAInit();
+    HyLogCreate();
 
     return 0;
 }
