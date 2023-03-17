@@ -57,8 +57,10 @@ AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  example/Makefile
                  include/Makefile
+                 include/log/Makefile
                  include/thread/Makefile
                  res/Makefile
                  src/Makefile
+                 src/log/Makefile
                  src/thread/Makefile])
 AC_OUTPUT

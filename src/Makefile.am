@@ -20,7 +20,8 @@
 
 lib_LTLIBRARIES = lib@project_name@.la
 
-SUBDIRS = thread
+SUBDIRS = log \
+		  thread
 
 # ------------------
 # defining variables
@@ -50,8 +51,7 @@ _sources_com    += \
 				   hy_string.c \
 				   hy_signal.c \
 				   hy_dynamic_array.c \
-				   hy_mem.c \
-				   hy_log.c
+				   hy_mem.c
 
 _cppflags_com   += $(_no_error_com) $(_include_com) $(_define_com)
 
@@ -63,7 +63,9 @@ _ldflags_com    += \
 				   -export-symbols-regex 'Hy*' \
 				   -version-info @current@:@revision@:@age@
 
-_ldadd_com      += $(top_builddir)/src/thread/libhy_thread.la
+_ldadd_com      += \
+				   $(top_builddir)/src/log/libhy_log.la \
+				   $(top_builddir)/src/thread/libhy_thread.la
 
 lib@project_name@_la_SOURCES    = $(_sources_com)
 lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)

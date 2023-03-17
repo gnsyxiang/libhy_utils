@@ -32,7 +32,7 @@
 #include "hy_mem.h"
 #include "hy_type.h"
 #include "hy_assert.h"
-#include "hy_log.h"
+#include "log/hy_log.h"
 
 #define BACKTRACE_SIZE   32
 
