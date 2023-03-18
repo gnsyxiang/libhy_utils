@@ -36,18 +36,25 @@ AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 
+CHECK_PTHREAD
+
 # Checks for libraries.
+# FIXME: Replace `main' with a function in `-lpthread':
+AC_CHECK_LIB([pthread], [pthread_create])
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_C_INLINE
 AC_TYPE_INT8_T
+AC_TYPE_SIZE_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
+AC_FUNC_MKTIME
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([memset])
+AC_CHECK_FUNCS([atexit gettimeofday localtime_r memset select strerror])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
