@@ -46,6 +46,9 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
+				   hy_utils.c \
+				   hy_file.c \
+				   hy_gpio.c \
 				   hy_fifo.c \
 				   hy_hex.c \
 				   hy_time.c \
