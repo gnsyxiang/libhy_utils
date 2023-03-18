@@ -20,7 +20,9 @@
 
 lib_LTLIBRARIES = lib@project_name@.la
 
-SUBDIRS = log \
+SUBDIRS = \
+		  log \
+		  net \
 		  thread
 
 # ------------------
@@ -69,6 +71,7 @@ _ldflags_com    += \
 
 _ldadd_com      += \
 				   $(top_builddir)/src/log/libhy_log.la \
+				   $(top_builddir)/src/net/libhy_net.la \
 				   $(top_builddir)/src/thread/libhy_thread.la
 
 lib@project_name@_la_SOURCES    = $(_sources_com)

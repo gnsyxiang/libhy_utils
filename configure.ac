@@ -43,7 +43,7 @@ CHECK_PTHREAD
 AC_CHECK_LIB([pthread], [pthread_create])
 
 # Checks for header files.
-AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([inttypes.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -53,7 +53,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit gettimeofday localtime_r memset select strerror])
+AC_CHECK_FUNCS([atexit gettimeofday localtime_r memset select socket strerror])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -66,9 +66,11 @@ AC_CONFIG_FILES([Makefile
                  example/Makefile
                  include/Makefile
                  include/log/Makefile
+                 include/net/Makefile
                  include/thread/Makefile
                  res/Makefile
                  src/Makefile
                  src/log/Makefile
+                 src/net/Makefile
                  src/thread/Makefile])
 AC_OUTPUT
