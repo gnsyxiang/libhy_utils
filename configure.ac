@@ -51,7 +51,6 @@ AC_TYPE_INT8_T
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([atexit gettimeofday localtime_r memset select strerror])
@@ -59,6 +58,8 @@ AC_CHECK_FUNCS([atexit gettimeofday localtime_r memset select strerror])
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
                  build-script/Makefile
+                 build-script/embedfire/Makefile
+                 build-script/embedfire/i.MX6ULL/Makefile
                  build-script/pc/Makefile
                  build-script/pc/pc-chip/Makefile
                  doc/Makefile
