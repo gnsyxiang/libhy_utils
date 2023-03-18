@@ -54,7 +54,7 @@ void HyTimeGetLocalTime(struct tm *tm)
     localtime_r(&t, tm);    // localtime_r可重入，localtime不可重入
 }
 
-void HyTimeFormatLocalTime(char *buf, hy_u32_t len)
+hy_u32_t HyTimeFormatLocalTime(char *buf, hy_u32_t len)
 {
     struct tm tm;
 
@@ -62,12 +62,27 @@ void HyTimeFormatLocalTime(char *buf, hy_u32_t len)
 
     HyTimeGetLocalTime(&tm);
 
-    snprintf(buf, len, "%04d-%02d-%02d_%02d-%02d-%02d",
-             tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-             tm.tm_hour, tm.tm_min, tm.tm_sec);
+    return snprintf(buf, len, "%04d-%02d-%02d_%02d-%02d-%02d",
+                    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+                    tm.tm_hour, tm.tm_min, tm.tm_sec);
 
     // 跟上面的效果一样，strftime可以生成许多的格式
     // strftime(buf, len, "%Y-%m-%d_%H-%M-%S", &tm);
+}
+
+hy_u32_t HyTimeFormatLocalTime2(char *buf, hy_u32_t len)
+{
+    time_t t = 0;
+    struct tm tm;
+    struct timeval tv;
+
+    t = time(NULL);
+    localtime_r(&t, &tm);
+    gettimeofday(&tv, NULL);
+
+    return snprintf(buf, len, "%04d-%02d-%02d_%02d:%02d:%02d.%03d",
+                    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+                    tm.tm_hour, tm.tm_min, tm.tm_sec, (hy_u32_t)tv.tv_usec / 1000);
 }
 
 time_t HyTimeFormatTime2UTC(const char *data_time)
