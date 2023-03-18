@@ -17,8 +17,8 @@
  * 
  *     last modified: 26/04 2022 14:59
  */
-#ifndef __LIBHY_HAL_INCLUDE_HY_LIST_H_
-#define __LIBHY_HAL_INCLUDE_HY_LIST_H_
+#ifndef __LIBHY_UTILS_INCLUDE_HY_LIST_H_
+#define __LIBHY_UTILS_INCLUDE_HY_LIST_H_
 
 #ifdef __cplusplus
 extern "C" {

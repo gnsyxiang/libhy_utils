@@ -42,6 +42,7 @@ _define_com     +=
 _include_com    += \
 				   -I$(top_srcdir)/include 			\
 				   -I$(top_srcdir)/include/log 		\
+				   -I$(top_srcdir)/include/net 		\
 				   -I$(top_srcdir)/include/thread
 
 _sources_com    +=
@@ -79,6 +80,14 @@ hy_dynamic_array_demo_CFLAGS   	= $(_cflags_com)
 hy_dynamic_array_demo_CXXFLAGS 	= $(_cxxflags_com)
 hy_dynamic_array_demo_LDFLAGS  	= $(_ldflags_com)
 hy_dynamic_array_demo_LDADD    	= $(_ldadd_com)
+
+bin_PROGRAMS    				+= hy_epoll_demo
+hy_epoll_demo_SOURCES  			= $(_sources_com) hy_epoll_demo.c
+hy_epoll_demo_CPPFLAGS 			= $(_cppflags_com)
+hy_epoll_demo_CFLAGS   			= $(_cflags_com)
+hy_epoll_demo_CXXFLAGS 			= $(_cxxflags_com)
+hy_epoll_demo_LDFLAGS  			= $(_ldflags_com)
+hy_epoll_demo_LDADD    			= $(_ldadd_com)
 
 bin_PROGRAMS    				+= hy_fifo_demo
 hy_fifo_demo_SOURCES    		= $(_sources_com) hy_fifo_demo.c

@@ -34,6 +34,7 @@ _no_install_headers_com += \
                            net_wifi.h
 
 _install_headers_com    += \
+						   hy_epoll.h 			\
                            hy_net.h             \
                            hy_phy_led.h
 

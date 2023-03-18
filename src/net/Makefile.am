@@ -45,9 +45,10 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_net.c             \
-                   hy_phy_led.c         \
-                   net_config.c         \
+				   hy_epoll.c 	\
+                   hy_net.c     \
+                   hy_phy_led.c \
+                   net_config.c \
                    net_wifi.c
 
 _cppflags_com   += \
