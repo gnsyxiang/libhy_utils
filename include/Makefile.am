@@ -37,6 +37,7 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+						   hy_can.h \
 						   hy_gpio.h \
 						   hy_file.h \
 						   hy_list.h \

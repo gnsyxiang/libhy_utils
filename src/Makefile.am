@@ -48,6 +48,7 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
+				   hy_can.c \
 				   hy_utils.c \
 				   hy_file.c \
 				   hy_gpio.c \
