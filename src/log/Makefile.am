@@ -42,8 +42,7 @@ _define_com     += -D_GNU_SOURCE
 
 _include_com    += \
 				   -I$(top_srcdir)/include 			\
-				   -I$(top_srcdir)/include/log    	\
-				   -I$(top_srcdir)/include/thread
+				   -I$(top_srcdir)/include/log
 
 _sources_com    += \
 				   dynamic_array.c          \

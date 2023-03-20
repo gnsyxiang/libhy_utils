@@ -92,11 +92,18 @@ static hy_s32_t _format_log_pid_id_cb(dynamic_array_s *dynamic_array,
 static hy_s32_t _format_log_func_line_cb(dynamic_array_s *dynamic_array,
                                          HyLogAddiInfo_s *addi_info)
 {
-    char buf[64] = {0};
+    char buf[128] = {0};
     hy_s32_t ret = 0;
 
-    ret = snprintf(buf, sizeof(buf),
-                   "[%s:%"PRId32"]", addi_info->func, addi_info->line);
+    if (addi_info->err_str) {
+        ret += snprintf(buf + ret, sizeof(buf) - ret,
+                       "[%s:%"PRId32"]", addi_info->func, addi_info->line);
+        ret += snprintf(buf + ret, sizeof(buf) - ret,
+                       "[errno: %d, err: %s] ", errno, addi_info->err_str);
+    } else {
+        ret += snprintf(buf + ret, sizeof(buf) - ret,
+                       "[%s:%"PRId32"] ", addi_info->func, addi_info->line);
+    }
 
     return dynamic_array_write(dynamic_array, buf, ret);
 }
@@ -115,9 +122,9 @@ static hy_s32_t _format_log_color_reset_cb(dynamic_array_s *dynamic_array,
                                PRINT_ATTR_RESET, strlen(PRINT_ATTR_RESET));
 }
 
-void format_cb_register(format_cb_t *format_cb, hy_u32_t format)
+void format_cb_register(format_cb_t **format_cb_pp, hy_u32_t *format_cb_cnt, hy_u32_t format)
 {
-    if (!format_cb) {
+    if (!format_cb_pp || *format_cb_cnt) {
         log_error("the param is NULL \n");
         return;
     }
@@ -134,12 +141,21 @@ void format_cb_register(format_cb_t *format_cb, hy_u32_t format)
         {HY_LOG_OUTPUT_FORMAT_USR_MSG,      {_format_log_usr_msg_cb,        _format_log_usr_msg_cb,     }},
         {HY_LOG_OUTPUT_FORMAT_COLOR_RESET,  {_format_log_color_reset_cb,    NULL,                       }},
     };
+    hy_u32_t cnt = LOG_ARRAY_CNT(log_format_cb);
+    format_cb_t *format_cb = calloc(cnt, sizeof(format_cb_t));
+    if (!format_cb) {
+        log_error("calloc failed \n");
+        return;
+    }
 
-    for (hy_u32_t i = 0; i < LOG_ARRAY_CNT(log_format_cb); ++i) {
+    for (hy_u32_t i = 0; i < cnt; ++i) {
         if (log_format_cb[i].format == (format & 0x1 << i)) {
             memcpy(format_cb[i], log_format_cb[i].format_log_cb,
                    sizeof(log_format_cb[i].format_log_cb));
         }
     }
+
+    *format_cb_pp = format_cb;
+    *format_cb_cnt = cnt;
 }
 

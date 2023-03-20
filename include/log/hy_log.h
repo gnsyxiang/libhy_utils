@@ -33,8 +33,6 @@ extern "C" {
 #include <sys/syscall.h>      /* Definition of SYS_* constants */
 
 #include "hy_type.h"
-#include "hy_compile.h"
-#include "hy_misc.h"
 
 /**
  * @brief 打印等级定义
@@ -183,7 +181,18 @@ void HyLogLevelSet(HyLogLevel_e level);
  * @param fmt 格式
  * @param ... 参数
  */
-void HyLogWrite(HyLogAddiInfo_s *addi_info, const char *fmt, ...) HY_CHECK_PRINTF(2, 3);
+void HyLogWrite(HyLogAddiInfo_s *addi_info, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+
+/*
+ * 1，去掉文件路径，只获取文件名
+ *  1.1，使用strrchr函数，包含头文件#include <string.h>
+ *      #define HY_STRRCHR_FILE (strrchr(__FILE__, '/'))
+ *      #define HY_FILENAME     (HY_STRRCHR_FILE ? (HY_STRRCHR_FILE + 1) : __FILE__)
+ *  1.2，使用basename函数，包含头文件#include <libgen.h>
+ *      basename(__FILE__)
+ */
+#define HY_STRRCHR_FILE (strrchr(__FILE__, '/'))
+#define HY_FILENAME     (HY_STRRCHR_FILE ? (HY_STRRCHR_FILE + 1) : __FILE__)
 
 #define LOG(_level, _err_str, fmt, ...)                     \
 do {                                                        \

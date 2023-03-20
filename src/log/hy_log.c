@@ -39,7 +39,8 @@
 typedef struct {
     HyLogSaveConfig_s   save_c;
 
-    format_cb_t         format_cb[FORMAT_LOG_CB_CNT];
+    format_cb_t         *format_cb;
+    hy_u32_t            format_cb_cnt;
 
     void                *write_h;
 } _log_context_s;
@@ -61,7 +62,6 @@ void HyLogLevelSet(HyLogLevel_e level)
 void HyLogWrite(HyLogAddiInfo_s *addi_info, const char *fmt, ...)
 {
     _log_context_s *context = &_context;
-    HyLogSaveConfig_s *save_c = &context->save_c;
     dynamic_array_s *dynamic_array = NULL;
     log_write_info_s log_write_info;
     va_list args;
@@ -80,7 +80,7 @@ void HyLogWrite(HyLogAddiInfo_s *addi_info, const char *fmt, ...)
     addi_info->fmt = fmt;
     addi_info->str_args = &args;
     log_write_info.format_cb        = context->format_cb;
-    log_write_info.format_cb_cnt    = LOG_ARRAY_CNT(context->format_cb);
+    log_write_info.format_cb_cnt    = context->format_cb_cnt;
     log_write_info.dynamic_array    = dynamic_array;
     log_write_info.addi_info        = addi_info;
     process_single_write(context->write_h, &log_write_info);
@@ -117,6 +117,8 @@ void HyLogDeInit(void)
     process_single_destroy(&context->write_h);
 
     thread_specific_data_destroy();
+
+    free(context->format_cb);
 }
 
 hy_s32_t HyLogInit(HyLogConfig_s *log_c)
@@ -142,7 +144,7 @@ hy_s32_t HyLogInit(HyLogConfig_s *log_c)
         memset(context, '\0', sizeof(*context));
         memcpy(&context->save_c, &log_c->save_c, sizeof(context->save_c));
 
-        format_cb_register(context->format_cb, save_c->output_format);
+        format_cb_register(&context->format_cb, &context->format_cb_cnt, save_c->output_format);
 
         if (0 != thread_specific_data_create(
                 _thread_specific_data_create_cb,

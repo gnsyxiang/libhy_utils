@@ -19,10 +19,37 @@
  */
 #include <stdio.h>
 
-#include "hy_barrier.h"
 #include "log_private.h"
 
 #include "log_fifo.h"
+
+#if defined _WIN32 || defined __CYGWIN__
+#else
+#ifdef __GNUC__
+#if __GNUC__ >= 4 || defined(__arm__)
+/* Optimization barrier */
+/* The "volatile" is due to gcc bugs */
+#ifndef HY_BARRIER
+#define HY_BARRIER()   __asm__ __volatile__("": : :"memory")    // volatile: 告诉编译barrier()周围的指令不要被优化；
+// memory: 告诉编译器汇编代码会使内存里面的值更改，编译器应使用内存里的新值而非寄存器里保存的老值。
+#endif
+
+#ifndef HY_SMP_MB
+#define HY_SMP_MB()    HY_BARRIER()
+#endif
+
+#ifndef HY_SMP_WMB
+#define HY_SMP_WMB()   HY_BARRIER()
+#endif
+
+#ifndef HY_SMP_RMB
+#define HY_SMP_RMB()   HY_BARRIER()
+#endif
+#else
+#error "gcc version too low"
+#endif
+#endif
+#endif
 
 #define _IS_POWER_OF_2(x)           ((x) != 0 && (((x) & ((x) - 1)) == 0))  ///< 判断x是否为2^n，是返回1，否返回0
 #define HY_UTILS_MIN(x, y)          ((x) < (y) ? (x) : (y))                 ///< 求最小值

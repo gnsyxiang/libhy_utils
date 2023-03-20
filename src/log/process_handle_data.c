@@ -21,7 +21,6 @@
 #include <unistd.h>
 
 #include "log_private.h"
-#include "config.h"
 
 #include "process_handle_data.h"
 
