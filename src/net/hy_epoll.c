@@ -69,7 +69,7 @@ static void *_epoll_thread_cb(void *args)
         for (hy_s32_t i = 0; i < cnt; ++i) {
             cb_param = events[i].data.ptr;
             if (-1 == epoll_ctl(context->fd, EPOLL_CTL_DEL, cb_param->fd, NULL)) {
-                LOGE("epoll_ctl failed \n");
+                LOGES("epoll_ctl failed \n");
                 continue;
             }
 
@@ -101,6 +101,7 @@ hy_s32_t HyEpollAdd(void *handle, hy_s32_t event, hy_s32_t fd,
     _epoll_context_s *context = handle;
     struct epoll_event ev;
 
+    HY_MEMSET(&ev, sizeof(ev));
     ev.events   = event;
     ev.data.ptr = cb_param;
     return epoll_ctl(context->fd, EPOLL_CTL_ADD, fd, &ev);
@@ -122,7 +123,7 @@ void HyEpollDestroy(void **handle_pp)
 
     hy_s32_t cnt = 0;
     _epoll_context_s *context = *handle_pp;
-    LOGI("epoll helper context: %p destroy, thread_id: 0x%lx, "
+    LOGI("epoll context: %p destroy, thread_id: 0x%lx, "
             "epoll_fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
             context, context->id, context->fd,
             context->pipe_fd[0], context->pipe_fd[1]);
@@ -170,6 +171,7 @@ void *HyEpollCreate(HyEpollConfig_s *config)
         }
 
         struct epoll_event ev;
+        HY_MEMSET(&ev, sizeof(ev));
         ev.events = EPOLLIN | EPOLLET;
         ev.data.ptr = &context->pipe_fd[0];
         if (-1 == epoll_ctl(context->fd, EPOLL_CTL_ADD, context->pipe_fd[0], &ev)) {
@@ -182,7 +184,7 @@ void *HyEpollCreate(HyEpollConfig_s *config)
             break;
         }
 
-        LOGI("epoll helper context: %p create, thread_id: 0x%lx, "
+        LOGI("epoll context: %p create, thread_id: 0x%lx, "
              "epoll_fd: %d, pipe_fd[0]: %d, pipe_fd[1]: %d \n",
              context, context->id, context->fd,
              context->pipe_fd[0], context->pipe_fd[1]);
@@ -190,7 +192,7 @@ void *HyEpollCreate(HyEpollConfig_s *config)
         return context;
     } while(1);
 
-    LOGE("epoll helper context: %p create failed \n", context);
+    LOGE("epoll context: %p create failed \n", context);
     HyEpollDestroy((void **)&context);
 
     return NULL;
