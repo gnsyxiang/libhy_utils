@@ -68,18 +68,13 @@ static void *_epoll_thread_cb(void *args)
 
         for (hy_s32_t i = 0; i < cnt; ++i) {
             cb_param = events[i].data.ptr;
-            if (-1 == epoll_ctl(context->fd, EPOLL_CTL_DEL, cb_param->fd, NULL)) {
-                LOGES("epoll_ctl failed \n");
-                continue;
-            }
-
             if (cb_param->fd == context->pipe_fd[0]) {
                 LOGI("exit epoll wait \n");
                 goto _L_EPOLL_1;
             }
 
-            if (save_c->event_epoll_cb) {
-                save_c->event_epoll_cb(events[i].data.ptr);
+            if (events[i].events & EPOLLIN && save_c->event_epoll_cb) {
+                save_c->event_epoll_cb(cb_param);
             }
         }
     }
