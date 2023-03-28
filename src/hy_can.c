@@ -96,6 +96,7 @@ static hy_s32_t _can_bind_socket(_can_context_s *context, const char *name)
     }
     LOGI("socket can fd: %d, name: %s \n", context->fd, name);
 
+    HY_MEMSET(&addr, sizeof(addr));
     strcpy(ifr.ifr_name, name);
     ioctl(context->fd, SIOCGIFINDEX, &ifr);
     ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
