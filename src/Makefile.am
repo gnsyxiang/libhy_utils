@@ -23,7 +23,8 @@ lib_LTLIBRARIES = lib@project_name@.la
 SUBDIRS = \
 		  log \
 		  net \
-		  thread
+		  thread \
+		  timer
 
 # ------------------
 # defining variables
@@ -73,7 +74,8 @@ _ldflags_com    += \
 _ldadd_com      += \
 				   $(top_builddir)/src/log/libhy_log.la \
 				   $(top_builddir)/src/net/libhy_net.la \
-				   $(top_builddir)/src/thread/libhy_thread.la
+				   $(top_builddir)/src/thread/libhy_thread.la \
+				   $(top_builddir)/src/timer/libhy_timer.la
 
 lib@project_name@_la_SOURCES    = $(_sources_com)
 lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)
