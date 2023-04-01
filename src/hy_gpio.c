@@ -165,3 +165,152 @@ hy_s32_t HyGpioGetVal(HyGpio_s *gpio, HyGpioVal_e *val)
     return 0;
 }
 
+#define SYS_CLASS_GPIO_PATH "/sys/class/gpio"
+
+static hy_s32_t _gpio_export(hy_u32_t gpio, const char *export) // export unexport
+{
+    char buf[64] = {0};
+    hy_s32_t ret;
+    FILE *fp;
+
+    snprintf(buf, sizeof(buf), "%s/gpio%d", SYS_CLASS_GPIO_PATH, gpio);
+
+    if (0 == access(buf, F_OK)) {
+        return 0;
+    } else {
+        HY_MEMSET(buf, sizeof(buf));
+        snprintf(buf, sizeof(buf), "%s/%s", SYS_CLASS_GPIO_PATH, export);
+
+        fp = fopen(buf, "w");
+        if (!fp) {
+            LOGES("fopen failed, fd: %p \n", fp);
+            return -1;
+        }
+
+        ret = fprintf(fp, "%d", gpio);
+        if (ret < 0) {
+            LOGES("fwrite failed, ret: %d \n", ret);
+            fclose(fp);
+            return -1;
+        }
+
+        fclose(fp);
+        return 0;
+    }
+}
+
+static hy_s32_t _gpio_config(hy_u32_t gpio, const char *attr, const char *val)
+{
+    char buf[64] = {0};
+    FILE *fp;
+    hy_s32_t ret;
+
+    snprintf(buf, sizeof(buf), "%s/gpio%d/%s", SYS_CLASS_GPIO_PATH, gpio, attr);
+
+    fp = fopen(buf, "w");
+    if (!fp) {
+        LOGES("fopen failed, fd: %p \n", fp);
+        return -1;
+    }
+
+    ret = fwrite(val, strlen(val), 1, fp);
+    if (ret != 1) {
+        LOGES("fwrite failed, ret: %d \n", ret);
+        fclose(fp);
+        return -1;
+    }
+
+    fclose(fp);
+    return 0;
+}
+
+hy_s32_t HyGpioExport(hy_u32_t gpio, HyGpioExport_e export)
+{
+    hy_s32_t ret = 0;
+
+    if (export == HY_GPIO_EXPORT) {
+        ret = _gpio_export(gpio, "export");
+    } else {
+        ret = _gpio_export(gpio, "unexport");
+    }
+
+    return ret;
+}
+
+hy_s32_t HyGpioSetDirection2(hy_u32_t gpio, HyGpioDirection_e direction)
+{
+    hy_s32_t ret = 0;
+
+    if (direction == HY_GPIO_DIRECTION_IN) {
+        ret = _gpio_config(gpio, "direction", "in");
+    } else {
+        ret = _gpio_config(gpio, "direction", "out");
+    }
+
+    return ret;
+}
+
+hy_s32_t HyGpioSetActiveValue(hy_u32_t gpio, HyGpioActiveVal_e active_val)
+{
+    hy_s32_t ret = 0;
+
+    if (active_val == HY_GPIO_ACTIVE_VAL_0) {
+        ret = _gpio_config(gpio, "active_low", "0");
+    } else {
+        ret = _gpio_config(gpio, "active_low", "1");
+    }
+
+    return ret;
+}
+
+hy_s32_t HyGpioSetTrigger(hy_u32_t gpio, HyGpioTrigger_e trigger)
+{
+    hy_s32_t ret = 0;
+
+    switch (trigger) {
+        case HY_GPIO_TRIGGER_NONE:
+            ret = _gpio_config(gpio, "edge", "none");
+            break;
+        case HY_GPIO_TRIGGER_RISING:
+            ret = _gpio_config(gpio, "edge", "rising");
+            break;
+        case HY_GPIO_TRIGGER_FALLING:
+            ret = _gpio_config(gpio, "edge", "falling");
+            break;
+        case HY_GPIO_TRIGGER_BOTH:
+            ret = _gpio_config(gpio, "edge", "both");
+            break;
+    }
+    return ret;
+}
+
+hy_s32_t HyGpioConfig(HyGpio_s *gpio)
+{
+    const char *direction[] = {"in", "out"};
+    const char *active_val[] = {"0", "1"};
+    const char *trigger[] = {"none", "rising", "falling", "both"};
+    hy_s32_t ret = 0;
+
+    const char *val[][2] = {
+        {"direction",   direction[gpio->direction]},
+        {"active_low",  active_val[gpio->active_val]},
+        {"edge",        trigger[gpio->trigger]},
+    };
+
+    ret = _gpio_export(gpio->gpio, "export");
+    if (ret < 0) {
+        LOGE("gpio export failed \n");
+        return -1;
+    }
+
+    for (size_t i = 0; i < sizeof(val) / sizeof(val[0]); i++) {
+        ret = _gpio_config(gpio->gpio, val[i][0], val[i][1]);
+        if (ret != 0) {
+            LOGE("gpio config failed \n");
+            break;
+        }
+    }
+
+    return ret;
+}
+
