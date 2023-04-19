@@ -24,6 +24,10 @@
 extern "C" {
 #endif
 
+#ifndef NULL
+#define NULL (void *)0
+#endif
+
 // import from include/linux/types.h
 struct hy_list_head {
     struct hy_list_head *next, *prev;
