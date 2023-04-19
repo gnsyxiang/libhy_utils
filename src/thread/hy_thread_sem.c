@@ -20,7 +20,8 @@
 #include <stdio.h>
 #include <semaphore.h>
 
-#include "hy_log.h"
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 #include "hy_mem.h"
 

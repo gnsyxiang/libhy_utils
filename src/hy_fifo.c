@@ -22,10 +22,11 @@
 #include <string.h>
 #include <pthread.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 #include "hy_barrier.h"
 #include "hy_mem.h"
-#include "log/hy_log.h"
 #include "thread/hy_thread_mutex.h"
 
 #include "hy_hex.h"

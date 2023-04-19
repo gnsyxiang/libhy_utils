@@ -21,7 +21,6 @@
 lib_LTLIBRARIES = lib@project_name@.la
 
 SUBDIRS = \
-		  log \
 		  net \
 		  thread \
 		  timer
@@ -67,12 +66,13 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    += \
-				   -export-symbols-regex 'Hy*' \
-				   -version-info @current@:@revision@:@age@
+_ldflags_com    += -version-info @current@:@revision@:@age@
+
+if !COMPILE_DEBUG_INFO
+_ldflags_com    += -export-symbols-regex 'Hy*'
+endif
 
 _ldadd_com      += \
-				   $(top_builddir)/src/log/libhy_log.la \
 				   $(top_builddir)/src/net/libhy_net.la \
 				   $(top_builddir)/src/thread/libhy_thread.la \
 				   $(top_builddir)/src/timer/libhy_timer.la

@@ -41,7 +41,6 @@ _define_com     +=
 
 _include_com    += \
 				   -I$(top_srcdir)/include 			\
-				   -I$(top_srcdir)/include/log 		\
 				   -I$(top_srcdir)/include/net 		\
 				   -I$(top_srcdir)/include/thread
 
@@ -56,6 +55,10 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la -lpthread
+
+if COMPILE_LIBHY_LOG
+_ldflags_com    += $(HY_LOG_LIBS)
+endif
 
 bin_PROGRAMS    				+= hy_can_demo
 hy_can_demo_SOURCES    			= $(_sources_com) hy_can_demo.c
@@ -72,14 +75,6 @@ hy_template_demo_CFLAGS     	= $(_cflags_com)
 hy_template_demo_CXXFLAGS   	= $(_cxxflags_com)
 hy_template_demo_LDFLAGS    	= $(_ldflags_com)
 hy_template_demo_LDADD      	= $(_ldadd_com)
-
-bin_PROGRAMS    				+= hy_log_demo
-hy_log_demo_SOURCES    			= $(_sources_com) hy_log_demo.c
-hy_log_demo_CPPFLAGS   			= $(_cppflags_com)
-hy_log_demo_CFLAGS     			= $(_cflags_com)
-hy_log_demo_CXXFLAGS   			= $(_cxxflags_com)
-hy_log_demo_LDFLAGS    			= $(_ldflags_com)
-hy_log_demo_LDADD      			= $(_ldadd_com)
 
 bin_PROGRAMS    				+= hy_dynamic_array_demo
 hy_dynamic_array_demo_SOURCES  	= $(_sources_com) hy_dynamic_array_demo.c

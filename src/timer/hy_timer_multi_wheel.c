@@ -25,14 +25,14 @@
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_thread.h"
 #include "hy_time.h"
 #include "hy_list.h"
-
-#include "hy_log.h"
 
 #include "hy_timer_multi_wheel.h"
 

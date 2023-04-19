@@ -23,10 +23,10 @@
 #---------------
 .SpaceVim.d/
 .clang
-.cache/
 .ccls
 .ccls-cache
 .clang-format
+.cache/
 compile_commands.json
 
 
@@ -79,10 +79,12 @@ _build/
 install/
 doxygen/
 
+hy_utils.pc
+
 *.o
 *.lo
 *.la
 
-hy_utils.pc
 example/hy_*_demo
+test/hy_*_test
 

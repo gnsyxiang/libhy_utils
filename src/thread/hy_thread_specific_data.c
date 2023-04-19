@@ -19,10 +19,11 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_thread_specific_data.h"
 #include "hy_assert.h"
 #include "hy_mem.h"
-#include "hy_log.h"
 
 static HyThreadSpecificData_s context;
 

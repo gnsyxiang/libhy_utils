@@ -19,6 +19,8 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_signal.h"
 
 #if (__linux__ && __GLIBC__ && !__UCLIBC__) || __APPLE__
@@ -32,7 +34,6 @@
 #include "hy_mem.h"
 #include "hy_type.h"
 #include "hy_assert.h"
-#include "log/hy_log.h"
 
 #define BACKTRACE_SIZE   32
 

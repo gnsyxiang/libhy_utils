@@ -2,8 +2,6 @@
 
 # set -x
 
-top_path=`pwd`
-
 format_str_array_output()
 {
     _out_put_array=(`echo ${1}`)
@@ -31,7 +29,7 @@ select_vender()
             break
         fi
     done
-    if [[ ${_flag} != "true" ]]; then
+    if [[ -z "${usr_select_vender}" || ${_flag} != "true" ]]; then
         echo "error select vender !!!"
         exit
     fi
@@ -66,6 +64,62 @@ select_chip()
     fi
 
     configure_param="${configure_param} --with-chip=${usr_select_chip}"
+}
+
+select_product()
+{
+    echo "support product: "
+    _product_file=./build-script/${usr_select_vender}/${usr_select_chip}/config.sh
+
+    _product=`sed '/^product=/!d;s/.*=//' $_product_file`
+
+    format_str_array_output "${_product}"
+
+    echo -n "please select product: "
+    read usr_select_product
+
+    _flag="false"
+    _product_array=(`echo ${_product}`)
+    for i in ${_product_array[@]}; do
+        if [[ $i = ${usr_select_product} ]]; then
+            _flag="true"
+            break
+        fi
+    done
+    if [[ ${_flag} != "true" ]]; then
+        echo "error select product !!!"
+        exit
+    fi
+
+    configure_param="${configure_param} --with-product=${usr_select_product}"
+}
+
+select_language()
+{
+    echo "support language: "
+    _product_file=./build-script/${usr_select_vender}/${usr_select_chip}/config.sh
+
+    _language=`sed '/^language=/!d;s/.*=//' $_product_file`
+
+    format_str_array_output "${_language}"
+
+    echo -n "please select language: "
+    read usr_select_language
+
+    _flag="false"
+    _language_array=(`echo ${_language}`)
+    for i in ${_language_array[@]}; do
+        if [[ $i = ${usr_select_language} ]]; then
+            _flag="true"
+            break
+        fi
+    done
+    if [[ ${_flag} != "true" ]]; then
+        echo "error select language !!!"
+        exit
+    fi
+
+    configure_param="${configure_param} --with-language=${usr_select_language}"
 }
 
 select_build_version()
@@ -130,9 +184,9 @@ get_config()
     _ldflag=`sed '/^ldflag=/!d;s/ldflag=//' $_config_file`
     _lib=`sed '/^lib=/!d;s/lib=//' $_config_file`
 
-    _configure_param=`sed '/^configure_param=/!d;s/configure_param=//' $_config_file`
-
     install_path=`sed '/^install_path=/!d;s/.*=//' $_config_file`
+
+    _configure_param=`sed '/^configure_param=/!d;s/configure_param=//' $_config_file`
 
     cppflag="${cppflag} ${_cppflag}"
     cflag="${cflag} ${_cflag}"
@@ -145,19 +199,23 @@ get_config()
 
 select_vender
 select_chip
+# select_product
+# select_language
 select_build_version
 get_com_config
 get_config
 
-make distclean
-
-cd ${top_path} && ./autogen.sh && cd -
+cur_path=`pwd`
 
 cppflag="${cppflag} -I${install_path}/include"
 ldflag="${ldflag} -L${install_path}/lib"
 
+make distclean
+
+cd ${cur_path} && ./autogen.sh && cd -
+
 export STRIP=${cross_gcc_path}strip
-${top_path}/configure                                       \
+${cur_path}/configure                                       \
     CC=${cross_gcc_path}gcc                                 \
     CXX=${cross_gcc_path}g++                                \
     CPPFLAGS="${cppflag}"                                   \
@@ -175,9 +233,9 @@ ${top_path}/configure                                       \
 
 thread_jobs=`getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1`
 
-if [ x$usr_select_build_version = x"release" ]; then
-    make -j${thread_jobs} && make install-strip
-else
+if [ x$usr_select_build_version = x"debug" ]; then
     make -j${thread_jobs} && make install
+else
+    make -j${thread_jobs} && make install-strip
 fi
 

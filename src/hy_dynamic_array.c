@@ -22,8 +22,9 @@
 #include <assert.h>
 #include <string.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_dynamic_array.h"
-#include "log/hy_log.h"
 #include "hy_assert.h"
 #include "hy_mem.h"
 

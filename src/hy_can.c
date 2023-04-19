@@ -29,9 +29,10 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 #include "hy_mem.h"
-#include "log/hy_log.h"
 
 #include "hy_can.h"
 

@@ -21,20 +21,35 @@
 include res/doxygen.am
 
 SUBDIRS = \
-          include \
-          src \
-          doc \
-          example \
-          res
+          include       \
+          src           \
+          doc           \
+          example       \
+          res           \
+          build-script
+
+if COMPILE_LIBCUNIT
+SUBDIRS += test
+endif
 
 # ------------------
 # defining variables
 # ------------------
 _install_files_com  =
 _dist_files_com     =
+include_com         =
+ldadd_com           =
 
 ACLOCAL_AMFLAGS     = -I m4
-pkgconfigdir        = $(libdir)/pkgconfig
+include_com         += $(ACLOCAL_AMFLAGS)
+
+if COMPILE_LIBCUNIT
+include_com         += $(CUNIT_INCS)
+ldadd_com           += $(CUNIT_LIBS)
+endif
+
+export include_com
+export ldadd_com 
 
 # ---------------------
 # add necessary content
@@ -45,7 +60,7 @@ pkgconfigdir        = $(libdir)/pkgconfig
 # make install files
 # ------------------
 _install_files_com  += \
-                       LICENSE \
+                       LICENSE                  \
                        README.md
 dist_doc_DATA       = $(_install_files_com)
 pkgconfig_DATA      = @project_name@.pc
@@ -54,10 +69,9 @@ pkgconfig_DATA      = @project_name@.pc
 # make dist files
 # ---------------
 _dist_files_com     += \
-                       autogen.sh \
-                       build.sh \
+                       autogen.sh               \
+                       build.sh                 \
                        @project_name@.pc.in
 EXTRA_DIST          = $(_dist_files_com)
 
 DISTCLEANFILES = @project_name@.pc
-

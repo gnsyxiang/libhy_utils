@@ -19,12 +19,12 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_mem.h"
 #include "hy_gpio.h"
-
-#include "log/hy_log.h"
 
 #define _GPIO_EXPORT_PATH       "/sys/class/gpio/export"
 #define _GPIO_UNEXPORT_PATH     "/sys/class/gpio/unexport"

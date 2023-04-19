@@ -19,11 +19,12 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_string.h"
 
 #include "hy_assert.h"
 #include "hy_mem.h"
-#include "log/hy_log.h"
 
 void HyStrCopyRight(const char *src, char *dst, hy_u32_t len, char ch)
 {

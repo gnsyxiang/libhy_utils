@@ -23,8 +23,9 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
-#include "log/hy_log.h"
 
 #include "hy_utils.h"
 

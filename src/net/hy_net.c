@@ -19,13 +19,13 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_mem.h"
 #include "hy_file.h"
 #include "thread/hy_thread_mutex.h"
-
-#include "log/hy_log.h"
 
 #include "net_config.h"
 #include "net_wifi.h"

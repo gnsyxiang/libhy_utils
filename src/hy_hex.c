@@ -19,13 +19,14 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_type.h"
 #include "hy_string.h"
 #include "hy_assert.h"
 #include "hy_mem.h"
 #include "hy_compile.h"
 
-#include "log/hy_log.h"
 #include "hy_hex.h"
 
 HY_WEAK void HyHex(const void *_buf, hy_u32_t len, hy_s32_t flag)
