@@ -34,7 +34,7 @@
 typedef struct {
     HyNetSaveConfig_s   save_c;
 
-    void                *config_path_mutex_h;
+    HyThreadMutex_s     *config_path_mutex;
 
     void                *eth_h;
     HyNetEthConfig_s    eth_c;
@@ -94,11 +94,11 @@ void HyNetDestroy(void **handle)
 
     _net_context_s *context = *handle;
 
-    HyThreadMutexLock_m(context->config_path_mutex_h);
+    HyThreadMutexLock_m(context->config_path_mutex);
     net_config_eth_save(&context->eth_c);
     net_config_wifi_save(&context->wifi_c);
-    HyThreadMutexUnLock_m(context->config_path_mutex_h);
-    HyThreadMutexDestroy(&context->config_path_mutex_h);
+    HyThreadMutexUnLock_m(context->config_path_mutex);
+    HyThreadMutexDestroy(&context->config_path_mutex);
 
     net_wifi_destroy(&context->wifi_h);
 
@@ -118,8 +118,8 @@ void *HyNetCreate(HyNetConfig_s *net_c)
         context = HY_MEM_MALLOC_BREAK(_net_context_s *, sizeof(*context));
         HY_MEMCPY(&context->save_c, &net_c->save_c, sizeof(context->save_c));
 
-        context->config_path_mutex_h = HyThreadMutexCreate_m();
-        if (!context->config_path_mutex_h) {
+        context->config_path_mutex = HyThreadMutexCreate_m();
+        if (!context->config_path_mutex) {
             LOGE("HyThreadMutexCreate_m failed \n");
             break;
         }
@@ -140,10 +140,10 @@ void *HyNetCreate(HyNetConfig_s *net_c)
                         &context->eth_ip_info, net_c->args);
             }
         } else {
-            HyThreadMutexLock_m(context->config_path_mutex_h);
+            HyThreadMutexLock_m(context->config_path_mutex);
             net_config_eth_load(&context->eth_c);
             net_config_wifi_load(&context->wifi_c);
-            HyThreadMutexUnLock_m(context->config_path_mutex_h);
+            HyThreadMutexUnLock_m(context->config_path_mutex);
         }
 
         if (context->eth_c.enable) {

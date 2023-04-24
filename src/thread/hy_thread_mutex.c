@@ -27,75 +27,70 @@
 
 #include "hy_thread_mutex.h"
 
-typedef struct {
-    pthread_mutex_t             mutex;
-} _mutex_context_s;
+struct HyThreadMutex_s {
+    pthread_mutex_t mutex;
+};
 
-hy_s32_t HyThreadMutexTryLock(void *handle)
-{
-    HY_ASSERT(handle);
-    _mutex_context_s *context = handle;
-
-    return pthread_mutex_trylock(&context->mutex) == 0 ? 0 : -1;
-}
-
-hy_s32_t HyThreadMutexLock(void *handle)
-{
-    HY_ASSERT(handle);
-    _mutex_context_s *context = handle;
-
-    return pthread_mutex_lock(&context->mutex) == 0 ? 0 : -1;
-}
-
-hy_s32_t HyThreadMutexUnLock(void *handle)
-{
-    HY_ASSERT(handle);
-    _mutex_context_s *context = handle;
-
-    return pthread_mutex_unlock(&context->mutex) == 0 ? 0 : -1;
-}
-
-void *HyThreadMutexGetLock(void *handle)
+hy_s32_t HyThreadMutexTryLock(HyThreadMutex_s *handle)
 {
     HY_ASSERT(handle);
 
-    return &((_mutex_context_s *)handle)->mutex;
+    return pthread_mutex_trylock(&handle->mutex) == 0 ? 0 : -1;
 }
 
-void HyThreadMutexDestroy(void **handle)
+hy_s32_t HyThreadMutexLock(HyThreadMutex_s *handle)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
-    HY_ASSERT_RET(!handle || !*handle);
-    _mutex_context_s *context = *handle;
+    HY_ASSERT(handle);
 
-    if (0 != pthread_mutex_destroy(&context->mutex)) {
+    return pthread_mutex_lock(&handle->mutex) == 0 ? 0 : -1;
+}
+
+hy_s32_t HyThreadMutexUnLock(HyThreadMutex_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return pthread_mutex_unlock(&handle->mutex) == 0 ? 0 : -1;
+}
+
+void *HyThreadMutexGetLock(HyThreadMutex_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return &handle->mutex;
+}
+
+void HyThreadMutexDestroy(HyThreadMutex_s **handle_pp)
+{
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+    HyThreadMutex_s *handle = *handle_pp;
+
+    if (0 != pthread_mutex_destroy(&handle->mutex)) {
         LOGES("pthread_mutex_destroy failed \n");
     }
 
-    LOGI("thread mutex destroy, context: %p \n", context);
-    HY_MEM_FREE_PP(handle);
+    LOGI("thread mutex destroy, handle: %p \n", handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
-void *HyThreadMutexCreate(HyThreadMutexConfig_s *mutex_c)
+HyThreadMutex_s *HyThreadMutexCreate(HyThreadMutexConfig_s *mutex_c)
 {
-    LOGT("mutex_c: %p \n", mutex_c);
     HY_ASSERT_RET_VAL(!mutex_c, NULL);
-    _mutex_context_s *context = NULL;
+    HyThreadMutex_s *handle = NULL;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_mutex_context_s *, sizeof(*context));
+        handle = HY_MEM_MALLOC_BREAK(HyThreadMutex_s *, sizeof(*handle));
 
-        if (0 != pthread_mutex_init(&context->mutex, NULL)) {
+        if (0 != pthread_mutex_init(&handle->mutex, NULL)) {
             LOGES("pthread_mutex_init failed \n");
             break;
         }
 
-        LOGI("thread mutex create, context: %p \n", context);
-        return context;
+        LOGI("thread mutex create, handle: %p \n", handle);
+        return handle;
     } while (0);
 
     LOGE("thread mutex create failed \n");
-    HyThreadMutexDestroy((void **)&context);
+    HyThreadMutexDestroy((HyThreadMutex_s **)&handle);
     return NULL;
 }
 

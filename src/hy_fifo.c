@@ -56,7 +56,7 @@ typedef struct {
 
     hy_u32_t            read_pos;
     hy_u32_t            write_pos;
-    void                *mutex_h;
+    HyThreadMutex_s     *mutex;
 } _fifo_context_t;
 
 hy_s32_t HyFifoWrite(void *handle, const void *buf, hy_u32_t len)
@@ -79,7 +79,7 @@ hy_s32_t HyFifoWrite(void *handle, const void *buf, hy_u32_t len)
     len_tmp = HY_UTILS_MIN(len, context->save_c.len - _FIFO_WRITE_POS(context));
 
     if (context->save_c.is_lock) {
-        HyThreadMutexLock_m(context->mutex_h);
+        HyThreadMutexLock_m(context->mutex);
     }
 
     memcpy(context->buf + _FIFO_WRITE_POS(context), buf, len_tmp);
@@ -93,7 +93,7 @@ hy_s32_t HyFifoWrite(void *handle, const void *buf, hy_u32_t len)
     context->write_pos += len;
 
     if (context->save_c.is_lock) {
-        HyThreadMutexUnLock_m(context->mutex_h);
+        HyThreadMutexUnLock_m(context->mutex);
     }
 
     return len;
@@ -136,11 +136,11 @@ hy_s32_t HyFifoRead(void *handle, void *buf, hy_u32_t len)
     len = _fifo_read_com(handle, buf, len);
 
     if (context->save_c.is_lock) {
-        HyThreadMutexLock_m(context->mutex_h);
+        HyThreadMutexLock_m(context->mutex);
     }
     context->read_pos += len;
     if (context->save_c.is_lock) {
-        HyThreadMutexUnLock_m(context->mutex_h);
+        HyThreadMutexUnLock_m(context->mutex);
     }
 
     return len;
@@ -159,12 +159,12 @@ void HyFifoReset(void *handle)
     _fifo_context_t *context = handle;
 
     if (context->save_c.is_lock) {
-        HyThreadMutexLock_m(context->mutex_h);
+        HyThreadMutexLock_m(context->mutex);
     }
     context->write_pos = context->read_pos = 0;
     HY_MEMSET(context->buf, context->save_c.len);
     if (context->save_c.is_lock) {
-        HyThreadMutexUnLock_m(context->mutex_h);
+        HyThreadMutexUnLock_m(context->mutex);
     }
 }
 
@@ -176,11 +176,11 @@ hy_s32_t HyFifoReadDel(void *handle, hy_u32_t len)
     len = HY_UTILS_MIN(len, _FIFO_USED_LEN(context));
 
     if (context->save_c.is_lock) {
-        HyThreadMutexLock_m(context->mutex_h);
+        HyThreadMutexLock_m(context->mutex);
     }
     context->read_pos += len;
     if (context->save_c.is_lock) {
-        HyThreadMutexUnLock_m(context->mutex_h);
+        HyThreadMutexUnLock_m(context->mutex);
     }
 
     return len;
@@ -263,7 +263,7 @@ void HyFifoDestroy(void **handle)
 
     HY_MEM_FREE_P(context->buf);
 
-    HyThreadMutexDestroy(&context->mutex_h);
+    HyThreadMutexDestroy(&context->mutex);
 
     LOGI("fifo destroy, context: %p \n", context);
     HY_MEM_FREE_PP(handle);
@@ -287,8 +287,8 @@ void *HyFifoCreate(HyFifoConfig_s *fifo_c)
 
         context->write_pos = context->read_pos = 0;
 
-        context->mutex_h = HyThreadMutexCreate_m();
-        if (!context->mutex_h) {
+        context->mutex = HyThreadMutexCreate_m();
+        if (!context->mutex) {
             LOGE("HyThreadMutexCreate_m failed \n");
             break;
         }

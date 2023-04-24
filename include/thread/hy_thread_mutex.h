@@ -33,6 +33,8 @@ typedef struct {
     hy_s32_t    reserved;   ///< 预留
 } HyThreadMutexConfig_s;
 
+typedef struct HyThreadMutex_s HyThreadMutex_s;
+
 /**
  * @brief 创建模块
  *
@@ -40,9 +42,9 @@ typedef struct {
  *
  * @return 成功返回句柄，失败返回NULL
  */
-void *HyThreadMutexCreate(HyThreadMutexConfig_s *mutex_c);
+HyThreadMutex_s *HyThreadMutexCreate(HyThreadMutexConfig_s *mutex_c);
 
-#define HyThreadMutexCreate_m()                         \
+#define HyThreadMutexCreate_m()                     \
 ({                                                  \
     HyThreadMutexConfig_s thread_mutex_c;           \
     HyThreadMutexCreate(&thread_mutex_c);           \
@@ -51,9 +53,9 @@ void *HyThreadMutexCreate(HyThreadMutexConfig_s *mutex_c);
 /**
  * @brief 销毁模块
  *
- * @param handle 句柄的地址（二级指针）
+ * @param handle_pp 句柄的地址（二级指针）
  */
-void HyThreadMutexDestroy(void **handle);
+void HyThreadMutexDestroy(HyThreadMutex_s **handle_pp);
 
 /**
  * @brief 加锁
@@ -62,9 +64,9 @@ void HyThreadMutexDestroy(void **handle);
  *
  * @return 成功返回0，失败返回其他值
  */
-hy_s32_t HyThreadMutexLock(void *handle);
+hy_s32_t HyThreadMutexLock(HyThreadMutex_s *handle);
 
-#define HyThreadMutexLock_m(_handle)                    \
+#define HyThreadMutexLock_m(_handle)                \
 do {                                                \
     if (0 != HyThreadMutexLock(_handle)) {          \
         LOGES("HyThreadMutexLock failed \n");       \
@@ -78,9 +80,9 @@ do {                                                \
  *
  * @return 成功返回0，失败返回其他值
  */
-hy_s32_t HyThreadMutexUnLock(void *handle);
+hy_s32_t HyThreadMutexUnLock(HyThreadMutex_s *handle);
 
-#define HyThreadMutexUnLock_m(_handle)                  \
+#define HyThreadMutexUnLock_m(_handle)              \
 do {                                                \
     if (0 != HyThreadMutexUnLock(_handle)) {        \
         LOGES("HyThreadMutexUnLock failed \n");     \
@@ -94,9 +96,9 @@ do {                                                \
  *
  * @return 成功返回0，失败返回其他值
  */
-hy_s32_t HyThreadMutexTryLock(void *handle);
+hy_s32_t HyThreadMutexTryLock(HyThreadMutex_s *handle);
 
-#define HyThreadMutexTryLock_m(_handle)                 \
+#define HyThreadMutexTryLock_m(_handle)             \
 do {                                                \
     if (0 != HyThreadMutexTryLock(_handle)) {       \
         LOGES("HyThreadMutexTryLock failed \n");    \
@@ -110,7 +112,7 @@ do {                                                \
  *
  * @return 成功返回锁的地址，失败返回NULL
  */
-void *HyThreadMutexGetLock(void *handle);
+void *HyThreadMutexGetLock(HyThreadMutex_s *handle);
 
 #ifdef __cplusplus
 }
