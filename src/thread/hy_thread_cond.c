@@ -29,79 +29,76 @@
 #include "hy_time.h"
 #include "hy_thread_cond.h"
 
-typedef struct {
-    pthread_cond_t      cond;
-} _cond_context_s;
+struct HyThreadCond_s {
+    pthread_cond_t cond;
+};
 
-hy_s32_t HyThreadCondSignal(void *handle)
+hy_s32_t HyThreadCondSignal(HyThreadCond_s *handle)
 {
     HY_ASSERT(handle);
-    _cond_context_s *context = handle;
 
-    return pthread_cond_signal(&context->cond) == 0 ? 0 : -1;
+    return pthread_cond_signal(&handle->cond) == 0 ? 0 : -1;
 }
 
-hy_s32_t HyThreadCondBroadcast(void *handle)
+hy_s32_t HyThreadCondBroadcast(HyThreadCond_s *handle)
 {
     HY_ASSERT(handle);
-    _cond_context_s *context = handle;
 
-    return pthread_cond_broadcast(&context->cond) == 0 ? 0 : -1;
+    return pthread_cond_broadcast(&handle->cond) == 0 ? 0 : -1;
 }
 
-hy_s32_t HyThreadCondWait(void *handle, void *mutex_h, hy_u32_t timeout_ms)
+hy_s32_t HyThreadCondWait(HyThreadCond_s *handle, HyThreadMutex_s *mutex_h, hy_u32_t timeout_ms)
 {
     HY_ASSERT(handle);
     HY_ASSERT(mutex_h);
 
-    _cond_context_s *context = handle;
     hy_s32_t ret = 0;
+
+    // @fixme
     pthread_mutex_t *mutex = HyThreadMutexGetLock(mutex_h);
 
     if (timeout_ms == 0) {
-        ret = pthread_cond_wait(&context->cond, mutex);
+        ret = pthread_cond_wait(&handle->cond, mutex);
     } else {
         struct timespec ts = HyTimeGetTimespec(timeout_ms);
-        ret = pthread_cond_timedwait(&context->cond, mutex, &ts);
+        ret = pthread_cond_timedwait(&handle->cond, mutex, &ts);
     }
 
     return ret == 0 ? 0 : -1;
 }
 
-void HyThreadCondDestroy(void **handle)
+void HyThreadCondDestroy(HyThreadCond_s **handle_pp)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
-    HY_ASSERT_RET(!handle || !*handle);
-    _cond_context_s *context = *handle;
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+    HyThreadCond_s *handle = *handle_pp;
 
-    if (0 != pthread_cond_destroy(&context->cond)) {
+    if (0 != pthread_cond_destroy(&handle->cond)) {
         LOGES("pthread_cond_destroy faield \n");
     }
 
-    LOGI("thread cond destroy, context: %p \n", context);
-    HY_MEM_FREE_PP(handle);
+    LOGI("thread cond destroy, handle: %p \n", handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
-void *HyThreadCondCreate(HyThreadCondConfig_s *cond_c)
+HyThreadCond_s *HyThreadCondCreate(HyThreadCondConfig_s *cond_c)
 {
-    LOGT("cond_c: %p \n", cond_c);
     HY_ASSERT_RET_VAL(!cond_c, NULL);
-    _cond_context_s *context = NULL;
+    HyThreadCond_s *handle = NULL;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_cond_context_s *, sizeof(*context));
+        handle = HY_MEM_MALLOC_BREAK(HyThreadCond_s *, sizeof(*handle));
 
-        if (0 != pthread_cond_init(&context->cond, NULL)) {
+        if (0 != pthread_cond_init(&handle->cond, NULL)) {
             LOGES("pthread_cond_init failed \n");
             break;
         }
 
-        LOGI("thread cond create, context: %p \n", context);
-        return context;
+        LOGI("thread cond create, handle: %p \n", handle);
+        return handle;
     } while (0);
 
     LOGE("thread cond create failed \n");
-    HyThreadCondDestroy((void **)&context);
+    HyThreadCondDestroy((HyThreadCond_s **)&handle);
     return NULL;
 }
 

@@ -33,6 +33,8 @@ typedef struct {
     hy_s32_t    reserved;       ///< 预留
 } HyThreadCondConfig_s;
 
+typedef struct HyThreadCond_s HyThreadCond_s;
+
 /**
  * @brief 创建条件变量模块
  *
@@ -40,9 +42,9 @@ typedef struct {
  *
  * @return 成功返回句柄，失败返回NULL
  */
-void *HyThreadCondCreate(HyThreadCondConfig_s *cond_c);
+HyThreadCond_s *HyThreadCondCreate(HyThreadCondConfig_s *cond_c);
 
-#define HyThreadCondCreate_m()                          \
+#define HyThreadCondCreate_m()                      \
 ({                                                  \
     HyThreadCondConfig_s cond_c;                    \
     HY_MEMSET(&cond_c, sizeof(cond_c));             \
@@ -54,7 +56,7 @@ void *HyThreadCondCreate(HyThreadCondConfig_s *cond_c);
  *
  * @param handle 句柄的地址（二级指针）
  */
-void HyThreadCondDestroy(void **handle);
+void HyThreadCondDestroy(HyThreadCond_s **handle_pp);
 
 /**
  * @brief 发送信号
@@ -63,9 +65,9 @@ void HyThreadCondDestroy(void **handle);
  *
  * @return 成功返回0，失败返回-1
  */
-hy_s32_t HyThreadCondSignal(void *handle);
+hy_s32_t HyThreadCondSignal(HyThreadCond_s *handle);
 
-#define HyThreadCondSignal_m(_handle)                   \
+#define HyThreadCondSignal_m(_handle)               \
 do {                                                \
     if (0 != HyThreadCondSignal(_handle)) {         \
         LOGES("HyThreadCondSignal failed \n");      \
@@ -79,9 +81,9 @@ do {                                                \
  *
  * @return 成功返回0，失败返回-1
  */
-hy_s32_t HyThreadCondBroadcast(void *handle);
+hy_s32_t HyThreadCondBroadcast(HyThreadCond_s *handle);
 
-#define HyThreadCondBroadcast_m(_handle)                \
+#define HyThreadCondBroadcast_m(_handle)            \
 do {                                                \
     if (0 != HyThreadCondBroadcast(_handle)) {      \
         LOGES("HyThreadCondBroadcast failed \n");   \
@@ -97,9 +99,9 @@ do {                                                \
  *
  * @return 成功返回0，失败返回-1
  */
-hy_s32_t HyThreadCondWait(void *handle, void *_mutex_h, hy_u32_t timeout_ms);
+hy_s32_t HyThreadCondWait(HyThreadCond_s *handle, HyThreadMutex_s *mutex_h, hy_u32_t timeout_ms);
 
-#define HyThreadCondWait_m(_handle, _mutex_h, _timeout_ms)              \
+#define HyThreadCondWait_m(_handle, _mutex_h, _timeout_ms)          \
 do {                                                                \
     if (0 != HyThreadCondWait(_handle, _mutex_h, _timeout_ms)) {    \
         LOGES("HyThreadCondWait failed \n");                        \
