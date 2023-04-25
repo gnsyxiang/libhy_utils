@@ -64,7 +64,7 @@ typedef struct {
     HyModuleDestroyHandleCb_t   destroy_handle_cb;      ///< 模块销毁函数
 } HyModuleDestroyHandle_s;
 
-#define HY_MODULE_RUN_CREATE_HANDLE(module)                                     \
+#define HY_MODULE_RUN_CREATE_HANDLE(module)                                 \
 do {                                                                        \
     hy_u32_t i;                                                             \
     hy_u32_t len = _MODULE_ARRAY_CNT(module);                               \
@@ -92,7 +92,7 @@ do {                                                                        \
     }                                                                       \
 } while(0)
 
-#define HY_MODULE_RUN_DESTROY_HANDLE(module)                                    \
+#define HY_MODULE_RUN_DESTROY_HANDLE(module)                                \
 do {                                                                        \
     hy_u32_t i;                                                             \
     for (i = 0; i < _MODULE_ARRAY_CNT(module); ++i) {                       \
@@ -135,7 +135,7 @@ typedef struct {
     HyModuleDestroyBoolCb_t     destroy_bool_cb;        ///< 模块销毁函数
 } HyModuleDestroyBool_s;
 
-#define HY_MODULE_RUN_CREATE_BOOL(module)                                       \
+#define HY_MODULE_RUN_CREATE_BOOL(module)                                   \
 do {                                                                        \
     hy_u32_t i;                                                             \
     hy_u32_t len = _MODULE_ARRAY_CNT(module);                               \
@@ -162,7 +162,7 @@ do {                                                                        \
     }                                                                       \
 } while(0)
 
-#define HY_MODULE_RUN_DESTROY_BOOL(module)                                      \
+#define HY_MODULE_RUN_DESTROY_BOOL(module)                                  \
 do {                                                                        \
     hy_u32_t i;                                                             \
     for (i = 0; i < _MODULE_ARRAY_CNT(module); ++i) {                       \

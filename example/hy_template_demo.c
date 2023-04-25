@@ -35,13 +35,13 @@
 
 typedef struct {
     hy_s32_t    is_exit;
-} _main_template_s;
+} _main_context_s;
 
 static void _signal_error_cb(void *args)
 {
     LOGE("------error cb\n");
 
-    _main_template_s *context = args;
+    _main_context_s *context = args;
     context->is_exit = 1;
 }
 
@@ -49,7 +49,7 @@ static void _signal_user_cb(void *args)
 {
     LOGW("------user cb\n");
 
-    _main_template_s *context = args;
+    _main_context_s *context = args;
     context->is_exit = 1;
 }
 
@@ -63,7 +63,7 @@ static void _bool_module_destroy(void)
     HY_MODULE_RUN_DESTROY_BOOL(bool_module);
 }
 
-static hy_s32_t _bool_module_create(_main_template_s *context)
+static hy_s32_t _bool_module_create(_main_context_s *context)
 {
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
@@ -98,14 +98,39 @@ static hy_s32_t _bool_module_create(_main_template_s *context)
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
 }
 
+static void _handle_module_destroy(_main_context_s *context)
+{
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {NULL, NULL, NULL},
+    };
+
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
+}
+
+static hy_s32_t _handle_module_create(_main_context_s *context)
+{
+    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
+    HyModuleCreateHandle_s module[] = {
+        {NULL, NULL, NULL, NULL, NULL},
+    };
+
+    HY_MODULE_RUN_CREATE_HANDLE(module);
+}
+
 int main(int argc, char *argv[])
 {
-    _main_template_s *context = NULL;
+    _main_context_s *context = NULL;
     do {
-        context = HY_MEM_MALLOC_BREAK(_main_template_s *, sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(_main_context_s *, sizeof(*context));
 
         if (0 != _bool_module_create(context)) {
             printf("_bool_module_create failed \n");
+            break;
+        }
+
+        if (0 != _handle_module_create(context)) {
+            LOGE("_handle_module_create failed \n");
             break;
         }
 
@@ -116,6 +141,7 @@ int main(int argc, char *argv[])
         }
     } while (0);
 
+    _handle_module_destroy(context);
     _bool_module_destroy();
     HY_MEM_FREE_PP(&context);
 
