@@ -37,6 +37,13 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+						   hy_json.h \
+						   hy_math.h \
+						   hy_video.h \
+						   hy_audio.h \
+						   hy_sort.h \
+						   hy_md5sum.h \
+						   hy_bit.h \
 						   hy_queue.h \
 						   hy_package_list.h \
 						   hy_can.h \

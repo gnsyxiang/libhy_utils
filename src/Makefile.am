@@ -48,6 +48,11 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
+				   cjson_impl.c \
+				   hy_json.c \
+				   hy_sort.c \
+				   hy_md5sum.c \
+				   hy_bit.c \
 				   hy_queue.c \
 				   hy_package_list.c \
 				   hy_can.c \

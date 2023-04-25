@@ -57,7 +57,11 @@ _ldflags_com    +=
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la -lpthread
 
 if COMPILE_LIBHY_LOG
-_ldflags_com    += $(HY_LOG_LIBS)
+_ldadd_com      += $(HY_LOG_LIBS)
+endif
+
+if COMPILE_LIBCJSON
+_ldadd_com      += $(CJSON_LIBS)
 endif
 
 bin_PROGRAMS    				+= hy_can_demo
