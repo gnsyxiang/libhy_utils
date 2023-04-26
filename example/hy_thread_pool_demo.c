@@ -5,7 +5,7 @@
  * @file    hy_thread_pool_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    24/04 2023 11:53
+ * @date    29/12 2021 17:18
  * @version v0.0.1
  * 
  * @since    note
@@ -13,9 +13,9 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        24/04 2023      create the file
+ *     00      zhenquan.qiu        29/12 2021      create the file
  * 
- *     last modified: 24/04 2023 11:53
+ *     last modified: 29/12 2021 17:18
  */
 #include <stdio.h>
 #include <stdlib.h>

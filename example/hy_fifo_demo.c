@@ -26,10 +26,11 @@
 
 #include "hy_module.h"
 #include "hy_mem.h"
-#include "hy_type.h"
-#include "hy_string.h"
-#include "thread/hy_thread.h"
 #include "hy_signal.h"
+#include "hy_string.h"
+#include "hy_type.h"
+#include "hy_utils.h"
+#include "hy_thread.h"
 
 #include "hy_fifo.h"
 
@@ -143,9 +144,9 @@ static hy_s32_t _handle_module_create(_main_context_t *context)
     HY_MEMSET(&thread_c, sizeof(thread_c));
     thread_c.save_c.thread_loop_cb    = _get_fifo_loop_cb;
     thread_c.save_c.args              = context;
-#define _THREAD_NAME "get_fifo"
+    #define _THREAD_NAME "get_fifo"
     HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
-               _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
+            _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {

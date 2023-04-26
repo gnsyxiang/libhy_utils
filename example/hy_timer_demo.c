@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_hash_demo.c
+ * @file    hy_timer_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    30/10 2021 17:20
+ * @date    30/10 2021 13:35
  * @version v0.0.1
  * 
  * @since    note
@@ -15,37 +15,43 @@
  *     NO.     Author              Date            Modified
  *     00      zhenquan.qiu        30/10 2021      create the file
  * 
- *     last modified: 30/10 2021 17:20
+ *     last modified: 30/10 2021 13:35
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-#include "hy_hal/hy_type.h"
-#include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_string.h"
-#include "hy_hal/hy_signal.h"
-#include "hy_hal/hy_module.h"
-#include "hy_hal/hy_hal_utils.h"
-#include "hy_hal/hy_log.h"
+#include <hy_log/hy_log.h>
 
-#include "hy_hash.h"
+#include "hy_type.h"
+#include "hy_mem.h"
+#include "hy_string.h"
+#include "hy_signal.h"
+#include "hy_module.h"
+#include "hy_utils.h"
 
-#define _APP_NAME "hy_hash_demo"
+#include "hy_timer.h"
 
-typedef struct {
-    char name[32];
-
-    hy_s32_t score;
-    hy_u32_t age;
-} _student_t;
+#define _APP_NAME "hy_timer_demo"
 
 typedef struct {
-    void        *hash_handle;
+    void        *timer_handle;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
+
+static void _timer_cb(void *args)
+{
+    _main_context_t *context = args;
+
+    static int cnt = 0;
+    if (++cnt >= 5) {
+        context->exit_flag = 1;
+    }
+
+    LOGD("------cnt: %d \n", cnt);
+}
 
 static void _signal_error_cb(void *args)
 {
@@ -109,35 +115,6 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
 }
 
-static void _handle_module_destroy(_main_context_t *context)
-{
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"hash",    &context->hash_handle,      HyHashDestroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
-}
-
-static hy_s32_t _handle_module_create(_main_context_t *context)
-{
-    HyHashConfig_t hash_config;
-    hash_config.save_config.bucket_cnt = 32;
-
-    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
-    HyModuleCreateHandle_s module[] = {
-        {"hash",    &context->hash_handle,      &hash_config,       (HyModuleCreateHandleCb_t)HyHashCreate,     HyHashDestroy},
-    };
-
-    HY_MODULE_RUN_CREATE_HANDLE(module);
-}
-
-static void _hash_dump_item_cb(void *val, void *args)
-{
-    _student_t *st = val;
-    LOGD("name: %s, age: %d, score: %d \n", st->name, st->age, st->score);
-}
-
 int main(int argc, char *argv[])
 {
     _main_context_t *context = NULL;
@@ -149,52 +126,13 @@ int main(int argc, char *argv[])
             break;
         }
 
-        if (0 != _handle_module_create(context)) {
-            LOGE("_handle_module_create failed \n");
-            break;
-        }
-
         LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-        {
-            HyHashItem_t h_item;
-            _student_t *st = malloc(sizeof(*st));
+        HyTimerCreate(1, 1000);
 
-            for (int i = 0; i < 4; ++i) {
-                HY_MEMSET(st, sizeof(*st));
-                snprintf(st->name, 32, "jim%d", i);
-                st->age = 10 + i;
-                st->score = 80 + i;
-
-                h_item.key      = st->name;
-                h_item.val      = st;
-                h_item.val_len  = sizeof(*st);
-
-                HyHashItemAdd(context->hash_handle, &h_item);
-            }
-
-            free(st);
-
-            HyHashDump(context->hash_handle, _hash_dump_item_cb, context);
-        }
-
-        {
-            HyHashItem_t h_item;
-            _student_t *st = malloc(sizeof(*st));
-
-            for (int i = 0; i < 4; ++i) {
-                HY_MEMSET(st, sizeof(*st));
-                snprintf(st->name, 32, "jim%d", i);
-
-                h_item.key      = st->name;
-                h_item.val      = st;
-
-                HyHashItemGet(context->hash_handle, &h_item);
-
-                LOGD("name: %s, age: %d, score: %d \n", st->name, st->age, st->score);
-            }
-
-            free(st);
+        context->timer_handle = HyTimerAdd_m(500, HY_TYPE_FLAG_ENABLE, _timer_cb, context);
+        if (!context->timer_handle) {
+            LOGE("HyTimerAdd failed \n");
         }
 
         while (!context->exit_flag) {
@@ -203,7 +141,8 @@ int main(int argc, char *argv[])
 
     } while (0);
 
-    _handle_module_destroy(context);
+    HyTimerDel(&context->timer_handle);
+
     _bool_module_destroy();
     HY_MEM_FREE_PP(&context);
 

@@ -96,13 +96,11 @@ AC_CONFIG_FILES([Makefile
                  build-script/rock-chips/rk3568/Makefile
                  doc/Makefile
                  example/Makefile
-                 example/linux/Makefile
-                 example/linux/ipc/Makefile
-                 example/linux/ipc/ipc_process/Makefile
-                 example/linux/ipc/ipc_socket/Makefile
-                 example/linux/net/Makefile
-                 example/linux/timer/Makefile
-                 example/mcu/Makefile
+                 example/ipc/Makefile
+                 example/ipc/ipc_process/Makefile
+                 example/ipc/ipc_socket/Makefile
+                 example/net/Makefile
+                 example/timer/Makefile
                  include/Makefile
                  include/ipc/Makefile
                  include/ipc/ipc_process/Makefile

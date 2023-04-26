@@ -22,10 +22,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "hy_hal/hy_type.h"
-#include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_string.h"
-#include "hy_hal/hy_log.h"
+#include <hy_log/hy_log.h>
+
+#include "hy_type.h"
+#include "hy_mem.h"
+#include "hy_string.h"
 
 #include "hy_json.h"
 

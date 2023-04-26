@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_protobuf-c_demo.c
+ * @file    hy_zone_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    17/08 2021 20:51
+ * @date    13/04 2022 18:25
  * @version v0.0.1
  * 
  * @since    note
@@ -13,27 +13,33 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        17/08 2021      create the file
+ *     00      zhenquan.qiu        13/04 2022      create the file
  * 
- *     last modified: 17/08 2021 20:51
+ *     last modified: 13/04 2022 18:25
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "hy_hal/hy_log.h"
-#include "hy_hal/hy_hal_utils.h"
-#include "hy_hal/hy_module.h"
-#include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_string.h"
-#include "hy_hal/hy_signal.h"
-#include "hy_hal/hy_type.h"
+#include <hy_log/hy_log.h>
 
-#include "address_book.pb-c.h"
+#include "hy_assert.h"
+#include "hy_type.h"
+#include "hy_mem.h"
+#include "hy_string.h"
+#include "hy_signal.h"
+#include "hy_module.h"
+#include "hy_utils.h"
+#include "hy_time.h"
 
-#define _APP_NAME "hy_protobuf-c_demo"
+#include "hy_zone.h"
+
+#define _APP_NAME "hy_zone_demo"
 
 typedef struct {
+    void        *zone_h;
+
     hy_s32_t    exit_flag;
 } _main_context_t;
 
@@ -47,7 +53,7 @@ static void _signal_error_cb(void *args)
 
 static void _signal_user_cb(void *args)
 {
-    LOGI("------user cb\n");
+    LOGW("------user cb\n");
 
     _main_context_t *context = args;
     context->exit_flag = 1;
@@ -99,62 +105,31 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
 }
 
-static hy_s32_t _do_pack(uint8_t *buf)
+static void _handle_module_destroy(_main_context_t *context)
 {
-    Tutorial__Person__PhoneNumber phone_number = TUTORIAL__PERSON__PHONE_NUMBER__INIT;
-    Tutorial__Person person = TUTORIAL__PERSON__INIT;
-    Tutorial__Addressbook address_book = TUTORIAL__ADDRESSBOOK__INIT;
-    Tutorial__Person__PhoneNumber *phone_number_p = &phone_number;
-    Tutorial__Person *person_p = &person;
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {"zone",        &context->zone_h,       HyZoneDestroy},
+    };
 
-    phone_number.has_type   = 1;
-    phone_number.type       = TUTORIAL__PERSON__PHONE_TYPE__HOME;
-    phone_number.number     = "110";
-
-    person.id               = 1;
-    person.name             = "haha";
-    person.email            = "haha@110.com";
-    person.n_phones         = 1;
-    person.phones           = &phone_number_p;
-
-    address_book.n_people   = 1;
-    address_book.people     = &person_p;
-
-    return tutorial__addressbook__pack(&address_book, buf);
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
 }
 
-static hy_s32_t _do_unpack(const uint8_t *buf, size_t len)
+static hy_s32_t _handle_module_create(_main_context_t *context)
 {
-    Tutorial__Addressbook *address_book = NULL;
+    HyZoneConfig_s zone_c;
+    HY_MEMSET(&zone_c, sizeof(zone_c));
+    HY_STRCPY(zone_c.save_c.zone_file_paht, "/data/nfs/bin/zoneinfo");
 
-    address_book = tutorial__addressbook__unpack(NULL, len, buf);
-    if (!address_book) {
-        LOGE("user__unpack failed\n");
-        return -1;
-    }
+    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
+    HyModuleCreateHandle_s module[] = {
+        {"zone",        &context->zone_h,       &zone_c,        (HyModuleCreateHandleCb_t)HyZoneCreate,         HyZoneDestroy},
+    };
 
-    for (size_t i = 0; i < address_book->n_people; ++i) {
-        Tutorial__Person *people = address_book->people[i];
-
-        LOGI("id: %d \n", people->id);
-        LOGI("name: %s \n", people->name);
-        LOGI("email: %s \n", people->email);
-
-        LOGI("phone_number: \n");
-        for (size_t j = 0; j < people->n_phones; ++j) {
-            Tutorial__Person__PhoneNumber *phones = people->phones[j];
-
-            LOGI("\t\ttype: %d \n", phones->type);
-            LOGI("\t\tnumber: %s \n", phones->number);
-        }
-    }
-
-    tutorial__addressbook__free_unpacked(address_book, NULL);
-
-    return 0;
+    HY_MODULE_RUN_CREATE_HANDLE(module);
 }
 
-int main(int argc, char const* argv[])
+int main(int argc, char *argv[])
 {
     _main_context_t *context = NULL;
     do {
@@ -170,15 +145,47 @@ int main(int argc, char const* argv[])
             break;
         }
 
-        LOGI("version: %s, date: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-        uint8_t buf[1024] = {0};
-        hy_s32_t len = 0;
+        HyZoneInfo_s zone_info;
+        HY_MEMSET(&zone_info, sizeof(zone_info));
+#if 1
+#define _ZONEINFO_PATH "Asia/Shanghai"
+        // #define _ZONEINFO_PATH "America/Chicago"
+        HY_STRNCPY(zone_info.zoneinfo_path, sizeof(zone_info.zoneinfo_path),
+                _ZONEINFO_PATH, HY_STRLEN(_ZONEINFO_PATH));
+#endif
 
-        len = _do_pack(buf);
-        LOGI("len: %d \n", len);
+#if 0
+#define _ZONEINFO_NAME "CST-8"
+        // #define _ZONEINFO_NAME "CST6CDT"
+        HY_STRNCPY(zone_info.zoneinfo_name, sizeof(zone_info.zoneinfo_name),
+                _ZONEINFO_NAME, sizeof(_ZONEINFO_NAME));
+#endif
 
-        _do_unpack(buf, len);
+#if 0
+        zone_info.type = HY_ZONE_TYPE_EAST;
+        zone_info.num = HY_ZONE_NUM_8;
+        // zone_info.type = HY_ZONE_TYPE_WEST;
+        // zone_info.num = HY_ZONE_NUM_6;
+#endif
+
+        if (0 != HyZoneSet(&zone_info)) {
+            LOGE("HyZoneSet failed \n");
+        }
+
+        HyZoneInfo_s zone_info_get;
+        HyZoneGet(&zone_info_get);
+        LOGI("type: %d \n", zone_info_get.type);
+        LOGI("num: %d \n", zone_info_get.num);
+        LOGI("daylight: %d \n", zone_info_get.daylight);
+        LOGI("utc_s: %d \n", zone_info_get.utc_s);
+        LOGI("zoneinfo_path: %s \n", zone_info_get.zoneinfo_path);
+        LOGI("zoneinfo_name: %s \n", zone_info_get.zoneinfo_name);
+
+        char time_buf[BUF_LEN] = {0};
+        HyTimeFormatLocalTime(time_buf, sizeof(time_buf));
+        LOGI("time_buf: %s \n", time_buf);
 
         while (!context->exit_flag) {
             sleep(1);

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "hy_hal/hy_type.h"
+#include "hy_type.h"
 
 #include "hy_md5sum.h"
 
