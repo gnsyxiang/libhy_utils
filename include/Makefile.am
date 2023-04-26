@@ -28,6 +28,10 @@ if COMPILE_LIBCJSON
 SUBDIRS += serialize
 endif
 
+if COMPILE_LIBCURL
+SUBDIRS += download
+endif
+
 # ------------------
 # defining variables
 # ------------------

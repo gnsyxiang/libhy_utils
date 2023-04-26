@@ -102,6 +102,7 @@ AC_CONFIG_FILES([Makefile
                  example/net/Makefile
                  example/timer/Makefile
                  include/Makefile
+                 include/download/Makefile
                  include/ipc/Makefile
                  include/ipc/ipc_process/Makefile
                  include/ipc/ipc_socket/Makefile
@@ -114,6 +115,7 @@ AC_CONFIG_FILES([Makefile
                  res/voice/cn/Makefile
                  res/voice/en/Makefile
                  src/Makefile
+                 src/download/Makefile
                  src/ipc/Makefile
                  src/ipc/ipc_process/Makefile
                  src/ipc/ipc_socket/Makefile
