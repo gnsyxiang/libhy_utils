@@ -31,7 +31,7 @@ extern "C" {
 /**
  * @brief 任务回调函数
  */
-typedef void (*HyThreadPoolsTaskCb_t)(void *args);
+typedef void (*HyThreadPoolsTaskCb_t)(void *args, void *run_befor_cb_args);
 
 /**
  * @brief 任务
@@ -42,11 +42,24 @@ typedef struct {
 } HyThreadPoolsTask_s;
 
 /**
+ * @brief 任务调度前的初始化
+ */
+typedef void *(*HyThreadPoolRunBeforCb_t)(void *args);
+
+/**
+ * @brief 任务调度后的资源释放
+ */
+typedef void (*HyThreadPoolRunAfterCb_t)(void *args);
+
+/**
  * @brief 配置参数
  */
 typedef struct {
-    hy_s32_t thread_cnt_min;            ///< 创建最小线程数
-    hy_s32_t thread_cnt_max;            ///< 创建最大线程数
+    HyThreadPoolRunBeforCb_t    run_befor_cb;               ///< 任务调度前初始化
+    HyThreadPoolRunAfterCb_t    run_after_cb;               ///< 任务调度后释放资源
+    void                        *run_befor_args;            ///< 任务初始化后参数回调
+    hy_s32_t                    thread_cnt_min;             ///< 创建最小线程数
+    hy_s32_t                    thread_cnt_max;             ///< 创建最大线程数
 } HyThreadPoolSaveConfig_s;
 
 /**

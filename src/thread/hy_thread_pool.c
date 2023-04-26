@@ -105,7 +105,18 @@ static void _thread_exit(HyThreadPools_s* handle)
 static void *_worker_loop_cb(void* args)
 {
     HyThreadPools_s *handle = (HyThreadPools_s*)args;
+    HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
     HyThreadPoolsTask_s task;
+    void *run_befor_cb_args = NULL;
+
+    if (save_c->run_after_cb) {
+        run_befor_cb_args = save_c->run_befor_cb(save_c->run_befor_args);
+        if (!run_befor_cb_args) {
+            LOGE("run_befor_cb failed \n");
+            _thread_exit(handle);
+            return NULL;
+        }
+    }
 
     while (!handle->is_exit) {
         HyThreadMutexLock(handle->mutex_h);
@@ -116,7 +127,7 @@ static void *_worker_loop_cb(void* args)
                 handle->live_num--;
                 HyThreadMutexUnLock(handle->mutex_h);
 
-                _thread_exit(handle);
+                break;
             }
         }
         HyThreadMutexUnLock(handle->mutex_h);
@@ -129,11 +140,15 @@ static void *_worker_loop_cb(void* args)
         handle->busy_num++;
         HyThreadMutexUnLock(handle->busy_mutex_h);
 
-        task.task_cb(&task);
+        task.task_cb(task.args, run_befor_cb_args);
 
         HyThreadMutexLock(handle->busy_mutex_h);
         handle->busy_num--;
         HyThreadMutexUnLock(handle->busy_mutex_h);
+    }
+
+    if (save_c->run_after_cb) {
+        save_c->run_after_cb(run_befor_cb_args);
     }
 
     _thread_exit(handle);

@@ -129,10 +129,9 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HY_MODULE_RUN_CREATE_HANDLE(module);
 }
 
-void taskFunc(void* args)
+static void _task_cb(void* args, void *run_befor_cb_args)
 {
-    HyThreadPoolsTask_s *task = args;
-    hy_s32_t *num = task->args;
+    hy_s32_t *num = args;
 
     LOGI("tid: %ld, num: %d \n", pthread_self(), *num);
 
@@ -160,7 +159,7 @@ int main(int argc, char *argv[])
         LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
         HyThreadPoolsTask_s task;
-        task.task_cb = taskFunc;
+        task.task_cb = _task_cb;
         for (int i = 0; i < 100; ++i) {
             hy_s32_t *num = calloc(1, sizeof(hy_s32_t));
 
@@ -181,5 +180,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-
