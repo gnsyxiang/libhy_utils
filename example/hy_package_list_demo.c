@@ -45,8 +45,8 @@ typedef struct {
     hy_s32_t                is_exit;
     HyPackageList_s         *package_list;
 
-    void                    *get_h;
-    void                    *put_h;
+    HyThread_s              *get_h;
+    HyThread_s              *put_h;
 
     pthread_mutex_t         mutex;
     struct hy_list_head     list;
@@ -231,8 +231,8 @@ static void _handle_module_destroy(_main_context_s *context)
 {
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
-        {"get_thread",          &context->get_h,                      HyThreadDestroy},
-        {"put_thread",          &context->put_h,                      HyThreadDestroy},
+        {"get_thread",          (void **)&context->get_h,                      (HyModuleDestroyHandleCb_t)HyThreadDestroy},
+        {"put_thread",          (void **)&context->put_h,                      (HyModuleDestroyHandleCb_t)HyThreadDestroy},
         {"package_list",        (void *)&context->package_list,       (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
     };
 
@@ -261,9 +261,9 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
-        {"package_list",        (void *)&context->package_list,       &package_list_config,            (HyModuleCreateHandleCb_t)HyPackageListCreate,     (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
-        {"get_thread",          &context->get_h,                      &thread_get_c,                   (HyModuleCreateHandleCb_t)HyThreadCreate,          HyThreadDestroy},
-        {"put_thread",          &context->put_h,                      &thread_put_c,                   (HyModuleCreateHandleCb_t)HyThreadCreate,          HyThreadDestroy},
+        {"package_list",        (void **)&context->package_list,       &package_list_config,            (HyModuleCreateHandleCb_t)HyPackageListCreate,     (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
+        {"get_thread",          (void **)&context->get_h,              &thread_get_c,                   (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
+        {"put_thread",          (void **)&context->put_h,              &thread_put_c,                   (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);

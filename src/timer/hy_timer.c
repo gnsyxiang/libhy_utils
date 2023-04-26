@@ -49,7 +49,7 @@ typedef struct {
     HyThreadMutex_s         *mutex_h;
 
     hy_s32_t                exit_flag;
-    void                    *thread_h;
+    HyThread_s              *thread_h;
 
     struct hy_list_head     *list_head;
 } _timer_context_t;

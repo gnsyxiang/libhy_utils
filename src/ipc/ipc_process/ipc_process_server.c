@@ -57,14 +57,14 @@ typedef struct {
 
     sem_t                           cb_sem;
     void                            *cb_fifo_h;
-    void                            *handle_cb_thread_h;
+    HyThread_s                      *handle_cb_thread_h;
 
     sem_t                           ack_sem;
     void                            *ack_fifo_h;
-    void                            *handle_ack_thread_h;
+    HyThread_s                      *handle_ack_thread_h;
 
     void                            *pipe_h;
-    void                            *handle_ipc_link_msg_thread_h;
+    HyThread_s                      *handle_ipc_link_msg_thread_h;
 
     hy_s32_t                        exit_flag:1;
     hy_s32_t                        reserved;

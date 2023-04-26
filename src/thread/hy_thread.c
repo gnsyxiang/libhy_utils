@@ -34,21 +34,21 @@
 
 #include "hy_thread.h"
 
-typedef struct {
+struct HyThread_s {
     HyThreadSaveConfig_s    save_c;
     pthread_key_t           key;
     hy_s32_t                is_init_key;
 
     pthread_t               id;
     hy_u32_t                is_exit;
-} _thread_context_t;
+};
 
-hy_s32_t HyThreadKeySet(void *handle,
+hy_s32_t HyThreadKeySet(HyThread_s *handle,
         void *key, HyThreadKeyDestroyCb_t destroy_cb)
 {
     HY_ASSERT(handle);
     HY_ASSERT(key);
-    _thread_context_t *context = handle;
+    HyThread_s *context = handle;
 
     if (!context->is_init_key) {
         if (0 != pthread_key_create(&context->key, destroy_cb)) {
@@ -66,33 +66,33 @@ hy_s32_t HyThreadKeySet(void *handle,
     return 0;
 }
 
-void *HyThreadKeyGet(void *handle)
+void *HyThreadKeyGet(HyThread_s *handle)
 {
     HY_ASSERT(handle);
-    _thread_context_t *context = handle;
+    HyThread_s *context = handle;
 
     return pthread_getspecific(context->key);
 }
 
-const char *HyThreadGetName(void *handle)
+const char *HyThreadGetName(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, NULL);
-    _thread_context_t *context = handle;
+    HyThread_s *context = handle;
 
     return context->save_c.name;
 }
 
-pthread_t HyThreadGetId(void *handle)
+pthread_t HyThreadGetId(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, -1);
-    _thread_context_t *context = handle;
+    HyThread_s *context = handle;
 
     return context->id;
 }
 
 static void *_thread_cb(void *args)
 {
-    _thread_context_t *context = args;
+    HyThread_s *context = args;
     HyThreadSaveConfig_s *save_c = &context->save_c;
     hy_s32_t ret = 0;
 
@@ -112,17 +112,17 @@ static void *_thread_cb(void *args)
     LOGI("%s thread loop stop \n", save_c->name);
 
     if (HY_THREAD_DETACH_MODE_YES == save_c->detach_mode) {
-        HyThreadDestroy((void **)&context);
+        HyThreadDestroy(&context);
     }
 
     return NULL;
 }
 
-void HyThreadDestroy(void **handle)
+void HyThreadDestroy(HyThread_s **handle)
 {
     LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
-    _thread_context_t *context = *handle;
+    HyThread_s *context = *handle;
     hy_u32_t cnt = 0;
 
     if (context->save_c.destroy_mode == HY_THREAD_DESTROY_MODE_FORCE) {
@@ -142,15 +142,15 @@ void HyThreadDestroy(void **handle)
     HY_MEM_FREE_PP(handle);
 }
 
-void *HyThreadCreate(HyThreadConfig_s *thread_c)
+HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
 {
     LOGT("thread_c: %p \n", thread_c);
     HY_ASSERT_RET_VAL(!thread_c, NULL);
-    _thread_context_t *context = NULL;
+    HyThread_s *context = NULL;
     pthread_attr_t attr;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_thread_context_t *, sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(HyThread_s *, sizeof(*context));
 
         HY_MEMCPY(&context->save_c, &thread_c->save_c, sizeof(context->save_c));
 
@@ -187,7 +187,7 @@ void *HyThreadCreate(HyThreadConfig_s *thread_c)
     } while (0);
 
     LOGE("%s thread create failed \n", thread_c->save_c.name);
-    HyThreadDestroy((void **)&context);
+    HyThreadDestroy(&context);
     return NULL;
 }
 

@@ -36,7 +36,7 @@ typedef struct {
     pthread_mutex_t                 list_mutex;
 
     void                            *ipc_link_h;
-    void                            *accept_thread_h;
+    HyThread_s                      *accept_thread_h;
 } _ipc_link_manager_context_s;
 
 struct hy_list_head *ipc_link_manager_list_get(void *ipc_link_manager_h)

@@ -71,7 +71,7 @@ typedef struct {
     struct itimerspec           its;
 
     hy_s32_t                    exit_flag;
-    void                        *thread_h;
+    HyThread_s                  *thread_h;
 } _timer_context_s;
 
 static hy_s32_t is_init = 0;

@@ -64,7 +64,7 @@ typedef struct {
     void                    *led_fifo_handle;
     _led_blink_mode_t       led_blink_mode[HY_PHY_LED_NUM_MAX];
 
-    void                    *led_thread_h;
+    HyThread_s              *led_thread_h;
     hy_s32_t                exit_flag;
 } _net_wired_context_t;
 

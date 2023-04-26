@@ -38,7 +38,7 @@
 
 typedef struct {
     void        *fifo_h;
-    void        *thread_h;
+    HyThread_s  *thread_h;
 
     hy_s32_t    exit_flag;
 } _main_context_t;
@@ -127,7 +127,7 @@ static void _handle_module_destroy(_main_context_t *context)
 {
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
-        {"thread",      &context->thread_h,     HyThreadDestroy},
+        {"thread",      (void **)&context->thread_h,     (HyModuleDestroyHandleCb_t)HyThreadDestroy},
         {"fifo",        &context->fifo_h,       HyFifoDestroy},
     };
 
@@ -151,7 +151,7 @@ static hy_s32_t _handle_module_create(_main_context_t *context)
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
         {"fifo",        &context->fifo_h,       &fifo_c,            (HyModuleCreateHandleCb_t)HyFifoCreate,     HyFifoDestroy},
-        {"thread",      &context->thread_h,     &thread_c,          (HyModuleCreateHandleCb_t)HyThreadCreate,   HyThreadDestroy},
+        {"thread",      (void **)&context->thread_h,     &thread_c,          (HyModuleCreateHandleCb_t)HyThreadCreate,   (HyModuleDestroyHandleCb_t)HyThreadDestroy},
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);

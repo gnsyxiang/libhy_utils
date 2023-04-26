@@ -89,6 +89,8 @@ typedef struct {
     HyThreadSaveConfig_s    save_c;                         ///< 模块配置参数
 } HyThreadConfig_s;
 
+typedef struct HyThread_s HyThread_s;
+
 /**
  * @brief 创建线程
  *
@@ -96,16 +98,16 @@ typedef struct {
  *
  * @return 成功返回句柄，失败返回NULL
  */
-void *HyThreadCreate(HyThreadConfig_s *thread_c);
+HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c);
 
-#define HyThreadCreate_m(_name, _thread_loop_cb, _args)                 \
+#define HyThreadCreate_m(_name, _thread_loop_cb, _args)             \
 ({                                                                  \
     HyThreadConfig_s thread_c;                                      \
     HY_MEMSET(&thread_c, sizeof(thread_c));                         \
     thread_c.save_c.thread_loop_cb      = _thread_loop_cb;          \
     thread_c.save_c.args                = _args;                    \
     HY_STRNCPY(thread_c.save_c.name, sizeof(thread_c.save_c.name),  \
-               _name, HY_STRLEN(_name));                               \
+               _name, HY_STRLEN(_name));                            \
     HyThreadCreate(&thread_c);                                      \
 })
 
@@ -114,7 +116,7 @@ void *HyThreadCreate(HyThreadConfig_s *thread_c);
  *
  * @param handle 线程句柄的地址(二级指针)
  */
-void HyThreadDestroy(void **handle);
+void HyThreadDestroy(HyThread_s **handle);
 
 /**
  * @brief 设置线程私有数据
@@ -127,7 +129,7 @@ void HyThreadDestroy(void **handle);
  *
  * @note 使用线程私有数据的好处是，多个线程同时使用同一个名字，但是内容不一样
  */
-hy_s32_t HyThreadKeySet(void *handle,
+hy_s32_t HyThreadKeySet(HyThread_s *handle,
                         void *key, HyThreadKeyDestroyCb_t destroy_cb);
 
 /**
@@ -137,7 +139,7 @@ hy_s32_t HyThreadKeySet(void *handle,
  *
  * @return 成功返回私有数据的地址，失败返回NULL
  */
-void *HyThreadKeyGet(void *handle);
+void *HyThreadKeyGet(HyThread_s *handle);
 
 /**
  * @brief 获取线程名字
@@ -146,7 +148,7 @@ void *HyThreadKeyGet(void *handle);
  *
  * @return 返回线程名字
  */
-const char *HyThreadGetName(void *handle);
+const char *HyThreadGetName(HyThread_s *handle);
 
 /**
  * @brief 获取线程id
@@ -155,7 +157,7 @@ const char *HyThreadGetName(void *handle);
  *
  * @return 返回id(pthread线程库维护的, 进程级别)
  */
-pthread_t HyThreadGetId(void *handle);
+pthread_t HyThreadGetId(HyThread_s *handle);
 
 #ifdef __cplusplus
 }

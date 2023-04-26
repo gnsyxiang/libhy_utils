@@ -49,7 +49,7 @@ typedef struct {
 
     pid_t                           pid;
     hy_u32_t                        connect_timeout_s;
-    void                            *connect_thread_h;
+    HyThread_s                      *connect_thread_h;
 
     void                            *ipc_link_h;
 
@@ -57,7 +57,7 @@ typedef struct {
     pthread_cond_t                  ack_cond;
     pthread_mutex_t                 ack_mutex;
 
-    void                            *handle_ipc_link_msg_thread_h;
+    HyThread_s                      *handle_ipc_link_msg_thread_h;
 
     hy_s32_t                        exit_flag:1;
     hy_s32_t                        exit_wait_flag:1;
