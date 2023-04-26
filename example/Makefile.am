@@ -18,14 +18,12 @@
 #     last modified: 05/03 2021 10:38
 # ===============================================================
 
-SUBDIRS = $(run_os)
-
 # ------------------
 # defining variables
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    = $(INCLUDE_COM)
+_include_com    =
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
@@ -41,7 +39,10 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    += -I$(top_srcdir)/include
+_include_com    += \
+				   -I$(top_srcdir)/include 			\
+				   -I$(top_srcdir)/include/net 		\
+				   -I$(top_srcdir)/include/thread
 
 _sources_com    +=
 
@@ -56,57 +57,68 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += \
-                   $(top_builddir)/src/lib@project_name@.la \
-                   $(ldadd_com)
+_ldadd_com      += $(top_builddir)/src/lib@project_name@.la -lpthread
 
-bin_PROGRAMS                += hy_hex_demo
-hy_hex_demo_SOURCES         = $(_sources_com) hy_hex_demo.c
-hy_hex_demo_CPPFLAGS        = $(_cppflags_com)
-hy_hex_demo_CFLAGS          = $(_cflags_com)
-hy_hex_demo_CXXFLAGS        = $(_cxxflags_com)
-hy_hex_demo_LDFLAGS         = $(_ldflags_com)
-hy_hex_demo_LDADD           = $(_ldadd_com)
-
-if COMPILE_LIBCJSON
-bin_PROGRAMS                += hy_json_demo
-hy_json_demo_SOURCES        = $(_sources_com) hy_json_demo.c
-hy_json_demo_CPPFLAGS       = $(_cppflags_com)
-hy_json_demo_CFLAGS         = $(_cflags_com)
-hy_json_demo_CXXFLAGS       = $(_cxxflags_com)
-hy_json_demo_LDFLAGS        = $(_ldflags_com)
-hy_json_demo_LDADD          = $(_ldadd_com)
+if COMPILE_LIBHY_LOG
+_ldadd_com      += $(HY_LOG_LIBS)
 endif
 
-bin_PROGRAMS                += hy_md5sum_demo
-hy_md5sum_demo_SOURCES      = $(_sources_com) hy_md5sum_demo.c
-hy_md5sum_demo_CPPFLAGS     = $(_cppflags_com)
-hy_md5sum_demo_CFLAGS       = $(_cflags_com)
-hy_md5sum_demo_CXXFLAGS     = $(_cxxflags_com)
-hy_md5sum_demo_LDFLAGS      = $(_ldflags_com)
-hy_md5sum_demo_LDADD        = $(_ldadd_com)
+if COMPILE_LIBCJSON
+_ldadd_com      += $(CJSON_LIBS)
+endif
 
-bin_PROGRAMS                += hy_sort_demo
-hy_sort_demo_SOURCES        = $(_sources_com) hy_sort_demo.c
-hy_sort_demo_CPPFLAGS       = $(_cppflags_com)
-hy_sort_demo_CFLAGS         = $(_cflags_com)
-hy_sort_demo_CXXFLAGS       = $(_cxxflags_com)
-hy_sort_demo_LDFLAGS        = $(_ldflags_com)
-hy_sort_demo_LDADD          = $(_ldadd_com)
+bin_PROGRAMS    				+= hy_can_demo
+hy_can_demo_SOURCES    			= $(_sources_com) hy_can_demo.c
+hy_can_demo_CPPFLAGS   			= $(_cppflags_com)
+hy_can_demo_CFLAGS     			= $(_cflags_com)
+hy_can_demo_CXXFLAGS   			= $(_cxxflags_com)
+hy_can_demo_LDFLAGS    			= $(_ldflags_com)
+hy_can_demo_LDADD      			= $(_ldadd_com)
 
-bin_PROGRAMS                += hy_template_demo
-hy_template_demo_SOURCES    = $(_sources_com) hy_template_demo.c
-hy_template_demo_CPPFLAGS   = $(_cppflags_com)
-hy_template_demo_CFLAGS     = $(_cflags_com)
-hy_template_demo_CXXFLAGS   = $(_cxxflags_com)
-hy_template_demo_LDFLAGS    = $(_ldflags_com)
-hy_template_demo_LDADD      = $(_ldadd_com)
+bin_PROGRAMS    				+= hy_template_demo
+hy_template_demo_SOURCES    	= $(_sources_com) hy_template_demo.c
+hy_template_demo_CPPFLAGS   	= $(_cppflags_com)
+hy_template_demo_CFLAGS     	= $(_cflags_com)
+hy_template_demo_CXXFLAGS   	= $(_cxxflags_com)
+hy_template_demo_LDFLAGS    	= $(_ldflags_com)
+hy_template_demo_LDADD      	= $(_ldadd_com)
 
-bin_PROGRAMS                += hy_utils_demo
-hy_utils_demo_SOURCES       = $(_sources_com) hy_utils_demo.c
-hy_utils_demo_CPPFLAGS      = $(_cppflags_com)
-hy_utils_demo_CFLAGS        = $(_cflags_com)
-hy_utils_demo_CXXFLAGS      = $(_cxxflags_com)
-hy_utils_demo_LDFLAGS       = $(_ldflags_com)
-hy_utils_demo_LDADD         = $(_ldadd_com)
+bin_PROGRAMS    				+= hy_dynamic_array_demo
+hy_dynamic_array_demo_SOURCES  	= $(_sources_com) hy_dynamic_array_demo.c
+hy_dynamic_array_demo_CPPFLAGS 	= $(_cppflags_com)
+hy_dynamic_array_demo_CFLAGS   	= $(_cflags_com)
+hy_dynamic_array_demo_CXXFLAGS 	= $(_cxxflags_com)
+hy_dynamic_array_demo_LDFLAGS  	= $(_ldflags_com)
+hy_dynamic_array_demo_LDADD    	= $(_ldadd_com)
 
+bin_PROGRAMS    				+= hy_epoll_demo
+hy_epoll_demo_SOURCES  			= $(_sources_com) hy_epoll_demo.c
+hy_epoll_demo_CPPFLAGS 			= $(_cppflags_com)
+hy_epoll_demo_CFLAGS   			= $(_cflags_com)
+hy_epoll_demo_CXXFLAGS 			= $(_cxxflags_com)
+hy_epoll_demo_LDFLAGS  			= $(_ldflags_com)
+hy_epoll_demo_LDADD    			= $(_ldadd_com)
+
+bin_PROGRAMS    				+= hy_fifo_demo
+hy_fifo_demo_SOURCES    		= $(_sources_com) hy_fifo_demo.c
+hy_fifo_demo_CPPFLAGS   		= $(_cppflags_com)
+hy_fifo_demo_CFLAGS     		= $(_cflags_com)
+hy_fifo_demo_CXXFLAGS   		= $(_cxxflags_com)
+hy_fifo_demo_LDFLAGS    		= $(_ldflags_com)
+hy_fifo_demo_LDADD      		= $(_ldadd_com)
+
+bin_PROGRAMS    				+= hy_package_list_demo
+hy_package_list_demo_SOURCES    = $(_sources_com) hy_package_list_demo.c
+hy_package_list_demo_CPPFLAGS   = $(_cppflags_com)
+hy_package_list_demo_CFLAGS     = $(_cflags_com)
+hy_package_list_demo_CXXFLAGS   = $(_cxxflags_com)
+hy_package_list_demo_LDFLAGS    = $(_ldflags_com)
+hy_package_list_demo_LDADD      = $(_ldadd_com)
+
+bin_PROGRAMS    				+= hy_thread_pool_demo
+hy_thread_pool_demo_SOURCES    = $(_sources_com) hy_thread_pool_demo.c
+hy_thread_pool_demo_CPPFLAGS   = $(_cppflags_com)
+hy_thread_pool_demo_CFLAGS     = $(_cflags_com)
+hy_thread_pool_demo_CXXFLAGS   = $(_cxxflags_com)
+hy_thread_pool_demo_LDFLAGS    = $(_ldflags_com)
+hy_thread_pool_demo_LDADD      = $(_ldadd_com)

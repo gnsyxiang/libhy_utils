@@ -18,9 +18,17 @@
 #     last modified: 05/03 2021 10:35
 # ===============================================================
 
-SUBDIRS = $(run_os)
-
 lib_LTLIBRARIES = lib@project_name@.la
+
+SUBDIRS = \
+		  ipc \
+		  net \
+		  thread \
+		  timer
+
+if COMPILE_LIBCJSON
+SUBDIRS += serialize
+endif
 
 # ------------------
 # defining variables
@@ -45,11 +53,24 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_bit.c         \
-                   hy_hex.c         \
-                   hy_md5sum.c      \
-                   hy_sort.c        \
-                   hy_utils.c
+				   hy_pipe.c \
+				   hy_hash.c \
+				   hy_sort.c \
+				   hy_md5sum.c \
+				   hy_bit.c \
+				   hy_queue.c \
+				   hy_package_list.c \
+				   hy_can.c \
+				   hy_utils.c \
+				   hy_file.c \
+				   hy_gpio.c \
+				   hy_fifo.c \
+				   hy_hex.c \
+				   hy_time.c \
+				   hy_string.c \
+				   hy_signal.c \
+				   hy_dynamic_array.c \
+				   hy_mem.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -62,19 +83,17 @@ _cxxflags_com   +=
 
 _ldflags_com    += -version-info @current@:@revision@:@age@
 
-if COMPILE_DEBUG_INFO
-else
+if !COMPILE_DEBUG_INFO
 _ldflags_com    += -export-symbols-regex 'Hy*'
 endif
 
 _ldadd_com      += \
-                   $(top_builddir)/src/$(run_os)/libhy_utils_os.la \
-                   $(ldadd_com)
+				   $(top_builddir)/src/net/libhy_net.la \
+				   $(top_builddir)/src/thread/libhy_thread.la \
+				   $(top_builddir)/src/timer/libhy_timer.la
 
 if COMPILE_LIBCJSON
-_sources_com    += \
-                   hy_json.c        \
-                   hy_cjson_impl.c
+_ldadd_com      += $(top_builddir)/src/serialize/libhy_serialize.la
 endif
 
 lib@project_name@_la_SOURCES    = $(_sources_com)

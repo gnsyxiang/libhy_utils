@@ -45,10 +45,11 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
-AC_PROG_MKDIR_P
 
-CHECK_LIBHY_HAL
+CHECK_LIBCUNIT
+CHECK_LIBHY_LOG
 CHECK_LIBCJSON
+
 CHECK_LIBLOG4CPLUS
 CHECK_LIBPROTOBUF_C
 CHECK_LIBZ
@@ -56,6 +57,8 @@ CHECK_LIBSSL
 CHECK_LIBCURL
 
 # Checks for libraries.
+# FIXME: Replace `main' with a function in `-lpthread':
+AC_CHECK_LIB([pthread], [pthread_create])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h limits.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
@@ -64,14 +67,17 @@ AC_CHECK_HEADERS([fcntl.h limits.h stddef.h stdint.h stdlib.h string.h sys/ioctl
 AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_INT8_T
+AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_CHECK_FUNCS([clock_gettime gettimeofday memset putenv select socket strstr tzset])
+# AC_FUNC_MALLOC
+AC_FUNC_MKTIME
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([atexit clock_gettime gettimeofday localtime_r memset putenv select socket strstr tzset])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -82,8 +88,12 @@ AC_CONFIG_FILES([Makefile
                  build-script/eeasytech/SV823/Makefile
                  build-script/fullhan/MC6810E/Makefile
                  build-script/fullhan/Makefile
+                 build-script/nxp/Makefile
+                 build-script/nxp/mx6ull/Makefile
                  build-script/pc/Makefile
                  build-script/pc/pc-chip/Makefile
+                 build-script/rock-chips/Makefile
+                 build-script/rock-chips/rk3568/Makefile
                  doc/Makefile
                  example/Makefile
                  example/linux/Makefile
@@ -94,23 +104,26 @@ AC_CONFIG_FILES([Makefile
                  example/linux/timer/Makefile
                  example/mcu/Makefile
                  include/Makefile
-                 include/linux/Makefile
-                 include/linux/ipc/Makefile
-                 include/linux/ipc/ipc_process/Makefile
-                 include/linux/ipc/ipc_socket/Makefile
-                 include/linux/net/Makefile
-                 include/linux/timer/Makefile
-                 include/mcu/Makefile
+                 include/ipc/Makefile
+                 include/ipc/ipc_process/Makefile
+                 include/ipc/ipc_socket/Makefile
+                 include/net/Makefile
+                 include/serialize/Makefile
+                 include/thread/Makefile
+                 include/timer/Makefile
                  res/Makefile
+                 res/voice/Makefile
+                 res/voice/cn/Makefile
+                 res/voice/en/Makefile
                  src/Makefile
-                 src/linux/Makefile
-                 src/linux/ipc/Makefile
-                 src/linux/ipc/ipc_process/Makefile
-                 src/linux/ipc/ipc_socket/Makefile
-                 src/linux/net/Makefile
-                 src/linux/timer/Makefile
-                 src/mcu/Makefile
-                 ]) # for make dist
+                 src/ipc/Makefile
+                 src/ipc/ipc_process/Makefile
+                 src/ipc/ipc_socket/Makefile
+                 src/net/Makefile
+                 src/serialize/Makefile
+                 src/thread/Makefile
+                 src/timer/Makefile
+                 test/Makefile])
 AC_OUTPUT
 
 AC_MSG_RESULT([

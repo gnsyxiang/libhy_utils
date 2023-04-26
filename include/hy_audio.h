@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_hal/hy_type.h"
+#include "hy_type.h"
 
 typedef struct {
     hy_u32_t channel;

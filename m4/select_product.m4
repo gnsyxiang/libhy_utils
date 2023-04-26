@@ -27,20 +27,15 @@ AC_DEFUN([SELECT_PRODUCT],
         product=""
 
         AC_ARG_WITH([product],
-            [AS_HELP_STRING([
-                --with-product=@<:@HY-pc|HY-6810|HY-8608|HY-8608E|HY-8608EV2|HY-MCU-6606@:>@],
-                [select product about @<:@HY-pc|HY-6810|HY-8608|HY-8608E|HY-8608EV2|HY-MCU-6606@:>@ @<:@default=HY-pc@:>@])],
-            [],
-            [with_product=HY-pc])
+                    [AS_HELP_STRING([--with-product=@<:@HY-pc|HY-6810|HY-8608|HY-8608E|HY-8608EV2|HY-MCU-6606@:>@],
+                                    [select product about @<:@HY-pc|HY-6810|HY-8608|HY-8608E|HY-8608EV2|HY-MCU-6606@:>@ @<:@default=HY-pc@:>@])],
+                    [],
+                    [with_product=HY-pc])
 
         case "$with_product" in
             HY-pc)
                 AC_DEFINE(HAVE_SELECT_PRODUCT_PC,  1, [select HY-pc product])
                 product="HY-pc"
-            ;;
-            HY-6810)
-                AC_DEFINE(HAVE_SELECT_PRODUCT_HY_8608,  1, [select HY-8608 product])
-                product="HY-8608"
             ;;
             HY-8608)
                 AC_DEFINE(HAVE_SELECT_PRODUCT_HY_8608,  1, [select HY-8608 product])
@@ -54,6 +49,10 @@ AC_DEFUN([SELECT_PRODUCT],
                 AC_DEFINE(HAVE_SELECT_PRODUCT_HY_8608EV2,  1, [select HY-8608EV2 product])
                 product="HY-8608EV2"
             ;;
+            HY-6810)
+                AC_DEFINE(HAVE_SELECT_PRODUCT_HY_6810,  1, [select HY-6810 product])
+                product="HY-6810"
+            ;;
             HY-MCU-6606)
                 AC_DEFINE(HAVE_SELECT_PRODUCT_HY_MCU_6606,  1, [select HY-MCU-6606 product])
                 product="HY-MCU-6606"
@@ -66,10 +65,10 @@ AC_DEFUN([SELECT_PRODUCT],
         AC_SUBST(product)
 
         AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_PC],             [test "x$with_product" = "xpc"])
-        AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_6810],        [test "x$with_product" = "xHY-6810"])
         AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_8608],        [test "x$with_product" = "xHY-8608"])
         AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_8608E],       [test "x$with_product" = "xHY-8608E"])
         AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_8608EV2],     [test "x$with_product" = "xHY-8608EV2"])
-        AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_MCU_6606],     [test "x$with_product" = "xHY-MCU-6606"])
+        AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_6810],        [test "x$with_product" = "xHY-6810"])
+        AM_CONDITIONAL([COMPILE_SELECT_PRODUCT_HY_MCU_6606],    [test "x$with_product" = "xHY-MCU-6606"])
     ])
 

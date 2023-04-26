@@ -18,6 +18,9 @@
 #     last modified: 08/03 2021 08:16
 # ===============================================================
 
+SUBDIRS = \
+          voice
+
 # ------------------
 # defining variables
 # ------------------
@@ -55,4 +58,3 @@ _dist_file_com  += log4cplus.rc
 endif
 
 EXTRA_DIST      = $(_dist_file_com)
-

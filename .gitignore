@@ -26,6 +26,7 @@
 .ccls
 .ccls-cache
 .clang-format
+.cache/
 compile_commands.json
 
 
@@ -78,12 +79,14 @@ _build/
 install/
 doxygen/
 
+hy_utils.pc
+
 *.o
 *.lo
 *.la
-hy_*_demo
-example/linux/*.pb-c.c
-example/linux/*.pb-c.h
 
-hy_utils.pc
+example/hy_*_demo
+example/*.pb-c.c
+example/*.pb-c.h
+test/hy_*_test
 

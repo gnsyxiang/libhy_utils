@@ -21,12 +21,16 @@
 include res/doxygen.am
 
 SUBDIRS = \
-          doc           \
-          res           \
           include       \
           src           \
+          doc           \
           example       \
+          res           \
           build-script
+
+if COMPILE_LIBCUNIT
+SUBDIRS += test
+endif
 
 # ------------------
 # defining variables
@@ -38,31 +42,6 @@ ldadd_com           =
 
 ACLOCAL_AMFLAGS     = -I m4
 include_com         += $(ACLOCAL_AMFLAGS)
-
-if COMPILE_LIBHY_HAL
-include_com         += $(HY_HAL_INCS)
-ldadd_com           += $(HY_HAL_LIBS)
-endif
-
-if COMPILE_LIBCURL
-include_com         += $(CURL_INCS)
-ldadd_com           += $(CURL_LIBS)
-endif
-
-if COMPILE_LIBPROTOBUF_C
-include_com         += $(LIBPROTOBUF_C_INCS)
-ldadd_com           += $(LIBPROTOBUF_C_LIBS)
-endif
-
-if COMPILE_LIBLOG4CPLUS
-include_com         += $(LOG4CPLUS_INCS)
-ldadd_com           += $(LOG4CPLUS_LIBS)
-endif
-
-if COMPILE_LIBCJSON
-include_com         += $(CJSON_INCS)
-ldadd_com           += $(CJSON_LIBS)
-endif
 
 export include_com
 export ldadd_com 
@@ -76,7 +55,7 @@ export ldadd_com
 # make install files
 # ------------------
 _install_files_com  += \
-                       LICENSE      \
+                       LICENSE \
                        README.md
 dist_doc_DATA       = $(_install_files_com)
 pkgconfig_DATA      = @project_name@.pc
@@ -85,10 +64,9 @@ pkgconfig_DATA      = @project_name@.pc
 # make dist files
 # ---------------
 _dist_files_com     += \
-                       autogen.sh   \
-                       build.sh     \
+                       autogen.sh               \
+                       build.sh                 \
                        @project_name@.pc.in
 EXTRA_DIST          = $(_dist_files_com)
 
 DISTCLEANFILES = @project_name@.pc
-

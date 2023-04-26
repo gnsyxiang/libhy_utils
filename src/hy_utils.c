@@ -22,9 +22,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/time.h>
 
-#include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_log.h"
+#include <hy_log/hy_log.h>
+
+#include "hy_assert.h"
 
 #include "hy_utils.h"
 
@@ -109,5 +111,15 @@ void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len,
             len += snprintf(bit_str + len, str_len - len, "0");
         }
     }
+}
+
+hy_u32_t HyUtilsLinuxRandomNum(hy_u32_t range)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    srand(tv.tv_usec);
+
+    return (1 + (hy_u32_t)(1.0 * range * rand() / (RAND_MAX + 1.0)));
 }
 
