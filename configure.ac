@@ -54,13 +54,15 @@ CHECK_LIBCJSON
 AC_CHECK_LIB([pthread], [pthread_create])
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h limits.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h limits.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_INT8_T
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
+AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_UINT8_T
 
@@ -68,7 +70,7 @@ AC_TYPE_UINT8_T
 # AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit clock_gettime gettimeofday localtime_r memset select socket strstr])
+AC_CHECK_FUNCS([atexit clock_gettime gettimeofday localtime_r memset putenv select socket strstr tzset])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -88,19 +90,29 @@ AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  example/Makefile
                  include/Makefile
+                 include/download/Makefile
+                 include/ipc/Makefile
+                 include/ipc/ipc_process/Makefile
+                 include/ipc/ipc_socket/Makefile
                  include/net/Makefile
                  include/serialize/Makefile
                  include/thread/Makefile
                  include/timer/Makefile
+                 include/wrapper_log/Makefile
                  res/Makefile
                  res/voice/Makefile
                  res/voice/cn/Makefile
                  res/voice/en/Makefile
                  src/Makefile
+                 src/download/Makefile
+                 src/ipc/Makefile
+                 src/ipc/ipc_process/Makefile
+                 src/ipc/ipc_socket/Makefile
                  src/net/Makefile
                  src/serialize/Makefile
                  src/thread/Makefile
                  src/timer/Makefile
+                 src/wrapper_log/Makefile
                  test/Makefile])
 AC_OUTPUT
 

@@ -21,6 +21,7 @@
 lib_LTLIBRARIES = lib@project_name@.la
 
 SUBDIRS = \
+		  ipc \
 		  net \
 		  thread \
 		  timer
@@ -52,6 +53,8 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
+				   hy_pipe.c \
+				   hy_hash.c \
 				   hy_sort.c \
 				   hy_md5sum.c \
 				   hy_bit.c \

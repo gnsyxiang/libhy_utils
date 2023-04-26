@@ -19,6 +19,7 @@
 # ===============================================================
 
 SUBDIRS = \
+		  ipc \
 		  net \
 		  thread \
 		  timer
@@ -41,6 +42,8 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+						   hy_pipe.h \
+						   hy_hash.h \
 						   hy_math.h \
 						   hy_video.h \
 						   hy_audio.h \

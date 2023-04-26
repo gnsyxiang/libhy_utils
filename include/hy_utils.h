@@ -120,6 +120,39 @@ hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len);
 void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len,
         char *bit_str, size_t str_len);
 
+/**
+ * @brief 生成随机数
+ *
+ * @param range 限定随机数的范围
+ *
+ * @return 生成1到range之间的任意一个数
+ */
+hy_u32_t HyUtilsLinuxRandomNum(hy_u32_t range);
+
+/**
+ * @brief 执行命令
+ *
+ * @param _cmd 命令
+ *
+ * @return 无
+ */
+#define HyUtilsSystemCmd_m(_cmd, _ret)                      \
+    ({                                                      \
+        hy_s32_t ret = 0xffffffff;                          \
+        do {                                                \
+            if (HY_STRLEN(_cmd) <= 0) {                     \
+                break;                                      \
+            }                                               \
+            ret = system(_cmd);                             \
+            if (_ret == ret) {                              \
+                LOGI("system cmd: %s \n", _cmd);            \
+                break;                                      \
+            }                                               \
+            LOGE("system cmd failed, cmd: %s \n", _cmd);    \
+        } while (0);                                        \
+        (ret == _ret) ? 0 : -1;                             \
+     })
+
 #ifdef __cplusplus
 }
 #endif

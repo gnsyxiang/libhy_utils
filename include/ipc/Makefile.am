@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    23/03 2023 14:16
+# @date    24/02 2022 14:28
 # @version v0.0.1
 # 
 # @since    note
@@ -13,10 +13,14 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        23/03 2023      create the file
+#     00      zhenquan.qiu        24/02 2022      create the file
 # 
-#     last modified: 23/03 2023 14:16
+#     last modified: 24/02 2022 14:28
 # ===============================================================
+
+SUBDIRS = \
+          ipc_socket    \
+          ipc_process
 
 # ------------------
 # defining variables
@@ -31,10 +35,7 @@ install_includedir      = $(includedir)/@project_name@
 # ---------------------
 _no_install_headers_com +=
 
-_install_headers_com    += \
-						   hy_zone.h \
-						   hy_timer.h \
-						   hy_timer_multi_wheel.h
+_install_headers_com    +=
 
 # ------------------
 # make install files
