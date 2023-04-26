@@ -43,6 +43,27 @@ struct HyThread_s {
     hy_u32_t                is_exit;
 };
 
+hy_s32_t HyThreadAttachCPU(hy_s32_t cpu_index)
+{
+    return 0;
+    int cpu_num = sysconf(_SC_NPROCESSORS_CONF);
+    if (cpu_index < 0 || cpu_index >= cpu_num) {
+        LOGE("cpu index ERROR! \n");
+        return -1;
+    }
+
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(cpu_index, &mask);
+
+    if (pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask) < 0) {
+        LOGE("set affinity np ERROR! \n");
+        return -1;
+    }
+
+    return 0;
+}
+
 hy_s32_t HyThreadKeySet(HyThread_s *handle,
         void *key, HyThreadKeyDestroyCb_t destroy_cb)
 {

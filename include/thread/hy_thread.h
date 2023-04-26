@@ -159,6 +159,14 @@ const char *HyThreadGetName(HyThread_s *handle);
  */
 pthread_t HyThreadGetId(HyThread_s *handle);
 
+/**
+ * @brief 设置cpu到指定核
+ *
+ * @param cpu_index cpu序号，从0开始
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyThreadAttachCPU(hy_s32_t cpu_index);
+
 #ifdef __cplusplus
 }
 #endif
