@@ -26,6 +26,8 @@ extern "C" {
 
 #include <assert.h>
 
+#include <hy_log/hy_log.h>
+
 // 防御性编程
 
 #define HY_ASSERT(zero) assert(zero);

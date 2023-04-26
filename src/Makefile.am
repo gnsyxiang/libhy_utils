@@ -54,9 +54,12 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    += -I$(top_srcdir)/include
+_include_com    += \
+				   -I$(top_srcdir)/include/thread \
+				   -I$(top_srcdir)/include
 
 _sources_com    += \
+				   hy_gpio_interrupt.c \
 				   hy_pipe.c \
 				   hy_hash.c \
 				   hy_sort.c \

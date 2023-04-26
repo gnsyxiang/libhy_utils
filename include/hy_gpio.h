@@ -26,6 +26,8 @@ extern "C" {
 
 #include "hy_type.h"
 
+#define HY_GPIO_CLASS_PATH "/sys/class/gpio"
+
 typedef enum {
     HY_GPIO_EXPORT,
     HY_GPIO_UNEXPORT,

@@ -165,21 +165,19 @@ hy_s32_t HyGpioGetVal(HyGpio_s *gpio, HyGpioVal_e *val)
     return 0;
 }
 
-#define SYS_CLASS_GPIO_PATH "/sys/class/gpio"
-
 static hy_s32_t _gpio_export(hy_u32_t gpio, const char *export) // export unexport
 {
     char buf[64] = {0};
     hy_s32_t ret;
     FILE *fp;
 
-    snprintf(buf, sizeof(buf), "%s/gpio%d", SYS_CLASS_GPIO_PATH, gpio);
+    snprintf(buf, sizeof(buf), "%s/gpio%d", HY_GPIO_CLASS_PATH, gpio);
 
     if (0 == access(buf, F_OK)) {
         return 0;
     } else {
         HY_MEMSET(buf, sizeof(buf));
-        snprintf(buf, sizeof(buf), "%s/%s", SYS_CLASS_GPIO_PATH, export);
+        snprintf(buf, sizeof(buf), "%s/%s", HY_GPIO_CLASS_PATH, export);
 
         fp = fopen(buf, "w");
         if (!fp) {
@@ -205,7 +203,7 @@ static hy_s32_t _gpio_config(hy_u32_t gpio, const char *attr, const char *val)
     FILE *fp;
     hy_s32_t ret;
 
-    snprintf(buf, sizeof(buf), "%s/gpio%d/%s", SYS_CLASS_GPIO_PATH, gpio, attr);
+    snprintf(buf, sizeof(buf), "%s/gpio%d/%s", HY_GPIO_CLASS_PATH, gpio, attr);
 
     fp = fopen(buf, "w");
     if (!fp) {

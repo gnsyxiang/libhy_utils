@@ -46,6 +46,7 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
+						   hy_gpio_interrupt.h \
 						   hy_pipe.h \
 						   hy_hash.h \
 						   hy_math.h \
