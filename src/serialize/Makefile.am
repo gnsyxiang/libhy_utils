@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    21/01 2022 19:32
+# @date    26/04 2023 08:52
 # @version v0.0.1
 # 
 # @since    note
@@ -13,12 +13,12 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        21/01 2022      create the file
+#     00      zhenquan.qiu        26/04 2023      create the file
 # 
-#     last modified: 21/01 2022 19:32
+#     last modified: 26/04 2023 08:52
 # ===============================================================
 
-noinst_LTLIBRARIES = libhy_thread.la
+noinst_LTLIBRARIES = libhy_serialize.la
 
 # ------------------
 # defining variables
@@ -41,15 +41,12 @@ _no_error_com   +=
 _define_com     += -D_GNU_SOURCE
 
 _include_com    += \
-				   -I$(top_srcdir)/include/thread \
+				   -I$(top_srcdir)/include/serialize \
 				   -I$(top_srcdir)/include
 
 _sources_com    += \
-				   hy_thread_pool.c  	\
-				   hy_thread.c          \
-				   hy_thread_cond.c     \
-				   hy_thread_mutex.c    \
-				   hy_thread_sem.c
+				   cjson_impl.c \
+				   hy_json.c
 
 _cppflags_com   += \
 				   $(_no_error_com)     \
@@ -64,10 +61,10 @@ _ldflags_com    +=
 
 _ldadd_com      += $(lib_com)
 
-libhy_thread_la_SOURCES     = $(_sources_com)
-libhy_thread_la_CPPFLAGS    = $(_cppflags_com)
-libhy_thread_la_CFLAGS      = $(_cflags_com)
-libhy_thread_la_CXXFLAGS    = $(_cxxflags_com)
-libhy_thread_la_LDFLAGS     = $(_ldflags_com)
-libhy_thread_la_LIBADD      = $(_ldadd_com)
+libhy_serialize_la_SOURCES     = $(_sources_com)
+libhy_serialize_la_CPPFLAGS    = $(_cppflags_com)
+libhy_serialize_la_CFLAGS      = $(_cflags_com)
+libhy_serialize_la_CXXFLAGS    = $(_cxxflags_com)
+libhy_serialize_la_LDFLAGS     = $(_ldflags_com)
+libhy_serialize_la_LIBADD      = $(_ldadd_com)
 

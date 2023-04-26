@@ -9,7 +9,7 @@ language=cn en
 host=arm-linux-gnu
 cross_gcc_path=/opt/toolchains/nxp/mx6ull/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
 
-configure_param=--enable-cjson
+configure_param=
 
 cppflag=-fstack-protector-all
 cflag=-Wno-error=unused-value

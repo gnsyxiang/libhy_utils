@@ -25,6 +25,10 @@ SUBDIRS = \
 		  thread \
 		  timer
 
+if COMPILE_LIBCJSON
+SUBDIRS += serialize
+endif
+
 # ------------------
 # defining variables
 # ------------------
@@ -48,8 +52,6 @@ _define_com     +=
 _include_com    += -I$(top_srcdir)/include
 
 _sources_com    += \
-				   cjson_impl.c \
-				   hy_json.c \
 				   hy_sort.c \
 				   hy_md5sum.c \
 				   hy_bit.c \
@@ -83,6 +85,10 @@ _ldadd_com      += \
 				   $(top_builddir)/src/net/libhy_net.la \
 				   $(top_builddir)/src/thread/libhy_thread.la \
 				   $(top_builddir)/src/timer/libhy_timer.la
+
+if COMPILE_LIBCJSON
+_ldadd_com      += $(top_builddir)/src/serialize/libhy_serialize.la
+endif
 
 lib@project_name@_la_SOURCES    = $(_sources_com)
 lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)

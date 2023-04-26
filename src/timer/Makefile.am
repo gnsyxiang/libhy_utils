@@ -41,7 +41,6 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/log \
                    -I$(top_srcdir)/include/thread \
                    -I$(top_srcdir)/include/timer  \
                    -I$(top_srcdir)/include
