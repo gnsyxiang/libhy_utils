@@ -27,59 +27,56 @@
 
 #include "hy_thread_sem.h"
 
-typedef struct {
+struct HyThreadSem_s {
     sem_t sem;
-} _sem_context_t;
+};
 
-hy_s32_t HyThreadSemPost(void *handle)
+hy_s32_t HyThreadSemPost(HyThreadSem_s *handle)
 {
     HY_ASSERT(handle);
 
-    return sem_post(&((_sem_context_t *)handle)->sem);
+    return sem_post(&handle->sem);
 }
 
-hy_s32_t HyThreadSemWait(void *handle)
+hy_s32_t HyThreadSemWait(HyThreadSem_s *handle)
 {
     HY_ASSERT(handle);
 
-    return sem_wait(&((_sem_context_t *)handle)->sem);
+    return sem_wait(&handle->sem);
 }
 
-void HyThreadSemDestroy(void **handle)
+void HyThreadSemDestroy(HyThreadSem_s **handle_pp)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
-    HY_ASSERT_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
 
-    _sem_context_t *context = *handle;
+    HyThreadSem_s *handle = *handle_pp;
 
-    if (0 != sem_destroy(&context->sem)) {
+    if (0 != sem_destroy(&handle->sem)) {
         LOGES("sem_destroy failed \n");
     }
 
-    LOGI("thread sem destroy, context: %p \n", context);
-    HY_MEM_FREE_PP(handle);
+    LOGI("thread sem destroy, context: %p \n", handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
-void *HyThreadSemCreate(HyThreadSemConfig_s *sem_c)
+HyThreadSem_s *HyThreadSemCreate(HyThreadSemConfig_s *sem_c)
 {
-    LOGT("sem_c: %p \n", sem_c);
     HY_ASSERT_RET_VAL(!sem_c, NULL);
+    HyThreadSem_s *handle = NULL;
 
-    _sem_context_t *context = NULL;
     do {
-        context = HY_MEM_MALLOC_BREAK(_sem_context_t *, sizeof(*context));
+        handle = HY_MEM_MALLOC_BREAK(HyThreadSem_s *, sizeof(*handle));
 
-        if (0 != sem_init(&context->sem, 0, sem_c->value)) {
+        if (0 != sem_init(&handle->sem, 0, sem_c->value)) {
             LOGES("sem_init failed \n");
             break;
         }
 
-        LOGI("thread sem create, context: %p \n", context);
-        return context;
+        LOGI("thread sem create, context: %p \n", handle);
+        return handle;
     } while (0);
 
     LOGE("thread sem create failed \n");
-    HyThreadSemDestroy((void **)&context);
+    HyThreadSemDestroy(&handle);
     return NULL;
 }
-
