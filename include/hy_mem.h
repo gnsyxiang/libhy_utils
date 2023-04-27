@@ -28,6 +28,8 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_type.h"
 
 #define HY_MEM_BYTE(x)                          (*((unsigned char *)(x)))                                   ///< 得到指定地址上的一个字节

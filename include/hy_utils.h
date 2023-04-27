@@ -27,6 +27,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_type.h"
 
 #define HY_UTILS_IP_INT_LEN_MAX         (4)

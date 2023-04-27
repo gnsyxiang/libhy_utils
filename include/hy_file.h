@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include <hy_log/hy_log.h>
+
 #include "hy_type.h"
 
 /**
