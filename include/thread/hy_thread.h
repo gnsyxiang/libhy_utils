@@ -114,9 +114,9 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c);
 /**
  * @brief 销毁线程
  *
- * @param handle 线程句柄的地址(二级指针)
+ * @param handle_pp 线程句柄的地址(二级指针)
  */
-void HyThreadDestroy(HyThread_s **handle);
+void HyThreadDestroy(HyThread_s **handle_pp);
 
 /**
  * @brief 设置线程私有数据

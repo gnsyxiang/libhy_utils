@@ -55,6 +55,7 @@ CHECK_LIBPROTOBUF_C
 CHECK_LIBZ
 CHECK_LIBSSL
 CHECK_LIBCURL
+CHECK_PTHREAD
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lpthread':

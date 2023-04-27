@@ -18,10 +18,10 @@
  *     last modified: 30/10 2021 08:29
  */
 #include <stdio.h>
+#include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
 #include <string.h>
-
 #include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include <sys/prctl.h>
 
@@ -45,7 +45,6 @@ struct HyThread_s {
 
 hy_s32_t HyThreadAttachCPU(hy_s32_t cpu_index)
 {
-    return 0;
     int cpu_num = sysconf(_SC_NPROCESSORS_CONF);
     if (cpu_index < 0 || cpu_index >= cpu_num) {
         LOGE("cpu index ERROR! \n");
@@ -69,17 +68,16 @@ hy_s32_t HyThreadKeySet(HyThread_s *handle,
 {
     HY_ASSERT(handle);
     HY_ASSERT(key);
-    HyThread_s *context = handle;
 
-    if (!context->is_init_key) {
-        if (0 != pthread_key_create(&context->key, destroy_cb)) {
+    if (!handle->is_init_key) {
+        if (0 != pthread_key_create(&handle->key, destroy_cb)) {
             LOGES("pthread_key_create failed \n");
             return -1;
         }
-        context->is_init_key = 1;
+        handle->is_init_key = 1;
     }
 
-    if (0 != pthread_setspecific(context->key, key)) {
+    if (0 != pthread_setspecific(handle->key, key)) {
         LOGES("pthread_setspecific failed \n");
         return -1;
     }
@@ -90,37 +88,34 @@ hy_s32_t HyThreadKeySet(HyThread_s *handle,
 void *HyThreadKeyGet(HyThread_s *handle)
 {
     HY_ASSERT(handle);
-    HyThread_s *context = handle;
 
-    return pthread_getspecific(context->key);
+    return pthread_getspecific(handle->key);
 }
 
 const char *HyThreadGetName(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, NULL);
-    HyThread_s *context = handle;
 
-    return context->save_c.name;
+    return handle->save_c.name;
 }
 
 pthread_t HyThreadGetId(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, -1);
-    HyThread_s *context = handle;
 
-    return context->id;
+    return handle->id;
 }
 
 static void *_thread_cb(void *args)
 {
-    HyThread_s *context = args;
-    HyThreadSaveConfig_s *save_c = &context->save_c;
+    HyThread_s *handle = args;
+    HyThreadSaveConfig_s *save_c = &handle->save_c;
     hy_s32_t ret = 0;
 
-    LOGI("<%s> thread loop start, id: 0x%lx \n", save_c->name, context->id);
+    LOGI("<%s> thread loop start, tid: 0x%lx \n", save_c->name, handle->id);
 
 #ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(context->id, save_c->name);
+    pthread_setname_np(handle->id, save_c->name);
 #endif
 
     while (0 == ret) {
@@ -129,53 +124,51 @@ static void *_thread_cb(void *args)
         // pthread_testcancel();
     }
 
-    context->is_exit = 1;
+    handle->is_exit = 1;
     LOGI("%s thread loop stop \n", save_c->name);
 
     if (HY_THREAD_DETACH_MODE_YES == save_c->detach_mode) {
-        HyThreadDestroy(&context);
+        HyThreadDestroy(&handle);
     }
 
     return NULL;
 }
 
-void HyThreadDestroy(HyThread_s **handle)
+void HyThreadDestroy(HyThread_s **handle_pp)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
-    HY_ASSERT_RET(!handle || !*handle);
-    HyThread_s *context = *handle;
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+    HyThread_s *handle = *handle_pp;
     hy_u32_t cnt = 0;
 
-    if (context->save_c.destroy_mode == HY_THREAD_DESTROY_MODE_FORCE) {
-        if (!context->is_exit) {
+    if (handle->save_c.destroy_mode == HY_THREAD_DESTROY_MODE_FORCE) {
+        if (!handle->is_exit) {
             while (++cnt <= 9) {
                 usleep(200 * 1000);
             }
 
             LOGW("force cancellation \n");
-            pthread_cancel(context->id);
+            pthread_cancel(handle->id);
         }
     }
 
-    pthread_join(context->id, NULL);
+    pthread_join(handle->id, NULL);
 
-    LOGI("%s thread destroy, handle: %p \n", context->save_c.name, context);
-    HY_MEM_FREE_PP(handle);
+    LOGI("%s thread destroy, handle: %p \n", handle->save_c.name, handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
 HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
 {
-    LOGT("thread_c: %p \n", thread_c);
     HY_ASSERT_RET_VAL(!thread_c, NULL);
-    HyThread_s *context = NULL;
+    HyThread_s *handle = NULL;
     pthread_attr_t attr;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(HyThread_s *, sizeof(*context));
+        handle = HY_MEM_MALLOC_BREAK(HyThread_s *, sizeof(*handle));
 
-        HY_MEMCPY(&context->save_c, &thread_c->save_c, sizeof(context->save_c));
+        HY_MEMCPY(&handle->save_c, &thread_c->save_c, sizeof(handle->save_c));
 
-        if (HY_THREAD_DETACH_MODE_YES == context->save_c.detach_mode) {
+        if (HY_THREAD_DETACH_MODE_YES == handle->save_c.detach_mode) {
             if (0 != pthread_attr_init(&attr)) {
                 LOGES("pthread init fail \n");
                 break;
@@ -186,7 +179,7 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
                 break;
             }
 
-            if (0 != pthread_create(&context->id, &attr, _thread_cb, context)) {
+            if (0 != pthread_create(&handle->id, &attr, _thread_cb, handle)) {
                 LOGES("pthread create fail \n");
                 break;
             }
@@ -196,19 +189,19 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
                 break;
             }
         } else {
-            if (0 != pthread_create(&context->id, NULL, _thread_cb, context)) {
+            if (0 != pthread_create(&handle->id, NULL, _thread_cb, handle)) {
                 LOGES("pthread create fail \n");
                 break;
             }
         }
 
         LOGI("%s thread create, context: %p, id: 0x%lx \n",
-                context->save_c.name, context, context->id);
-        return context;
+             handle->save_c.name, handle, handle->id);
+        return handle;
     } while (0);
 
     LOGE("%s thread create failed \n", thread_c->save_c.name);
-    HyThreadDestroy(&context);
+    HyThreadDestroy(&handle);
     return NULL;
 }
 
