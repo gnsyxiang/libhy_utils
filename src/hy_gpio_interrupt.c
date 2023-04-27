@@ -163,7 +163,7 @@ HyGpioInterrupt_s *HyGpioInterruptCreate(HyGpioInterruptConfig_s *gpio_interrupt
         return handle;
     } while(0);
 
-    LOGI("HyGpioInterrupt create failed \n");
+    LOGE("HyGpioInterrupt create failed \n");
     HyGpioInterruptDestroy(&handle);
     return NULL;
 }

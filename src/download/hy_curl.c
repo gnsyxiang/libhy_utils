@@ -19,7 +19,6 @@
  */
 #include <stdio.h>
 
-#include <hy_log/hy_log.h>
 #include <curl/curl.h>
 
 #include "hy_assert.h"
@@ -81,7 +80,6 @@ hy_s32_t HyCurlGetDataBlock(void *handle, HyCurlGetData_s *curl_get_data)
 
 void HyCurlDestroy(void **handle)
 {
-    LOGT("&handle: %p, handle: %p \n", handle, *handle);
     HY_ASSERT_RET(!handle || !*handle);
 
     _curl_context_s *context = *handle;
@@ -93,7 +91,6 @@ void HyCurlDestroy(void **handle)
 
 void *HyCurlCreate(HyCurlConfig_s *curl_c)
 {
-    LOGT("curl_c: %p \n", curl_c);
     HY_ASSERT_RET_VAL(!curl_c, NULL);
 
     _curl_context_s *context = NULL;
@@ -107,7 +104,7 @@ void *HyCurlCreate(HyCurlConfig_s *curl_c)
             break;
         }
 
-        LOGI("curl create successful, context: %p \n", context);
+        LOGI("curl create successful, context: 0x%p \n", context);
         return context;
     } while (0);
 
@@ -115,4 +112,3 @@ void *HyCurlCreate(HyCurlConfig_s *curl_c)
     HyCurlDestroy((void **)&context);
     return NULL;
 }
-
