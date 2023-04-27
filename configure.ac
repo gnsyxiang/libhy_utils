@@ -55,6 +55,7 @@ CHECK_LIBPROTOBUF_C
 CHECK_LIBZ
 CHECK_LIBSSL
 CHECK_LIBCURL
+CHECK_LIBEVENT
 CHECK_PTHREAD
 
 # Checks for libraries.
@@ -78,7 +79,7 @@ AC_TYPE_UINT8_T
 # AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit clock_gettime gettimeofday localtime_r memset putenv select socket strstr tzset])
+AC_CHECK_FUNCS([atexit clock_gettime gettimeofday localtime_r memset putenv select socket strerror strstr tzset])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -107,6 +108,7 @@ AC_CONFIG_FILES([Makefile
                  include/ipc/Makefile
                  include/ipc/ipc_process/Makefile
                  include/ipc/ipc_socket/Makefile
+                 include/libevent/Makefile
                  include/net/Makefile
                  include/serialize/Makefile
                  include/thread/Makefile
@@ -120,6 +122,7 @@ AC_CONFIG_FILES([Makefile
                  src/ipc/Makefile
                  src/ipc/ipc_process/Makefile
                  src/ipc/ipc_socket/Makefile
+                 src/libevent/Makefile
                  src/net/Makefile
                  src/serialize/Makefile
                  src/thread/Makefile

@@ -32,6 +32,10 @@ if COMPILE_LIBCURL
 SUBDIRS += download
 endif
 
+if COMPILE_LIBEVENT
+SUBDIRS += libevent
+endif
+
 # ------------------
 # defining variables
 # ------------------
