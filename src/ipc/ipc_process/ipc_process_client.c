@@ -19,6 +19,7 @@
  */
 #include <stdio.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include <hy_log/hy_log.h>
 

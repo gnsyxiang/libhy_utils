@@ -19,8 +19,8 @@
 # ===============================================================
 
 SUBDIRS = \
-          ipc_socket    \
-          ipc_process
+          ipc_process \
+          ipc_socket
 
 noinst_LTLIBRARIES = libhy_ipc.la
 

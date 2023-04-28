@@ -21,14 +21,10 @@
 lib_LTLIBRARIES = lib@project_name@.la
 
 SUBDIRS = \
-		  ipc \
-		  net \
-		  thread \
-		  timer
-
-if COMPILE_LIBCJSON
-SUBDIRS += serialize
-endif
+          ipc \
+          net \
+          thread \
+          timer
 
 if COMPILE_LIBCURL
 SUBDIRS += download
@@ -36,6 +32,10 @@ endif
 
 if COMPILE_LIBEVENT
 SUBDIRS += libevent
+endif
+
+if COMPILE_LIBCJSON
+SUBDIRS += serialize
 endif
 
 # ------------------

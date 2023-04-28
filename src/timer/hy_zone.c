@@ -18,6 +18,7 @@
  *     last modified: 13/04 2022 11:03
  */
 #include <stdio.h>
+#include <time.h>
 
 #include <hy_log/hy_log.h>
 

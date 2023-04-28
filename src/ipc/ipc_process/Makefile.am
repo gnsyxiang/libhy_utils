@@ -48,8 +48,9 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_ipc_process.c     \
-                   \
+                   hy_ipc_process.c
+
+_sources_com    += \
                    ipc_link.c           \
                    ipc_link_manager.c   \
                    ipc_process_client.c \

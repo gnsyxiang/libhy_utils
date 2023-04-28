@@ -18,10 +18,11 @@
  *     last modified: 17/01 2022 16:38
  */
 #include <stdio.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <sys/un.h>
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
-#include <sys/un.h>
-#include <stddef.h>
 
 #include <hy_log/hy_log.h>
 
