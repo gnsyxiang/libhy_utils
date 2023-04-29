@@ -39,7 +39,7 @@ bin_PROGRAMS    =
 # ---------------------
 _no_error_com   +=
 
-_define_com     +=
+_define_com     += -Wno-error=strict-aliasing
 
 _include_com    += \
                    -I$(top_srcdir)/include/ipc/ipc_socket     \

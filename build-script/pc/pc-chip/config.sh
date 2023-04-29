@@ -11,10 +11,10 @@ cross_gcc_path=
 
 configure_param=
 
-cppflag=-fstack-protector-all
+cppflag=-Wno-error=stringop-truncation
 cflag=
 cxxflag=
-ldflag=-rdynamic
+ldflag=
 lib=
 
 install_path=/mnt/nfs/pc/pc-chip

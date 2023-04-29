@@ -155,16 +155,15 @@ select_build_version()
 
 get_com_config()
 {
-    cppflag="${cppflag} -W -Wall -Werror"
-    cppflag="${cppflag} -Wno-address"
-    cppflag="${cppflag} -Wno-unused-parameter"
-    cppflag="${cppflag} -Wno-error=unused-but-set-variable"
-    cppflag="${cppflag} -Wno-error=unused-variable"
-    cppflag="${cppflag} -Wno-error=unused-function"
     cppflag="${cppflag} -pipe"
+    cppflag="${cppflag} -fstack-protector-all"
     cppflag="${cppflag} -ffunction-sections"
     cppflag="${cppflag} -fdata-sections"
+    cppflag="${cppflag} -W -Wall -Werror"
+    cppflag="${cppflag} -Wno-error=unused-parameter -Wno-unused-parameter"
+    cppflag="${cppflag} -Wno-error=unused-result -Wno-unused-result"
 
+    ldflag="${ldflag} -rdynamic"
     ldflag="${ldflag} -Wl,--gc-sections"
     ldflag="${ldflag} -Wl,--as-needed"
     ldflag="${ldflag} -Wl,-rpath=../lib"

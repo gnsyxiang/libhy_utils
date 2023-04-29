@@ -11,10 +11,10 @@ cross_gcc_path=/mnt/data/toolchain/eeasytech/SV823/gcc-linaro-7.5.0-2019.12-x86_
 
 configure_param=
 
-cppflag=-fstack-protector-all
+cppflag=
 cflag=
 cxxflag=
-ldflag=-rdynamic
+ldflag=
 lib=
 
 install_path=/mnt/nfs/eeasytech/SV823

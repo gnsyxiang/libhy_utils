@@ -46,6 +46,11 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
 
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lpthread':
+AC_CHECK_LIB([pthread], [pthread_create])
+AC_CHECK_LIB([zlog], [zlog_init])
+
 CHECK_LIBCUNIT
 CHECK_LIBHY_LOG
 CHECK_LIBCJSON
@@ -57,11 +62,6 @@ CHECK_LIBSSL
 CHECK_LIBCURL
 CHECK_LIBEVENT
 CHECK_PTHREAD
-
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lpthread':
-AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([zlog], [zlog_init])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h limits.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])

@@ -127,7 +127,7 @@ do {                                        \
 
 #define HY_MEM_FREE_PP(pptr)                \
 do {                                        \
-    if (pptr && *pptr) {                    \
+    if (*pptr) {                            \
         free(*pptr);                        \
         *pptr = NULL;                       \
     }                                       \

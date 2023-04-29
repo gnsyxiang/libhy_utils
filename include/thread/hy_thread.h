@@ -100,15 +100,15 @@ typedef struct HyThread_s HyThread_s;
  */
 HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c);
 
-#define HyThreadCreate_m(_name, _thread_loop_cb, _args)             \
-({                                                                  \
-    HyThreadConfig_s thread_c;                                      \
-    HY_MEMSET(&thread_c, sizeof(thread_c));                         \
-    thread_c.save_c.thread_loop_cb      = _thread_loop_cb;          \
-    thread_c.save_c.args                = _args;                    \
-    HY_STRNCPY(thread_c.save_c.name, sizeof(thread_c.save_c.name),  \
-               _name, HY_STRLEN(_name));                            \
-    HyThreadCreate(&thread_c);                                      \
+#define HyThreadCreate_m(_name, _thread_loop_cb, _args)                 \
+({                                                                      \
+    HyThreadConfig_s thread_c;                                          \
+    HY_MEMSET(&thread_c, sizeof(thread_c));                             \
+    thread_c.save_c.thread_loop_cb      = _thread_loop_cb;              \
+    thread_c.save_c.args                = _args;                        \
+    HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,            \
+               _name, HY_STRLEN(_name));                                \
+    HyThreadCreate(&thread_c);                                          \
 })
 
 /**

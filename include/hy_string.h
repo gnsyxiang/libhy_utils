@@ -38,19 +38,19 @@ extern "C" {
 #define HY_STRING_BUF_MAX_LEN_256           (256)
 #define HY_STRING_BUF_MAX_LEN_512           (512)
 
-#define HY_STRLEN(str)                      ((hy_s32_t)strlen(str))
+#define HY_STRLEN(str)                      (strlen(str))
 #define HY_STRCMP(src, dst)                 strcmp(src, dst)
 #define HY_STRNCMP(src, dst, len)           strncmp(src, dst, len)
 #define HY_STRCPY(dst, src)                 strcpy(dst, src)
 
 #define HY_STRNCPY(dst, dst_len, src, src_len)  \
-do {                                        \
-    hy_u32_t len = src_len;                 \
-    if (len >= dst_len) {                   \
-        len = dst_len - 1;                  \
-    }                                       \
-    memset(dst, '\0', dst_len);             \
-    strncpy(dst, src, len);                 \
+do {                                            \
+    size_t len = src_len;                       \
+    if (len >= dst_len) {                       \
+        len = dst_len - 1;                      \
+    }                                           \
+    HY_MEMSET(dst, dst_len);                    \
+    strncpy(dst, src, dst_len - 1);             \
 } while(0)
 
 /**
