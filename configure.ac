@@ -49,7 +49,6 @@ AC_PROG_MAKE_SET
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lpthread':
 AC_CHECK_LIB([pthread], [pthread_create])
-AC_CHECK_LIB([zlog], [zlog_init])
 
 CHECK_LIBCUNIT
 CHECK_LIBHY_LOG

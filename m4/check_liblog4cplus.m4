@@ -81,6 +81,7 @@ AC_DEFUN([CHECK_LIBLOG4CPLUS],
 
                 case "$have_log4cplus" in
                     yes)
+                        AC_CHECK_LIB([log4cplus], [_ZN9log4cplus6Logger7getRootEv])
                         AC_DEFINE(HAVE_LOG4CPLUS, 1, [Define if the system has log4cplus])
                     ;;
                     *)

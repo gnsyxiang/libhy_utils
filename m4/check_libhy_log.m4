@@ -75,6 +75,7 @@ AC_DEFUN([CHECK_LIBHY_LOG],
 
                 case "$have_hy_log" in
                     yes)
+                        AC_CHECK_LIB([hy_log], [HyLogInit])
                         AC_DEFINE(HAVE_HY_LOG, 1, [Define if the system has hy_log])
                     ;;
                     *)

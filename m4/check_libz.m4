@@ -78,6 +78,7 @@ AC_DEFUN([CHECK_LIBZ],
 
                 case "$have_libz" in
                     yes)
+                        AC_CHECK_LIB([libz], [zlibVersion])
                         AC_DEFINE(HAVE_LIBZ, 1, [Define if the system has libz])
                     ;;
                     *)

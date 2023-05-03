@@ -77,6 +77,7 @@ AC_DEFUN([CHECK_LIBCJSON],
 
                 case "$have_cjson" in
                     yes)
+                        AC_CHECK_LIB([cjson], [cJSON_Version])
                         AC_DEFINE(HAVE_CJSON, 1, [Define if the system has cjson])
                     ;;
                     *)

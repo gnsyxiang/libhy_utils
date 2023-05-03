@@ -79,6 +79,7 @@ AC_DEFUN([CHECK_LIBCURL],
 
                 case "$have_curl" in
                     yes)
+                        AC_CHECK_LIB([curl], [curl_version])
                         AC_DEFINE(HAVE_CURL, 1, [Define if the system has curl])
                     ;;
                     *)

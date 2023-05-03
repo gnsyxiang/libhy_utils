@@ -59,18 +59,6 @@ _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la -lpthread
 
-if COMPILE_LIBHY_LOG
-_ldadd_com      += $(HY_LOG_LIBS)
-endif
-
-if COMPILE_LIBCJSON
-_ldadd_com      += $(CJSON_LIBS)
-endif
-
-if COMPILE_LIBEVENT
-_ldadd_com      += $(EVENT_LIBS)
-endif
-
 bin_PROGRAMS    				+= hy_can_demo
 hy_can_demo_SOURCES    			= $(_sources_com) hy_can_demo.c
 hy_can_demo_CPPFLAGS   			= $(_cppflags_com)

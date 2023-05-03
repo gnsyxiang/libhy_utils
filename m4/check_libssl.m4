@@ -78,6 +78,7 @@ AC_DEFUN([CHECK_LIBSSL],
 
                 case "$have_ssl" in
                     yes)
+                        AC_CHECK_LIB([ssl], [SSL_in_init])
                         AC_DEFINE(HAVE_SSL, 1, [Define if the system has ssl])
                     ;;
                     *)

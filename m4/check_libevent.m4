@@ -75,6 +75,7 @@ AC_DEFUN([CHECK_LIBEVENT],
 
                 case "$have_event" in
                     yes)
+                        AC_CHECK_LIB([event], [event_base_new])
                         AC_DEFINE(HAVE_EVENT, 1, [Define if the system has event])
                     ;;
                     *)

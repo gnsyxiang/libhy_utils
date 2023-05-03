@@ -78,6 +78,7 @@ AC_DEFUN([CHECK_LIBPROTOBUF_C],
 
                 case "$have_libprotobuf_c" in
                     yes)
+                        AC_CHECK_LIB([protobuf-c], [protobuf_c_version])
                         AC_DEFINE(HAVE_LIBPROTOBUF_C, 1, [Define if the system has libprotobuf_c])
                     ;;
                     *)
