@@ -63,10 +63,9 @@ CHECK_LIBEVENT
 CHECK_PTHREAD
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h limits.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
 AC_C_INLINE
 AC_TYPE_INT8_T
 AC_TYPE_MODE_T
@@ -101,6 +100,7 @@ AC_CONFIG_FILES([Makefile
                  example/ipc/Makefile
                  example/ipc/ipc_process/Makefile
                  example/ipc/ipc_socket/Makefile
+                 example/libevent/Makefile
                  example/net/Makefile
                  example/timer/Makefile
                  include/Makefile

@@ -86,6 +86,7 @@ hy_utils.pc
 *.la
 
 example/hy_*_demo
+example/*/hy_*_demo
 example/*.pb-c.c
 example/*.pb-c.h
 test/hy_*_test
