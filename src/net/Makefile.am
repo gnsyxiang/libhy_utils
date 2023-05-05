@@ -45,6 +45,7 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
+                   hy_socket.c \
                    hy_epoll.c   \
                    hy_net.c     \
                    hy_phy_led.c
