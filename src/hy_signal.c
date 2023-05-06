@@ -18,6 +18,8 @@
  *     last modified: 25/10 2021 19:03
  */
 #include <stdio.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include <hy_log/hy_log.h>
 
@@ -36,6 +38,7 @@
 #include "hy_assert.h"
 
 #define BACKTRACE_SIZE      (32)
+#define CORE_SIZE           (1024 * 1024 * 500)
 
 #define _ADD_SIGNAL(sig, act)                                   \
     do {                                                        \
@@ -63,6 +66,35 @@ static char *signal_str[] = {
     [25] = "SIGCONT",     [26] = "SIGTTIN",     [27] = "SIGTTOU",     [28] = "SIGVTALRM",
     [29] = "SIGPROF",     [30] = "SIGXCPU",     [31] = "SIGXFSZ",
 };
+
+static void _get_rlimit_info(struct rlimit *rlmt, char *name)
+{
+    if (getrlimit(RLIMIT_CORE, rlmt) == -1) {
+        LOGES("getrlimit faild \n");
+        return ;
+    }
+
+    LOGI("%s: CORE dump current is:%d, max is:%d\n", \
+                  name, (int)rlmt->rlim_cur, (int)rlmt->rlim_max);
+}
+
+static void _open_core_dump(void)
+{
+    struct rlimit rlmt;
+
+    _get_rlimit_info(&rlmt, "before");
+
+    rlmt.rlim_cur = (rlim_t)CORE_SIZE;
+    rlmt.rlim_max  = (rlim_t)CORE_SIZE;
+
+    if (setrlimit(RLIMIT_CORE, &rlmt) == -1) {
+        LOGES("setrlimit faild \n");
+        return ;
+    }
+
+    _get_rlimit_info(&rlmt, "after");
+}
+
 
 static hy_s32_t _dump_backtrace(void)
 {
@@ -151,6 +183,8 @@ hy_s32_t HySignalCreate(HySignalConfig_t *signal_c)
     do {
         context = HY_MEM_MALLOC_BREAK(_signal_context_s *, sizeof(*context));
         HY_MEMCPY(&context->save_c, &signal_c->save_c, sizeof(signal_c->save_c));
+
+        _open_core_dump();
 
         act.sa_flags = SA_RESETHAND;
         sigemptyset(&act.sa_mask);
