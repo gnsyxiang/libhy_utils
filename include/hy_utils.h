@@ -41,7 +41,9 @@ extern "C" {
 
 #define HY_UTILS_UPCASE(c)              (((c) >= 'a' && (c) <= 'z') ? ((c) - 0x20) : (c))   ///< 将一个字母转换为大写
 
-#define HY_UTILS_ARRAY_CNT(array)       (hy_u32_t)(sizeof((array)) / sizeof((array)[0]))    ///< 求数组元素的个数
+#define HY_UTILS_ARRAY_LEN(_array)      (sizeof((_array)))
+#define HY_UTILS_ARRAY_ITEM_LEN(_array) (sizeof((_array)[0]))
+#define HY_UTILS_ARRAY_CNT(_array)      (hy_u32_t)(sizeof((_array)) / sizeof((_array)[0]))    ///< 求数组元素的个数
 
 #define HY_UTILS_IS_POWER_OF_2(x)       ((x) != 0 && (((x) & ((x) - 1)) == 0))              ///< 判断x是否为2^n，是返回1，否返回0
 

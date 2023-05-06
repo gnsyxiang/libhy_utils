@@ -35,16 +35,16 @@
 #include "hy_type.h"
 #include "hy_assert.h"
 
-#define BACKTRACE_SIZE   32
+#define BACKTRACE_SIZE      (32)
 
-#define _ADD_SIGNAL(sig, act)                               \
-    do {                                                    \
-        for (int i = 0; i < HY_SIGNAL_NUM_MAX_32; ++i) {    \
-            if (sig[i] == 0) {                              \
-                continue;                                   \
-            }                                               \
-            sigaction(sig[i], act, NULL);                   \
-        }                                                   \
+#define _ADD_SIGNAL(sig, act)                                   \
+    do {                                                        \
+        for (hy_u32_t i = 0; i < HY_SIGNAL_NUM_MAX_32; ++i) {   \
+            if (sig[i] == 0) {                                  \
+                continue;                                       \
+            }                                                   \
+            sigaction(sig[i], act, NULL);                       \
+        }                                                       \
     } while (0);
 
 typedef struct {
@@ -66,40 +66,40 @@ static char *signal_str[] = {
 
 static hy_s32_t _dump_backtrace(void)
 {
-    int nptrs;
+    hy_s32_t nptrs;
     char **strings = NULL;
     void *buffer[BACKTRACE_SIZE];
 
     nptrs = backtrace(buffer, BACKTRACE_SIZE);
     if (nptrs <= 0) {
-        LOGE("backtrace get error, nptrs: %d \n", nptrs);
+        LOGES("backtrace error, nptrs: %d \n", nptrs);
         return -1;
     }
 
     printf("Call Trace:\n");
     strings = backtrace_symbols(buffer, nptrs);
-    if (strings == NULL) {
-        perror("Not Found\n\n");
+    if (!strings) {
+        LOGES("Not Found\n\n");
         return -1;
     }
 
-    for (int j = 0; j < nptrs; j++) {
+    for (hy_s32_t j = 0; j < nptrs; j++) {
         printf("  [%02d] %s\n", j, strings[j]);
     }
 
-    HY_MEM_FREE_P(strings);
+    HY_MEM_FREE_PP(strings);
 
     return 0;
 }
 
-static void _error_handler(int signo)
+static void _error_handler(hy_s32_t signo)
 {
     HySignalSaveConfig_t *save_c= &context->save_c;
 
     LOGE("<<<%s(pid: %d)>>> crashed by signal %s \n",
             save_c->app_name, getpid(), signal_str[signo]);
 
-    if (save_c->error_cb) {
+    if (save_c && save_c->error_cb) {
         save_c->error_cb(save_c->args);
     }
 
@@ -126,11 +126,11 @@ static void _error_handler(int signo)
     }
 }
 
-static void _user_handler(int signo)
+static void _user_handler(hy_s32_t signo)
 {
     HySignalSaveConfig_t *save_c= &context->save_c;
 
-    if (save_c->user_cb) {
+    if (save_c && save_c->user_cb) {
         save_c->user_cb(save_c->args);
     }
 }
@@ -144,7 +144,6 @@ void HySignalDestroy(void)
 
 hy_s32_t HySignalCreate(HySignalConfig_t *signal_c)
 {
-    LOGT("signal_c: %p \n", signal_c);
     HY_ASSERT_RET_VAL(!signal_c, -1);
 
     struct sigaction act;
@@ -165,10 +164,11 @@ hy_s32_t HySignalCreate(HySignalConfig_t *signal_c)
 
         signal(SIGPIPE, SIG_IGN);
 
-        LOGI("signal context: %p create \n", context);
+        LOGI("signal create, handle: %p \n", context);
         return 0;
     } while (0);
 
+    LOGE("signal context: %p create \n", context);
     HySignalDestroy();
     return -1;
 }

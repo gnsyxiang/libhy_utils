@@ -32,7 +32,7 @@
 HY_WEAK void HyHex(const void *_buf, hy_u32_t len, hy_s32_t flag)
 {
     hy_u8_t cnt = 0;
-    const unsigned char *buf = (const unsigned char *)_buf;
+    const hy_u8_t *buf = (const hy_u8_t *)_buf;
 
     if (len <= 0) {
         return;

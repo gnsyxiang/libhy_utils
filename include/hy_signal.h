@@ -73,26 +73,26 @@ hy_s32_t HySignalCreate(HySignalConfig_t *signal_c);
  * @return 成功返回0，失败返回-1
  */
 #define HySignalCreate_m(_app_name, _core_path, _error_cb, _user_cb, args)  \
-({                                                                      \
-    int8_t signal_error[HY_SIGNAL_NUM_MAX_32] = {                       \
-    SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,                          \
-    SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,                          \
-};                                                                  \
-    int8_t signal_user[HY_SIGNAL_NUM_MAX_32] = {                        \
-        SIGINT, SIGTERM, SIGUSR1, SIGUSR2,                                  \
-    };                                                                  \
-HySignalConfig_t signal_c;                                          \
-HY_MEMSET(&signal_c, sizeof(signal_c));                             \
-HY_MEMCPY(signal_c.error_num, signal_error, sizeof(signal_error));  \
-HY_MEMCPY(signal_c.user_num, signal_user, sizeof(signal_user));     \
-signal_c.save_c.app_name           = _app_name;                     \
-signal_c.save_c.coredump_path     = _core_path;                     \
-signal_c.save_c.error_cb          = _error_cb;                      \
-signal_c.save_c.user_cb           = _user_cb;                       \
-signal_c.save_c.args              = _args;                          \
-\
-HySignalCreate(&signal_c);                                          \
-     })
+    ({                                                                      \
+        int8_t signal_error[HY_SIGNAL_NUM_MAX_32] = {                       \
+            SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,                      \
+            SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,                      \
+        };                                                                  \
+        int8_t signal_user[HY_SIGNAL_NUM_MAX_32] = {                        \
+            SIGINT, SIGTERM, SIGUSR1, SIGUSR2,                              \
+        };                                                                  \
+        HySignalConfig_t signal_c;                                          \
+        HY_MEMSET(&signal_c, sizeof(signal_c));                             \
+        HY_MEMCPY(signal_c.error_num, signal_error, sizeof(signal_error));  \
+        HY_MEMCPY(signal_c.user_num, signal_user, sizeof(signal_user));     \
+        signal_c.save_c.app_name           = _app_name;                     \
+        signal_c.save_c.coredump_path     = _core_path;                     \
+        signal_c.save_c.error_cb          = _error_cb;                      \
+        signal_c.save_c.user_cb           = _user_cb;                       \
+        signal_c.save_c.args              = _args;                          \
+                                                                            \
+        HySignalCreate(&signal_c);                                          \
+    })
 
 /**
  * @brief 销毁信号处理模块
