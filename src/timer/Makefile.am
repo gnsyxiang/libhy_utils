@@ -46,9 +46,9 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-				   hy_zone.c \
-				   hy_timer.c \
-				   hy_timer_multi_wheel.c
+                   hy_zone.c \
+                   hy_timer.c \
+                   hy_timer_multi_wheel.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

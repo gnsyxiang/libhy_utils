@@ -41,17 +41,17 @@ _no_error_com   +=
 _define_com     += -D_GNU_SOURCE
 
 _include_com    += \
-				   -I$(top_srcdir)/include/serialize \
-				   -I$(top_srcdir)/include
+                   -I$(top_srcdir)/include/serialize \
+                   -I$(top_srcdir)/include
 
 _sources_com    += \
-				   cjson_impl.c \
-				   hy_json.c
+                   cjson_impl.c \
+                   hy_json.c
 
 _cppflags_com   += \
-				   $(_no_error_com)     \
-				   $(_include_com)      \
-				   $(_define_com)
+                   $(_no_error_com)     \
+                   $(_include_com)      \
+                   $(_define_com)
 
 _cflags_com     +=
 

@@ -30,11 +30,11 @@ install_includedir      = $(includedir)/@project_name@
 # add necessary content
 # ---------------------
 _no_install_headers_com += \
-						   json_impl.h \
-						   cjson_impl.h
+                           json_impl.h \
+                           cjson_impl.h
 
 _install_headers_com    += \
-						   hy_json.h
+                           hy_json.h
 
 # ------------------
 # make install files

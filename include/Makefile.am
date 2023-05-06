@@ -19,10 +19,10 @@
 # ===============================================================
 
 SUBDIRS = \
-		  ipc \
-		  net \
-		  thread \
-		  timer
+          ipc \
+          net \
+          thread \
+          timer
 
 if COMPILE_LIBCJSON
 SUBDIRS += serialize
@@ -50,35 +50,35 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
-						   hy_gpio_interrupt.h \
-						   hy_pipe.h \
-						   hy_hash.h \
-						   hy_math.h \
-						   hy_video.h \
-						   hy_audio.h \
-						   hy_sort.h \
-						   hy_md5sum.h \
-						   hy_bit.h \
-						   hy_queue.h \
-						   hy_package_list.h \
-						   hy_can.h \
-						   hy_gpio.h \
-						   hy_file.h \
-						   hy_list.h \
-						   hy_fifo.h \
-						   hy_misc.h \
-						   hy_compile.h \
-						   hy_utils.h \
-						   hy_hex.h \
-						   hy_time.h \
-						   hy_string.h \
-						   hy_signal.h \
-						   hy_module.h \
-						   hy_barrier.h \
-						   hy_dynamic_array.h \
-						   hy_mem.h \
-						   hy_assert.h \
-						   hy_type.h
+                           hy_assert.h \
+                           hy_audio.h \
+                           hy_barrier.h \
+                           hy_bit.h \
+                           hy_can.h \
+                           hy_compile.h \
+                           hy_dynamic_array.h \
+                           hy_fifo.h \
+                           hy_file.h \
+                           hy_gpio.h \
+                           hy_gpio_interrupt.h \
+                           hy_hash.h \
+                           hy_hex.h \
+                           hy_list.h \
+                           hy_math.h \
+                           hy_md5sum.h \
+                           hy_mem.h \
+                           hy_misc.h \
+                           hy_module.h \
+                           hy_package_list.h \
+                           hy_pipe.h \
+                           hy_queue.h \
+                           hy_signal.h \
+                           hy_sort.h \
+                           hy_string.h \
+                           hy_time.h \
+                           hy_type.h \
+                           hy_utils.h \
+                           hy_video.h
 
 # ------------------
 # make install files

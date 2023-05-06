@@ -59,29 +59,29 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-				   -I$(top_srcdir)/include/thread \
-				   -I$(top_srcdir)/include
+                   -I$(top_srcdir)/include/thread \
+                   -I$(top_srcdir)/include
 
 _sources_com    += \
-				   hy_gpio_interrupt.c \
-				   hy_pipe.c \
-				   hy_hash.c \
-				   hy_sort.c \
-				   hy_md5sum.c \
-				   hy_bit.c \
-				   hy_queue.c \
-				   hy_package_list.c \
-				   hy_can.c \
-				   hy_utils.c \
-				   hy_file.c \
-				   hy_gpio.c \
-				   hy_fifo.c \
-				   hy_hex.c \
-				   hy_time.c \
-				   hy_string.c \
-				   hy_signal.c \
-				   hy_dynamic_array.c \
-				   hy_mem.c
+                   hy_bit.c \
+                   hy_can.c \
+                   hy_dynamic_array.c \
+                   hy_fifo.c \
+                   hy_file.c \
+                   hy_gpio.c \
+                   hy_gpio_interrupt.c \
+                   hy_hash.c \
+                   hy_hex.c \
+                   hy_md5sum.c \
+                   hy_mem.c \
+                   hy_package_list.c \
+                   hy_pipe.c \
+                   hy_queue.c \
+                   hy_signal.c \
+                   hy_sort.c \
+                   hy_string.c \
+                   hy_time.c \
+                   hy_utils.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -99,9 +99,9 @@ _ldflags_com    += -export-symbols-regex 'Hy*'
 endif
 
 _ldadd_com      += \
-				   $(top_builddir)/src/net/libhy_net.la \
-				   $(top_builddir)/src/thread/libhy_thread.la \
-				   $(top_builddir)/src/timer/libhy_timer.la
+                   $(top_builddir)/src/net/libhy_net.la \
+                   $(top_builddir)/src/thread/libhy_thread.la \
+                   $(top_builddir)/src/timer/libhy_timer.la
 
 if COMPILE_LIBCJSON
 _ldadd_com      += $(top_builddir)/src/serialize/libhy_serialize.la
