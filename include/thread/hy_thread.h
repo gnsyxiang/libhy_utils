@@ -31,13 +31,24 @@ extern "C" {
 #define HY_THREAD_NAME_LEN_MAX  (16)
 
 /**
+ * @brief 线程调度策略
+ */
+typedef enum {
+    HY_THREAD_POLICY_SCHED_OTHER,               ///< 一般模式
+    HY_THREAD_POLICY_SCHED_FIFO,                ///< 队列加时间片轮询
+    HY_THREAD_POLICY_SCHED_RR,                  ///< 抢占式调度
+
+    HY_THREAD_POLICY_MAX,
+} HyThreadPolicy_e;
+
+/**
  * @brief 线程退出方式
  */
 typedef enum {
     HY_THREAD_DESTROY_MODE_GRACE,               ///< 优雅退出，等待线程执行完
     HY_THREAD_DESTROY_MODE_FORCE,               ///< 强制退出，等待一定时间(2s)后强制退出
 
-    HY_THREAD_DESTROY_MODE_MAX = 0xffffffff,
+    HY_THREAD_DESTROY_MODE_MAX,
 } HyThreadDestroyMode_e;
 
 /**
@@ -47,7 +58,7 @@ typedef enum {
     HY_THREAD_DETACH_MODE_NO,                   ///< 非分离属性
     HY_THREAD_DETACH_MODE_YES,                  ///< 分离属性
 
-    HY_THREAD_DETACH_MAX = 0xffffffff,
+    HY_THREAD_DETACH_MAX,
 } HyThreadDetachMode_e;
 
 /**
@@ -80,6 +91,8 @@ typedef struct {
 
     HyThreadDestroyMode_e   destroy_mode;                   ///< 线程退出方式
     HyThreadDetachMode_e    detach_mode;                    ///< 线程是否分离
+    HyThreadPolicy_e        policy;                         ///< 调度策略，实时线程执行必须有root权限
+    hy_u32_t                priority;                       ///< 线程优先级，只有实施线程才能设置优先级
 } HyThreadSaveConfig_s;
 
 /**
@@ -158,6 +171,22 @@ const char *HyThreadGetName(HyThread_s *handle);
  * @return 返回id(pthread线程库维护的, 进程级别)
  */
 pthread_t HyThreadGetId(HyThread_s *handle);
+
+/**
+ * @brief 获取线程调度策略
+ *
+ * @param handle 句柄
+ * @return 该线程的调度策略
+ */
+HyThreadPolicy_e HyThreadGetPolicy(HyThread_s *handle);
+
+/**
+ * @brief 获取线程优先级
+ *
+ * @param handle 句柄
+ * @return 返回线程的优先级
+ */
+hy_u32_t HyThreadGetPriority(HyThread_s *handle);
 
 /**
  * @brief 设置cpu到指定核

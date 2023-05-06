@@ -102,6 +102,7 @@ AC_CONFIG_FILES([Makefile
                  example/ipc/ipc_socket/Makefile
                  example/libevent/Makefile
                  example/net/Makefile
+                 example/thread/Makefile
                  example/timer/Makefile
                  include/Makefile
                  include/download/Makefile

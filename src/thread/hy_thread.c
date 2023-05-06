@@ -162,40 +162,57 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
     HY_ASSERT_RET_VAL(!thread_c, NULL);
     HyThread_s *handle = NULL;
     pthread_attr_t attr;
+    struct sched_param param;
 
     do {
         handle = HY_MEM_MALLOC_BREAK(HyThread_s *, sizeof(*handle));
-
         HY_MEMCPY(&handle->save_c, &thread_c->save_c, sizeof(handle->save_c));
 
-        if (HY_THREAD_DETACH_MODE_YES == handle->save_c.detach_mode) {
-            if (0 != pthread_attr_init(&attr)) {
-                LOGES("pthread init fail \n");
+        if (0 != pthread_attr_init(&attr)) {
+            LOGES("pthread init failed \n");
+            break;
+        }
+
+        if (thread_c->save_c.policy != HY_THREAD_POLICY_SCHED_OTHER) {
+            //设置继承的调度策略
+            //必需设置为PTHREAD_EXPLICIT_SCHED，否则设置线程的优先级会被忽略
+            if (0 != pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED)) {
+                LOGES("pthread_attr_setinheritsched failed \n");
+                break;
+            }
+            if (0 != pthread_attr_setschedpolicy(&attr, thread_c->save_c.policy)) {
+                LOGES("pthread_attr_setschedpolicy failed \n");
                 break;
             }
 
-            if (0 != pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)) {
-                LOGES("set detach state fail \n");
-                break;
-            }
+            // pthread_attr_getschedpolicy(&attr, &policy);
+            // sched_get_priority_min(policy);
 
-            if (0 != pthread_create(&handle->id, &attr, _thread_cb, handle)) {
-                LOGES("pthread create fail \n");
-                break;
-            }
-
-            if (0 != pthread_attr_destroy(&attr)) {
-                LOGES("destroy attr fail \n");
-                break;
-            }
-        } else {
-            if (0 != pthread_create(&handle->id, NULL, _thread_cb, handle)) {
-                LOGES("pthread create fail \n");
+            param.sched_priority = thread_c->save_c.priority;
+            if (0 != pthread_attr_setschedparam(&attr, &param)) {
+                LOGES("pthread_attr_setschedparam failed \n");
                 break;
             }
         }
 
-        LOGI("%s thread create, context: %p, id: 0x%lx \n",
+        if (HY_THREAD_DETACH_MODE_YES == handle->save_c.detach_mode) {
+            if (0 != pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED)) {
+                LOGES("set detach state failed \n");
+                break;
+            }
+        }
+
+        if (0 != pthread_create(&handle->id, &attr, _thread_cb, handle)) {
+            LOGES("pthread create failed \n");
+            break;
+        }
+
+        if (0 != pthread_attr_destroy(&attr)) {
+            LOGES("destroy attr failed \n");
+            break;
+        }
+
+        LOGI("%s thread create, handle: %p, id: 0x%lx \n",
              handle->save_c.name, handle, handle->id);
         return handle;
     } while (0);
