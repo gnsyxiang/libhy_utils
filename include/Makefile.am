@@ -77,6 +77,7 @@ _install_headers_com    += \
                            hy_string.h \
                            hy_time.h \
                            hy_type.h \
+                           hy_uart.h \
                            hy_utils.h \
                            hy_video.h
 

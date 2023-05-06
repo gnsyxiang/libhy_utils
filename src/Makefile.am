@@ -81,6 +81,7 @@ _sources_com    += \
                    hy_sort.c \
                    hy_string.c \
                    hy_time.c \
+                   hy_uart.c \
                    hy_utils.c
 
 _cppflags_com   += \

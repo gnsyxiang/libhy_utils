@@ -18,6 +18,7 @@
  *     last modified: 04/11 2021 08:08
  */
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <stdint.h>
@@ -264,7 +265,9 @@ hy_s32_t HyFileWrite(hy_s32_t fd, const void *buf, hy_u32_t len)
     hy_s32_t ret;
 
     ret = write(fd, buf, len);
-    if (ret < 0 && errno == EINTR) {
+
+    if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
+        LOGW("try again, errno: %s \n", strerror(errno));
         return 0;
     } else if (ret == -1) {
         LOGES("fd close, fd: %d \n", fd);
@@ -286,7 +289,10 @@ hy_s32_t HyFileWriteN(hy_s32_t fd, const void *buf, hy_u32_t len)
     while (nleft > 0) {
         ret = write(fd, ptr, nleft);
         if (ret <= 0) {
-            if (ret < 0 && errno == EINTR) {
+            if (ret < 0 && (EINTR == errno
+                            || EAGAIN == errno
+                            || EWOULDBLOCK == errno)) {
+                LOGW("try again, errno: %s \n", strerror(errno));
                 ret = 0;
             } else {
                 LOGES("fd close, fd: %d \n", fd);
