@@ -61,6 +61,14 @@ _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
                    $(ldadd_com)
 
+bin_PROGRAMS                    += hy_epoll_demo
+hy_epoll_demo_SOURCES           = $(_sources_com) hy_epoll_demo.c
+hy_epoll_demo_CPPFLAGS          = $(_cppflags_com)
+hy_epoll_demo_CFLAGS            = $(_cflags_com)
+hy_epoll_demo_CXXFLAGS          = $(_cxxflags_com)
+hy_epoll_demo_LDFLAGS           = $(_ldflags_com)
+hy_epoll_demo_LDADD             = $(_ldadd_com)
+
 bin_PROGRAMS                += hy_net_demo
 hy_net_demo_SOURCES         = $(_sources_com) hy_net_demo.c
 hy_net_demo_CPPFLAGS        = $(_cppflags_com)

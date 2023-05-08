@@ -22,6 +22,10 @@ SUBDIRS = \
           libevent \
           thread
 
+if COMPILE_LIBCJSON
+SUBDIRS += serialize
+endif
+
 # ------------------
 # defining variables
 # ------------------
@@ -87,14 +91,6 @@ hy_dynamic_array_demo_CXXFLAGS  = $(_cxxflags_com)
 hy_dynamic_array_demo_LDFLAGS   = $(_ldflags_com)
 hy_dynamic_array_demo_LDADD     = $(_ldadd_com)
 
-bin_PROGRAMS                    += hy_epoll_demo
-hy_epoll_demo_SOURCES           = $(_sources_com) hy_epoll_demo.c
-hy_epoll_demo_CPPFLAGS          = $(_cppflags_com)
-hy_epoll_demo_CFLAGS            = $(_cflags_com)
-hy_epoll_demo_CXXFLAGS          = $(_cxxflags_com)
-hy_epoll_demo_LDFLAGS           = $(_ldflags_com)
-hy_epoll_demo_LDADD             = $(_ldadd_com)
-
 bin_PROGRAMS                    += hy_fifo_demo
 hy_fifo_demo_SOURCES            = $(_sources_com) hy_fifo_demo.c
 hy_fifo_demo_CPPFLAGS           = $(_cppflags_com)
@@ -110,11 +106,3 @@ hy_package_list_demo_CFLAGS     = $(_cflags_com)
 hy_package_list_demo_CXXFLAGS   = $(_cxxflags_com)
 hy_package_list_demo_LDFLAGS    = $(_ldflags_com)
 hy_package_list_demo_LDADD      = $(_ldadd_com)
-
-bin_PROGRAMS                    += hy_thread_pool_demo
-hy_thread_pool_demo_SOURCES    = $(_sources_com) hy_thread_pool_demo.c
-hy_thread_pool_demo_CPPFLAGS   = $(_cppflags_com)
-hy_thread_pool_demo_CFLAGS     = $(_cflags_com)
-hy_thread_pool_demo_CXXFLAGS   = $(_cxxflags_com)
-hy_thread_pool_demo_LDFLAGS    = $(_ldflags_com)
-hy_thread_pool_demo_LDADD      = $(_ldadd_com)

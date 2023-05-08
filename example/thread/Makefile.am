@@ -67,3 +67,11 @@ hy_thread_demo_CFLAGS       = $(_cflags_com)
 hy_thread_demo_CXXFLAGS     = $(_cxxflags_com)
 hy_thread_demo_LDFLAGS      = $(_ldflags_com)
 hy_thread_demo_LDADD        = $(_ldadd_com)
+
+bin_PROGRAMS                    += hy_thread_pool_demo
+hy_thread_pool_demo_SOURCES    = $(_sources_com) hy_thread_pool_demo.c
+hy_thread_pool_demo_CPPFLAGS   = $(_cppflags_com)
+hy_thread_pool_demo_CFLAGS     = $(_cflags_com)
+hy_thread_pool_demo_CXXFLAGS   = $(_cxxflags_com)
+hy_thread_pool_demo_LDFLAGS    = $(_ldflags_com)
+hy_thread_pool_demo_LDADD      = $(_ldadd_com)
