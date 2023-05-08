@@ -157,6 +157,13 @@ hy_u32_t HyUtilsLinuxRandomNum(hy_u32_t range);
         (ret == _ret) ? 0 : -1;                             \
      })
 
+/**
+ * @brief 检查网络大小端序
+ *
+ * @return 返回1为小端序，返回0为大端序
+ */
+hy_s32_t HyUtilsCheckEndianness(void);
+
 #ifdef __cplusplus
 }
 #endif

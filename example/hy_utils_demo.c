@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
         char addr[] = {0x10, 0x11, 0x12};
         char buf[BUF_LEN] = {0};
 
-        HyUtilsHex2Int2Str(addr, HyHalUtilsArrayCnt(addr), buf, sizeof(buf));
+        HyUtilsHex2Int2Str(addr, HY_UTILS_ARRAY_CNT(addr), buf, sizeof(buf));
         LOGE("buf: %s \n", buf);
     }
 
@@ -84,6 +84,14 @@ int main(int argc, char *argv[])
 
         HyUtilsDec2BitStr(dec, 8, buf, sizeof(buf));
         LOGE("buf: %s \n", buf);
+    }
+
+    {
+        if (0 == HyUtilsCheckEndianness()) {
+            LOGE("small endianness \n");
+        } else {
+            LOGE("big endianness \n");
+        }
     }
 
     HyLogDeInit();

@@ -106,3 +106,11 @@ hy_package_list_demo_CFLAGS     = $(_cflags_com)
 hy_package_list_demo_CXXFLAGS   = $(_cxxflags_com)
 hy_package_list_demo_LDFLAGS    = $(_ldflags_com)
 hy_package_list_demo_LDADD      = $(_ldadd_com)
+
+bin_PROGRAMS             += hy_utils_demo
+hy_utils_demo_SOURCES    = $(_sources_com) hy_utils_demo.c
+hy_utils_demo_CPPFLAGS   = $(_cppflags_com)
+hy_utils_demo_CFLAGS     = $(_cflags_com)
+hy_utils_demo_CXXFLAGS   = $(_cxxflags_com)
+hy_utils_demo_LDFLAGS    = $(_ldflags_com)
+hy_utils_demo_LDADD      = $(_ldadd_com)

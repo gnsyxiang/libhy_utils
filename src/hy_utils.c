@@ -123,3 +123,15 @@ hy_u32_t HyUtilsLinuxRandomNum(hy_u32_t range)
     return (1 + (hy_u32_t)(1.0 * range * rand() / (RAND_MAX + 1.0)));
 }
 
+hy_s32_t HyUtilsCheckEndianness(void)
+{
+    union Check{ //起始地址是一致的
+        char a;
+        hy_u32_t data;
+    } c;
+
+    c.data = 1;
+
+    return (1 == c.a) ? 0 : 1;
+}
+
