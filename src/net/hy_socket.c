@@ -17,12 +17,16 @@
  * 
  *     last modified: 05/05 2023 10:30
  */
+#include <netdb.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
+#include "hy_mem.h"
 
 #include "hy_socket.h"
 
@@ -50,6 +54,86 @@
  * 因此只要保证接受方与发送发使用的字节序相同，就不需要进行转换
  */
 
+hy_s32_t HySocketListen(const char *ip, hy_u16_t port)
+{
+    HY_ASSERT_RET_VAL(!ip, -1);
+    hy_s32_t listen_fd = -1;
+    hy_s32_t ret;
+    struct sockaddr_in addr;
+
+    do {
+        listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (listen_fd < 0) {
+            LOGES("socket failed \n");
+            break;
+        }
+
+        HY_MEMSET(&addr, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = inet_addr(ip);
+
+        ret = bind(listen_fd, (struct sockaddr *)&addr, sizeof(addr));
+        if (ret < 0) {
+            LOGES("bind failed \n");
+            break;
+        }
+
+        ret = listen(listen_fd, 32);
+        if (ret != 0) {
+            LOGES("listen failed \n");
+            break;
+        }
+
+        LOGI("listen fd: %d \n", listen_fd);
+        return listen_fd;
+    } while(0);
+
+    if (listen_fd) {
+        close(listen_fd);
+    }
+
+    LOGE("socket bind failed \n");
+    return -1;
+}
+
+hy_s32_t HySocketConnect(const char *ip, const hy_u16_t port)
+{
+    HY_ASSERT_RET_VAL(!ip, -1);
+    hy_s32_t socket_fd = -1;
+    hy_s32_t ret;
+    struct sockaddr_in addr;
+
+    do {
+        socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+        if (socket_fd < 0) {
+            LOGES("socket failed \n");
+            break;
+        }
+
+        HY_MEMSET(&addr, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = inet_addr(ip);
+
+        ret = connect(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
+        if(ret < 0) {
+            LOGES("connect failed \n");
+            break;
+        }
+
+        LOGI("socket_fd: %d \n", socket_fd);
+        return socket_fd;
+    } while(0);
+
+    if (socket_fd) {
+        close(socket_fd);
+    }
+
+    LOGE("socket connect failed \n");
+    return -1;
+}
+
 hy_s32_t HySocketClientWriteOnce(const char *ip, hy_u16_t port,
                                  void *buf, hy_u32_t len)
 {
@@ -65,6 +149,7 @@ hy_s32_t HySocketClientWriteOnce(const char *ip, hy_u16_t port,
             break;
         }
 
+        HY_MEMSET(&addr, sizeof(addr));
         addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
         addr.sin_addr.s_addr = inet_addr(ip);

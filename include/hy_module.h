@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#include <hy_log/hy_log.h>
-
 #include "hy_type.h"
 
 #define _MODULE_ARRAY_CNT(array) (hy_u32_t)(sizeof((array)) / sizeof((array)[0]))
