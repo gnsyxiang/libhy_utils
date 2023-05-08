@@ -56,7 +56,7 @@ typedef struct {
 typedef struct {
     HyEventListenerSaveConfig_s save_c;
 
-    char                        *ip;
+    const char                  *ip;
     hy_u32_t                    port;
 } HyEventListenerConfig_s;
 

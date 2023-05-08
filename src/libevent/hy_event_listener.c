@@ -122,6 +122,7 @@ HyEventListener_s *HyEventListenerCreate(HyEventListenerConfig_s *listener_c)
         }
         if (!handle->listener_base) {
             LOGE("event_base new failed \n");
+            break;
         }
         LOGI("current method: %s\n", event_base_get_method(handle->listener_base));
 
@@ -135,10 +136,12 @@ HyEventListener_s *HyEventListenerCreate(HyEventListenerConfig_s *listener_c)
                                                    save_c->signal_cb[i].signal_cb_args); 
             if (!handle->signal_event[i]) {
                 LOGE("evsignal_new failed \n");
+                break;
             }
 
             if (event_add(handle->signal_event[i], 0) != 0) {
                 LOGE("event_add failed \n");
+                break;
             }
         }
 
@@ -158,6 +161,7 @@ HyEventListener_s *HyEventListenerCreate(HyEventListenerConfig_s *listener_c)
                                                    sizeof(addr));
         if (!handle->listener) {
             LOGE("evconnlistener_new_bind failed \n");
+            break;
         }
 
         evconnlistener_set_error_cb(handle->listener, _listener_error_cb);
@@ -167,5 +171,6 @@ HyEventListener_s *HyEventListenerCreate(HyEventListenerConfig_s *listener_c)
     } while(0);
 
     LOGE("HyEventListener create failed \n");
+    HyEventListenerDestroy(&handle);
     return NULL;
 }
