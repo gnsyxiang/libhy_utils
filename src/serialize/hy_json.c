@@ -19,6 +19,7 @@
  */
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,9 +30,9 @@
 #include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_mem.h"
+#include "hy_utils.h"
 
 #include "cjson_impl.h"
-
 #include "hy_json.h"
 
 #if (HY_JSON_USE_TYPE == 1)
@@ -238,20 +239,20 @@ static inline void _file_content_destroy(char **buf)
     HY_MEM_FREE_PP(buf);
 }
 
-static size_t _file_content_create(const char *name, char **buf)
+static size_t _file_content_create(const char *file, char **buf)
 {
     hy_s32_t fd;
     off_t offset = 0;
 
     do {
-        if (0 != access(name, 0)) {
-            LOGES("the %s file not exist \n", name);
+        if (0 != access(file, 0)) {
+            LOGES("the %s file not exist \n", file);
             break;
         }
 
-        fd = open(name, O_RDONLY, 0644);
+        fd = open(file, O_RDONLY, 0644);
         if (fd < 0) {
-            LOGES("open %s file failed \n", name);
+            LOGES("open %s file failed \n", file);
             break;
         }
 
@@ -274,28 +275,76 @@ static size_t _file_content_create(const char *name, char **buf)
     return 0;
 }
 
-void HyJsonFileDestroy(void *root)
+static size_t _save_file_content(HyJsonFile_s *json_file)
 {
-    HY_ASSERT_RET(!root);
+    hy_s32_t fd;
+    hy_s32_t ret;
+    off_t offset = 0;
+    char *buf = json_impl.item_print_str(json_file->root);
+    char file[1024] = {0};
 
-    json_impl.item_destroy(root);
+    snprintf(file, 1024, "%s-bak", json_file->file);
+
+    do {
+        fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (fd < 0) {
+            LOGES("open %s file failed \n", file);
+            break;
+        }
+
+        if (-1 == write(fd, buf, strlen(buf))) {
+            LOGE("write failed \n");
+            break;
+        }
+
+        HY_MEMSET(file, 1024);
+        snprintf(file, 1024, "mv %s-bak %s", json_file->file, json_file->file);
+        ret = HyUtilsSystemCmd_m(file, 0);
+        if (0 != ret) {
+            return -1;
+        }
+
+        close(fd);
+
+        return offset;
+    } while (0);
+
+    if (fd) {
+        close(fd);
+    }
+
+    return 0;
 }
 
-void *HyJsonFileCreate(const char *name)
+void HyJsonFileDestroy(HyJsonFile_s **handle_pp)
 {
-    HY_ASSERT_RET_VAL(!name, NULL);
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+    HyJsonFile_s *json_file = *handle_pp;
 
+    _save_file_content(json_file);
+
+    json_impl.item_destroy(json_file->root);
+
+    HY_MEM_FREE_PP(handle_pp);
+}
+
+HyJsonFile_s *HyJsonFileCreate(const char *file)
+{
+    HY_ASSERT_RET_VAL(!file, NULL);
     size_t len;
     char *buf = NULL;
-    void *root = NULL;
+    HyJsonFile_s *json_file = NULL;
 
-    len = _file_content_create(name, &buf);
+    json_file = HY_MEM_CALLOC_RETURN_VAL(HyJsonFile_s *, sizeof(*json_file), NULL);
+    json_file->file = file;
+
+    len = _file_content_create(file, &buf);
     if (len > 0) {
-        root = json_impl.item_create(buf);
+        json_file->root = json_impl.item_create(buf);
         _file_content_destroy((char **)&buf);
     }
 
-    return root;
+    return json_file;
 }
 
 char *HyJsonDump(void *root)

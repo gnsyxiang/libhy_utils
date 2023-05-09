@@ -26,6 +26,11 @@ extern "C" {
 
 #include "hy_type.h"
 
+typedef struct {
+    void        *root;
+    const char  *file;
+} HyJsonFile_s;
+
 /**
  * @brief 提供两种解析json的方法
  *
@@ -79,18 +84,18 @@ char *HyJsonDump(void *root);
 /**
  * @brief 从文件中创建json
  *
- * @param name 文件路径
+ * @param file 文件路径
  *
- * @return 成功返回root节点，失败返回NULL
+ * @return 成功返回句柄，失败返回NULL
  */
-void *HyJsonFileCreate(const char *name);
+HyJsonFile_s *HyJsonFileCreate(const char *file);
 
 /**
  * @brief 销毁从文件中创建json
  *
- * @param root root根节点
+ * @param handle 句柄的地址（二级指针）
  */
-void HyJsonFileDestroy(void *root);
+void HyJsonFileDestroy(HyJsonFile_s **handle_pp);
 
 #if (HY_JSON_USE_TYPE == 1)
 /**

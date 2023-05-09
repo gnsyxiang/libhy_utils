@@ -73,12 +73,14 @@ static void _test_json(void *root)
 
 static void _test_json_file(void)
 {
-    void *root = HyJsonFileCreate("../res/hy_utils/demo.json");
+    HyJsonFile_s *json_file = NULL;
 
-    if (root) {
-        _test_json(root);
+    json_file = HyJsonFileCreate("../res/hy_utils/demo.json");
 
-        HyJsonFileDestroy(root);
+    if (json_file->root) {
+        _test_json(json_file->root);
+
+        HyJsonFileDestroy(&json_file);
     }
 }
 
