@@ -26,9 +26,14 @@ extern "C" {
 
 #include "hy_type.h"
 
+/**
+ * @brief json文件句柄
+ *
+ */
 typedef struct {
-    void        *root;
-    const char  *file;
+    void        *root;          ///< json的root节点
+    const char  *file;          ///< 文件路径
+    hy_s32_t    save_flag;      ///< 是否保存到文件，1为保存，0为不保存
 } HyJsonFile_s;
 
 /**

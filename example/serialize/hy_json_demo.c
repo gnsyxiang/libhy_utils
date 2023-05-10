@@ -80,6 +80,7 @@ static void _test_json_file(void)
     if (json_file->root) {
         _test_json(json_file->root);
 
+        json_file->save_flag = 1;
         HyJsonFileDestroy(&json_file);
     }
 }

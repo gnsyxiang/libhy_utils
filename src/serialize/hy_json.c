@@ -321,7 +321,9 @@ void HyJsonFileDestroy(HyJsonFile_s **handle_pp)
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
     HyJsonFile_s *json_file = *handle_pp;
 
-    _save_file_content(json_file);
+    if (json_file->save_flag) {
+        _save_file_content(json_file);
+    }
 
     json_impl.item_destroy(json_file->root);
 
