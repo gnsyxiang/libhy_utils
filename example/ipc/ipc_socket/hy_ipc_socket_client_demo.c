@@ -71,6 +71,7 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
 {
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
+    log_c.config_file               = "../res/hy_log/zlog.conf";
     log_c.fifo_len                  = 10 * 1024;
     log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
