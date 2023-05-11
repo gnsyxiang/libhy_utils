@@ -53,10 +53,10 @@ typedef struct {
 typedef struct {
     HyGpioInterruptSaveConfig_s save_c;                     ///< 配置参数
 
-    hy_s32_t gpio;                                          ///< gpio引脚号
-    hy_s32_t direction;                                     ///< 输入输出
-    hy_s32_t active_val;                                    ///< 有效电平
-    hy_s32_t trigger;                                       ///< 触发方式
+    hy_s32_t                    gpio;                       ///< gpio引脚号
+    hy_s32_t                    direction;                  ///< 输入输出
+    hy_s32_t                    active_val;                 ///< 有效电平
+    hy_s32_t                    trigger;                    ///< 触发方式
 } HyGpioInterruptConfig_s;
 
 typedef struct HyGpioInterrupt_s HyGpioInterrupt_s;

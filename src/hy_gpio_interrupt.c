@@ -38,10 +38,10 @@
 struct HyGpioInterrupt_s {
     HyGpioInterruptSaveConfig_s save_c;
 
-    HyThread_s *thread_h;
-    hy_s32_t fd;
+    HyThread_s                  *thread_h;
+    hy_s32_t                    fd;
 
-    hy_s32_t is_exit;
+    hy_s32_t                    is_exit;
 };
 
 static hy_s32_t _gpio_interrupt_loop_cb(void *args)
@@ -51,7 +51,7 @@ static hy_s32_t _gpio_interrupt_loop_cb(void *args)
     hy_s32_t epfd;
     hy_s32_t nfds;
     struct epoll_event ev;
-    struct epoll_event events[32];
+    struct epoll_event events[4];
     char val;
 
     epfd = epoll_create1(0);
@@ -68,7 +68,7 @@ static hy_s32_t _gpio_interrupt_loop_cb(void *args)
         nfds=epoll_wait(epfd, events, HY_UTILS_ARRAY_CNT(events),
                         save_c->timeout_ms);
         if (nfds == 0) {
-            LOGD("gpio interrupt epoll_wait timeout \n");
+            LOGW("gpio interrupt epoll_wait timeout \n");
 
             if (save_c->gpio_interrupt_timeout_cb) {
                 save_c->gpio_interrupt_timeout_cb(save_c->timeout_args);
@@ -79,13 +79,13 @@ static hy_s32_t _gpio_interrupt_loop_cb(void *args)
         for(hy_s32_t i = 0; i < nfds; ++i) {
             if (events[i].events & EPOLLPRI) {
                 if (0 > lseek(events[i].data.fd, 0, SEEK_SET)) {//将读位置移动到头部
-                    perror("lseek error");
-                    exit(-1);
+                    LOGES("lseek failed \n");
+                    break;
                 }
 
                 if (0 > read(events[i].data.fd, &val, 1)) {
-                    perror("read error");
-                    exit(-1);
+                    LOGES("read failed \n");
+                    break;
                 }
 
                 if (save_c->gpio_interrupt_cb) {
