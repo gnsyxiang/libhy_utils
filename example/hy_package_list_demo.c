@@ -241,8 +241,8 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyPackageListConfig_s package_list_c;
     HY_MEMSET(&package_list_c, sizeof(package_list_c));
     package_list_c.save_c.num = 8;
-    package_list_c.save_c.create_cb = _package_list_node_create_cb;
-    package_list_c.save_c.destroy_cb = _package_list_node_destroy_cb;
+    package_list_c.save_c.node_create_cb = _package_list_node_create_cb;
+    package_list_c.save_c.node_destroy_cb = _package_list_node_destroy_cb;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {

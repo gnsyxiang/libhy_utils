@@ -33,8 +33,8 @@ extern "C" {
  * @brief 链表节点
  */
 typedef struct {
-    void                    *user_data;             ///< 用户数据
-    struct hy_list_head     entry;                  ///< 链表索引
+    void                    *user_data;                 ///< 用户数据
+    struct hy_list_head     entry;                      ///< 链表索引
 } HyPackageListNode_s;
 
 /**
@@ -55,16 +55,16 @@ typedef void (*HyPackageListNodeDestroyCb_t)(HyPackageListNode_s **list_node_pp)
  * @brief 配置参数
  */
 typedef struct {
-    hy_u32_t                        num;            ///< 创建链表的个数
-    HyPackageListNodeCreateCb_t     create_cb;      ///< 创建用户数据回调函数
-    HyPackageListNodeDestroyCb_t    destroy_cb;     ///< 销毁用户数据回调函数
+    hy_u32_t                        num;                ///< 创建链表的个数
+    HyPackageListNodeCreateCb_t     node_create_cb;     ///< 创建用户数据回调函数
+    HyPackageListNodeDestroyCb_t    node_destroy_cb;    ///< 销毁用户数据回调函数
 } HyPackageListSaveConfig_s;
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    HyPackageListSaveConfig_s       save_c;         ///< 配置参数
+    HyPackageListSaveConfig_s       save_c;             ///< 配置参数
 } HyPackageListConfig_s;
 
 typedef struct HyPackageList_s HyPackageList_s;

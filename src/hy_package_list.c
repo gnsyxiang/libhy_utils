@@ -103,8 +103,8 @@ void HyPackageListDestroy(HyPackageList_s **handle_pp)
                 hy_list_del(&pos->entry);
                 HyThreadMutexUnLock_m(handle->mutex_h);
 
-                if (save_c->destroy_cb) {
-                    save_c->destroy_cb(&pos);
+                if (save_c->node_destroy_cb) {
+                    save_c->node_destroy_cb(&pos);
                 }
 
                 HyThreadMutexLock_m(handle->mutex_h);
@@ -151,7 +151,7 @@ HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
         }
 
         HyPackageListSaveConfig_s *save_c = &handle->save_c;
-        if (!save_c->create_cb) {
+        if (!save_c->node_create_cb) {
             LOGE("the node_create_cb is NULL \n");
             break;
         }
@@ -159,7 +159,7 @@ HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
         HyPackageListNode_s *node;
         hy_u32_t num = handle->save_c.num;
         while (num-- != 0) {
-            node = save_c->create_cb();
+            node = save_c->node_create_cb();
             if (!node) {
                 LOGE("node_create_cb failed \n");
                 continue;
