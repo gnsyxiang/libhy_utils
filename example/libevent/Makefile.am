@@ -67,3 +67,11 @@ hy_bufferevent_client_demo_CFLAGS       = $(_cflags_com)
 hy_bufferevent_client_demo_CXXFLAGS     = $(_cxxflags_com)
 hy_bufferevent_client_demo_LDFLAGS      = $(_ldflags_com)
 hy_bufferevent_client_demo_LDADD        = $(_ldadd_com)
+
+bin_PROGRAMS                            += hy_evconnlistener_demo
+hy_evconnlistener_demo_SOURCES      = $(_sources_com) hy_evconnlistener_demo.c
+hy_evconnlistener_demo_CPPFLAGS     = $(_cppflags_com)
+hy_evconnlistener_demo_CFLAGS       = $(_cflags_com)
+hy_evconnlistener_demo_CXXFLAGS     = $(_cxxflags_com)
+hy_evconnlistener_demo_LDFLAGS      = $(_ldflags_com)
+hy_evconnlistener_demo_LDADD        = $(_ldadd_com)
