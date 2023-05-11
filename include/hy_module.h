@@ -71,6 +71,7 @@ do {                                                                        \
     for (i = 0; i < len; ++i) {                                             \
         HyModuleCreateHandle_s *_create = &module[i];                       \
         if (_create->create_handle_cb) {                                    \
+            LOGI("create handle module: <%s> \n", _create->name);           \
             *_create->handle = _create->create_handle_cb(_create->config);  \
             if (!*_create->handle) {                                        \
                 LOGE("%s create error \n", _create->name);                  \
@@ -84,6 +85,7 @@ do {                                                                        \
         hy_s32_t j;                                                         \
         for (j = i - 1; j >= 0; j--) {                                      \
             HyModuleCreateHandle_s *_create = &module[j];                   \
+            LOGI("destroy handle module: <%s> \n", _create->name);          \
             if (_create->destroy_handle_cb) {                               \
                 _create->destroy_handle_cb(_create->handle);                \
             }                                                               \
@@ -97,6 +99,7 @@ do {                                                                        \
     hy_u32_t i;                                                             \
     for (i = 0; i < _MODULE_ARRAY_CNT(module); ++i) {                       \
         HyModuleDestroyHandle_s *_destroy = &module[i];                     \
+        LOGI("destroy handle module: <%s> \n", _destroy->name);             \
         if (_destroy->destroy_handle_cb) {                                  \
             _destroy->destroy_handle_cb(_destroy->handle);                  \
         }                                                                   \
@@ -142,6 +145,7 @@ do {                                                                        \
     for (i = 0; i < len; ++i) {                                             \
         HyModuleCreateBool_s *_create = &module[i];                         \
         if (_create->create_bool_cb) {                                      \
+            LOGI("create bool module: <%s> \n", _create->name);             \
             if (0 != _create->create_bool_cb(_create->config)) {            \
                 LOGE("%s create error \n", _create->name);                  \
                 break;                                                      \
@@ -154,6 +158,7 @@ do {                                                                        \
         hy_s32_t j;                                                         \
         for (j = i - 1; j >= 0; j--) {                                      \
             HyModuleCreateBool_s *_create = &module[j];                     \
+            LOGI("destroy bool module: <%s> \n", _create->name);            \
             if (_create->destroy_bool_cb) {                                 \
                 _create->destroy_bool_cb();                                 \
             }                                                               \
@@ -167,6 +172,7 @@ do {                                                                        \
     hy_u32_t i;                                                             \
     for (i = 0; i < _MODULE_ARRAY_CNT(module); ++i) {                       \
         HyModuleDestroyBool_s *_destroy = &module[i];                       \
+        LOGI("destroy module: <%s> \n", _destroy->name);                    \
         if (_destroy->destroy_bool_cb) {                                    \
             _destroy->destroy_bool_cb();                                    \
         }                                                                   \
