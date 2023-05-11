@@ -29,19 +29,20 @@ extern "C" {
 
 #include "hy_type.h"
 
-#define HY_STRING_BUF_MAX_LEN_4             (4)
-#define HY_STRING_BUF_MAX_LEN_8             (8)
-#define HY_STRING_BUF_MAX_LEN_16            (16)
-#define HY_STRING_BUF_MAX_LEN_32            (32)
-#define HY_STRING_BUF_MAX_LEN_64            (64)
-#define HY_STRING_BUF_MAX_LEN_128           (128)
-#define HY_STRING_BUF_MAX_LEN_256           (256)
-#define HY_STRING_BUF_MAX_LEN_512           (512)
+#define HY_STRING_BUF_LEN_4             (4)
+#define HY_STRING_BUF_LEN_8             (8)
+#define HY_STRING_BUF_LEN_16            (16)
+#define HY_STRING_BUF_LEN_32            (32)
+#define HY_STRING_BUF_LEN_64            (64)
+#define HY_STRING_BUF_LEN_128           (128)
+#define HY_STRING_BUF_LEN_256           (256)
+#define HY_STRING_BUF_LEN_512           (512)
+#define HY_STRING_BUF_LEN_512           (512)
 
-#define HY_STRLEN(str)                      (strlen(str))
-#define HY_STRCMP(src, dst)                 strcmp(src, dst)
-#define HY_STRNCMP(src, dst, len)           strncmp(src, dst, len)
-#define HY_STRCPY(dst, src)                 strcpy(dst, src)
+#define HY_STRLEN(_str)                 strlen(_str)
+#define HY_STRCMP(_src, _dst)           strcmp(_src, _dst)
+#define HY_STRNCMP(_src, _dst, _len)    strncmp(_src, _dst, _len)
+#define HY_STRCPY(_dst, _src)           strcpy(_dst, _src)
 
 #define HY_STRNCPY(_dst, _dst_len, _src, _src_len)              \
 do {                                                            \
