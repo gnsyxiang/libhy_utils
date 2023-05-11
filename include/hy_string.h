@@ -43,14 +43,12 @@ extern "C" {
 #define HY_STRNCMP(src, dst, len)           strncmp(src, dst, len)
 #define HY_STRCPY(dst, src)                 strcpy(dst, src)
 
-#define HY_STRNCPY(dst, dst_len, src, src_len)  \
-do {                                            \
-    size_t len = src_len;                       \
-    if (len >= dst_len) {                       \
-        len = dst_len - 1;                      \
-    }                                           \
-    HY_MEMSET(dst, dst_len);                    \
-    strncpy(dst, src, dst_len - 1);             \
+#define HY_STRNCPY(_dst, _dst_len, _src, _src_len)              \
+do {                                                            \
+    hy_u32_t _len;                                              \
+    _len = (_src_len >= _dst_len) ? _dst_len - 1 : _src_len;    \
+    HY_MEMSET(_dst, _dst_len);                                  \
+    strncpy(_dst, _src, _len);                                  \
 } while(0)
 
 /**
