@@ -27,49 +27,48 @@
 
 #include "hy_type.h"
 #include "hy_mem.h"
+#include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_signal.h"
 #include "hy_module.h"
-#include "hy_package_list.h"
 #include "hy_utils.h"
 #include "hy_thread.h"
+#include "hy_thread_mutex.h"
+#include "hy_package_list.h"
 
 #define _APP_NAME "hy_package_list_demo"
 
 typedef struct {
-    hy_s32_t num;
-    char *buf;
-} _client_data_s;
-
-typedef struct {
     hy_s32_t                is_exit;
-    HyPackageList_s         *package_list;
+    HyPackageList_s         *package_list_h;
 
     HyThread_s              *get_h;
     HyThread_s              *put_h;
 
-    pthread_mutex_t         mutex;
+    HyThreadMutex_s         *mutex_h;
     struct hy_list_head     list;
 } _main_context_s;
 
-static void _package_list_node_destroy_cb(HyPackageListNode_s *node)
-{
-    if (!node) {
-        LOGE("the param is NULL \n");
-        return;
-    }
+typedef struct {
+    hy_s32_t    num;
+    char        *buf;
+} _client_data_s;
 
+static void _package_list_node_destroy_cb(HyPackageListNode_s **node_pp)
+{
+    HY_ASSERT_RET(!node_pp || !*node_pp);
+    HyPackageListNode_s *node = *node_pp;
     _client_data_s *client_data = node->user_data;
 
     if (client_data) {
         if (client_data->buf) {
-            free(client_data->buf);
+            HY_MEM_FREE_PP(&client_data->buf);
         }
 
-        free(client_data);
+        HY_MEM_FREE_PP(&client_data);
     }
 
-    free(node);
+    HY_MEM_FREE_PP(node_pp);
 }
 
 static HyPackageListNode_s *_package_list_node_create_cb(void)
@@ -78,36 +77,17 @@ static HyPackageListNode_s *_package_list_node_create_cb(void)
     _client_data_s *client_data = NULL;
 
     do {
-        node = calloc(1, sizeof(*node));
-        if (!node) {
-            LOGES("calloc failed \n");
-            break;
-        }
+        node = HY_MEM_CALLOC_BREAK(HyPackageListNode_s *, sizeof(*node));
+        client_data = HY_MEM_CALLOC_BREAK(_client_data_s *, sizeof(*client_data));
+        client_data->buf = HY_MEM_CALLOC_BREAK(char *, 1024);
 
-        client_data = calloc(1, sizeof(*client_data));
-        if (!client_data) {
-            LOGES("calloc failed \n");
-            break;
-        }
         node->user_data = client_data;
 
-        client_data->buf = calloc(1, 1024);
-        if (!client_data->buf) {
-            LOGES("calloc failed \n");
-            break;
-        }
-
+        LOGI("node: %p, client_data: %p \n", node, client_data);
         return node;
-    }while (0);
+    } while (0);
 
-    if (node) {
-        if (node->user_data) {
-            free(node->user_data);
-        }
-
-        free(node);
-    }
-
+    _package_list_node_destroy_cb(&node);
     return NULL;
 }
 
@@ -119,11 +99,11 @@ static hy_s32_t _get_loop_cb(void *args)
     hy_s32_t cnt = 0;
 
     while (!context->is_exit) {
-        node = HyPackageListHeadGet(context->package_list);
+        node = HyPackageListHeadGet(context->package_list_h);
         if (!node) {
             LOGE("HyPackageListGet failed \n");
 
-            sleep(1);
+            usleep(200 * 1000);
             continue;
         }
         client_data = node->user_data;
@@ -131,11 +111,11 @@ static hy_s32_t _get_loop_cb(void *args)
         snprintf(client_data->buf, 1024, "cnt: %d", cnt);
         client_data->num = cnt++;
 
-        pthread_mutex_lock(&context->mutex);
+        HyThreadMutexLock_m(context->mutex_h);
         hy_list_add_tail(&node->entry, &context->list);
-        pthread_mutex_unlock(&context->mutex);
+        HyThreadMutexUnLock_m(context->mutex_h);
 
-        sleep(1);
+        usleep(200 * 1000);
     }
 
     return -1;
@@ -148,21 +128,21 @@ static hy_s32_t _put_loop_cb(void *args)
     _client_data_s *client_data;
 
     while (!context->is_exit) {
-        pthread_mutex_lock(&context->mutex);
+        HyThreadMutexLock_m(context->mutex_h);
         hy_list_for_each_entry_safe(pos, n, &context->list, entry) {
             hy_list_del(&pos->entry);
-            pthread_mutex_unlock(&context->mutex);
+            HyThreadMutexUnLock_m(context->mutex_h);
 
             client_data = pos->user_data;
             LOGI("buf: %s, cnt: %d \n", client_data->buf, client_data->num);
 
-            HyPackageListTailPut(context->package_list, pos);
+            HyPackageListTailPut(context->package_list_h, pos);
 
-            sleep(2);
+            usleep(500 * 1000);
 
-            pthread_mutex_lock(&context->mutex);
+            HyThreadMutexLock_m(context->mutex_h);
         }
-        pthread_mutex_unlock(&context->mutex);
+        HyThreadMutexUnLock_m(context->mutex_h);
     }
 
     return -1;
@@ -198,6 +178,7 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
 {
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
+    log_c.config_file               = "../res/hy_log/zlog.conf";
     log_c.fifo_len                  = 10 * 1024;
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
@@ -233,7 +214,8 @@ static void _handle_module_destroy(_main_context_s *context)
     HyModuleDestroyHandle_s module[] = {
         {"get_thread",          (void **)&context->get_h,                      (HyModuleDestroyHandleCb_t)HyThreadDestroy},
         {"put_thread",          (void **)&context->put_h,                      (HyModuleDestroyHandleCb_t)HyThreadDestroy},
-        {"package_list",        (void *)&context->package_list,       (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
+        {"package_list",        (void **)&context->package_list_h,             (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
+        {"mutex",               (void **)&context->mutex_h,                    (HyModuleDestroyHandleCb_t)HyThreadMutexDestroy},
     };
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
@@ -241,6 +223,9 @@ static void _handle_module_destroy(_main_context_s *context)
 
 static hy_s32_t _handle_module_create(_main_context_s *context)
 {
+    HyThreadMutexConfig_s mutex_c;
+    HY_MEMSET(&mutex_c, sizeof(mutex_c));
+
     HyThreadConfig_s thread_get_c;
     HY_MEMSET(&thread_get_c, sizeof(thread_get_c));
     thread_get_c.save_c.thread_loop_cb    = _get_loop_cb;
@@ -253,17 +238,18 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     thread_put_c.save_c.args              = context;
     strcpy(thread_put_c.save_c.name, "put");
 
-    HyPackageListConfig_s package_list_config;
-    HY_MEMSET(&package_list_config, sizeof(package_list_config));
-    package_list_config.save_c.num = 8;
-    package_list_config.save_c.node_create_cb = _package_list_node_create_cb;
-    package_list_config.save_c.node_destroy_cb = _package_list_node_destroy_cb;
+    HyPackageListConfig_s package_list_c;
+    HY_MEMSET(&package_list_c, sizeof(package_list_c));
+    package_list_c.save_c.num = 8;
+    package_list_c.save_c.create_cb = _package_list_node_create_cb;
+    package_list_c.save_c.destroy_cb = _package_list_node_destroy_cb;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
-        {"package_list",        (void **)&context->package_list,       &package_list_config,            (HyModuleCreateHandleCb_t)HyPackageListCreate,     (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
-        {"get_thread",          (void **)&context->get_h,              &thread_get_c,                   (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
-        {"put_thread",          (void **)&context->put_h,              &thread_put_c,                   (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
+        {"mutex",               (void **)&context->mutex_h,            &mutex_c,            (HyModuleCreateHandleCb_t)HyThreadMutexCreate,     (HyModuleDestroyHandleCb_t)HyThreadMutexDestroy},
+        {"package_list",        (void **)&context->package_list_h,     &package_list_c,     (HyModuleCreateHandleCb_t)HyPackageListCreate,     (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
+        {"get_thread",          (void **)&context->get_h,              &thread_get_c,       (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
+        {"put_thread",          (void **)&context->put_h,              &thread_put_c,       (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
@@ -276,11 +262,6 @@ int main(int argc, char *argv[])
         context = HY_MEM_MALLOC_BREAK(_main_context_s *, sizeof(*context));
 
         HY_INIT_LIST_HEAD(&context->list);
-
-        if (0 != pthread_mutex_init(&context->mutex, NULL)) {
-            LOGES("pthread_mutex_init failed \n");
-            break;
-        }
 
         if (0 != _bool_module_create(context)) {
             printf("_bool_module_create failed \n");
@@ -296,14 +277,13 @@ int main(int argc, char *argv[])
 
         hy_u32_t cnt = 0;
         while (!context->is_exit) {
-            cnt = HyPackageListGetNodeCount(context->package_list);
+            cnt = HyPackageListGetNodeCount(context->package_list_h);
             LOGI("cnt: %d \n", cnt);
 
             sleep(1);
         }
     } while (0);
 
-    pthread_mutex_destroy(&context->mutex);
     _handle_module_destroy(context);
     _bool_module_destroy();
     HY_MEM_FREE_PP(&context);

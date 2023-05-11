@@ -24,130 +24,157 @@
 
 #include <hy_log/hy_log.h>
 
-#include "hy_package_list.h"
+#include "hy_assert.h"
 #include "hy_mem.h"
+#include "hy_thread_mutex.h"
+#include "hy_thread_cond.h"
+#include "hy_package_list.h"
 
 struct HyPackageList_s {
     HyPackageListSaveConfig_s   save_c;
+    hy_s32_t                    is_exit;
 
-    pthread_mutex_t             mutex;
+    HyThreadCond_s              *cond_h;
+    HyThreadMutex_s             *mutex_h;
     struct hy_list_head         list;
 };
 
-hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *context)
+hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle)
 {
-    if (!context) {
-        LOGE("the param is NULL \n");
-    }
-
+    HY_ASSERT_RET_VAL(!handle, -1);
     hy_u32_t cnt;
-    pthread_mutex_lock(&context->mutex);
-    cnt = context->save_c.num;
-    pthread_mutex_unlock(&context->mutex);
+
+    HyThreadMutexLock_m(handle->mutex_h);
+    cnt = handle->save_c.num;
+    HyThreadMutexUnLock_m(handle->mutex_h);
 
     return cnt;
 }
 
-HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *context)
+HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
 {
+    HY_ASSERT_RET_VAL(!handle, NULL);
     HyPackageListNode_s *pos;
 
-    pthread_mutex_lock(&context->mutex);
-    pos = hy_list_first_entry(&context->list, HyPackageListNode_s, entry);
+    HyThreadMutexLock_m(handle->mutex_h);
+    while (handle->save_c.num == 0) {
+        HyThreadCondWait_m(handle->cond_h, handle->mutex_h, 0);
+
+        if (1 == handle->is_exit) {
+            HyThreadMutexUnLock_m(handle->mutex_h);
+            return NULL;
+        }
+    }
+    pos = hy_list_first_entry(&handle->list, HyPackageListNode_s, entry);
     hy_list_del(&pos->entry);
-    context->save_c.num--;
-    pthread_mutex_unlock(&context->mutex);
+    handle->save_c.num--;
+    HyThreadMutexUnLock_m(handle->mutex_h);
 
     return pos;
 }
 
-void HyPackageListTailPut(HyPackageList_s *context, HyPackageListNode_s *node)
+void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node)
 {
-    if (!context || !node) {
-        LOGE("the param is NULL \n");
-    }
+    HY_ASSERT_RET(!handle || !node);
 
-    pthread_mutex_lock(&context->mutex);
-    context->save_c.num++;
-    hy_list_add_tail(&node->entry, &context->list);
-    pthread_mutex_unlock(&context->mutex);
+    HyThreadMutexLock_m(handle->mutex_h);
+    handle->save_c.num++;
+    hy_list_add_tail(&node->entry, &handle->list);
+    HyThreadMutexUnLock_m(handle->mutex_h);
+
+    HyThreadCondSignal_m(handle->cond_h);
 }
 
-void HyPackageListDestroy(HyPackageList_s **context_pp)
+void HyPackageListDestroy(HyPackageList_s **handle_pp)
 {
-    if (!context_pp || !*context_pp) {
-        LOGE("the param is NULL \n");
-    }
-
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
     HyPackageListNode_s *pos, *n;
-    HyPackageList_s *context = *context_pp;
-    HyPackageListSaveConfig_s *save_c = &context->save_c;
+    HyPackageList_s *handle = *handle_pp;
+    HyPackageListSaveConfig_s *save_c = &handle->save_c;
 
-    if (context) {
-        if (&context->mutex) {
-            pthread_mutex_lock(&context->mutex);
-            hy_list_for_each_entry_safe(pos, n, &context->list, entry) {
+    if (handle) {
+        handle->is_exit = 1;
+
+        HyThreadCondBroadcast_m(handle->cond_h);
+
+        if (handle->mutex_h) {
+            HyThreadMutexLock_m(handle->mutex_h);
+            hy_list_for_each_entry_safe(pos, n, &handle->list, entry) {
                 hy_list_del(&pos->entry);
-                pthread_mutex_unlock(&context->mutex);
+                HyThreadMutexUnLock_m(handle->mutex_h);
 
-                if (save_c->node_destroy_cb) {
-                    save_c->node_destroy_cb(pos);
+                if (save_c->destroy_cb) {
+                    save_c->destroy_cb(&pos);
                 }
 
-                pthread_mutex_lock(&context->mutex);
+                HyThreadMutexLock_m(handle->mutex_h);
             }
-            pthread_mutex_unlock(&context->mutex);
+            HyThreadMutexUnLock_m(handle->mutex_h);
+
+            HyThreadMutexDestroy(&handle->mutex_h);
         }
 
-        pthread_mutex_destroy(&context->mutex);
+        if (handle->cond_h) {
+            HyThreadCondDestroy(&handle->cond_h);
+        }
     }
 
-    LOGI("package list destroy, context: %p \n", context);
-    free(context);
-    *context_pp = NULL;
+    LOGI("package list destroy, handle: %p \n", handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
-HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *config)
+HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
 {
-    HyPackageList_s *context = NULL;
+    HY_ASSERT_RET_VAL(!package_list_c, NULL);
+    HyPackageList_s *handle = NULL;
+
     do {
-        context = HY_MEM_CALLOC_BREAK(HyPackageList_s *, sizeof(*context));
+        handle = HY_MEM_CALLOC_BREAK(HyPackageList_s *, sizeof(*handle));
+        HY_MEMCPY(&handle->save_c, &package_list_c->save_c, sizeof(handle->save_c));
 
-        memcpy(&context->save_c, &config->save_c, sizeof(context->save_c));
+        HY_INIT_LIST_HEAD(&handle->list);
 
-        HY_INIT_LIST_HEAD(&context->list);
-
-        if (0 != pthread_mutex_init(&context->mutex, NULL)) {
-            LOGES("pthread_mutex_init failed \n");
+        HyThreadMutexConfig_s mutex_c;
+        HY_MEMSET(&mutex_c, sizeof(mutex_c));
+        handle->mutex_h = HyThreadMutexCreate(&mutex_c);
+        if (!handle->mutex_h) {
+            LOGE("HyThreadMutexCreate failed \n");
             break;
         }
 
-        HyPackageListNode_s *node;
-        HyPackageListSaveConfig_s *save_c = &context->save_c;
-        hy_u32_t num = context->save_c.num;
+        HyThreadCondConfig_s cond_c;
+        HY_MEMSET(&cond_c, sizeof(cond_c));
+        handle->cond_h = HyThreadCondCreate(&cond_c);
+        if (!handle->cond_h) {
+            LOGE("HyThreadCondCreate failed \n");
+            break;
+        }
 
-        if (!save_c->node_create_cb) {
+        HyPackageListSaveConfig_s *save_c = &handle->save_c;
+        if (!save_c->create_cb) {
             LOGE("the node_create_cb is NULL \n");
             break;
         }
 
+        HyPackageListNode_s *node;
+        hy_u32_t num = handle->save_c.num;
         while (num-- != 0) {
-            node = save_c->node_create_cb();
+            node = save_c->create_cb();
             if (!node) {
                 LOGE("node_create_cb failed \n");
                 continue;
             }
 
-            pthread_mutex_lock(&context->mutex);
-            hy_list_add_tail(&node->entry, &context->list);
-            pthread_mutex_unlock(&context->mutex);
+            HyThreadMutexLock_m(handle->mutex_h);
+            hy_list_add_tail(&node->entry, &handle->list);
+            HyThreadMutexUnLock_m(handle->mutex_h);
         }
 
-        LOGI("package list create, context: %p \n", context);
-        return context;
-    }while (0);
+        LOGI("package list create, handle: %p \n", handle);
+        return handle;
+    } while (0);
 
-    LOGI("package list failed \n");
-    HyPackageListDestroy(&context);
+    LOGI("package list create failed \n");
+    HyPackageListDestroy(&handle);
     return NULL;
 }

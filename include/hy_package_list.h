@@ -42,29 +42,29 @@ typedef struct {
  *
  * @return 返回node节点，详见HyPackageListNode_s
  */
-typedef HyPackageListNode_s *(*HyPackageListNodeCreate_t)(void);
+typedef HyPackageListNode_s *(*HyPackageListNodeCreateCb_t)(void);
 
 /**
  * @brief 销毁用户数据回调函数
  *
- * @param node node节点
+ * @param list_node_pp 节点地址（二级指针）
  */
-typedef void (*HyPackageListNodeDestroy_t)(HyPackageListNode_s *node);
+typedef void (*HyPackageListNodeDestroyCb_t)(HyPackageListNode_s **list_node_pp);
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    hy_u32_t                    num;                ///< 创建链表的个数
-    HyPackageListNodeCreate_t   node_create_cb;     ///< 创建用户数据回调函数
-    HyPackageListNodeDestroy_t  node_destroy_cb;    ///< 销毁用户数据回调函数
+    hy_u32_t                        num;            ///< 创建链表的个数
+    HyPackageListNodeCreateCb_t     create_cb;      ///< 创建用户数据回调函数
+    HyPackageListNodeDestroyCb_t    destroy_cb;     ///< 销毁用户数据回调函数
 } HyPackageListSaveConfig_s;
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    HyPackageListSaveConfig_s   save_c;             ///< 配置参数
+    HyPackageListSaveConfig_s       save_c;         ///< 配置参数
 } HyPackageListConfig_s;
 
 typedef struct HyPackageList_s HyPackageList_s;
@@ -72,45 +72,44 @@ typedef struct HyPackageList_s HyPackageList_s;
 /**
  * @brief 创建package_list模块
  *
- * @param config 配置参数，详见
- * @return 返回package_list链表
+ * @param package_list_c 配置参数，详见HyPackageListConfig_s
+ * @return 成功返回句柄，失败返回NULL
  */
-HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *config);
+HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c);
 
 /**
  * @brief 销毁package_list模块
  *
- * @param context_pp 链表地址（二级指针）
+ * @param handle_pp 句柄地址（二级指针）
  */
-void HyPackageListDestroy(HyPackageList_s **context_pp);
+void HyPackageListDestroy(HyPackageList_s **handle_pp);
 
 /**
  * @brief 从package_list中获取节点
  *
- * @param context 链表，详见HyPackageList_s
+ * @param handle 句柄，详见HyPackageList_s
  * @return 返回node节点，详见HyPackageListNode_s
  */
-HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *context);
+HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle);
 
 /**
  * @brief 向package_list中加入node
  *
- * @param context 链表，详见HyPackageList_s
+ * @param handle 句柄，详见HyPackageList_s
  * @param node node节点，详见HyPackageListNode_s
  */
-void HyPackageListTailPut(HyPackageList_s *context, HyPackageListNode_s *node);
+void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node);
 
 /**
  * @brief 获取package_list中包含的个数
  *
- * @param context 链表，详见HyPackageList_s
+ * @param handle 句柄，详见HyPackageList_s
  * @return 返回package_list中链表的个数
  */
-hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *context);
+hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-
