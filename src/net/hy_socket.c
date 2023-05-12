@@ -166,6 +166,10 @@ hy_s32_t HySocketClientWriteOnce(const char *ip, hy_u16_t port,
             break;
         }
 
+        if (socket_fd) {
+            close(socket_fd);
+        }
+
         return ret;
     } while(0);
 
