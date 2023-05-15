@@ -142,12 +142,12 @@ static hy_s32_t _handle_module_create(_main_context_t *context)
     fifo_c.save_c.is_lock       = HY_FIFO_MUTEX_LOCK;
 
     HyThreadConfig_s thread_c;
+    const char *thread_name = "get_fifo";
     HY_MEMSET(&thread_c, sizeof(thread_c));
     thread_c.save_c.thread_loop_cb    = _get_fifo_loop_cb;
     thread_c.save_c.args              = context;
-    #define _THREAD_NAME "get_fifo"
     HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
-            _THREAD_NAME, HY_STRLEN(_THREAD_NAME));
+            thread_name, HY_STRLEN(thread_name));
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {

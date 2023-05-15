@@ -148,13 +148,14 @@ static void _accept_cb(void *handle, void *args)
     accept->ipc_socket_h = handle;
 
     HyThreadConfig_s thread_c;
+    const char *thread_name = "hy_socket_communication";
     HY_MEMSET(&thread_c, sizeof(thread_c));
     thread_c.save_c.thread_loop_cb    = _socket_communication;
     thread_c.save_c.args              = accept;
     thread_c.save_c.destroy_mode      = HY_THREAD_DESTROY_MODE_FORCE;
     thread_c.save_c.detach_mode       = HY_THREAD_DETACH_MODE_YES;
     HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
-            "hy_socket_communication", HY_STRLEN("hy_socket_communication"));
+            thread_name, HY_STRLEN("thread_name"));
 
     if (!HyThreadCreate(&thread_c)) {
         LOGE("HyThreadCreate failed \n");

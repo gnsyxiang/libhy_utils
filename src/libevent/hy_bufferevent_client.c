@@ -168,13 +168,8 @@ HyBuffereventClient_s *HyBuffereventClientCreate(HyBuffereventClientConfig_s *cl
         bufferevent_enable(handle->event, EV_READ | EV_WRITE);
         bufferevent_setcb(handle->event, _read_cb, _write_cb, _event_cb, handle);
 
-        HyThreadConfig_s thread_c;
-        HY_MEMSET(&thread_c, sizeof(thread_c));
-        thread_c.save_c.thread_loop_cb = _read_thread_loop_cb;
-        thread_c.save_c.args = handle;
-        HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
-                   "bev_client_read", HY_STRLEN("ben_client_read"));
-        handle->read_thread_h = HyThreadCreate(&thread_c);
+        handle->read_thread_h = HyThreadCreate_m(
+            "ben_client_read", _read_thread_loop_cb, handle);
         if (!handle->read_thread_h) {
             LOGE("HyThreadCreate failed \n");
             break;

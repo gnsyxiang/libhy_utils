@@ -226,17 +226,21 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyThreadMutexConfig_s mutex_c;
     HY_MEMSET(&mutex_c, sizeof(mutex_c));
 
-    HyThreadConfig_s thread_get_c;
-    HY_MEMSET(&thread_get_c, sizeof(thread_get_c));
-    thread_get_c.save_c.thread_loop_cb    = _get_loop_cb;
-    thread_get_c.save_c.args              = context;
-    strcpy(thread_get_c.save_c.name, "get");
+    HyThreadConfig_s get_thread_c;
+    const char *get_thread_name = "get_loop";
+    HY_MEMSET(&get_thread_c, sizeof(get_thread_c));
+    get_thread_c.save_c.thread_loop_cb    = _get_loop_cb;
+    get_thread_c.save_c.args              = context;
+    HY_STRNCPY(get_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
+               get_thread_name, HY_STRLEN(get_thread_name));
 
-    HyThreadConfig_s thread_put_c;
-    HY_MEMSET(&thread_put_c, sizeof(thread_put_c));
-    thread_put_c.save_c.thread_loop_cb    = _put_loop_cb;
-    thread_put_c.save_c.args              = context;
-    strcpy(thread_put_c.save_c.name, "put");
+    HyThreadConfig_s put_thread_c;
+    const char *put_thread_name = "put_loop";
+    HY_MEMSET(&put_thread_c, sizeof(put_thread_c));
+    put_thread_c.save_c.thread_loop_cb    = _put_loop_cb;
+    put_thread_c.save_c.args              = context;
+    HY_STRNCPY(put_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
+               put_thread_name, HY_STRLEN(put_thread_name));
 
     HyPackageListConfig_s package_list_c;
     HY_MEMSET(&package_list_c, sizeof(package_list_c));
@@ -248,8 +252,8 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyModuleCreateHandle_s module[] = {
         {"mutex",               (void **)&context->mutex_h,            &mutex_c,            (HyModuleCreateHandleCb_t)HyThreadMutexCreate,     (HyModuleDestroyHandleCb_t)HyThreadMutexDestroy},
         {"package_list",        (void **)&context->package_list_h,     &package_list_c,     (HyModuleCreateHandleCb_t)HyPackageListCreate,     (HyModuleDestroyHandleCb_t)HyPackageListDestroy},
-        {"get_thread",          (void **)&context->get_h,              &thread_get_c,       (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
-        {"put_thread",          (void **)&context->put_h,              &thread_put_c,       (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
+        {"get_thread",          (void **)&context->get_h,              &get_thread_c,       (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
+        {"put_thread",          (void **)&context->put_h,              &put_thread_c,       (HyModuleCreateHandleCb_t)HyThreadCreate,          (HyModuleDestroyHandleCb_t)HyThreadDestroy},
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
