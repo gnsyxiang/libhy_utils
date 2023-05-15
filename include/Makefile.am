@@ -22,7 +22,8 @@ SUBDIRS = \
           ipc \
           net \
           thread \
-          timer
+          timer \
+          uart
 
 if COMPILE_LIBCJSON
 SUBDIRS += serialize
@@ -77,7 +78,6 @@ _install_headers_com    += \
                            hy_string.h \
                            hy_time.h \
                            hy_type.h \
-                           hy_uart.h \
                            hy_utils.h \
                            hy_video.h
 

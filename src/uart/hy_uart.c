@@ -147,8 +147,12 @@ static hy_s32_t _uart_set_param(hy_s32_t fd, HyUartSaveConfig_s *save_c)
             break;
     }
 
+    // open的时候没有设置O_NONBLOCK或O_NDELAY，下面两个参数起效
+    // 再接收到第一个字节后，开始计算超时时间
+    // 接收到VMIN字节后，read直接返回
+    // 在VTIME时间内，没有接收到VIMIN字节，read也直接返回
     // read阻塞条件: wait time and minmum number of "bytes"
-    options.c_cc[VTIME]= _HY_UART_READ_VTIME_100MS; // wait for 0.1s
+    options.c_cc[VTIME]= _HY_UART_READ_VTIME_100MS; // wait for 0.1s，百毫秒, 是一个unsigned char变量
     options.c_cc[VMIN]= _HY_UART_READ_VMIN_LEN;     // read at least 1 byte
 
     // TCIFLUSH刷清输入队列
@@ -220,7 +224,13 @@ HyUart_s *HyUartCreate(HyUartConfig_s *uart_c)
         handle = HY_MEM_CALLOC_BREAK(HyUart_s *, sizeof(*handle));
         HY_MEMCPY(&handle->save_c, &uart_c->save_c, sizeof(handle->save_c));
 
+        // O_NONBLOCK和O_NDELAY区别:
+        // 它们的差别在于设立O_NDELAY会使I/O函式马上回传0，但是又衍生出一个问题，
+        // 因为读取到档案结尾时所回传的也是0，这样无法得知是哪中情况；
+        // 因此，O_NONBLOCK就产生出来，它在读取不到数据时会回传-1，并且设置errno为EAGAIN。
         hy_s32_t flags = O_RDWR | O_NOCTTY;
+        // hy_s32_t flags = O_RDWR | O_NOCTTY | O_NONBLOCK;
+        // hy_s32_t flags = O_RDWR | O_NOCTTY | O_NDELAY;
         // hy_s32_t flags = O_RDWR | O_NOCTTY | O_NDELAY;
         handle->fd = open(uart_c->save_c.dev_path, flags);
         if (handle->fd <= 0) {

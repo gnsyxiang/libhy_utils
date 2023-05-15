@@ -20,7 +20,8 @@
 
 SUBDIRS = \
           libevent \
-          thread
+          thread \
+          uart
 
 if COMPILE_LIBCJSON
 SUBDIRS += serialize

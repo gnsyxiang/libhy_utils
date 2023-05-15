@@ -96,6 +96,8 @@ const char *HyThreadGetName(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, NULL);
 
+    // ret = prctl(PR_GET_NAME, name);
+
     return handle->save_c.name;
 }
 
@@ -116,6 +118,7 @@ static void *_thread_cb(void *args)
 
 #ifdef HAVE_PTHREAD_SETNAME_NP
     pthread_setname_np(handle->id, save_c->name);
+    // ret = prctl(PR_SET_NAME, name);
 #endif
 
     while (0 == ret) {

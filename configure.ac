@@ -63,7 +63,7 @@ CHECK_LIBEVENT
 CHECK_PTHREAD
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h termios.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -105,6 +105,7 @@ AC_CONFIG_FILES([Makefile
                  example/serialize/Makefile
                  example/thread/Makefile
                  example/timer/Makefile
+                 example/uart/Makefile
                  include/Makefile
                  include/download/Makefile
                  include/ipc/Makefile
@@ -115,6 +116,7 @@ AC_CONFIG_FILES([Makefile
                  include/serialize/Makefile
                  include/thread/Makefile
                  include/timer/Makefile
+                 include/uart/Makefile
                  res/Makefile
                  res/voice/Makefile
                  res/voice/cn/Makefile
@@ -129,6 +131,7 @@ AC_CONFIG_FILES([Makefile
                  src/serialize/Makefile
                  src/thread/Makefile
                  src/timer/Makefile
+                 src/uart/Makefile
                  test/Makefile])
 AC_OUTPUT
 
