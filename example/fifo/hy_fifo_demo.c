@@ -37,10 +37,10 @@
 #define _APP_NAME "hy_fifo_demo"
 
 typedef struct {
-    void        *fifo_h;
-    HyThread_s  *thread_h;
+    HyFifo_s        *fifo_h;
+    HyThread_s      *thread_h;
 
-    hy_s32_t    exit_flag;
+    hy_s32_t        exit_flag;
 } _main_context_t;
 
 static void _signal_error_cb(void *args)
@@ -129,7 +129,7 @@ static void _handle_module_destroy(_main_context_t *context)
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
         {"thread",      (void **)&context->thread_h,     (HyModuleDestroyHandleCb_t)HyThreadDestroy},
-        {"fifo",        &context->fifo_h,       HyFifoDestroy},
+        {"fifo",        (void **)&context->fifo_h,       (HyModuleDestroyHandleCb_t)HyFifoDestroy},
     };
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
@@ -152,7 +152,7 @@ static hy_s32_t _handle_module_create(_main_context_t *context)
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
-        {"fifo",        &context->fifo_h,       &fifo_c,            (HyModuleCreateHandleCb_t)HyFifoCreate,     HyFifoDestroy},
+        {"fifo",        (void **)&context->fifo_h,       &fifo_c,            (HyModuleCreateHandleCb_t)HyFifoCreate,     (HyModuleDestroyHandleCb_t)HyFifoDestroy},
         {"thread",      (void **)&context->thread_h,     &thread_c,          (HyModuleCreateHandleCb_t)HyThreadCreate,   (HyModuleDestroyHandleCb_t)HyThreadDestroy},
     };
 

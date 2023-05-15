@@ -56,11 +56,11 @@ typedef struct {
     struct hy_list_head             cb_id_list;
 
     sem_t                           cb_sem;
-    void                            *cb_fifo_h;
+    HyFifo_s                        *cb_fifo_h;
     HyThread_s                      *handle_cb_thread_h;
 
     sem_t                           ack_sem;
-    void                            *ack_fifo_h;
+    HyFifo_s                        *ack_fifo_h;
     HyThread_s                      *handle_ack_thread_h;
 
     void                            *pipe_h;

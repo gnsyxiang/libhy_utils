@@ -61,7 +61,7 @@ typedef struct {
 typedef struct {
     HyPHYLedSaveConfig_s    save_c;
 
-    void                    *led_fifo_handle;
+    HyFifo_s                *led_fifo_handle;
     _led_blink_mode_t       led_blink_mode[HY_PHY_LED_NUM_MAX];
 
     HyThread_s              *led_thread_h;

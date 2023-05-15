@@ -34,7 +34,7 @@ typedef enum {
     HY_FIFO_INFO_USED_LEN,              ///< 获取fifo使用长度
     HY_FIFO_INFO_FREE_LEN,              ///< 获取fifo空闲长度
 
-    HY_FIFO_INFO_MAX = 0xffffffff,
+    HY_FIFO_INFO_MAX,
 } HyFifoInfo_e;
 
 /**
@@ -44,7 +44,7 @@ typedef enum {
     HY_FIFO_DUMP_ALL,                   ///< 打印fifo全部信息，按照开辟的空间打印
     HY_FIFO_DUMP_CONTENT,               ///< 打印fifo里面的有效内容
 
-    HY_FIFO_DUMP_MAX = 0xffffffff,
+    HY_FIFO_DUMP_MAX,
 } HyFifoDump_e;
 
 /**
@@ -70,6 +70,8 @@ typedef struct {
     HyFifoSaveConfig_s  save_c;         ///< 配置参数
 } HyFifoConfig_s;
 
+typedef struct HyFifo_s HyFifo_s;
+
 /**
  * @brief 创建fifo模块
  *
@@ -77,7 +79,7 @@ typedef struct {
  *
  * @return 成功返回fifo句柄，失败返回NULL
  */
-void *HyFifoCreate(HyFifoConfig_s *fifo_c);
+HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c);
 
 /**
  * @brief 创建fifo模块宏
@@ -99,9 +101,9 @@ void *HyFifoCreate(HyFifoConfig_s *fifo_c);
 /**
  * @brief 销毁fifo模块
  *
- * @param handle fifo句柄的地址（二级指针）
+ * @param handle_pp fifo句柄的地址（二级指针）
  */
-void HyFifoDestroy(void **handle);
+void HyFifoDestroy(HyFifo_s **handle_pp);
 
 /**
  * @brief 向fifo中写入数据
@@ -114,7 +116,7 @@ void HyFifoDestroy(void **handle);
  *
  * @note 没有足够空间写入时，一个字节也不会写入，直接返回-1
  */
-hy_s32_t HyFifoWrite(void *handle, const void *buf, hy_u32_t len);
+hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len);
 
 /**
  * @brief 从fifo中读取数据
@@ -127,7 +129,7 @@ hy_s32_t HyFifoWrite(void *handle, const void *buf, hy_u32_t len);
  *
  * @note 当fifo为空时，直接返回0
  */
-hy_s32_t HyFifoRead(void *handle, void *buf, hy_u32_t len);
+hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 从fifo中读取数据
@@ -142,7 +144,7 @@ hy_s32_t HyFifoRead(void *handle, void *buf, hy_u32_t len);
  * 1, 当fifo为空时，直接返回0
  * 2, 该操作不会删除数据
  */
-hy_s32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len);
+hy_s32_t HyFifoReadPeek(HyFifo_s *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 从fifo中删除数据
@@ -152,21 +154,21 @@ hy_s32_t HyFifoReadPeek(void *handle, void *buf, hy_u32_t len);
  *
  * @return 成功返回删除的字节数，失败返回-1
  */
-hy_s32_t HyFifoReadDel(void *handle, hy_u32_t len);
+hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len);
 
 /**
  * @brief 复位fifo
  *
  * @param handle 句柄
  */
-void HyFifoReset(void *handle);
+void HyFifoReset(HyFifo_s *handle);
 
 /**
  * @brief 打印fifo
  *
  * @param handle 句柄
  */
-void HyFifoDump(void *handle, HyFifoDump_e type);
+void HyFifoDump(HyFifo_s *handle, HyFifoDump_e type);
 
 /**
  * @brief 获取FIFO相关信息
@@ -176,7 +178,7 @@ void HyFifoDump(void *handle, HyFifoDump_e type);
  *
  * @return 成功返回对应的值，失败返回-1
  */
-hy_s32_t HyFifoGetInfo(void *handle, HyFifoInfo_e type);
+hy_s32_t HyFifoGetInfo(HyFifo_s *handle, HyFifoInfo_e type);
 
 /**
  * @brief fifo是否满
@@ -185,7 +187,7 @@ hy_s32_t HyFifoGetInfo(void *handle, HyFifoInfo_e type);
  *
  * @return 满返回1，否则返回0
  */
-hy_s32_t HyFifoIsFull(void *handle);
+hy_s32_t HyFifoIsFull(HyFifo_s *handle);
 
 /**
  * @brief fifo是否为空
@@ -194,7 +196,7 @@ hy_s32_t HyFifoIsFull(void *handle);
  *
  * @return 空返回1，否则返回0
  */
-hy_s32_t HyFifoIsEmpty(void *handle);
+hy_s32_t HyFifoIsEmpty(HyFifo_s *handle);
 
 #ifdef __cplusplus
 }
