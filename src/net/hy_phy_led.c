@@ -136,7 +136,7 @@ static hy_s32_t _led_loop_cb(void *args)
     while (!context->exit_flag) {
         val = 0;
         while (0 == val) {
-            val = HyFifoGetInfo(context->led_fifo_handle, HY_FIFO_INFO_USED_LEN);
+            val = HyFifoGetUsedLen(context->led_fifo_handle);
             usleep(100 * 1000);
 
             for (i = 0; i < HY_PHY_LED_NUM_MAX; ++i) {

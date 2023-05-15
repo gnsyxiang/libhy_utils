@@ -179,8 +179,17 @@ hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len)
     return len;
 }
 
-static void _dump_content(HyFifo_s *handle)
+void HyFifoDumpAll(HyFifo_s *handle)
 {
+    HY_ASSERT_RET(!handle);
+
+    HY_HEX_ASCII(handle->buf, handle->save_c.len);
+}
+
+void HyFifoDumpContent(HyFifo_s *handle)
+{
+    HY_ASSERT_RET(!handle);
+
     hy_u32_t len_tmp;
 
     len_tmp = handle->save_c.len - _FIFO_READ_POS(handle);
@@ -193,55 +202,30 @@ static void _dump_content(HyFifo_s *handle)
     HyHex(handle->buf, _FIFO_USED_LEN(handle) - len_tmp, 1);
 }
 
-void HyFifoDump(HyFifo_s *handle, HyFifoDump_e type)
-{
-    HY_ASSERT_RET(!handle);
-
-    switch (type) {
-        case HY_FIFO_DUMP_ALL:
-            HY_HEX_ASCII(handle->buf, handle->save_c.len);
-            break;
-        case HY_FIFO_DUMP_CONTENT:
-            _dump_content(handle);
-            break;
-        default:
-            LOGE("error type: %d \n", type);
-    }
-}
-
-hy_s32_t HyFifoGetInfo(HyFifo_s *handle, HyFifoInfo_e type)
+hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, -1);
-    hy_u32_t val = 0;
 
-    switch (type) {
-        case HY_FIFO_INFO_TOTAL_LEN:
-            val = handle->save_c.len;
-            break;
-        case HY_FIFO_INFO_USED_LEN:
-            val = _FIFO_USED_LEN(handle);
-            break;
-        case HY_FIFO_INFO_FREE_LEN:
-            val = handle->save_c.len - _FIFO_USED_LEN(handle);
-            break;
-        default:
-            LOGE("the type is ERROR, type: %d \n", type);
-            break;
-    }
+    return handle->save_c.len - _FIFO_USED_LEN(handle);
+}
 
-    return val;
+hy_s32_t HyFifoGetUsedLen(HyFifo_s *handle)
+{
+    HY_ASSERT_RET_VAL(!handle, -1);
+
+    return _FIFO_USED_LEN(handle);
 }
 
 hy_s32_t HyFifoIsEmpty(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, 0);
+    HY_ASSERT_RET_VAL(!handle, -1);
 
     return _FIFO_IS_EMPTY(handle);
 }
 
 hy_s32_t HyFifoIsFull(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, 0);
+    HY_ASSERT_RET_VAL(!handle, -1);
 
     return handle->save_c.len == _FIFO_USED_LEN(handle);
 }
@@ -292,4 +276,3 @@ HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c)
     HyFifoDestroy(&handle);
     return NULL;
 }
-

@@ -112,7 +112,7 @@ static hy_s32_t _get_fifo_loop_cb(void *args)
     hy_u32_t len;
     char c;
     while (!context->exit_flag) {
-        len = HyFifoGetInfo(context->fifo_h, HY_FIFO_INFO_USED_LEN);
+        len = HyFifoGetUsedLen(context->fifo_h);
         if (len > 0) {
             HyFifoRead(context->fifo_h, &c, 1);
             LOGI("--read---------, c: %c \n", c);
@@ -199,9 +199,9 @@ int main(int argc, char *argv[])
         }
     } while (0);
 
-    HyFifoDump(context->fifo_h, HY_FIFO_DUMP_CONTENT);
+    HyFifoDumpContent(context->fifo_h);
 
-    HyFifoDump(context->fifo_h, HY_FIFO_DUMP_ALL);
+    HyFifoDumpAll(context->fifo_h);
 
     _handle_module_destroy(context);
     _bool_module_destroy();

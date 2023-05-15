@@ -27,27 +27,6 @@ extern "C" {
 #include "hy_type.h"
 
 /**
- * @brief 获取fifo相关信息
- */
-typedef enum {
-    HY_FIFO_INFO_TOTAL_LEN,             ///< 获取fifo总长度
-    HY_FIFO_INFO_USED_LEN,              ///< 获取fifo使用长度
-    HY_FIFO_INFO_FREE_LEN,              ///< 获取fifo空闲长度
-
-    HY_FIFO_INFO_MAX,
-} HyFifoInfo_e;
-
-/**
- * @brief 打印fifo相关信息
- */
-typedef enum {
-    HY_FIFO_DUMP_ALL,                   ///< 打印fifo全部信息，按照开辟的空间打印
-    HY_FIFO_DUMP_CONTENT,               ///< 打印fifo里面的有效内容
-
-    HY_FIFO_DUMP_MAX,
-} HyFifoDump_e;
-
-/**
  * @brief 锁状态
  */
 typedef enum {
@@ -77,7 +56,7 @@ typedef struct HyFifo_s HyFifo_s;
  *
  * @param config 配置参数
  *
- * @return 成功返回fifo句柄，失败返回NULL
+ * @return 成功返回句柄，失败返回NULL
  */
 HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c);
 
@@ -164,39 +143,52 @@ hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len);
 void HyFifoReset(HyFifo_s *handle);
 
 /**
- * @brief 打印fifo
+ * @brief 打印整个fifo
  *
  * @param handle 句柄
  */
-void HyFifoDump(HyFifo_s *handle, HyFifoDump_e type);
+void HyFifoDumpAll(HyFifo_s *handle);
 
 /**
- * @brief 获取FIFO相关信息
+ * @brief 打印fifo中的内容
  *
  * @param handle 句柄
- * @param type 操作类型
- *
- * @return 成功返回对应的值，失败返回-1
  */
-hy_s32_t HyFifoGetInfo(HyFifo_s *handle, HyFifoInfo_e type);
+void HyFifoDumpContent(HyFifo_s *handle);
 
 /**
- * @brief fifo是否满
+ * @brief 获取fifo中未使用的长度
  *
  * @param handle 句柄
- *
- * @return 满返回1，否则返回0
+ * @return 成功返回对应值，失败返回-1
  */
-hy_s32_t HyFifoIsFull(HyFifo_s *handle);
+hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle);
+
+/**
+ * @brief 获取fifo使用的长度
+ *
+ * @param handle 句柄
+ * @return 成功返回对应值，失败返回-1
+ */
+hy_s32_t HyFifoGetUsedLen(HyFifo_s *handle);
 
 /**
  * @brief fifo是否为空
  *
  * @param handle 句柄
  *
- * @return 空返回1，否则返回0
+ * @return 空返回1，没空返回0，失败返回-1
  */
 hy_s32_t HyFifoIsEmpty(HyFifo_s *handle);
+
+/**
+ * @brief fifo是否满
+ *
+ * @param handle 句柄
+ *
+ * @return 满返回1，没满返回0，失败返回-1
+ */
+hy_s32_t HyFifoIsFull(HyFifo_s *handle);
 
 #ifdef __cplusplus
 }
