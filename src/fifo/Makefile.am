@@ -45,6 +45,7 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
+                   hy_fifo_lock.c \
                    hy_fifo.c
 
 _cppflags_com   += \
