@@ -27,19 +27,10 @@ extern "C" {
 #include "hy_type.h"
 
 /**
- * @brief 锁状态
- */
-typedef enum {
-    HY_FIFO_MUTEX_UNLOCK,               ///< 不加锁
-    HY_FIFO_MUTEX_LOCK,                 ///< 加锁
-} HyFifoMutex_e;
-
-/**
  * @brief 配置参数
  */
 typedef struct {
     hy_u32_t            len;            ///< fifo数据空间长度
-    HyFifoMutex_e       is_lock;        ///< 是否加锁，多线程需要加锁
 } HyFifoSaveConfig_s;
 
 /**
@@ -52,33 +43,35 @@ typedef struct {
 typedef struct HyFifo_s HyFifo_s;
 
 /**
- * @brief 创建fifo模块
+ * @brief 创建无锁fifo模块
  *
- * @param config 配置参数
+ * @param fifo_c 配置参数
  *
  * @return 成功返回句柄，失败返回NULL
+ *
+ * @note
+ * 1，使用该套函数时，需要开辟的空间大一点，否则在写入的时候会出现数据被截断。
+ * 2，只适用于单个生产者和单个消费者模型
  */
 HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c);
 
 /**
- * @brief 创建fifo模块宏
+ * @brief 创建无锁fifo模块宏
  *
  * @param _len fifo长度
- * @param _is_lock fifo是否加锁
  *
  * @return 成功返回句柄，失败返回NULL
  */
-#define HyFifoCreate_m(_len, _is_lock)              \
+#define HyFifoCreate_m(_len)                        \
     ({                                              \
         HyFifoConfig_s fifo_c;                      \
         HY_MEMSET(&fifo_c, sizeof(fifo_c));         \
         fifo_c.save_c.len       = _len;             \
-        fifo_c.save_c.is_lock   = _is_lock;         \
         HyFifoCreate(&fifo_c);                      \
      })
 
 /**
- * @brief 销毁fifo模块
+ * @brief 销毁无锁fifo模块
  *
  * @param handle_pp fifo句柄的地址（二级指针）
  */
@@ -91,9 +84,9 @@ void HyFifoDestroy(HyFifo_s **handle_pp);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回写入的大小，失败返回-1
+ * @return 成功返回写入的大小
  *
- * @note 没有足够空间写入时，一个字节也不会写入，直接返回-1
+ * @note 如果此时的空间不足以存下len数据，会尽量存下最多，其余的被丢弃
  */
 hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len);
 
@@ -104,9 +97,7 @@ hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回读取到的字节数，失败返回-1
- *
- * @note 当fifo为空时，直接返回0
+ * @return 成功返回读取到的字节数，返回为0表示fifo为空
  */
 hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len);
 

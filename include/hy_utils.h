@@ -32,8 +32,8 @@ extern "C" {
 #define HY_UTILS_IP_INT_LEN_MAX         (4)
 #define HY_UTILS_IP_STR_LEN_MAX         (16)
 
-#define HY_UTILS_MIN(x, y)              ((x) < (y) ? (x) : (y))                             ///< 求最小值
-#define HY_UTILS_MAX(x, y)              ((x) > (y) ? (x) : (y))                             ///< 求最大值
+#define HY_UTILS_MIN(_x, _y)            ((_x) < (_y) ? (_x) : (_y))                             ///< 求最小值
+#define HY_UTILS_MAX(_x, _y)            ((_x) > (_y) ? (_x) : (_y))                             ///< 求最大值
 
 #define HY_UTILS_ROUND_UP(x, size)      ((((x) + size - 1) / size ) * size)                 ///< 对size向上取整
 

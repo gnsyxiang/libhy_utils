@@ -27,8 +27,6 @@
 #include "hy_assert.h"
 #include "hy_barrier.h"
 #include "hy_mem.h"
-#include "thread/hy_thread_mutex.h"
-
 #include "hy_hex.h"
 #include "hy_utils.h"
 
@@ -43,118 +41,78 @@
  */
 #define USE_MB
 
-#define _FIFO_USED_LEN(handle)      ((handle)->write_pos - (handle)->read_pos)
-#define _FIFO_FREE_LEN(handle)      ((handle)->save_c.len - (_FIFO_USED_LEN(handle)))
-#define _FIFO_WRITE_POS(handle)     ((handle)->write_pos & ((handle)->save_c.len - 1))   // 优化 handle->write_pos % handle->save_c.len
-#define _FIFO_READ_POS(handle)      ((handle)->read_pos & ((handle)->save_c.len - 1))    // 优化 handle->read_pos % handle->save_c.len
-#define _FIFO_IS_EMPTY(handle)      ((handle)->read_pos == (handle)->write_pos)
+#define _FIFO_USED_LEN(_handle)     ((_handle)->in - (_handle)->out)
+#define _FIFO_FREE_LEN(_handle)     ((_handle)->save_c.len - (_FIFO_USED_LEN(_handle)))
+#define _FIFO_IN_POS(_handle)       ((_handle)->in & ((_handle)->save_c.len - 1))   // 优化 _handle->write_pos % _handle->save_c.len
+#define _FIFO_OUT_POS(_handle)      ((_handle)->out & ((_handle)->save_c.len - 1))    // 优化 _handle->read_pos % _handle->save_c.len
 
 struct HyFifo_s {
     HyFifoSaveConfig_s  save_c;
 
-    char                *buf;
-    hy_u32_t            read_pos;
-    hy_u32_t            write_pos;
-    HyThreadMutex_s     *mutex;
+    char                *buf;       ///< 
+    hy_u32_t            out;        ///< 队头
+    hy_u32_t            in;         ///< 队尾
 };
 
 hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len)
 {
-    HY_ASSERT_RET_VAL(!handle || !buf || len == 0, -1);
-    hy_u32_t len_tmp = 0;
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
+    hy_u32_t l;
 
-    len_tmp = HY_UTILS_MIN(len, handle->save_c.len - _FIFO_WRITE_POS(handle));
+    if (len > _FIFO_FREE_LEN(handle)) {
+        LOGW("not enough space to write \n");
 
-#ifdef USE_MB
-    // 确保其他线程对write_pos的可见性
-    HY_SMP_MB();
-#endif
-
-    if (handle->save_c.is_lock) {
-        HyThreadMutexLock_m(handle->mutex);
+        len = _FIFO_FREE_LEN(handle);
     }
 
-    memcpy(handle->buf + _FIFO_WRITE_POS(handle), buf, len_tmp);
-    memcpy(handle->buf, buf + len_tmp, len - len_tmp);
+    // len = HY_UTILS_MIN(len, _FIFO_FREE_LEN(handle));
 
-#ifdef USE_MB
-    // 确保write_pos不会优化到上面去
-    HY_SMP_WMB();
-#endif
+    // 在开始将字节放入fifo之前，请确保对out索引进行采样。
+    __sync_synchronize();
 
-    handle->write_pos += len;
+    l = HY_UTILS_MIN(len, handle->save_c.len - _FIFO_IN_POS(handle));
+    memcpy(handle->buf + _FIFO_IN_POS(handle), buf, l);
+    memcpy(handle->buf, buf + l, len - l);
 
-    if (handle->save_c.is_lock) {
-        HyThreadMutexUnLock_m(handle->mutex);
-    }
+    // 在更新索引中的fifo->in之前，请确保将字节添加到fifo中。
+    __sync_synchronize();
 
-    return len;
-}
-
-static hy_s32_t _fifo_read_com(HyFifo_s *handle, void *buf, hy_u32_t len)
-{
-    hy_u32_t len_tmp = 0;
-
-    if (_FIFO_IS_EMPTY(handle)) {
-        return 0;
-    }
-
-    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(handle));
-
-#ifdef USE_MB
-    // 确保其他线程对read_pos的可见性
-    HY_SMP_WMB();
-#endif
-
-    len_tmp = HY_UTILS_MIN(len, handle->save_c.len - _FIFO_READ_POS(handle));
-
-    memcpy(buf, handle->buf + _FIFO_READ_POS(handle), len_tmp);
-    memcpy(buf + len_tmp, handle->buf, len - len_tmp);
-
-#ifdef USE_MB
-    // 确保read_pos不会优化到上面去
-    HY_SMP_MB();
-#endif
-
-    return len;
-}
-
-hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len)
-{
-    HY_ASSERT_RET_VAL(!handle || !buf || len == 0, -1);
-
-    len = _fifo_read_com(handle, buf, len);
-
-    if (handle->save_c.is_lock) {
-        HyThreadMutexLock_m(handle->mutex);
-    }
-    handle->read_pos += len;
-    if (handle->save_c.is_lock) {
-        HyThreadMutexUnLock_m(handle->mutex);
-    }
+    handle->in += len;
 
     return len;
 }
 
 hy_s32_t HyFifoReadPeek(HyFifo_s *handle, void *buf, hy_u32_t len)
 {
-    HY_ASSERT_RET_VAL(!handle || !buf || len == 0, -1);
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
+    hy_u32_t l;
 
-    return _fifo_read_com(handle, buf, len);
+    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(handle));
+
+    // 在开始从fifo中删除字节之前，请确保对索引中的in进行采样。
+    __sync_synchronize();
+
+    l = HY_UTILS_MIN(len, handle->save_c.len - _FIFO_OUT_POS(handle));
+    memcpy(buf, handle->buf + _FIFO_OUT_POS(handle), l);
+    memcpy(buf + l, handle->buf, len - l);
+
+    // 在更新fifo->out索引之前，请确保从kfifo中删除字节。
+    __sync_synchronize();
+
+    return len;
 }
 
-void HyFifoReset(HyFifo_s *handle)
+hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len)
 {
-    HY_ASSERT_RET(!handle);
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
 
-    if (handle->save_c.is_lock) {
-        HyThreadMutexLock_m(handle->mutex);
-    }
-    handle->write_pos = handle->read_pos = 0;
-    HY_MEMSET(handle->buf, handle->save_c.len);
-    if (handle->save_c.is_lock) {
-        HyThreadMutexUnLock_m(handle->mutex);
-    }
+    len = HyFifoReadPeek(handle, buf, len);
+    handle->out += len;
+
+    return len;
 }
 
 hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len)
@@ -162,16 +120,18 @@ hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len)
     HY_ASSERT_RET_VAL(!handle, -1);
 
     len = HY_UTILS_MIN(len, _FIFO_USED_LEN(handle));
-
-    if (handle->save_c.is_lock) {
-        HyThreadMutexLock_m(handle->mutex);
-    }
-    handle->read_pos += len;
-    if (handle->save_c.is_lock) {
-        HyThreadMutexUnLock_m(handle->mutex);
-    }
+    handle->out += len;
 
     return len;
+}
+
+void HyFifoReset(HyFifo_s *handle)
+{
+    HY_ASSERT_RET(!handle);
+
+    handle->in = 0;
+    handle->out = 0;
+    HY_MEMSET(handle->buf, handle->save_c.len);
 }
 
 void HyFifoDumpAll(HyFifo_s *handle)
@@ -185,23 +145,23 @@ void HyFifoDumpContent(HyFifo_s *handle)
 {
     HY_ASSERT_RET(!handle);
 
-    hy_u32_t len_tmp;
+    hy_u32_t len;
 
-    len_tmp = handle->save_c.len - _FIFO_READ_POS(handle);
-    len_tmp = HY_UTILS_MIN(len_tmp, _FIFO_USED_LEN(handle));
+    len = handle->save_c.len - _FIFO_OUT_POS(handle);
+    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(handle));
 
     LOGD("used len: %u, write_pos: %u, read_pos: %u \n",
-         _FIFO_USED_LEN(handle), handle->write_pos, handle->read_pos);
+         _FIFO_USED_LEN(handle), handle->in, handle->out);
 
-    HyHex(handle->buf + _FIFO_READ_POS(handle), len_tmp, 1);
-    HyHex(handle->buf, _FIFO_USED_LEN(handle) - len_tmp, 1);
+    HyHex(handle->buf + _FIFO_OUT_POS(handle), len, 1);
+    HyHex(handle->buf, _FIFO_USED_LEN(handle) - len, 1);
 }
 
 hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, -1);
 
-    return handle->save_c.len - _FIFO_USED_LEN(handle);
+    return _FIFO_FREE_LEN(handle);
 }
 
 hy_s32_t HyFifoGetTotalLen(HyFifo_s *handle)
@@ -222,7 +182,7 @@ hy_s32_t HyFifoIsEmpty(HyFifo_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, -1);
 
-    return _FIFO_IS_EMPTY(handle);
+    return handle->in == handle->out;
 }
 
 hy_s32_t HyFifoIsFull(HyFifo_s *handle)
@@ -238,8 +198,6 @@ void HyFifoDestroy(HyFifo_s **handle_pp)
     HyFifo_s *handle = *handle_pp;
 
     HY_MEM_FREE_PP(&handle->buf);
-
-    HyThreadMutexDestroy(&handle->mutex);
 
     LOGI("fifo destroy, handle: %p \n", handle);
     HY_MEM_FREE_PP(handle_pp);
@@ -261,14 +219,8 @@ HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c)
         handle->buf = HY_MEM_MALLOC_BREAK(char *, fifo_c->save_c.len);
         HY_MEMCPY(&handle->save_c, &fifo_c->save_c, sizeof(fifo_c->save_c));
 
-        handle->write_pos = 0;
-        handle->read_pos = 0;
-
-        handle->mutex = HyThreadMutexCreate_m();
-        if (!handle->mutex) {
-            LOGE("HyThreadMutexCreate_m failed \n");
-            break;
-        }
+        handle->in = 0;
+        handle->out = 0;
 
         LOGI("fifo create, handle: %p \n", handle);
         return handle;

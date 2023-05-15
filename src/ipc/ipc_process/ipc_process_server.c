@@ -408,16 +408,14 @@ void *ipc_process_server_create(HyIpcProcessConfig_s *ipc_process_c)
         }
 
         sem_init(&context->cb_sem, 0, 0);
-        context->cb_fifo_h = HyFifoCreate_m(sizeof(_func_cb_s) * 1024,
-                HY_FIFO_MUTEX_LOCK);
+        context->cb_fifo_h = HyFifoCreate_m(sizeof(_func_cb_s) * 1024);
         if (!context->cb_fifo_h) {
             LOGE("hy fifo create failed \n");
             break;
         }
 
         sem_init(&context->ack_sem, 0, 0);
-        context->ack_fifo_h = HyFifoCreate_m(sizeof(_func_cb_s) * 1024,
-                HY_FIFO_MUTEX_LOCK);
+        context->ack_fifo_h = HyFifoCreate_m(sizeof(_func_cb_s) * 1024);
         if (!context->ack_fifo_h) {
             LOGE("hy fifo create failed \n");
             break;

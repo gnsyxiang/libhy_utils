@@ -197,8 +197,7 @@ void *HyPHYLedCreate(HyPHYLedConfig_s *phy_led_c)
         context = HY_MEM_MALLOC_BREAK(_net_wired_context_t *, sizeof(*context));
         HY_MEMCPY(&context->save_c, &phy_led_c->save_c, sizeof(phy_led_c->save_c));
 
-        context->led_fifo_handle = HyFifoCreate_m(sizeof(_led_mode_t) * 6,
-                HY_FIFO_MUTEX_UNLOCK);
+        context->led_fifo_handle = HyFifoCreate_m(sizeof(_led_mode_t) * 6);
         if (!context->led_fifo_handle) {
             LOGE("HyFifoCreate failed \n");
             break;
