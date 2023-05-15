@@ -138,6 +138,7 @@ static void _handle_module_destroy(_main_context_t *context)
 static hy_s32_t _handle_module_create(_main_context_t *context)
 {
     HyFifoConfig_s fifo_c;
+    HY_MEMSET(&fifo_c, sizeof(fifo_c));
     fifo_c.save_c.len           = 25;
     fifo_c.save_c.is_lock       = HY_FIFO_MUTEX_LOCK;
 

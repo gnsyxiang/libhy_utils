@@ -21,6 +21,7 @@
 lib_LTLIBRARIES = lib@project_name@.la
 
 SUBDIRS = \
+          fifo \
           ipc \
           net \
           thread \
@@ -67,7 +68,6 @@ _sources_com    += \
                    hy_bit.c \
                    hy_can.c \
                    hy_dynamic_array.c \
-                   hy_fifo.c \
                    hy_file.c \
                    hy_gpio.c \
                    hy_gpio_interrupt.c \
@@ -103,6 +103,7 @@ _ldadd_com      += \
                    $(top_builddir)/src/net/libhy_net.la \
                    $(top_builddir)/src/thread/libhy_thread.la \
                    $(top_builddir)/src/timer/libhy_timer.la \
+                   $(top_builddir)/src/fifo/libhy_fifo.la \
                    $(top_builddir)/src/uart/libhy_uart.la
 
 if COMPILE_LIBCJSON

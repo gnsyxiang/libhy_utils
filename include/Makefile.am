@@ -19,6 +19,7 @@
 # ===============================================================
 
 SUBDIRS = \
+          fifo \
           ipc \
           net \
           thread \
@@ -58,7 +59,6 @@ _install_headers_com    += \
                            hy_can.h \
                            hy_compile.h \
                            hy_dynamic_array.h \
-                           hy_fifo.h \
                            hy_file.h \
                            hy_gpio.h \
                            hy_gpio_interrupt.h \

@@ -19,6 +19,7 @@
 # ===============================================================
 
 SUBDIRS = \
+          fifo \
           libevent \
           thread \
           uart
@@ -66,7 +67,7 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la -lpthread
+_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
 bin_PROGRAMS                    += hy_can_demo
 hy_can_demo_SOURCES             = $(_sources_com) hy_can_demo.c
@@ -91,14 +92,6 @@ hy_dynamic_array_demo_CFLAGS    = $(_cflags_com)
 hy_dynamic_array_demo_CXXFLAGS  = $(_cxxflags_com)
 hy_dynamic_array_demo_LDFLAGS   = $(_ldflags_com)
 hy_dynamic_array_demo_LDADD     = $(_ldadd_com)
-
-bin_PROGRAMS                    += hy_fifo_demo
-hy_fifo_demo_SOURCES            = $(_sources_com) hy_fifo_demo.c
-hy_fifo_demo_CPPFLAGS           = $(_cppflags_com)
-hy_fifo_demo_CFLAGS             = $(_cflags_com)
-hy_fifo_demo_CXXFLAGS           = $(_cxxflags_com)
-hy_fifo_demo_LDFLAGS            = $(_ldflags_com)
-hy_fifo_demo_LDADD              = $(_ldadd_com)
 
 bin_PROGRAMS                    += hy_package_list_demo
 hy_package_list_demo_SOURCES    = $(_sources_com) hy_package_list_demo.c

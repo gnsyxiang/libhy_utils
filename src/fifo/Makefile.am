@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    01/04 2022 11:35
+# @date    15/05 2023 10:46
 # @version v0.0.1
 # 
 # @since    note
@@ -13,12 +13,12 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        01/04 2022      create the file
+#     00      zhenquan.qiu        15/05 2023      create the file
 # 
-#     last modified: 01/04 2022 11:35
+#     last modified: 15/05 2023 10:46
 # ===============================================================
 
-noinst_LTLIBRARIES = libhy_net.la
+noinst_LTLIBRARIES = libhy_fifo.la
 
 # ------------------
 # defining variables
@@ -38,26 +38,18 @@ _ldadd_com      =
 # ---------------------
 _no_error_com   +=
 
-_define_com     +=
+_define_com     += -D_GNU_SOURCE
 
 _include_com    += \
                    -I$(top_srcdir)/include/fifo \
-                   -I$(top_srcdir)/include/net    \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_socket.c \
-                   hy_epoll.c   \
-                   hy_net.c     \
-                   hy_phy_led.c
-
-_sources_com    += \
-                   net_config.c \
-                   net_wifi.c
+                   hy_fifo.c
 
 _cppflags_com   += \
-                   $(_no_error_com) \
-                   $(_include_com)  \
+                   $(_no_error_com)     \
+                   $(_include_com)      \
                    $(_define_com)
 
 _cflags_com     +=
@@ -66,12 +58,12 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(ldadd_com)
+_ldadd_com      += $(lib_com)
 
-libhy_net_la_SOURCES    = $(_sources_com)
-libhy_net_la_CPPFLAGS   = $(_cppflags_com)
-libhy_net_la_CFLAGS     = $(_cflags_com)
-libhy_net_la_CXXFLAGS   = $(_cxxflags_com)
-libhy_net_la_LDFLAGS    = $(_ldflags_com)
-libhy_net_la_LIBADD     = $(_ldadd_com)
+libhy_fifo_la_SOURCES       = $(_sources_com)
+libhy_fifo_la_CPPFLAGS      = $(_cppflags_com)
+libhy_fifo_la_CFLAGS        = $(_cflags_com)
+libhy_fifo_la_CXXFLAGS      = $(_cxxflags_com)
+libhy_fifo_la_LDFLAGS       = $(_ldflags_com)
+libhy_fifo_la_LIBADD        = $(_ldadd_com)
 
