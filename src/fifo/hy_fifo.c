@@ -63,17 +63,12 @@ hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len)
     HY_ASSERT_RET_VAL(!handle || !buf || len == 0, -1);
     hy_u32_t len_tmp = 0;
 
-    if (len > _FIFO_FREE_LEN(handle)) {
-        LOGE("write failed, len: %u, free_len: %u \n", len, _FIFO_FREE_LEN(handle));
-        return -1;
-    }
+    len_tmp = HY_UTILS_MIN(len, handle->save_c.len - _FIFO_WRITE_POS(handle));
 
 #ifdef USE_MB
     // 确保其他线程对write_pos的可见性
     HY_SMP_MB();
 #endif
-
-    len_tmp = HY_UTILS_MIN(len, handle->save_c.len - _FIFO_WRITE_POS(handle));
 
     if (handle->save_c.is_lock) {
         HyThreadMutexLock_m(handle->mutex);
@@ -207,6 +202,13 @@ hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle)
     HY_ASSERT_RET_VAL(!handle, -1);
 
     return handle->save_c.len - _FIFO_USED_LEN(handle);
+}
+
+hy_s32_t HyFifoGetTotalLen(HyFifo_s *handle)
+{
+    HY_ASSERT_RET_VAL(!handle, -1);
+
+    return handle->save_c.len;
 }
 
 hy_s32_t HyFifoGetUsedLen(HyFifo_s *handle)

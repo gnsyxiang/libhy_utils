@@ -173,6 +173,14 @@ hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle);
 hy_s32_t HyFifoGetUsedLen(HyFifo_s *handle);
 
 /**
+ * @brief 获取fifo使用的长度
+ *
+ * @param handle 句柄
+ * @return 成功返回对应值，失败返回-1
+ */
+hy_s32_t HyFifoGetTotalLen(HyFifo_s *handle);
+
+/**
  * @brief fifo是否为空
  *
  * @param handle 句柄
