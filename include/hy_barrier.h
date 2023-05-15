@@ -31,8 +31,11 @@ extern "C" {
 /* Optimization barrier */
 /* The "volatile" is due to gcc bugs */
 #ifndef HY_BARRIER
-#define HY_BARRIER()   __asm__ __volatile__("": : :"memory")    // volatile: 告诉编译barrier()周围的指令不要被优化；
-// memory: 告诉编译器汇编代码会使内存里面的值更改，编译器应使用内存里的新值而非寄存器里保存的老值。
+// __asm__用于指示编译器在此插入汇编语句
+// __volatile__用于告诉编译器，严禁将此处的汇编语句与其它的语句重组合优化
+// memory告诉编译器汇编代码会使内存里面的值更改，编译器应使用内存里的新值而非寄存器里保存的老值。
+// "":::表示这是个空指令。barrier()不用在此插入一条串行化汇编指令。
+#define HY_BARRIER()   __asm__ __volatile__("": : :"memory")
 #endif
 
 #ifndef HY_SMP_MB
