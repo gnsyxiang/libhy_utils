@@ -28,6 +28,26 @@ extern "C" {
 
 #include "hy_type.h"
 
+#define HY_TIME_TIMEVAL_ADD(_add1_ptr, _add2_ptr, _sum_ptr)             \
+do {                                                                    \
+    (_sum_ptr)->tv_sec = (_add1_ptr)->tv_sec + (_add2_ptr)->tv_sec;     \
+    (_sum_ptr)->tv_usec = (_add1_ptr)->tv_usec + (_add2_ptr)->tv_usec;  \
+    if ((_sum_ptr)->tv_usec >= 1000000) {                               \
+        (_sum_ptr)->tv_sec++;                                           \
+        (_sum_ptr)->tv_usec -= 1000000;                                 \
+    }                                                                   \
+} while (0)
+
+#define HY_TIME_TIMEVAL_SUB(_op1, _op2, _difference_ptr)                \
+do {                                                                    \
+    (_difference_ptr)->tv_sec = (_op1)->tv_sec - (_op2)->tv_sec;        \
+    (_difference_ptr)->tv_usec = (_op1)->tv_usec - (_op2)->tv_usec;     \
+    if ((_difference_ptr)->tv_usec < 0) {                               \
+        (_difference_ptr)->tv_sec--;                                    \
+        (_difference_ptr)->tv_usec += 1000000;                          \
+    }                                                                   \
+} while (0)
+
 /**
  * @brief 获取utc时间
  *
