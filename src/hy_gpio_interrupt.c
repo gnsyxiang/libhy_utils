@@ -148,8 +148,16 @@ HyGpioInterrupt_s *HyGpioInterruptCreate(HyGpioInterruptConfig_s *gpio_interrupt
         char val;
         read(handle->fd, &val, 1);
 
-        handle->thread_h = HyThreadCreate_m(
-            "gpio_interrupt_loop", _gpio_interrupt_loop_cb, handle);
+        HyThreadConfig_s thread_c;
+        const char *thread_name = "gpio_interrupt_loop";
+        HY_MEMSET(&thread_c, sizeof(thread_c));
+        thread_c.save_c.args = handle;
+        thread_c.save_c.policy = HY_THREAD_POLICY_SCHED_RR;
+        thread_c.save_c.priority = 10;
+        thread_c.save_c.thread_loop_cb = _gpio_interrupt_loop_cb;
+        HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
+                   thread_name, HY_STRLEN(thread_name));
+        handle->thread_h = HyThreadCreate(&thread_c);
         if (!handle->thread_h) {
             LOGE("HyThreadCreate failed \n");
             break;

@@ -72,9 +72,9 @@ HyGpioInterrupt_s *HyGpioInterruptCreate(HyGpioInterruptConfig_s *gpio_interrupt
 /**
  * @brief 销毁周期性获取gpio中断模块
  *
- * @param handle 句柄的地址（二级指针）
+ * @param handle_pp 句柄的地址（二级指针）
  */
-void HyGpioInterruptDestroy(HyGpioInterrupt_s **handle);
+void HyGpioInterruptDestroy(HyGpioInterrupt_s **handle_pp);
 
 #ifdef __cplusplus
 }
