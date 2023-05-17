@@ -40,7 +40,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/net    \
+                   -I$(top_srcdir)/include/net \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -60,13 +60,13 @@ _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
                    $(ldadd_com)
 
-bin_PROGRAMS                    += hy_epoll_demo
-hy_epoll_demo_SOURCES           = $(_sources_com) hy_epoll_demo.c
-hy_epoll_demo_CPPFLAGS          = $(_cppflags_com)
-hy_epoll_demo_CFLAGS            = $(_cflags_com)
-hy_epoll_demo_CXXFLAGS          = $(_cxxflags_com)
-hy_epoll_demo_LDFLAGS           = $(_ldflags_com)
-hy_epoll_demo_LDADD             = $(_ldadd_com)
+bin_PROGRAMS                += hy_epoll_demo
+hy_epoll_demo_SOURCES       = $(_sources_com) hy_epoll_demo.c
+hy_epoll_demo_CPPFLAGS      = $(_cppflags_com)
+hy_epoll_demo_CFLAGS        = $(_cflags_com)
+hy_epoll_demo_CXXFLAGS      = $(_cxxflags_com)
+hy_epoll_demo_LDFLAGS       = $(_ldflags_com)
+hy_epoll_demo_LDADD         = $(_ldadd_com)
 
 bin_PROGRAMS                += hy_net_demo
 hy_net_demo_SOURCES         = $(_sources_com) hy_net_demo.c
@@ -84,3 +84,10 @@ hy_phy_led_demo_CXXFLAGS    = $(_cxxflags_com)
 hy_phy_led_demo_LDFLAGS     = $(_ldflags_com)
 hy_phy_led_demo_LDADD       = $(_ldadd_com)
 
+bin_PROGRAMS                += hy_socket_demo
+hy_socket_demo_SOURCES      = $(_sources_com) hy_socket_demo.c
+hy_socket_demo_CPPFLAGS     = $(_cppflags_com)
+hy_socket_demo_CFLAGS       = $(_cflags_com)
+hy_socket_demo_CXXFLAGS     = $(_cxxflags_com)
+hy_socket_demo_LDFLAGS      = $(_ldflags_com)
+hy_socket_demo_LDADD        = $(_ldadd_com)

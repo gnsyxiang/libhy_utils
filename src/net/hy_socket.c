@@ -193,18 +193,26 @@ hy_s32_t HySocketAccept(hy_s32_t socket_fd, struct sockaddr_in *client_addr)
     new_fd = accept(socket_fd, (struct sockaddr *)client_addr, &addr_len);
     if (-1 == new_fd) {
         LOGES("accept failed \n");
+        return -1;
     }
 
+    LOGI("new client socket fd: %d \n", new_fd);
     return new_fd;
 }
 
 hy_s32_t HySocketListen(hy_s32_t socket_fd, const char *ip, hy_u16_t port)
 {
-    HY_ASSERT_RET_VAL(!ip, -1);
     hy_s32_t ret;
     struct sockaddr_in addr;
+    hy_s32_t flag = 1;
 
     do {
+        ret = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &flag,sizeof(flag));
+        if (ret == -1){
+            LOGES("setsockopt failed \n");
+            break;
+        }
+
         HY_MEMSET(&addr, sizeof(addr));
         addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
@@ -257,6 +265,7 @@ void HySocketDestroy(hy_s32_t *socket_fd)
 {
     if (socket_fd && *socket_fd) {
         LOGI("close socket fd: %d \n", *socket_fd);
+
         close(*socket_fd);
         *socket_fd = -1;
     }
