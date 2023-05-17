@@ -163,6 +163,7 @@ get_com_config()
     cppflag="${cppflag} -Wno-error=unused-parameter -Wno-unused-parameter"
     cppflag="${cppflag} -Wno-error=unused-result -Wno-unused-result"
     cppflag="${cppflag} -Wno-error=unused-function"
+    cppflag="${cppflag} -Wno-error=unused-variable"
 
     ldflag="${ldflag} -rdynamic"
     ldflag="${ldflag} -Wl,--gc-sections"

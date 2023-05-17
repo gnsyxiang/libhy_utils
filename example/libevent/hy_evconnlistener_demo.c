@@ -119,7 +119,7 @@ static void _handle_module_destroy(_main_context_s *context)
         {NULL, NULL, NULL},
     };
 
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
+    // HY_MODULE_RUN_DESTROY_HANDLE(module);
 }
 
 static hy_s32_t _handle_module_create(_main_context_s *context)
