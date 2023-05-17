@@ -21,6 +21,7 @@
 SUBDIRS = \
           fifo \
           libevent \
+          net \
           thread \
           uart
 

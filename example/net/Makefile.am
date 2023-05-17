@@ -40,8 +40,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/$(run_os)/net    \
-                   -I$(top_srcdir)/include/$(run_os)        \
+                   -I$(top_srcdir)/include/net    \
                    -I$(top_srcdir)/include
 
 _sources_com    +=

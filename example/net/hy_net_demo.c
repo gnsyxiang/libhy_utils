@@ -22,14 +22,15 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "hy_hal/hy_assert.h"
-#include "hy_hal/hy_type.h"
-#include "hy_hal/hy_mem.h"
-#include "hy_hal/hy_string.h"
-#include "hy_hal/hy_signal.h"
-#include "hy_hal/hy_module.h"
-#include "hy_hal/hy_hal_utils.h"
-#include "hy_hal/hy_log.h"
+#include <hy_log/hy_log.h>
+
+#include "hy_assert.h"
+#include "hy_type.h"
+#include "hy_mem.h"
+#include "hy_string.h"
+#include "hy_signal.h"
+#include "hy_module.h"
+#include "hy_utils.h"
 
 #include "hy_net.h"
 
@@ -73,7 +74,6 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.config_file               = "../res/hy_log/zlog.conf";
     log_c.fifo_len                  = 10 * 1024;
-    log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
 
