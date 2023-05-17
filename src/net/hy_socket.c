@@ -17,11 +17,11 @@
  * 
  *     last modified: 05/05 2023 10:30
  */
-#include <netdb.h>
 #include <stdio.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <netdb.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 
 #include <hy_log/hy_log.h>
 
@@ -54,109 +54,22 @@
  * 因此只要保证接受方与发送发使用的字节序相同，就不需要进行转换
  */
 
-hy_s32_t HySocketListen(const char *ip, hy_u16_t port)
-{
-    HY_ASSERT_RET_VAL(!ip, -1);
-    hy_s32_t listen_fd = -1;
-    hy_s32_t ret;
-    struct sockaddr_in addr;
-
-    do {
-        listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (listen_fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
-
-        HY_MEMSET(&addr, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = inet_addr(ip);
-
-        ret = bind(listen_fd, (struct sockaddr *)&addr, sizeof(addr));
-        if (ret < 0) {
-            LOGES("bind failed \n");
-            break;
-        }
-
-        ret = listen(listen_fd, 32);
-        if (ret != 0) {
-            LOGES("listen failed \n");
-            break;
-        }
-
-        LOGI("listen fd: %d \n", listen_fd);
-        return listen_fd;
-    } while(0);
-
-    if (listen_fd) {
-        close(listen_fd);
-    }
-
-    LOGE("socket bind failed \n");
-    return -1;
-}
-
-hy_s32_t HySocketConnect(const char *ip, const hy_u16_t port)
-{
-    HY_ASSERT_RET_VAL(!ip, -1);
-    hy_s32_t socket_fd = -1;
-    hy_s32_t ret;
-    struct sockaddr_in addr;
-
-    do {
-        socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (socket_fd < 0) {
-            LOGES("socket failed \n");
-            break;
-        }
-
-        HY_MEMSET(&addr, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = inet_addr(ip);
-
-        ret = connect(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
-        if(ret < 0) {
-            LOGES("connect failed \n");
-            break;
-        }
-
-        LOGI("socket_fd: %d \n", socket_fd);
-        return socket_fd;
-    } while(0);
-
-    if (socket_fd) {
-        close(socket_fd);
-    }
-
-    LOGE("socket connect failed \n");
-    return -1;
-}
-
-hy_s32_t HySocketClientWriteOnce(const char *ip, hy_u16_t port,
-                                 void *buf, hy_u32_t len)
+hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
+                                    void *buf, hy_u32_t len)
 {
     HY_ASSERT_RET_VAL(!ip || !buf, -1);
-    hy_s32_t socket_fd;
+    hy_s32_t socket_fd = -1;
     hy_s32_t ret;
-    struct sockaddr_in addr;
 
     do {
-        socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+        socket_fd = HySocketCreate(HY_SOCKET_DOMAIN_TCP);
         if (socket_fd < 0) {
-            LOGES("socket failed \n");
+            LOGES("HySocketCreate failed \n");
             break;
         }
 
-        HY_MEMSET(&addr, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = inet_addr(ip);
-
-        ret = connect(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
-        if(ret < 0) {
-            LOGES("connect failed \n");
+        if (-1 == HySocketConnect(socket_fd, ip, port)) {
+            LOGE("HySocketConnect failed \n");
             break;
         }
 
@@ -166,16 +79,216 @@ hy_s32_t HySocketClientWriteOnce(const char *ip, hy_u16_t port,
             break;
         }
 
-        if (socket_fd) {
-            close(socket_fd);
-        }
+        HySocketDestroy(&socket_fd);
 
         return ret;
     } while(0);
 
     if (socket_fd) {
-        close(socket_fd);
+        HySocketDestroy(&socket_fd);
     }
 
     return -1;
+}
+
+hy_s32_t HySocketUnixConnect(hy_s32_t socket_fd, const char *file_path)
+{
+    HY_ASSERT_RET_VAL(!file_path, -1);
+    hy_s32_t ret;
+    struct sockaddr_un server_addr;
+
+    HY_MEMSET(&server_addr, sizeof(server_addr));
+    server_addr.sun_family = AF_UNIX;
+    strcpy(server_addr.sun_path, file_path);
+
+    ret = connect(socket_fd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+    if(ret < 0) {
+        LOGES("unix socket connect failed \n");
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+hy_s32_t HySocketUnixListen(hy_s32_t socket_fd, const char *file_path)
+{
+    HY_ASSERT_RET_VAL(!file_path, -1);
+    hy_s32_t ret;
+    struct sockaddr_un addr;
+
+    do {
+        unlink(file_path);
+
+        HY_MEMSET(&addr, sizeof(addr));
+        addr.sun_family = AF_UNIX;
+        strncpy(addr.sun_path, file_path, sizeof(addr.sun_path) - 1);
+
+        ret = bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
+        if (ret < 0) {
+            LOGES("unix bind failed \n");
+            break;
+        }
+
+        ret = listen(socket_fd, 16);
+        if (ret != 0) {
+            LOGES("unix listen failed \n");
+            break;
+        }
+
+        return 0;
+    } while(0);
+
+    unlink(file_path);
+
+    LOGE("unix socket listen failed \n");
+    return -1;
+}
+
+hy_s32_t HySocketUnixAccept(hy_s32_t socket_fd, struct sockaddr_un *client_addr)
+{
+    HY_ASSERT_RET_VAL(!client_addr, -1);
+    hy_s32_t new_fd = -1;
+
+    socklen_t addr_len = sizeof(*client_addr);
+    new_fd = accept(socket_fd, (struct sockaddr *)client_addr, &addr_len);
+    if (-1 == new_fd) {
+        LOGES("unix accept failed \n");
+    }
+
+    return new_fd;
+}
+
+void HySocketUnixDestroy(hy_s32_t *socket_fd, const char *file_path)
+{
+    if (socket_fd && *socket_fd) {
+        LOGI("close socket fd: %d \n", *socket_fd);
+        close(*socket_fd);
+        *socket_fd = -1;
+    }
+
+    if (file_path) {
+        unlink(file_path);
+    }
+}
+
+hy_s32_t HySocketUnixCreate(void)
+{
+    hy_s32_t socket_fd = -1;
+
+    socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (socket_fd < 0) {
+        LOGES("unix socket failed \n");
+    }
+
+    LOGI("unix socket fd: %d \n", socket_fd);
+    return socket_fd;
+}
+
+hy_s32_t HySocketAccept(hy_s32_t socket_fd, struct sockaddr_in *client_addr)
+{
+    HY_ASSERT_RET_VAL(!client_addr, -1);
+    hy_s32_t new_fd = -1;
+
+    socklen_t addr_len = sizeof(*client_addr);
+    new_fd = accept(socket_fd, (struct sockaddr *)client_addr, &addr_len);
+    if (-1 == new_fd) {
+        LOGES("accept failed \n");
+    }
+
+    return new_fd;
+}
+
+hy_s32_t HySocketListen(hy_s32_t socket_fd, const char *ip, hy_u16_t port)
+{
+    HY_ASSERT_RET_VAL(!ip, -1);
+    hy_s32_t ret;
+    struct sockaddr_in addr;
+
+    do {
+        HY_MEMSET(&addr, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        if (ip) {
+            addr.sin_addr.s_addr = inet_addr(ip);
+        } else {
+            addr.sin_addr.s_addr = INADDR_ANY;
+        }
+
+        ret = bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
+        if (ret < 0) {
+            LOGES("bind failed \n");
+            break;
+        }
+
+        ret = listen(socket_fd, 16);
+        if (ret != 0) {
+            LOGES("listen failed \n");
+            break;
+        }
+
+        return 0;
+    } while(0);
+
+    LOGE("socket listen failed \n");
+    return -1;
+}
+
+hy_s32_t HySocketConnect(hy_s32_t socket_fd, const char *ip, const hy_u16_t port)
+{
+    HY_ASSERT_RET_VAL(!ip, -1);
+    hy_s32_t ret;
+    struct sockaddr_in server_addr;
+
+    HY_MEMSET(&server_addr, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(ip);
+
+    ret = connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if(ret < 0) {
+        LOGES("socket connect failed \n");
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+void HySocketDestroy(hy_s32_t *socket_fd)
+{
+    if (socket_fd && *socket_fd) {
+        LOGI("close socket fd: %d \n", *socket_fd);
+        close(*socket_fd);
+        *socket_fd = -1;
+    }
+}
+
+hy_s32_t HySocketCreate(HySocketDomain_e domain)
+{
+    hy_s32_t socket_fd = -1;
+
+    switch (domain) {
+        case HY_SOCKET_DOMAIN_TCP:
+            socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+            if (socket_fd < 0) {
+                LOGES("socket failed \n");
+                socket_fd = -1;
+                break;
+            }
+            LOGI("tcp socket fd: %d \n", socket_fd);
+            break;
+        case HY_SOCKET_DOMAIN_UDP:
+            socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
+            if (socket_fd < 0) {
+                LOGES("socket failed \n");
+                socket_fd = -1;
+                break;
+            }
+            LOGI("udp socket fd: %d \n", socket_fd);
+            break;
+        default:
+            LOGE("the domain is error \n");
+            break;
+    }
+
+    return socket_fd;
 }
