@@ -30,24 +30,24 @@ extern "C" {
 
 #include "hy_type.h"
 
-#define HY_MEM_BYTE(x)                          (*((unsigned char *)(x)))                                   ///< 得到指定地址上的一个字节
-#define HY_MEM_WORD(x)                          (*((unsigned short *)(x)))                                  ///< 得到指定地址上的一个字
-#define HY_MEM_DOUBLE_WORD(x)                   (*((unsigned int *)(x)))                                    ///< 得到指定地址上的一个双字
+#define HY_MEM_BYTE(x)                          (*((unsigned char *)(x)))                                       ///< 得到指定地址上的一个字节
+#define HY_MEM_WORD(x)                          (*((unsigned short *)(x)))                                      ///< 得到指定地址上的一个字
+#define HY_MEM_DOUBLE_WORD(x)                   (*((unsigned int *)(x)))                                        ///< 得到指定地址上的一个双字
 
-#define HY_MEM_OFFSETOF(type, member)           ((hy_s32_t) &((type *)0)->member)                             ///< 得到一个member在结构体(struct)中的偏移量
-#define HY_MEM_OFFSETOF_SIZE(type, member)      sizeof(((type *)0)->member)                                 ///< 得到一个结构体中member所占用的字节数
+#define HY_MEM_OFFSETOF(_type, _member)         ((hy_s32_t) &((_type *)0)->_member)                             ///< 得到一个member在结构体(struct)中的偏移量
+#define HY_MEM_OFFSETOF_SIZE(_type, _member)    sizeof(((_type *)0)->_member)                                   ///< 得到一个结构体中member所占用的字节数
 
-#define HY_MEM_LSB_BYTE_2_WORD(array)           ((((unsigned short) (array)[0]) << 8) + (array)[1])         ///< 按照LSB格式把两个字节转化为一个Word
-#define HY_MEM_LSB_WORD_2_BYTE(array, word)     (array)[0] = ((word) / 256); (array)[1] = ((word) & 0xFF)   ///< 按照LSB格式把一个Word转化为两个字节
+#define HY_MEM_LSB_BYTE_2_WORD(_array)          ((((unsigned short) (_array)[0]) << 8) + (_array)[1])           ///< 按照LSB格式把两个字节转化为一个Word
+#define HY_MEM_LSB_WORD_2_BYTE(_array, _word)   (_array)[0] = ((_word) / 256); (_array)[1] = ((_word) & 0xFF)   ///< 按照LSB格式把一个Word转化为两个字节
 
-#define HY_MEM_ALIGN(len, align)                (((len) + (align) - 1) & ~((align) - 1))                    ///< 字节对齐
-#define HY_MEM_ALIGN2(len)                      HY_MEM_ALIGN(len, 2)                                        ///< 2字节对齐
-#define HY_MEM_ALIGN4(len)                      HY_MEM_ALIGN(len, 4)                                        ///< 4字节对齐
-#define HY_MEM_ALIGN4_UP(len)                   (HY_MEM_ALIGN(len, 4) + HY_MEM_ALIGN4(1))                   ///< 4字节向上对齐(原来已经事4字节对齐，使用后再增加4个字节)
+#define HY_MEM_ALIGN(_len, _align)              (((_len) + (_align) - 1) & ~((_align) - 1))                     ///< 字节对齐
+#define HY_MEM_ALIGN2(_len)                     HY_MEM_ALIGN(_len, 2)                                           ///< 2字节对齐
+#define HY_MEM_ALIGN4(_len)                     HY_MEM_ALIGN(_len, 4)                                           ///< 4字节对齐
+#define HY_MEM_ALIGN4_UP(_len)                  (HY_MEM_ALIGN(_len, 4) + HY_MEM_ALIGN4(1))                      ///< 4字节向上对齐(原来已经事4字节对齐，使用后再增加4个字节)
 
-#define HY_MEMCMP(dst, src, size)               memcmp(dst, src, size)
-#define HY_MEMSET(ptr, size)                    memset(ptr, '\0', size)
-#define HY_MEMCPY(dst, src, size)               memcpy(dst, src, size)
+#define HY_MEMCMP(_dst, _src, _size)            memcmp(_dst, _src, _size)
+#define HY_MEMSET(_ptr, _size)                  memset(_ptr, '\0', _size)
+#define HY_MEMCPY(_dst, _src, _size)            memcpy(_dst, _src, _size)
 
 #define HY_MEM_CALLOC_BREAK(type, size)             \
 ({                                                  \

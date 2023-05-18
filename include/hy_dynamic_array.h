@@ -26,6 +26,8 @@ extern "C" {
 
 #include "hy_type.h"
 
+typedef struct HyDynamicArray_s HyDynamicArray_s;
+
 /**
  * @brief 创建动态数组
  *
@@ -34,21 +36,21 @@ extern "C" {
  *
  * @return 成功返回句柄，失败返回NULL
  */
-void *HyDynamicArrayCreate(hy_u32_t min_len, hy_u32_t max_len);
+HyDynamicArray_s *HyDynamicArrayCreate(hy_u32_t min_len, hy_u32_t max_len);
 
 /**
  * @brief 销毁动态数组
  *
- * @param handle 句柄的地址（二级指针）
+ * @param handle_pp 句柄的地址（二级指针）
  */
-void HyDynamicArrayDestroy(void **handle);
+void HyDynamicArrayDestroy(HyDynamicArray_s **handle_pp);
 
 /**
 * @brief 复位动态数据
 *
 * @param handle 句柄
 */
-void HyDynamicArrayReset(void *handle);
+void HyDynamicArrayReset(HyDynamicArray_s *handle);
 
 /**
  * @brief 从动态数组中读取
@@ -59,7 +61,7 @@ void HyDynamicArrayReset(void *handle);
  *
  * @return 返回实际读取到的长度
  */
-hy_s32_t HyDynamicArrayRead(void *handle, void *buf, hy_u32_t len);
+hy_s32_t HyDynamicArrayRead(HyDynamicArray_s *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 向动态数组中写入
@@ -70,7 +72,7 @@ hy_s32_t HyDynamicArrayRead(void *handle, void *buf, hy_u32_t len);
  *
  * @return 成功返回写入的长度，失败返回-1
  */
-hy_s32_t HyDynamicArrayWrite(void *handle, const void *buf, hy_u32_t len);
+hy_s32_t HyDynamicArrayWrite(HyDynamicArray_s *handle, const void *buf, hy_u32_t len);
 
 /**
  * @brief 向动态数组中写入
@@ -81,7 +83,7 @@ hy_s32_t HyDynamicArrayWrite(void *handle, const void *buf, hy_u32_t len);
  *
  * @return 成功返回写入的长度，失败返回-1
  */
-hy_s32_t HyDynamicArrayWriteVprintf(void *handle, const char *fmt, va_list *args);
+hy_s32_t HyDynamicArrayWriteVprintf(HyDynamicArray_s *handle, const char *fmt, va_list *args);
 
 
 #ifdef __cplusplus

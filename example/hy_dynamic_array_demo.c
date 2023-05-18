@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     char buf[128] = {0};
     char *data = NULL;
 
-    void *handle = HyDynamicArrayCreate(4, 12);
+    HyDynamicArray_s *handle = HyDynamicArrayCreate(4, 12);
 
     data = "1234";
     HyDynamicArrayWrite(handle, data, strlen(data));
