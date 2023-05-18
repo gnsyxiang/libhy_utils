@@ -27,14 +27,6 @@ extern "C" {
 #include "hy_type.h"
 
 /**
- * @brief 锁状态
- */
-typedef enum {
-    HY_FIFO_LOCK_MUTEX_UNLOCK,          ///< 不加锁
-    HY_FIFO_LOCK_MUTEX_LOCK,            ///< 加锁
-} HyFifoLockMutex_e;
-
-/**
  * @brief 配置参数
  */
 typedef struct {
@@ -53,11 +45,11 @@ typedef struct HyFifoLock_s HyFifoLock_s;
 /**
  * @brief 创建fifo模块
  *
- * @param fifo_c 配置参数
+ * @param fifo_lock_c 配置参数
  *
  * @return 成功返回句柄，失败返回NULL
  */
-HyFifoLock_s *HyFifoLockCreate(HyFifoLockConfig_s *fifo_c);
+HyFifoLock_s *HyFifoLockCreate(HyFifoLockConfig_s *fifo_lock_c);
 
 /**
  * @brief 创建fifo模块宏
@@ -66,12 +58,12 @@ HyFifoLock_s *HyFifoLockCreate(HyFifoLockConfig_s *fifo_c);
  *
  * @return 成功返回句柄，失败返回NULL
  */
-#define HyFifoLockCreate_m(_len)                \
-    ({                                          \
-        HyFifoLockConfig_s fifo_c;              \
-        HY_MEMSET(&fifo_c, sizeof(fifo_c));     \
-        fifo_c.save_c.len = _len;               \
-        HyFifoLockCreate(&fifo_c);              \
+#define HyFifoLockCreate_m(_len)                        \
+    ({                                                  \
+        HyFifoLockConfig_s fifo_lock_c;                 \
+        HY_MEMSET(&fifo_lock_c, sizeof(fifo_lock_c));   \
+        fifo_lock_c.save_c.len = _len;                  \
+        HyFifoLockCreate(&fifo_lock_c);                 \
      })
 
 /**
@@ -88,9 +80,7 @@ void HyFifoLockDestroy(HyFifoLock_s **handle_pp);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回写入的大小，失败返回-1
- *
- * @note 没有足够空间写入时，一个字节也不会写入，直接返回-1
+ * @return 返回写入的大小
  */
 hy_s32_t HyFifoLockWrite(HyFifoLock_s *handle, const void *buf, hy_u32_t len);
 
@@ -112,11 +102,9 @@ hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回读取到的字节数，失败返回-1
+ * @return 返回读取到的字节数
  *
- * @note
- * 1, 当fifo为空时，直接返回0
- * 2, 该操作不会删除数据
+ * @note 该操作不会删除数据
  */
 hy_s32_t HyFifoLockReadPeek(HyFifoLock_s *handle, void *buf, hy_u32_t len);
 
