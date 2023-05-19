@@ -227,37 +227,60 @@ hy_s32_t HyFileReadN(hy_s32_t fd, void *buf, hy_u32_t len)
     return offset;
 }
 
-hy_s32_t HyFileReadNTimeout(hy_s32_t fd, void *buf, hy_u32_t cnt, hy_u32_t ms)
+hy_s32_t HyFileReadTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms)
 {
-    hy_s32_t len = 0;
+    hy_u32_t ret;
     fd_set rfds;
     struct timeval time;
 
     FD_ZERO(&rfds);
     FD_SET(fd, &rfds);
 
-	time.tv_sec = ms / 1000;
-	time.tv_usec = (ms % 1000) * 1000;
+    time.tv_sec = ms / 1000;
+    time.tv_usec = (ms % 1000) * 1000;
 
-    hy_u32_t ret = select(fd+1, &rfds, NULL, NULL, &time);
+    ret = select(fd + 1, &rfds, NULL, NULL, &time);
     switch (ret) {
         case -1:
-            LOGES("select error");
-            cnt = -1;
+            LOGES("select error \n");
             break;
         case 0:
-            LOGES("select timeout");
-            cnt = -1;
+            LOGT("select timeout \n");
             break;
         default:
-            if ((len = HyFileReadN(fd, buf, cnt)) == -1) {
-                LOGES("read error");
-                cnt = -1;
-            }
+            ret = HyFileRead(fd, buf, len);
             break;
     }
 
-    return cnt;
+    return ret;
+}
+
+hy_s32_t HyFileReadNTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms)
+{
+    hy_s32_t ret;
+    fd_set rfds;
+    struct timeval time;
+
+    FD_ZERO(&rfds);
+    FD_SET(fd, &rfds);
+
+    time.tv_sec = ms / 1000;
+    time.tv_usec = (ms % 1000) * 1000;
+
+    ret = select(fd + 1, &rfds, NULL, NULL, &time);
+    switch (ret) {
+        case -1:
+            LOGES("select error \n");
+            break;
+        case 0:
+            LOGT("select timeout \n");
+            break;
+        default:
+            ret = HyFileReadN(fd, buf, len);
+            break;
+    }
+
+    return ret;
 }
 
 hy_s32_t HyFileWrite(hy_s32_t fd, const void *buf, hy_u32_t len)

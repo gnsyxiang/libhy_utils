@@ -131,15 +131,29 @@ hy_s32_t HyFileReadN(hy_s32_t fd, void *buf, hy_u32_t len);
  *
  * @param fd 文件fd
  * @param buf 数据的地址
- * @param cnt 数据的长度
+ * @param len 数据的长度
  * @param ms 超时时间
- *
- * @return
+ * @return 
  *   1，返回读到指定的字节数
  *   2，失败放回-1
  *   3，超时返回0
  */
-hy_s32_t HyFileReadNTimeout(hy_s32_t fd, void *buf, hy_u32_t cnt, hy_u32_t ms);
+hy_s32_t HyFileReadTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms);
+
+/**
+ * @brief 读取数据
+ *
+ * @param fd 文件fd
+ * @param buf 数据的地址
+ * @param len 数据的长度
+ * @param ms 超时时间
+ *
+ * @return
+ *   1，返回读到指定的字节数，字节数不等于len时，标识对端已经关闭
+ *   2，失败放回-1
+ *   3，超时返回0
+ */
+hy_s32_t HyFileReadNTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms);
 
 /**
  * @brief 写入数据
