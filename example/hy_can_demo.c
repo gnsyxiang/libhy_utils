@@ -131,7 +131,7 @@ static void _handle_module_destroy(_main_can_s *context)
 static hy_s32_t _handle_module_create(_main_can_s *context)
 {
     HyCanConfig_s can_c;
-    hy_u32_t can_id[] = {0x110, 0x10};
+    hy_u32_t can_id[] = {0x110, 0x10, 0x2};
 
     HY_MEMSET(&can_c, sizeof(can_c));
     can_c.speed = HY_CAN_SPEED_200K;
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
             }
             LOGI("%s \n", buf);
 
-            sleep(1);
+            usleep(33 * 1000);
         }
     } while (0);
 

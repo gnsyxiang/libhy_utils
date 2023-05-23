@@ -121,7 +121,7 @@ static void _can_deinit(const char *name)
     char param[64];
 
     HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "ifconfig %s down", name);
+    snprintf(param, sizeof(param), "ip link set %s down", name);
     HyUtilsSystemCmd_m(param, 0);
 }
 
@@ -164,7 +164,11 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
     }
 
     HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "ifconfig %s down", name);
+    snprintf(param, sizeof(param), "echo 4096 > /sys/class/net/can0/tx_queue_len");
+    HyUtilsSystemCmd_m(param, 0);
+
+    HY_MEMSET(param, sizeof(param));
+    snprintf(param, sizeof(param), "ip link set %s down", name);
     HyUtilsSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
@@ -172,7 +176,7 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
     HyUtilsSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "ifconfig %s up", name);
+    snprintf(param, sizeof(param), "ip link set %s up", name);
     HyUtilsSystemCmd_m(param, 0);
 
     return 0;
@@ -215,10 +219,9 @@ hy_s32_t HyCanWriteBuf(HyCan_s *handle, hy_u32_t can_id, char *buf, hy_u32_t len
         memcpy(tx_frame.data, buf + 8 * i, 8);
         ret = write(handle->fd, &tx_frame, sizeof(struct can_frame));
         if (ret < 0 && errno == EINTR) {
-            LOGW("write failed, errno is EINTR \n");
+            LOGE("write failed, errno is EINTR, i: %d \n", i);
             return 0;
         } else if (ret == -1) {
-            LOGW("write failed first, i: %d \n", i);
             if (errno == 105) {
                 usleep(500);
                 ret = write(handle->fd, &tx_frame, sizeof(struct can_frame));
