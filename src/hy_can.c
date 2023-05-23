@@ -22,10 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
-
 #include <net/if.h>
 #include <sys/ioctl.h>
 
@@ -33,18 +31,22 @@
 
 #include "hy_assert.h"
 #include "hy_mem.h"
+#include "hy_string.h"
+#include "hy_utils.h"
 
 #include "hy_can.h"
 
-typedef struct {
+struct HyCan_s {
     HyCanSaveConfig_s   save_c;
 
-    const char          *name;
+    hy_u32_t            *filter_id;
+    hy_u32_t            filter_id_cnt;
+
     hy_s32_t            fd;
-} _can_context_s;
+};
 
 static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
-        hy_u32_t cnt, HyCanFilter_e type)
+                                     hy_u32_t cnt, HyCanFilter_e type)
 {
     if (fd <= 0) {
         LOGE("the fd: %d <= 0 \n", fd);
@@ -53,6 +55,7 @@ static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
 
     if (NULL == can_id) {
         LOGI("can no filtering \n");
+
         setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
         return 0;
     }
@@ -78,33 +81,34 @@ static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
 
     if (type & HY_CAN_FILTER_REJECT) {
         hy_s32_t join_filter = 1;
-        setsockopt(fd, SOL_CAN_RAW, CAN_RAW_JOIN_FILTERS, &join_filter, sizeof(join_filter));
+        setsockopt(fd, SOL_CAN_RAW, CAN_RAW_JOIN_FILTERS,
+                   &join_filter, sizeof(join_filter));
     }
     setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, sizeof(rfilter));
 
     return 0;
 }
 
-static hy_s32_t _can_bind_socket(_can_context_s *context, const char *name)
+static hy_s32_t _can_bind_socket(HyCan_s *handle)
 {
     struct ifreq ifr;
     struct sockaddr_can addr;
 
-    context->fd = socket(AF_CAN, SOCK_RAW, CAN_RAW);
-    if (context->fd < 0) {
+    handle->fd = socket(AF_CAN, SOCK_RAW, CAN_RAW);
+    if (handle->fd < 0) {
         LOGES("socket failed \n");
         return -1;
     }
-    LOGI("socket can fd: %d, name: %s \n", context->fd, name);
+    LOGI("socket can fd: %d, name: %s \n", handle->fd, handle->save_c.name);
 
     HY_MEMSET(&addr, sizeof(addr));
-    strcpy(ifr.ifr_name, name);
-    ioctl(context->fd, SIOCGIFINDEX, &ifr);
+    strcpy(ifr.ifr_name, handle->save_c.name);
+    ioctl(handle->fd, SIOCGIFINDEX, &ifr);
     ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
     addr.can_family = AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 
-    if (bind(context->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    if (bind(handle->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         LOGES("bind error! \n");
         return -1;
     }
@@ -112,57 +116,92 @@ static hy_s32_t _can_bind_socket(_can_context_s *context, const char *name)
     return 0;
 }
 
-static void _can_init(const char *name, hy_u32_t speed)
+static void _can_deinit(const char *name)
 {
     char param[64];
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "ifconfig %s down", name);
-    system(param);
+    HyUtilsSystemCmd_m(param, 0);
+}
+
+static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
+{
+    char param[64];
+    hy_u32_t speed_num = 0;
+    size_t i = 0;
+    struct {
+        HyCanSpeed_e    speed;
+        hy_u32_t        speed_num;
+    } speed_array[] = {
+        {HY_CAN_SPEED_5K,       5 * 1000},
+        {HY_CAN_SPEED_10K,      10 * 1000},
+        {HY_CAN_SPEED_20K,      20 * 1000},
+        {HY_CAN_SPEED_40K,      40 * 1000},
+        {HY_CAN_SPEED_50K,      50 * 1000},
+        {HY_CAN_SPEED_80K,      80 * 1000},
+        {HY_CAN_SPEED_100K,     100 * 1000},
+        {HY_CAN_SPEED_125K,     125 * 1000},
+        {HY_CAN_SPEED_200K,     200 * 1000},
+        {HY_CAN_SPEED_250K,     250 * 1000},
+        {HY_CAN_SPEED_400K,     400 * 1000},
+        {HY_CAN_SPEED_500K,     500 * 1000},
+        {HY_CAN_SPEED_666K,     666 * 1000},
+        {HY_CAN_SPEED_800K,     800 * 1000},
+        {HY_CAN_SPEED_1000K,    1000 * 1000},
+    };
+
+    for (i = 0; i < HY_UTILS_ARRAY_CNT(speed_array); i++) {
+        if (speed_array[i].speed == speed) {
+            speed_num = speed_array[i].speed_num;
+            break;
+        }
+    }
+
+    if (i >= HY_UTILS_ARRAY_CNT(speed_array)) {
+        LOGE("the speed is error \n");
+        return -1;
+    }
 
     HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "ip link set %s type can bitrate %d triple-sampling on", name, speed);
-    system(param);
+    snprintf(param, sizeof(param), "ifconfig %s down", name);
+    HyUtilsSystemCmd_m(param, 0);
+
+    HY_MEMSET(param, sizeof(param));
+    snprintf(param, sizeof(param), "ip link set %s type can bitrate %d", name, speed_num);
+    HyUtilsSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "ifconfig %s up", name);
-    system(param);
+    HyUtilsSystemCmd_m(param, 0);
+
+    return 0;
 }
 
-hy_s32_t HyCanGetFd(void *handle)
-{
-    HY_ASSERT(handle);
-    _can_context_s *context = handle;
-
-    return context->fd;
-}
-
-hy_s32_t HyCanWrite(void *handle, struct can_frame *tx_frame)
+hy_s32_t HyCanWrite(HyCan_s *handle, struct can_frame *tx_frame)
 {
     HY_ASSERT(handle);
     HY_ASSERT(tx_frame);
 
     hy_s32_t ret;
-    _can_context_s *context = handle;
 
-    ret = write(context->fd, tx_frame, sizeof(struct can_frame));
+    ret = write(handle->fd, tx_frame, sizeof(struct can_frame));
     if (ret < 0 && errno == EINTR) {
         LOGW("write failed, errno is EINTR \n");
         return 0;
     } else if (ret == -1) {
-        LOGES("fd close, fd: %d \n", context->fd);
+        LOGES("fd close, fd: %d \n", handle->fd);
         return -1;
     } else {
         return ret;
     }
 }
 
-hy_s32_t HyCanWriteBuf(void *handle, hy_u32_t can_id, char *buf, hy_u32_t len)
+hy_s32_t HyCanWriteBuf(HyCan_s *handle, hy_u32_t can_id, char *buf, hy_u32_t len)
 {
     HY_ASSERT(handle);
     HY_ASSERT(buf);
 
-    _can_context_s *context = handle;
     struct can_frame tx_frame;
     hy_s32_t shang = len / 8;
     hy_s32_t yushu = len % 8;
@@ -174,7 +213,7 @@ hy_s32_t HyCanWriteBuf(void *handle, hy_u32_t can_id, char *buf, hy_u32_t len)
     // @fixme 考虑写失败情况
     for (hy_s32_t i = 0; i < shang; ++i) {
         memcpy(tx_frame.data, buf + 8 * i, 8);
-        ret = write(context->fd, &tx_frame, sizeof(struct can_frame));
+        ret = write(handle->fd, &tx_frame, sizeof(struct can_frame));
         if (ret < 0 && errno == EINTR) {
             LOGW("write failed, errno is EINTR \n");
             return 0;
@@ -182,7 +221,7 @@ hy_s32_t HyCanWriteBuf(void *handle, hy_u32_t can_id, char *buf, hy_u32_t len)
             LOGW("write failed first, i: %d \n", i);
             if (errno == 105) {
                 usleep(500);
-                ret = write(context->fd, &tx_frame, sizeof(struct can_frame));
+                ret = write(handle->fd, &tx_frame, sizeof(struct can_frame));
                 if (ret == -1) {
                     LOGES("write failed, i: %d \n", i);
                 }
@@ -195,21 +234,20 @@ hy_s32_t HyCanWriteBuf(void *handle, hy_u32_t can_id, char *buf, hy_u32_t len)
     if (yushu > 0) {
         tx_frame.can_dlc = yushu;
         memcpy(tx_frame.data, buf + 8 * shang, yushu);
-        HyCanWrite(context, &tx_frame);
+        HyCanWrite(handle, &tx_frame);
     }
 
     return 0;
 }
 
-hy_s32_t HyCanRead(void *handle, struct can_frame *rx_frame)
+hy_s32_t HyCanRead(HyCan_s *handle, struct can_frame *rx_frame)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
-    HY_ASSERT_RET_VAL(!rx_frame, -1);
+    HY_ASSERT(handle);
+    HY_ASSERT(rx_frame);
 
     hy_s32_t ret;
-    _can_context_s *context = handle;
 
-    ret = read(context->fd, rx_frame, sizeof(struct can_frame));
+    ret = read(handle->fd, rx_frame, sizeof(struct can_frame));
     if (ret < 0) {
         if (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno) {
             LOGW("read failed, errno is EINTR/EAGAIN/EWOULDBLOCK \n");
@@ -219,68 +257,62 @@ hy_s32_t HyCanRead(void *handle, struct can_frame *rx_frame)
             return -1;
         }
     } else if (ret == 0) {
-        LOGE("fd close, fd: %d \n", context->fd);
+        LOGE("fd close, fd: %d \n", handle->fd);
     }
 
     return ret;
 }
 
-void HyCanDestroy(void **handle)
+void HyCanDestroy(HyCan_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle);
-    HY_ASSERT_RET(!*handle);
-    _can_context_s *context = *handle;
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+    HyCan_s *handle = *handle_pp;
 
-    LOGI("close can fd: %d, name: %s \n", context->fd, context->name);
+    LOGI("close can fd: %d, name: %s \n", handle->fd, handle->save_c.name);
 
-    close(context->fd);
+    close(handle->fd);
+    handle->fd = -1;
 
-    char param[64];
+    _can_deinit(handle->save_c.name);
 
-    HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "ifconfig %s down", context->name);
-    system(param);
-
-    LOGI("can destroy, context: %p, fd: %d \n", context, context->fd);
-    HY_MEM_FREE_PP(&context);
+    LOGI("can destroy, handle: %p \n", handle);
+    HY_MEM_FREE_PP(&handle);
 }
 
-void *HyCanCreate(HyCanConfig_s *can_c)
+HyCan_s *HyCanCreate(HyCanConfig_s *can_c)
 {
     HY_ASSERT_RET_VAL(!can_c, NULL);
+    HyCan_s *handle = NULL;
 
-    _can_context_s *context = NULL;
     do {
-        context = HY_MEM_CALLOC_BREAK(_can_context_s *, sizeof(*context));
-        if (can_c->save_c.can_id_cnt > HY_CAN_ID_MAX) {
-            LOGE("can id cnt is too long, "
-                 "please fix  HY_CAN_ID_MAX in hy_can.h \n");
+        handle = HY_MEM_CALLOC_BREAK(HyCan_s *, sizeof(*handle));
+        HY_MEMCPY(&handle->save_c, &can_c->save_c, sizeof(handle->save_c));
+
+        HyCanSaveConfig_s *save_c = &can_c->save_c;
+
+        handle->filter_id = HY_MEM_CALLOC_BREAK(hy_u32_t *, can_c->filter_id_cnt);
+        HY_MEMCPY(handle->filter_id, can_c->filter_id,
+                  sizeof(hy_u32_t) * can_c->filter_id_cnt);
+        handle->filter_id_cnt = can_c->filter_id_cnt;
+
+        if (0 != _can_init(save_c->name, can_c->speed)) {
+            LOGE("_can_init failed \n");
             break;
         }
 
-        memcpy(&context->save_c,
-               &can_c->save_c, sizeof(context->save_c));
-
-        _can_init(can_c->name, can_c->speed);
-
-        if (0 != _can_bind_socket(context, can_c->name)) {
+        if (0 != _can_bind_socket(handle)) {
             LOGE("can bind socket failed \n");
             break;
         }
 
-        context->name = can_c->name;
-        HyCanSaveConfig_s *save_c = &can_c->save_c;
+        _can_set_recv_filter(handle->fd, handle->filter_id,
+                             handle->filter_id_cnt, save_c->filter);
 
-        _can_set_recv_filter(context->fd,
-                             save_c->can_id, save_c->can_id_cnt, save_c->filter);
-
-        LOGI("can create, context: %p, fd: %d \n",
-             context, context->fd);
-        return context;
+        LOGI("can create, handle: %p \n", handle);
+        return handle;
     } while (0);
 
     LOGE("can create failed \n");
-    HyCanDestroy((void **)&context);
+    HyCanDestroy(&handle);
     return NULL;
 }
-

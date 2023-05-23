@@ -122,7 +122,7 @@ static void _handle_module_destroy(_main_can_s *context)
 {
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
-        {"can0",        &context->can_handle,           HyCanDestroy},
+        {"can0",        &context->can_handle,           (HyModuleDestroyHandleCb_t)HyCanDestroy},
     };
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
@@ -134,15 +134,15 @@ static hy_s32_t _handle_module_create(_main_can_s *context)
     hy_u32_t can_id[] = {0x110, 0x10};
 
     HY_MEMSET(&can_c, sizeof(can_c));
-    can_c.name = _CAN_NAME;
-    can_c.speed = 200 * 1000;
-    can_c.save_c.can_id_cnt = sizeof(can_id) / sizeof(can_id[0]);
-    memcpy(can_c.save_c.can_id, can_id, sizeof(can_id));
+    can_c.speed = HY_CAN_SPEED_200K;
+    can_c.filter_id = can_id;
+    can_c.filter_id_cnt = sizeof(can_id) / sizeof(can_id[0]);
+    can_c.save_c.name = _CAN_NAME;
     can_c.save_c.filter = HY_CAN_FILTER_PASS;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
-        {"can0",        &context->can_handle,           &can_c,             (HyModuleCreateHandleCb_t)HyCanCreate,      HyCanDestroy},
+        {"can0",        &context->can_handle,           &can_c,             (HyModuleCreateHandleCb_t)HyCanCreate,      (HyModuleDestroyHandleCb_t)HyCanDestroy},
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);
@@ -175,23 +175,20 @@ int main(int argc, char *argv[])
             HyCanRead(context->can_handle, &rx_frame);
             HyCanWrite(context->can_handle, &rx_frame);
 
-            if (1) {
-                char buf[128];
-                int ret = 0;
-                static int can_cnt = 0;
+            char buf[128];
+            int ret = 0;
+            static int can_cnt = 0;
 
-                can_cnt++;
+            can_cnt++;
 
-                memset(buf, '\0', sizeof(buf));
-                ret = snprintf(buf + ret, sizeof(buf) - ret, "cnt: %d", can_cnt);
-                ret += snprintf(buf + ret, sizeof(buf) - ret, ", dlc: %d",
-                                rx_frame.can_dlc);
-                for (int i = 0; i < rx_frame.can_dlc; ++i) {
-                    ret += snprintf(buf + ret, sizeof(buf) - ret, ", 0x%0x",
-                                    rx_frame.data[i]);
-                }
-                LOGI("%s \n", buf);
+            memset(buf, '\0', sizeof(buf));
+            ret = snprintf(buf + ret, sizeof(buf) - ret, "cnt: %d", can_cnt);
+            ret += snprintf(buf + ret, sizeof(buf) - ret, ", dlc: %d", rx_frame.can_dlc);
+            for (int i = 0; i < rx_frame.can_dlc; ++i) {
+                ret += snprintf(buf + ret, sizeof(buf) - ret, ", 0x%0x", rx_frame.data[i]);
             }
+            LOGI("%s \n", buf);
+
             sleep(1);
         }
     } while (0);
