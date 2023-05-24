@@ -134,7 +134,7 @@ static void _can_deinit(const char *name)
 
 static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
 {
-    char param[64];
+    char param[128];
     hy_u32_t speed_num = 0;
     size_t i = 0;
     struct {
@@ -179,7 +179,8 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
     HyUtilsSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "ip link set %s type can bitrate %d", name, speed_num);
+    snprintf(param, sizeof(param), "ip link set %s up type can bitrate %d dbitrate 2000000  fd on", name, speed_num);
+    // snprintf(param, sizeof(param), "ip link set %s type can bitrate %d", name, speed_num);
     HyUtilsSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
@@ -195,6 +196,7 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
     HY_ASSERT(buf);
 
     struct can_frame tx_frame;
+    HY_MEMSET(&tx_frame, sizeof(tx_frame));
     hy_s32_t shang = len / 8;
     hy_s32_t yushu = len % 8;
 
