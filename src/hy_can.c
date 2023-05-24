@@ -318,9 +318,11 @@ HyCan_s *HyCanCreate(HyCanConfig_s *can_c)
         HyCanSaveConfig_s *save_c = &can_c->save_c;
 
         if (can_c->filter_id_cnt) {
-            handle->filter_id = HY_MEM_CALLOC_BREAK(hy_u32_t *, can_c->filter_id_cnt);
-            HY_MEMCPY(handle->filter_id, can_c->filter_id,
-                      sizeof(hy_u32_t) * can_c->filter_id_cnt);
+            hy_u32_t len = sizeof(hy_u32_t) * can_c->filter_id_cnt;
+
+            handle->filter_id = HY_MEM_CALLOC_BREAK(hy_u32_t *, len);
+            HY_MEMCPY(handle->filter_id, can_c->filter_id, len);
+
             handle->filter_id_cnt = can_c->filter_id_cnt;
         }
 
