@@ -24,9 +24,6 @@
 extern "C" {
 #endif
 
-#include <linux/can.h>
-#include <linux/can/raw.h>
-
 #include "hy_type.h"
 
 typedef enum {
@@ -51,15 +48,15 @@ typedef enum {
  * @brief 过滤器设置
  */
 typedef enum {
-    HY_CAN_FILTER_PASS,
-    HY_CAN_FILTER_REJECT,
-} HyCanFilter_e;
+    HY_CAN_FILTER_TYPE_PASS,
+    HY_CAN_FILTER_TYPE_REJECT,
+} HyCanFilterType_e;
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    HyCanFilter_e       filter;                 ///< 过滤或取反
+    hy_s32_t            can_id;                 ///< 自身的can id
     const char          *name;                  ///< can接口
 } HyCanSaveConfig_s;
 
@@ -71,8 +68,9 @@ typedef struct {
 
     hy_u32_t            *filter_id;             ///< 需要过滤的can_id
     hy_u32_t            filter_id_cnt;          ///< can_id个数
-    hy_s32_t            file_block;             ///< 0为阻塞状态，1为非阻塞状态
+    HyCanFilterType_e   filter;                 ///< 过滤或取反
 
+    hy_s32_t            file_block;             ///< 0为阻塞状态，1为非阻塞状态
     HyCanSpeed_e        speed;                  ///< 速度
 } HyCanConfig_s;
 
@@ -90,7 +88,7 @@ HyCan_s *HyCanCreate(HyCanConfig_s *can_c);
 /**
  * @brief 销毁can模块
  *
- * @param handle 句柄的地址
+ * @param handle_pp 句柄的地址（二级指针）
  */
 void HyCanDestroy(HyCan_s **handle_pp);
 
@@ -98,46 +96,36 @@ void HyCanDestroy(HyCan_s **handle_pp);
  * @brief 发送数据
  *
  * @param handle 句柄
- * @param tx_frame 数据
+ * @param buf 数据的地址
+ * @param len 数据的长度
  *
  * @return 成功返回写入的数据，失败返回-1 
  */
-hy_s32_t HyCanWrite(HyCan_s *handle, struct can_frame *tx_frame);
-
-/**
- * @brief 发送数据
- *
- * @param handle 句柄
- * @param can_id can id
- * @param buf 数组
- * @param len 数组长度
- *
- * @return 成功返回写入的数据，失败返回-1 
- */
-hy_s32_t HyCanWriteBuf(HyCan_s *handle, hy_u32_t can_id, char *buf, hy_u32_t len);
+hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len);
 
 /**
  * @brief 读取数据
  *
  * @param handle 句柄
- * @param rx_frame 数据
- *
- * @return  成功返回读取到的数据，失败返回-1
+ * @param buf 数据地址
+ * @param len 需要读取的数据长度
+ * @return 成功返回读到的字节数，失败返回-1
  */
-hy_s32_t HyCanRead(HyCan_s *handle, struct can_frame *rx_frame);
+hy_s32_t HyCanRead(HyCan_s *handle, void *buf, hy_u32_t len);
 
 /**
  * @brief 读取数据，超时等待
  *
  * @param handle 句柄
- * @param rx_frame 数据
+ * @param buf 数据地址
+ * @param len 需要读取的数据长度
  * @param ms 超时时间，单位: 毫秒
  * @return 
  *   1，成功返回读到的字节数
  *   2，失败返回-1
  *   3，超时返回0
  */
-hy_s32_t HyCanReadTimeout(HyCan_s *handle, struct can_frame *rx_frame, hy_u32_t ms);
+hy_s32_t HyCanReadTimeout(HyCan_s *handle, void *buf, hy_u32_t len, hy_u32_t ms);
 
 #ifdef __cplusplus
 }

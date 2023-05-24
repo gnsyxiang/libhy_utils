@@ -42,20 +42,6 @@ typedef struct {
     void        *can_handle;
 } _main_can_s;
 
-static void _can_test_write(_main_can_s *context)
-{
-    char can_buf[128];
-    for (unsigned int i = 0; i < sizeof(can_buf) / sizeof(can_buf[0]); ++i) {
-        can_buf[i] = i;
-    }
-    unsigned long long start = HyTimeGetUTCUs();
-    LOGI("start time: %lld \n", start);
-    HyCanWriteBuf(context->can_handle, 0x110, can_buf,
-                  sizeof(can_buf) / sizeof(can_buf[0]));
-    unsigned long long end = HyTimeGetUTCUs();
-    LOGI("end time: %lld, speed time: %lld \n", end, end - start);
-}
-
 static void _signal_error_cb(void *args)
 {
     LOGE("------error cb\n");
@@ -135,10 +121,11 @@ static hy_s32_t _handle_module_create(_main_can_s *context)
 
     HY_MEMSET(&can_c, sizeof(can_c));
     can_c.speed = HY_CAN_SPEED_200K;
+    can_c.filter = HY_CAN_FILTER_TYPE_PASS;
     can_c.filter_id = can_id;
     can_c.filter_id_cnt = sizeof(can_id) / sizeof(can_id[0]);
+    can_c.save_c.can_id = 0x01;
     can_c.save_c.name = _CAN_NAME;
-    can_c.save_c.filter = HY_CAN_FILTER_PASS;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
@@ -166,28 +153,35 @@ int main(int argc, char *argv[])
 
         LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-        _can_test_write(context);
+        {
+            char can_buf[128];
+            for (unsigned int i = 0; i < HY_UTILS_ARRAY_CNT(can_buf); ++i) {
+                can_buf[i] = i;
+            }
 
-        struct can_frame rx_frame;
+            LOGI("start \n");
+            HyCanWrite(context->can_handle, can_buf, HY_UTILS_ARRAY_CNT(can_buf));
+            LOGI("end \n");
+        }
+
+        char buf[64];
+        char data[8];
+        size_t ret;
+        size_t index = 0;
+        hy_u32_t can_cnt = 0;
         while (!context->is_exit) {
+            HY_MEMSET(data, sizeof(data));
+            HY_MEMSET(buf, sizeof(buf));
+            index = 0;
 
-            memset(&rx_frame, 0, sizeof(rx_frame));
-            HyCanRead(context->can_handle, &rx_frame);
-            HyCanWrite(context->can_handle, &rx_frame);
-
-            char buf[128];
-            int ret = 0;
-            static int can_cnt = 0;
-
+            ret = HyCanRead(context->can_handle, data, sizeof(data));
+            HyCanWrite(context->can_handle, data, sizeof(data));
             can_cnt++;
 
-            memset(buf, '\0', sizeof(buf));
-            ret = snprintf(buf + ret, sizeof(buf) - ret, "cnt: %d", can_cnt);
-            ret += snprintf(buf + ret, sizeof(buf) - ret, ", dlc: %d", rx_frame.can_dlc);
-            for (int i = 0; i < rx_frame.can_dlc; ++i) {
-                ret += snprintf(buf + ret, sizeof(buf) - ret, ", 0x%0x", rx_frame.data[i]);
+            for (size_t i = 0; i < ret; i++) {
+                index += snprintf(buf + index, sizeof(buf) - index, "0x%x ", data[i]);
             }
-            LOGI("%s \n", buf);
+            LOGI("can cnt: %d, buf: %s \n", can_cnt, buf);
 
             usleep(33 * 1000);
         }

@@ -26,6 +26,8 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <linux/can.h>
+#include <linux/can/raw.h>
 
 #include <hy_log/hy_log.h>
 
@@ -47,7 +49,7 @@ struct HyCan_s {
 };
 
 static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
-                                     hy_u32_t cnt, HyCanFilter_e type)
+                                     hy_u32_t cnt, HyCanFilterType_e type)
 {
     if (fd <= 0) {
         LOGE("the fd: %d <= 0 \n", fd);
@@ -55,9 +57,9 @@ static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
     }
 
     if (NULL == can_id) {
-        LOGI("can no filtering \n");
+        LOGI("can no data receive \n");
 
-        setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);
+        setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FILTER, NULL, 0);   ///< 全部报文都不接收
         return 0;
     }
 
@@ -66,9 +68,9 @@ static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
 
     for (hy_u32_t i = 0; i < cnt; ++i) {
         if (can_id[i]) {
-            LOGI("set can id: %x \n", can_id[i]);
+            LOGI("set can id: 0x%x \n", can_id[i]);
 
-            if (type == HY_CAN_FILTER_PASS) {
+            if (type == HY_CAN_FILTER_TYPE_PASS) {
                 rfilter[i].can_id = can_id[i];
             } else {
                 rfilter[i].can_id = can_id[i] | CAN_INV_FILTER;
@@ -80,7 +82,7 @@ static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
         }
     }
 
-    if (type & HY_CAN_FILTER_REJECT) {
+    if (type & HY_CAN_FILTER_TYPE_REJECT) {
         hy_s32_t join_filter = 1;
         setsockopt(fd, SOL_CAN_RAW, CAN_RAW_JOIN_FILTERS,
                    &join_filter, sizeof(join_filter));
@@ -187,26 +189,7 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
     return 0;
 }
 
-hy_s32_t HyCanWrite(HyCan_s *handle, struct can_frame *tx_frame)
-{
-    HY_ASSERT(handle);
-    HY_ASSERT(tx_frame);
-
-    hy_s32_t ret;
-
-    ret = write(handle->fd, tx_frame, sizeof(struct can_frame));
-    if (ret < 0 && errno == EINTR) {
-        LOGW("write failed, errno is EINTR \n");
-        return 0;
-    } else if (ret == -1) {
-        LOGES("fd close, fd: %d \n", handle->fd);
-        return -1;
-    } else {
-        return ret;
-    }
-}
-
-hy_s32_t HyCanWriteBuf(HyCan_s *handle, hy_u32_t can_id, char *buf, hy_u32_t len)
+hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
 {
     HY_ASSERT(handle);
     HY_ASSERT(buf);
@@ -214,60 +197,93 @@ hy_s32_t HyCanWriteBuf(HyCan_s *handle, hy_u32_t can_id, char *buf, hy_u32_t len
     struct can_frame tx_frame;
     hy_s32_t shang = len / 8;
     hy_s32_t yushu = len % 8;
-    hy_s32_t ret = 0;
 
-    tx_frame.can_id = can_id;
+    tx_frame.can_id = handle->save_c.can_id;
     tx_frame.can_dlc = 8;
 
-    // @fixme 考虑写失败情况
     for (hy_s32_t i = 0; i < shang; ++i) {
         memcpy(tx_frame.data, buf + 8 * i, 8);
-        ret = write(handle->fd, &tx_frame, sizeof(struct can_frame));
-        if (ret < 0 && errno == EINTR) {
-            LOGE("write failed, errno is EINTR, i: %d \n", i);
-            return 0;
-        } else if (ret == -1) {
-            if (errno == 105) {
-                usleep(500);
-                ret = write(handle->fd, &tx_frame, sizeof(struct can_frame));
-                if (ret == -1) {
-                    LOGES("write failed, i: %d \n", i);
-                }
-            } else {
-                return -1;
-            }
+
+        if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
+            LOGE("HyFileWrite failed \n");
+            return -1;
         }
     }
 
     if (yushu > 0) {
         tx_frame.can_dlc = yushu;
         memcpy(tx_frame.data, buf + 8 * shang, yushu);
-        HyCanWrite(handle, &tx_frame);
+
+        if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
+            LOGE("HyFileWrite failed \n");
+            return -1;
+        }
     }
 
-    return 0;
+    return len;
 }
 
-hy_s32_t HyCanRead(HyCan_s *handle, struct can_frame *rx_frame)
+hy_s32_t HyCanRead(HyCan_s *handle, void *buf, hy_u32_t len)
 {
     HY_ASSERT(handle);
-    HY_ASSERT(rx_frame);
-
+    HY_ASSERT(buf);
     hy_s32_t ret;
+    hy_u32_t index = 0;
 
-    do {
-        ret = HyFileRead(handle->fd, rx_frame, sizeof(*rx_frame));
-    } while(ret == 0);
+    struct can_frame rx_frame;
+    HY_MEMSET(&rx_frame, sizeof(rx_frame));
 
-    return ret;
+    while (1) {
+        ret = HyFileRead(handle->fd, &rx_frame, sizeof(rx_frame));
+        if (-1 == ret) {
+            LOGE("HyFileRead failed \n");
+            index = -1;
+            break;
+        }
+
+        HY_MEMCPY(buf + index, rx_frame.data, rx_frame.can_dlc);
+        index += rx_frame.can_dlc;
+        if (index == len) {
+            break;
+        }
+
+        HY_MEMSET(&rx_frame, sizeof(rx_frame));
+    }
+
+    return index;
 }
 
-hy_s32_t HyCanReadTimeout(HyCan_s *handle, struct can_frame *rx_frame, hy_u32_t ms)
+hy_s32_t HyCanReadTimeout(HyCan_s *handle, void *buf, hy_u32_t len, hy_u32_t ms)
 {
     HY_ASSERT(handle);
-    HY_ASSERT(rx_frame);
+    HY_ASSERT(buf);
+    hy_s32_t ret;
+    hy_u32_t index = 0;
 
-    return HyFileReadTimeout(handle->fd, rx_frame, sizeof(*rx_frame), ms);
+    struct can_frame rx_frame;
+    HY_MEMSET(&rx_frame, sizeof(rx_frame));
+
+    while (1) {
+        ret = HyFileReadTimeout(handle->fd, &rx_frame, sizeof(rx_frame), ms);
+        if (ret == -1) {
+            index = -1;
+            break;
+        } else if (ret == 0) {
+            LOGI("HyFileReadTimeout timeout \n");
+            index = 0;
+            break;
+        } else {
+            HY_MEMCPY(buf + index, rx_frame.data, rx_frame.can_dlc);
+            index += rx_frame.can_dlc;
+            if (index == len) {
+                break;
+            }
+
+            HY_MEMSET(&rx_frame, sizeof(rx_frame));
+        }
+    }
+
+    return index;
 }
 
 void HyCanDestroy(HyCan_s **handle_pp)
@@ -281,6 +297,10 @@ void HyCanDestroy(HyCan_s **handle_pp)
     handle->fd = -1;
 
     _can_deinit(handle->save_c.name);
+
+    if (handle->filter_id) {
+        HY_MEM_FREE_PP(&handle->filter_id);
+    }
 
     LOGI("can destroy, handle: %p \n", handle);
     HY_MEM_FREE_PP(&handle);
@@ -297,10 +317,12 @@ HyCan_s *HyCanCreate(HyCanConfig_s *can_c)
 
         HyCanSaveConfig_s *save_c = &can_c->save_c;
 
-        handle->filter_id = HY_MEM_CALLOC_BREAK(hy_u32_t *, can_c->filter_id_cnt);
-        HY_MEMCPY(handle->filter_id, can_c->filter_id,
-                  sizeof(hy_u32_t) * can_c->filter_id_cnt);
-        handle->filter_id_cnt = can_c->filter_id_cnt;
+        if (can_c->filter_id_cnt) {
+            handle->filter_id = HY_MEM_CALLOC_BREAK(hy_u32_t *, can_c->filter_id_cnt);
+            HY_MEMCPY(handle->filter_id, can_c->filter_id,
+                      sizeof(hy_u32_t) * can_c->filter_id_cnt);
+            handle->filter_id_cnt = can_c->filter_id_cnt;
+        }
 
         if (0 != _can_init(save_c->name, can_c->speed)) {
             LOGE("_can_init failed \n");
@@ -313,7 +335,7 @@ HyCan_s *HyCanCreate(HyCanConfig_s *can_c)
         }
 
         _can_set_recv_filter(handle->fd, handle->filter_id,
-                             handle->filter_id_cnt, save_c->filter);
+                             handle->filter_id_cnt, can_c->filter);
 
         LOGI("can create, handle: %p \n", handle);
         return handle;
