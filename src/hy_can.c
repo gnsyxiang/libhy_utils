@@ -90,7 +90,7 @@ static hy_s32_t _can_set_recv_filter(hy_s32_t fd, const hy_u32_t *can_id,
     return 0;
 }
 
-static hy_s32_t _can_bind_socket(HyCan_s *handle)
+static hy_s32_t _can_bind_socket(HyCan_s *handle, hy_s32_t file_block)
 {
     struct ifreq ifr;
     struct sockaddr_can addr;
@@ -101,6 +101,10 @@ static hy_s32_t _can_bind_socket(HyCan_s *handle)
         return -1;
     }
     LOGI("socket can fd: %d, name: %s \n", handle->fd, handle->save_c.name);
+
+    if (HY_FILE_BLOCK_STATE_NOBLOCK == file_block) {
+        HyFileBlockStateSet(handle->fd, HY_FILE_BLOCK_STATE_NOBLOCK);
+    }
 
     HY_MEMSET(&addr, sizeof(addr));
     strcpy(ifr.ifr_name, handle->save_c.name);
@@ -303,7 +307,7 @@ HyCan_s *HyCanCreate(HyCanConfig_s *can_c)
             break;
         }
 
-        if (0 != _can_bind_socket(handle)) {
+        if (0 != _can_bind_socket(handle, can_c->file_block)) {
             LOGE("can bind socket failed \n");
             break;
         }

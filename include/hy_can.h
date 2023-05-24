@@ -71,6 +71,7 @@ typedef struct {
 
     hy_u32_t            *filter_id;             ///< 需要过滤的can_id
     hy_u32_t            filter_id_cnt;          ///< can_id个数
+    hy_s32_t            file_block;             ///< 0为阻塞状态，1为非阻塞状态
 
     HyCanSpeed_e        speed;                  ///< 速度
 } HyCanConfig_s;
