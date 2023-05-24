@@ -125,6 +125,19 @@ hy_s32_t HyCanWriteBuf(HyCan_s *handle, hy_u32_t can_id, char *buf, hy_u32_t len
  */
 hy_s32_t HyCanRead(HyCan_s *handle, struct can_frame *rx_frame);
 
+/**
+ * @brief 读取数据，超时等待
+ *
+ * @param handle 句柄
+ * @param rx_frame 数据
+ * @param ms 超时时间，单位: 毫秒
+ * @return 
+ *   1，成功返回读到的字节数
+ *   2，失败返回-1
+ *   3，超时返回0
+ */
+hy_s32_t HyCanReadTimeout(HyCan_s *handle, struct can_frame *rx_frame, hy_u32_t ms);
+
 #ifdef __cplusplus
 }
 #endif

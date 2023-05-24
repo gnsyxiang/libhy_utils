@@ -33,6 +33,7 @@
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_utils.h"
+#include "hy_file.h"
 
 #include "hy_can.h"
 
@@ -250,20 +251,19 @@ hy_s32_t HyCanRead(HyCan_s *handle, struct can_frame *rx_frame)
 
     hy_s32_t ret;
 
-    ret = read(handle->fd, rx_frame, sizeof(struct can_frame));
-    if (ret < 0) {
-        if (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno) {
-            LOGW("read failed, errno is EINTR/EAGAIN/EWOULDBLOCK \n");
-            ret = 0;
-        } else {
-            LOGE("read failed \n");
-            return -1;
-        }
-    } else if (ret == 0) {
-        LOGE("fd close, fd: %d \n", handle->fd);
-    }
+    do {
+        ret = HyFileRead(handle->fd, rx_frame, sizeof(*rx_frame));
+    } while(ret == 0);
 
     return ret;
+}
+
+hy_s32_t HyCanReadTimeout(HyCan_s *handle, struct can_frame *rx_frame, hy_u32_t ms)
+{
+    HY_ASSERT(handle);
+    HY_ASSERT(rx_frame);
+
+    return HyFileReadTimeout(handle->fd, rx_frame, sizeof(*rx_frame), ms);
 }
 
 void HyCanDestroy(HyCan_s **handle_pp)
