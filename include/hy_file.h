@@ -159,7 +159,7 @@ hy_s32_t HyFileReadNTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms);
  * @param buf 数据的地址
  * @param len 数据的长度
  *
- * @return 成功返回写入的字节数，失败返回-1，写中断返回0
+ * @return 成功返回写入的字节数，失败返回-1
  */
 hy_s32_t HyFileWrite(hy_s32_t fd, const void *buf, hy_u32_t len);
 

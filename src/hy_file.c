@@ -221,10 +221,10 @@ hy_s32_t HyFileReadN(hy_s32_t fd, void *buf, hy_u32_t len)
         } else if (ret == 0) {
             LOGES("opposite fd close, fd: %d \n", fd);
             break;
+        } else {
+            nleft  -= ret;
+            offset += ret;
         }
-
-        nleft  -= ret;
-        offset += ret;
     }
 
     return offset;
@@ -251,9 +251,7 @@ hy_s32_t HyFileReadTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms)
             LOGT("select timeout \n");
             break;
         default:
-            do {
-                ret = HyFileRead(fd, buf, len);
-            } while(ret == 0);
+            ret = HyFileRead(fd, buf, len);
             break;
     }
 
@@ -292,13 +290,13 @@ hy_s32_t HyFileWrite(hy_s32_t fd, const void *buf, hy_u32_t len)
 {
     hy_s32_t ret;
 
+_FILE_WRITE_AGAIN:
     ret = write(fd, buf, len);
-
     if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
-        LOGW("try again, errno: %s \n", strerror(errno));
-        return 0;
+        LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
+        goto _FILE_WRITE_AGAIN;
     } else if (ret == -1) {
-        LOGES("fd close, fd: %d \n", fd);
+        LOGES("opposite fd close, fd: %d \n", fd);
         return -1;
     } else {
         return ret;
@@ -315,21 +313,18 @@ hy_s32_t HyFileWriteN(hy_s32_t fd, const void *buf, hy_u32_t len)
     nleft = len;
 
     while (nleft > 0) {
+    _FILE_WRITEN_AGAIN:
         ret = write(fd, ptr, nleft);
-        if (ret <= 0) {
-            if (ret < 0 && (EINTR == errno
-                            || EAGAIN == errno
-                            || EWOULDBLOCK == errno)) {
-                LOGW("try again, errno: %s \n", strerror(errno));
-                ret = 0;
-            } else {
-                LOGES("fd close, fd: %d \n", fd);
-                return -1;
-            }
+        if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
+            LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
+            goto _FILE_WRITEN_AGAIN;
+        } else if (ret == -1) {
+            LOGES("opposite fd close, fd: %d \n", fd);
+            return -1;
+        } else {
+            nleft -= ret;
+            ptr   += ret;
         }
-
-        nleft -= ret;
-        ptr   += ret;
     }
 
     return len;
