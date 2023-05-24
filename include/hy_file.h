@@ -105,10 +105,7 @@ hy_s32_t HyFileGetContent2(const char *file, char *content, hy_u32_t content_len
  * @param buf 数据的地址
  * @param len 数据的长度
  *
- * @return
- *   1，成功返回读到的字节数
- *   2，被中断返回0
- *   3，失败返回-1
+ * @return 成功返回读到的字节数，失败返回-1
  */
 hy_s32_t HyFileRead(hy_s32_t fd, void *buf, hy_u32_t len);
 
@@ -120,7 +117,7 @@ hy_s32_t HyFileRead(hy_s32_t fd, void *buf, hy_u32_t len);
  * @param len 数据的长度
  *
  * @return 
- *   1，功返回len
+ *   1，成功返回len
  *   2，返回-1，表示read函数出现了系统相关错误
  *   3，返回字节数不等于len时，表示对端已经关闭
  */
@@ -134,8 +131,8 @@ hy_s32_t HyFileReadN(hy_s32_t fd, void *buf, hy_u32_t len);
  * @param len 数据的长度
  * @param ms 超时时间
  * @return 
- *   1，返回读到指定的字节数
- *   2，失败放回-1
+ *   1，成功返回读到的字节数
+ *   2，失败返回-1
  *   3，超时返回0
  */
 hy_s32_t HyFileReadTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms);
@@ -149,8 +146,8 @@ hy_s32_t HyFileReadTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms);
  * @param ms 超时时间
  *
  * @return
- *   1，返回读到指定的字节数，字节数不等于len时，标识对端已经关闭
- *   2，失败放回-1
+ *   1，返回读到指定的字节数，字节数不等于len时，标志对端已经关闭
+ *   2，失败返回-1
  *   3，超时返回0
  */
 hy_s32_t HyFileReadNTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms);

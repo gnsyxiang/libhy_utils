@@ -181,16 +181,19 @@ hy_s32_t HyFileRead(hy_s32_t fd, void *buf, hy_u32_t len)
 {
     hy_s32_t ret = 0;
 
+_FILE_READ_AGAIN:
     ret = read(fd, buf, len);
     if (ret < 0) {
         if (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno) {
+            LOGW("read failed, errno: %d(%s) \n", errno, strerror(errno));
             ret = 0;
+            goto _FILE_READ_AGAIN;
         } else {
             ret = -1;
             LOGES("read failed \n");
         }
     } else if (ret == 0) {
-        LOGES("fd close, fd: %d \n", fd);
+        LOGES("opposite fd close, fd: %d \n", fd);
         ret = -1;
     }
 
@@ -216,7 +219,7 @@ hy_s32_t HyFileReadN(hy_s32_t fd, void *buf, hy_u32_t len)
                 return -1;
             }
         } else if (ret == 0) {
-            LOGES("fd close, fd: %d \n", fd);
+            LOGES("opposite fd close, fd: %d \n", fd);
             break;
         }
 
@@ -248,7 +251,9 @@ hy_s32_t HyFileReadTimeout(hy_s32_t fd, void *buf, hy_u32_t len, hy_u32_t ms)
             LOGT("select timeout \n");
             break;
         default:
-            ret = HyFileRead(fd, buf, len);
+            do {
+                ret = HyFileRead(fd, buf, len);
+            } while(ret == 0);
             break;
     }
 
