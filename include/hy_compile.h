@@ -65,6 +65,13 @@ extern "C" {
 #if (__linux__ && __GLIBC__ && !__UCLIBC__) || __APPLE__
 #endif
 
+#define HY_COMPILE_CHECK_TYPE(_param1, _param_2)        \
+do {                                                    \
+    typeof(_param1) __param1= (_param1);                \
+    typeof(_param_2) __param_2= (_param_2);             \
+    (void) (&__param1 == &__param_2);                   \
+} while (0)
+
 #ifdef __cplusplus
 }
 #endif
