@@ -25,27 +25,59 @@ extern "C" {
 #endif
 
 #include <time.h>
+#include <sys/time.h>
 
 #include "hy_type.h"
 
-#define HY_TIME_TIMEVAL_ADD(_add1_ptr, _add2_ptr, _sum_ptr)             \
-do {                                                                    \
-    (_sum_ptr)->tv_sec = (_add1_ptr)->tv_sec + (_add2_ptr)->tv_sec;     \
-    (_sum_ptr)->tv_usec = (_add1_ptr)->tv_usec + (_add2_ptr)->tv_usec;  \
-    if ((_sum_ptr)->tv_usec >= 1000000) {                               \
-        (_sum_ptr)->tv_sec++;                                           \
-        (_sum_ptr)->tv_usec -= 1000000;                                 \
-    }                                                                   \
+#define HY_TIME_CHECK_TYPE(_param1, _param_2)       \
+do {                                                \
+    typeof(_param1) __param1= (_param1);            \
+    typeof(_param_2) __param_2= (_param_2);         \
+    (void) (&__param1 == &__param_2);               \
 } while (0)
 
-#define HY_TIME_TIMEVAL_SUB(_op1, _op2, _difference_ptr)                \
-do {                                                                    \
-    (_difference_ptr)->tv_sec = (_op1)->tv_sec - (_op2)->tv_sec;        \
-    (_difference_ptr)->tv_usec = (_op1)->tv_usec - (_op2)->tv_usec;     \
-    if ((_difference_ptr)->tv_usec < 0) {                               \
-        (_difference_ptr)->tv_sec--;                                    \
-        (_difference_ptr)->tv_usec += 1000000;                          \
-    }                                                                   \
+/**
+ * @brief 计算_tv1_ptr+_tv2_ptr时间(struct timeval)之和
+ */
+#define HY_TIME_TIMEVAL_ADD(_tv1_ptr, _tv2_ptr, _sum_tv_ptr)                \
+do {                                                                        \
+    HY_TIME_CHECK_TYPE(_tv1_ptr, _tv2_ptr);                                 \
+    HY_TIME_CHECK_TYPE(_tv1_ptr, _sum_tv_ptr);                              \
+                                                                            \
+    (_sum_tv_ptr)->tv_sec = (_tv1_ptr)->tv_sec + (_tv2_ptr)->tv_sec;        \
+    (_sum_tv_ptr)->tv_usec = (_tv1_ptr)->tv_usec + (_tv2_ptr)->tv_usec;     \
+    if ((_sum_tv_ptr)->tv_usec >= 1000000) {                                \
+        (_sum_tv_ptr)->tv_sec++;                                            \
+        (_sum_tv_ptr)->tv_usec -= 1000000;                                  \
+    }                                                                       \
+} while (0)
+
+/**
+ * @brief 计算_tv1_ptr-_tv2_ptr时间(struct timeval)之差
+ */
+#define HY_TIME_TIMEVAL_SUB(_tv1_ptr, _tv2_ptr, _sub_tv_ptr)                \
+do {                                                                        \
+    HY_TIME_CHECK_TYPE(_tv1_ptr, _tv2_ptr);                                 \
+    HY_TIME_CHECK_TYPE(_tv1_ptr, _sub_tv_ptr);                              \
+                                                                            \
+    (_sub_tv_ptr)->tv_sec = (_tv1_ptr)->tv_sec - (_tv2_ptr)->tv_sec;        \
+    (_sub_tv_ptr)->tv_usec = (_tv1_ptr)->tv_usec - (_tv2_ptr)->tv_usec;     \
+    if ((_sub_tv_ptr)->tv_usec < 0) {                                       \
+        (_sub_tv_ptr)->tv_sec--;                                            \
+        (_sub_tv_ptr)->tv_usec += 1000000;                                  \
+    }                                                                       \
+} while (0)
+
+/**
+ * @brief 计算当前时间-_tv时间(struct timeval)之差
+ */
+#define HY_TIME_TIMEVAL_NOW_SUB(_tv, _now_sub_tv_ptr)                       \
+do {                                                                        \
+    HY_TIME_CHECK_TYPE(_tv, _now_sub_tv_ptr);                               \
+                                                                            \
+    struct timeval _now;                                                    \
+    gettimeofday(&_now, NULL);                                              \
+    HY_TIME_TIMEVAL_SUB(&_now, (_tv), (_now_sub_tv_ptr));                   \
 } while (0)
 
 /**
