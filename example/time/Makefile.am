@@ -40,8 +40,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/$(run_os)/timer  \
-                   -I$(top_srcdir)/include/$(run_os)        \
+                   -I$(top_srcdir)/include/time \
                    -I$(top_srcdir)/include
 
 _sources_com    +=
@@ -69,11 +68,18 @@ hy_timer_multi_wheel_demo_CXXFLAGS  = $(_cxxflags_com)
 hy_timer_multi_wheel_demo_LDFLAGS   = $(_ldflags_com)
 hy_timer_multi_wheel_demo_LDADD     = $(_ldadd_com)
 
-bin_PROGRAMS           += hy_zone_demo
-hy_zone_demo_SOURCES   = $(_sources_com) hy_zone_demo.c
-hy_zone_demo_CPPFLAGS  = $(_cppflags_com)
-hy_zone_demo_CFLAGS    = $(_cflags_com)
-hy_zone_demo_CXXFLAGS  = $(_cxxflags_com)
-hy_zone_demo_LDFLAGS   = $(_ldflags_com)
-hy_zone_demo_LDADD     = $(_ldadd_com)
+bin_PROGRAMS                        += hy_zone_demo
+hy_zone_demo_SOURCES                = $(_sources_com) hy_zone_demo.c
+hy_zone_demo_CPPFLAGS               = $(_cppflags_com)
+hy_zone_demo_CFLAGS                 = $(_cflags_com)
+hy_zone_demo_CXXFLAGS               = $(_cxxflags_com)
+hy_zone_demo_LDFLAGS                = $(_ldflags_com)
+hy_zone_demo_LDADD                  = $(_ldadd_com)
 
+bin_PROGRAMS                        += hy_timer_demo
+hy_timer_demo_SOURCES               = $(_sources_com) hy_timer_demo.c
+hy_timer_demo_CPPFLAGS              = $(_cppflags_com)
+hy_timer_demo_CFLAGS                = $(_cflags_com)
+hy_timer_demo_CXXFLAGS              = $(_cxxflags_com)
+hy_timer_demo_LDFLAGS               = $(_ldflags_com)
+hy_timer_demo_LDADD                 = $(_ldadd_com)

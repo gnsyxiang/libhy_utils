@@ -105,7 +105,7 @@ AC_CONFIG_FILES([Makefile
                  example/net/Makefile
                  example/serialize/Makefile
                  example/thread/Makefile
-                 example/timer/Makefile
+                 example/time/Makefile
                  example/uart/Makefile
                  include/Makefile
                  include/download/Makefile
@@ -117,7 +117,7 @@ AC_CONFIG_FILES([Makefile
                  include/net/Makefile
                  include/serialize/Makefile
                  include/thread/Makefile
-                 include/timer/Makefile
+                 include/time/Makefile
                  include/uart/Makefile
                  res/Makefile
                  res/voice/Makefile
@@ -133,7 +133,7 @@ AC_CONFIG_FILES([Makefile
                  src/net/Makefile
                  src/serialize/Makefile
                  src/thread/Makefile
-                 src/timer/Makefile
+                 src/time/Makefile
                  src/uart/Makefile
                  test/Makefile])
 AC_OUTPUT

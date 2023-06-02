@@ -2,10 +2,10 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_zone_demo.c
+ * @file    hy_timer_multi_wheel_demo.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    13/04 2022 18:25
+ * @date    11/04 2022 14:59
  * @version v0.0.1
  * 
  * @since    note
@@ -13,9 +13,9 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        13/04 2022      create the file
+ *     00      zhenquan.qiu        11/04 2022      create the file
  * 
- *     last modified: 13/04 2022 18:25
+ *     last modified: 11/04 2022 14:59
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,15 +31,12 @@
 #include "hy_signal.h"
 #include "hy_module.h"
 #include "hy_utils.h"
-#include "hy_time.h"
 
-#include "hy_zone.h"
+#include "hy_timer_multi_wheel.h"
 
-#define _APP_NAME "hy_zone_demo"
+#define _APP_NAME "hy_timer_multi_wheel_demo"
 
 typedef struct {
-    void        *zone_h;
-
     hy_s32_t    exit_flag;
 } _main_context_t;
 
@@ -75,7 +72,6 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.config_file               = "../res/hy_log/zlog.conf";
     log_c.fifo_len                  = 10 * 1024;
-    log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
 
@@ -106,29 +102,12 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
 }
 
-static void _handle_module_destroy(_main_context_t *context)
+static void _timer_cb(void *args)
 {
-    // note: 增加或删除要同步到HyModuleCreateHandle_s中
-    HyModuleDestroyHandle_s module[] = {
-        {"zone",        &context->zone_h,       HyZoneDestroy},
-    };
-
-    HY_MODULE_RUN_DESTROY_HANDLE(module);
+    LOGD("----1---------haha \n");
 }
 
-static hy_s32_t _handle_module_create(_main_context_t *context)
-{
-    HyZoneConfig_s zone_c;
-    HY_MEMSET(&zone_c, sizeof(zone_c));
-    HY_STRCPY(zone_c.save_c.zone_file_paht, "/data/nfs/bin/zoneinfo");
-
-    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
-    HyModuleCreateHandle_s module[] = {
-        {"zone",        &context->zone_h,       &zone_c,        (HyModuleCreateHandleCb_t)HyZoneCreate,         HyZoneDestroy},
-    };
-
-    HY_MODULE_RUN_CREATE_HANDLE(module);
-}
+#define _TICK_MS (10)
 
 int main(int argc, char *argv[])
 {
@@ -141,52 +120,19 @@ int main(int argc, char *argv[])
             break;
         }
 
-        if (0 != _handle_module_create(context)) {
-            LOGE("_handle_module_create failed \n");
-            break;
-        }
-
         LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-        HyZoneInfo_s zone_info;
-        HY_MEMSET(&zone_info, sizeof(zone_info));
-#if 1
-#define _ZONEINFO_PATH "Asia/Shanghai"
-        // #define _ZONEINFO_PATH "America/Chicago"
-        HY_STRNCPY(zone_info.zoneinfo_path, sizeof(zone_info.zoneinfo_path),
-                _ZONEINFO_PATH, HY_STRLEN(_ZONEINFO_PATH));
-#endif
+        HyTimerMultiWheelCreate(_TICK_MS);
 
-#if 0
-#define _ZONEINFO_NAME "CST-8"
-        // #define _ZONEINFO_NAME "CST6CDT"
-        HY_STRNCPY(zone_info.zoneinfo_name, sizeof(zone_info.zoneinfo_name),
-                _ZONEINFO_NAME, sizeof(_ZONEINFO_NAME));
-#endif
+        LOGD("----2---------haha \n");
+        HyTimerMultiWheelConfig_s timer_c;
+        HY_MEMSET(&timer_c, sizeof(timer_c));
+        timer_c.timer_cb    = _timer_cb;
 
-#if 0
-        zone_info.type = HY_ZONE_TYPE_EAST;
-        zone_info.num = HY_ZONE_NUM_8;
-        // zone_info.type = HY_ZONE_TYPE_WEST;
-        // zone_info.num = HY_ZONE_NUM_6;
-#endif
-
-        if (0 != HyZoneSet(&zone_info)) {
-            LOGE("HyZoneSet failed \n");
+        for (hy_s32_t i = 1; i <= 10; ++i) {
+            timer_c.expires = i * 1000;
+            HyTimerMultiWheelAdd(&timer_c);
         }
-
-        HyZoneInfo_s zone_info_get;
-        HyZoneGet(&zone_info_get);
-        LOGI("type: %d \n", zone_info_get.type);
-        LOGI("num: %d \n", zone_info_get.num);
-        LOGI("daylight: %d \n", zone_info_get.daylight);
-        LOGI("utc_s: %d \n", zone_info_get.utc_s);
-        LOGI("zoneinfo_path: %s \n", zone_info_get.zoneinfo_path);
-        LOGI("zoneinfo_name: %s \n", zone_info_get.zoneinfo_name);
-
-        char time_buf[BUF_LEN] = {0};
-        HyTimeFormatLocalTime(time_buf, sizeof(time_buf));
-        LOGI("time_buf: %s \n", time_buf);
 
         while (!context->exit_flag) {
             sleep(1);
@@ -194,7 +140,8 @@ int main(int argc, char *argv[])
 
     } while (0);
 
-    _handle_module_destroy(context);
+    HyTimerMultiWheelDestroy();
+
     _bool_module_destroy();
     HY_MEM_FREE_PP(&context);
 

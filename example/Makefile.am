@@ -22,6 +22,7 @@ SUBDIRS = \
           fifo \
           net \
           thread \
+          time \
           uart
 
 if COMPILE_LIBCJSON
@@ -54,9 +55,10 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include          \
-                   -I$(top_srcdir)/include/net      \
-                   -I$(top_srcdir)/include/thread
+                   -I$(top_srcdir)/include/thread \
+                   -I$(top_srcdir)/include/net \
+                   -I$(top_srcdir)/include/time \
+                   -I$(top_srcdir)/include
 
 _sources_com    +=
 

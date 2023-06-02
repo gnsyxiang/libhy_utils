@@ -18,7 +18,7 @@
 #     last modified: 23/03 2023 14:17
 # ===============================================================
 
-noinst_LTLIBRARIES = libhy_timer.la
+noinst_LTLIBRARIES = libhy_time.la
 
 # ------------------
 # defining variables
@@ -42,11 +42,12 @@ _define_com     +=
 
 _include_com    += \
                    -I$(top_srcdir)/include/thread \
-                   -I$(top_srcdir)/include/timer  \
+                   -I$(top_srcdir)/include/time  \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
                    hy_zone.c \
+                   hy_time.c \
                    hy_timer.c \
                    hy_timer_multi_wheel.c
 
@@ -63,10 +64,9 @@ _ldflags_com    +=
 
 _ldadd_com      += $(ldadd_com)
 
-libhy_timer_la_SOURCES      = $(_sources_com)
-libhy_timer_la_CPPFLAGS     = $(_cppflags_com)
-libhy_timer_la_CFLAGS       = $(_cflags_com)
-libhy_timer_la_CXXFLAGS     = $(_cxxflags_com)
-libhy_timer_la_LDFLAGS      = $(_ldflags_com)
-libhy_timer_la_LIBADD       = $(_ldadd_com)
-
+libhy_time_la_SOURCES   = $(_sources_com)
+libhy_time_la_CPPFLAGS  = $(_cppflags_com)
+libhy_time_la_CFLAGS    = $(_cflags_com)
+libhy_time_la_CXXFLAGS  = $(_cxxflags_com)
+libhy_time_la_LDFLAGS   = $(_ldflags_com)
+libhy_time_la_LIBADD    = $(_ldadd_com)

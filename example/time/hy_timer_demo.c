@@ -33,7 +33,7 @@
 
 #include "hy_timer.h"
 
-#define _APP_NAME "hy_timer_demo"
+#define _APP_NAME "hy_time_demo"
 
 typedef struct {
     void        *timer_handle;
@@ -85,7 +85,6 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.config_file               = "../res/hy_log/zlog.conf";
     log_c.fifo_len                  = 10 * 1024;
-    log_c.save_c.mode               = HY_LOG_MODE_PROCESS_SINGLE;
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
 

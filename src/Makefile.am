@@ -25,7 +25,7 @@ SUBDIRS = \
           ipc \
           net \
           thread \
-          timer \
+          time \
           uart
 
 if COMPILE_LIBCURL
@@ -81,7 +81,6 @@ _sources_com    += \
                    hy_signal.c \
                    hy_sort.c \
                    hy_string.c \
-                   hy_time.c \
                    hy_utils.c
 
 _cppflags_com   += \
@@ -102,7 +101,7 @@ endif
 _ldadd_com      += \
                    $(top_builddir)/src/net/libhy_net.la \
                    $(top_builddir)/src/thread/libhy_thread.la \
-                   $(top_builddir)/src/timer/libhy_timer.la \
+                   $(top_builddir)/src/time/libhy_time.la \
                    $(top_builddir)/src/fifo/libhy_fifo.la \
                    $(top_builddir)/src/uart/libhy_uart.la
 
