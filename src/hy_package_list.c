@@ -134,17 +134,13 @@ HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
 
         HY_INIT_LIST_HEAD(&handle->list);
 
-        HyThreadMutexConfig_s mutex_c;
-        HY_MEMSET(&mutex_c, sizeof(mutex_c));
-        handle->mutex_h = HyThreadMutexCreate(&mutex_c);
+        handle->mutex_h = HyThreadMutexCreate_m();
         if (!handle->mutex_h) {
             LOGE("HyThreadMutexCreate failed \n");
             break;
         }
 
-        HyThreadCondConfig_s cond_c;
-        HY_MEMSET(&cond_c, sizeof(cond_c));
-        handle->cond_h = HyThreadCondCreate(&cond_c);
+        handle->cond_h = HyThreadCondCreate_m();
         if (!handle->cond_h) {
             LOGE("HyThreadCondCreate failed \n");
             break;
