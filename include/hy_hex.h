@@ -33,17 +33,17 @@ extern "C" {
  * @param len 长度
  * @param flag 是否需要打印对应的ascii
  */
-void HyHex(const void *buf, hy_u32_t len, hy_s32_t flag);
+void HyHex(const void *buf, size_t len, hy_s32_t flag);
 
 #define HY_HEX_ASCII(_buf, _len)                        \
     do {                                                \
-        LOGD("len: %d \n", _len);                       \
+        LOGD("len: %ld \n", (size_t)_len);              \
         HyHex(_buf, _len, 1);                           \
     } while (0)
 
 #define HY_HEX(_buf, _len)                              \
     do {                                                \
-        LOGD("len: %d \n", _len);                       \
+        LOGD("len: %ld \n", (size_t)_len);              \
         HyHex(_buf, _len, 0);                           \
     } while (0)
 

@@ -29,16 +29,16 @@
 
 #include "hy_hex.h"
 
-HY_WEAK void HyHex(const void *_buf, hy_u32_t len, hy_s32_t flag)
+HY_WEAK void HyHex(const void *_buf, size_t len, hy_s32_t flag)
 {
-    hy_u8_t cnt = 0;
-    const hy_u8_t *buf = (const hy_u8_t *)_buf;
+    hy_s32_t cnt = 0;
+    const char *buf = (const char *)_buf;
 
     if (len <= 0) {
         return;
     }
 
-    for (hy_u32_t i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         if (flag == 1) {
             if (buf[i] == 0x0d || buf[i] == 0x0a || buf[i] < 32 || buf[i] >= 127) {
                 printf("%02x[ ]  ", buf[i]);
@@ -57,4 +57,3 @@ HY_WEAK void HyHex(const void *_buf, hy_u32_t len, hy_s32_t flag)
     }
     printf("\r\n");
 }
-
