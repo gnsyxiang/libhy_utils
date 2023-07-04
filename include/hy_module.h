@@ -179,9 +179,10 @@ do {                                                                        \
         if (_destroy->destroy_bool_cb) {                                    \
             _destroy->destroy_bool_cb();                                    \
         }                                                                   \
-        LOGI("destroy module: <%s> end \n", _destroy->name);                \
+        if (i != _MODULE_ARRAY_CNT(module) - 1) {                           \
+            LOGI("destroy module: <%s> end \n", _destroy->name);            \
+        }                                                                   \
     }                                                                       \
-    sleep(1);                                                               \
 } while(0)
 
 #ifdef __cplusplus
