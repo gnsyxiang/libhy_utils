@@ -5,7 +5,7 @@
  * @file    hy_hash.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
- * @date    30/10 2021 15:35
+ * @date    19/05 2023 16:16
  * @version v0.0.1
  * 
  * @since    note
@@ -13,12 +13,11 @@
  * 
  *     change log:
  *     NO.     Author              Date            Modified
- *     00      zhenquan.qiu        30/10 2021      create the file
+ *     00      zhenquan.qiu        19/05 2023      create the file
  * 
- *     last modified: 30/10 2021 15:35
+ *     last modified: 19/05 2023 16:16
  */
 #include <stdio.h>
-#include <pthread.h>
 
 #include <hy_log/hy_log.h>
 
@@ -26,30 +25,27 @@
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_list.h"
+#include "hy_thread_mutex.h"
 
 #include "hy_hash.h"
 
 typedef struct {
-    hy_u32_t            key_hash;
-    void                *val;
-    hy_u32_t            val_len;
+    HyHashItem_s            item;
 
-    struct hy_hlist_node    list;
-} _item_t;
+    struct hy_hlist_node    entry;
+} _list_item_s;
 
-typedef void (*handle_item_cb_t)(_item_t *pos, HyHashItem_t *h_item);
+struct HyHash_s {
+    HyHashSaveConfig_s      save_c;
 
-typedef struct {
-    HyHashSaveConfig_t      save_config;
+    HyThreadMutex_s         **list_mutex_h;
+    struct hy_hlist_head    *list;
+};
 
-    pthread_mutex_t         *bucket_mutex;
-    struct hy_hlist_head    *bucket_head;
-} _hash_context_t;
+typedef void (*handle_item_cb_t)(_list_item_s *pos, HyHashItem_s *item);
 
-hy_u32_t HyHashGet(const char *key)
+hy_u32_t _hash_get(const char *key)
 {
-    HY_ASSERT_RET_VAL(!key, 0);
-
     hy_u32_t seed = 31; // 31 131 1313 13131 131313 etc..
     hy_u32_t hash = 0;
 
@@ -60,244 +56,285 @@ hy_u32_t HyHashGet(const char *key)
     return hash;
 }
 
-static hy_s32_t _key_to_index(_hash_context_t *context, const char *key)
+static hy_u32_t _key_2_index(hy_u32_t bucket_cnt, const char *key)
 {
-    HY_ASSERT_RET_VAL(!key, -1);
-
-    hy_s32_t bucket_max_len = context->save_config.bucket_cnt;
-    hy_s32_t len   = HY_STRLEN(key);
+    hy_u32_t len = HY_STRLEN(key);
     hy_s32_t index = (hy_s32_t)key[0];
 
-    for (hy_s32_t i = 1; i < len; ++i) {
-        index *= 1103515245 + (hy_s32_t)key[i];
+    for (size_t i = 0; i < len; i++) {
+        // index *= 1103515245 + (hy_s32_t)key[i];
+        index *= 0x41C64E6D + (hy_s32_t)key[i];
     }
 
     index >>= 27;
-    index &= (bucket_max_len - 1);
+    index &= (bucket_cnt - 1);
 
     return index;
 }
 
-static hy_s32_t _find_item_from_list(_hash_context_t *context,
-        HyHashItem_t *h_item, handle_item_cb_t handle_item_cb, hy_u32_t index)
+static void _list_item_destroy(_list_item_s **list_item_pp)
 {
-    _item_t *pos;
-    struct hy_hlist_node *n;
-    hy_s32_t find_flag = -1;
-    hy_u32_t key_hash = 0; 
+    _list_item_s *list_item = *list_item_pp;
 
-    key_hash = HyHashGet(h_item->key);
+    HY_MEM_FREE_PP(&list_item->item.val);
 
-    pthread_mutex_lock(&context->bucket_mutex[index]);
-    hy_hlist_for_each_entry_safe(pos, n, &context->bucket_head[index], list) {
-        if (pos->key_hash == key_hash) {
-            find_flag = 0;
-
-            if (handle_item_cb) {
-                handle_item_cb(pos, h_item);
-            }
-            break;
-        }
-    }
-    pthread_mutex_unlock(&context->bucket_mutex[index]);
-
-    return find_flag;
+    LOGI("list item create, list_item: %p \n", list_item);
+    HY_MEM_FREE_PP(list_item_pp);
 }
 
-static inline void _item_destroy(_item_t *item)
+static _list_item_s *_list_item_create(HyHashItem_s *item)
 {
-    HY_MEM_FREE_P(item->val);
-    HY_MEM_FREE_P(item);
-}
-
-static _item_t *_item_init(HyHashItem_t *h_item)
-{
-    _item_t *item = NULL;
+    _list_item_s *list_item = NULL;
     do {
-        item = HY_MEM_MALLOC_BREAK(_item_t *, sizeof(*item));
-        item->val = HY_MEM_MALLOC_BREAK(void *, h_item->val_len);
+        list_item = HY_MEM_CALLOC_BREAK(_list_item_s *, sizeof(*list_item));
+        list_item->item.val = HY_MEM_CALLOC_BREAK(void *, item->val_len);
 
-        item->val_len = h_item->val_len;
-        item->key_hash = HyHashGet(h_item->key);
+        list_item->item.val_len = item->val_len;
+        list_item->item.key_hash = _hash_get(item->key);
 
-        HY_MEMCPY(item->val, h_item->val, h_item->val_len);
+        HY_MEMCPY(list_item->item.val, item->val, item->val_len);
 
-        return item;
-    } while (0);
+        LOGI("list item create, list_item: %p \n", list_item);
+        return list_item;
+    } while(0);
 
-    _item_destroy(item);
+    LOGE("list item create failed \n");
+    _list_item_destroy(&list_item);
     return NULL;
 }
 
-static void _add_item_to_list(_hash_context_t *context, HyHashItem_t *h_item)
-{
-    LOGD("add item \n");
-
-    hy_s32_t index = _key_to_index(context, h_item->key);
-    _item_t *item  = _item_init(h_item);
-
-    pthread_mutex_lock(&context->bucket_mutex[index]);
-    hy_hlist_add_head(&item->list, &context->bucket_head[index]);
-    pthread_mutex_unlock(&context->bucket_mutex[index]);
-}
-
-static inline void _replace_item_val(_item_t *pos, HyHashItem_t *h_item)
+static void _item_val_replace(_list_item_s *pos, HyHashItem_s *item)
 {
     LOGD("replace item \n");
 
-    if (pos->val) {
-        free(pos->val);
-        pos->val = NULL;
+    HY_MEM_FREE_PP(&pos->item.val);
+
+    pos->item.val = HY_MEM_MALLOC_RET(void *, item->val_len);
+
+    HY_MEMCPY(pos->item.val, item->val, item->val_len);
+}
+
+static hy_s32_t _item_val_add(HyHash_s *handle, HyHashItem_s *item)
+{
+    LOGD("add item \n");
+
+    hy_s32_t index = _key_2_index(handle->save_c.bucket_cnt, item->key);
+    _list_item_s *list_item  = _list_item_create(item);
+    if (!list_item) {
+        LOGE("_list_item_create failed \n");
+        return -1;
     }
 
-    pos->val = HY_MEM_MALLOC_RET(void *, h_item->val_len);
-
-    HY_MEMCPY(pos->val, h_item->val, h_item->val_len);
-}
-
-static void _del_item_from_list(_item_t *pos, HyHashItem_t *h_item)
-{
-    LOGD("del item \n");
-
-    hy_hlist_del(&pos->list);
-    _item_destroy(pos);
-}
-
-static inline void _get_item_val(_item_t *pos, HyHashItem_t *h_item)
-{
-    LOGD("get item \n");
-
-    h_item->val_len = pos->val_len;
-    HY_MEMCPY(h_item->val, pos->val, pos->val_len);
-}
-
-hy_s32_t HyHashItemAdd(void *handle, HyHashItem_t *h_item)
-{
-    HY_ASSERT_RET_VAL(!handle || !h_item
-            || !h_item->key || !h_item->val, -1);
-
-    _hash_context_t *context = handle;
-    hy_s32_t index;
-    hy_s32_t find_flag;
-
-    index = _key_to_index(context, h_item->key);
-    find_flag = _find_item_from_list(context, h_item, _replace_item_val, index);
-
-    if (-1 == find_flag) {
-        _add_item_to_list(context, h_item);
-    }
+    HyThreadMutexLock(handle->list_mutex_h[index]);
+    hy_hlist_add_head(&list_item->entry, &handle->list[index]);
+    HyThreadMutexUnLock(handle->list_mutex_h[index]);
 
     return 0;
 }
 
-hy_s32_t HyHashItemDel(void *handle, HyHashItem_t *h_item)
+static void _item_val_del(_list_item_s *pos, HyHashItem_s *item)
 {
-    HY_ASSERT_RET_VAL(!handle || !h_item, -1);
+    LOGD("del item \n");
 
-    _hash_context_t *context = handle;
-    hy_s32_t index = -1;
+    hy_hlist_del(&pos->entry);
 
-    index = _key_to_index(context, h_item->key);
-    return _find_item_from_list(context, h_item, _del_item_from_list, index);
+    if (item) {
+        HY_MEM_FREE_PP(&item->val);
+        item->val = HY_MEM_CALLOC_RETURN(void *, pos->item.val_len);
+
+        item->val_len = pos->item.val_len;
+        HY_MEMCPY(item->val, pos->item.val, pos->item.val_len);
+    }
+
+    _list_item_destroy(&pos);
 }
 
-hy_s32_t HyHashItemGet(void *handle, HyHashItem_t *h_item)
+static void _item_val_get(_list_item_s *pos, HyHashItem_s *item)
 {
-    HY_ASSERT_RET_VAL(!handle || !h_item, -1);
+    LOGD("get item \n");
 
-    _hash_context_t *context = handle;
-    hy_s32_t index = -1;
-
-    index = _key_to_index(context, h_item->key);
-    return _find_item_from_list(context, h_item, _get_item_val, index);
+    item->val_len = pos->item.val_len;
+    HY_MEMCPY(item->val, pos->item.val, pos->item.val_len);
 }
 
-static void _traverse_item_list(_hash_context_t *context, hy_u32_t index,
-        hy_s32_t type, HyHashDumpItemCb_t dump_item_cb, void *args)
+static hy_s32_t _list_item_find(HyHash_s *handle, hy_u32_t index,
+                                handle_item_cb_t handle_item_cb,
+                                HyHashItem_s *item)
 {
-    _item_t *pos;
+    _list_item_s *pos;
+    struct hy_hlist_node *n;
+    hy_s32_t find_flag = 0;
+    hy_u32_t key_hash = 0; 
+
+    LOGI("find list item \n");
+
+    key_hash = _hash_get(item->key);
+
+    HyThreadMutexLock(handle->list_mutex_h[index]);
+    hy_hlist_for_each_entry_safe(pos, n, &handle->list[index], entry) {
+        if (pos->item.key_hash == key_hash) {
+            find_flag = 1;
+
+            if (handle_item_cb) {
+                handle_item_cb(pos, item);
+            }
+            break;
+        }
+    }
+    HyThreadMutexUnLock(handle->list_mutex_h[index]);
+
+    return find_flag;
+}
+
+hy_s32_t HyHashAdd(HyHash_s *handle, HyHashItem_s *item)
+{
+    HY_ASSERT_RET_VAL(!handle || !item, -1);
+    hy_u32_t index;
+    hy_s32_t find_flag;
+
+    index = _key_2_index(handle->save_c.bucket_cnt, item->key);
+    find_flag = _list_item_find(handle, index, _item_val_replace, item);
+
+    if (0 == find_flag) {
+        find_flag = _item_val_add(handle, item);
+    }
+
+    return (find_flag == -1 ? -1 : 0);
+}
+
+hy_s32_t HyHashPeekGet(HyHash_s *handle, HyHashItem_s *item)
+{
+    HY_ASSERT_RET_VAL(!handle || !item, -1);
+    hy_u32_t index;
+    hy_s32_t find_flag;
+
+    index = _key_2_index(handle->save_c.bucket_cnt, item->key);
+    find_flag = _list_item_find(handle, index, _item_val_get, item);
+
+    return (find_flag == 1 ? 0 : -1);
+}
+
+hy_s32_t HyHashDel(HyHash_s *handle, HyHashItem_s *item)
+{
+    HY_ASSERT_RET_VAL(!handle || !item, -1);
+    hy_u32_t index;
+    hy_s32_t find_flag;
+
+    index = _key_2_index(handle->save_c.bucket_cnt, item->key);
+    find_flag = _list_item_find(handle, index, _item_val_del, item);
+
+    return (find_flag == 1 ? 0 : -1);
+}
+
+static void _traverse_item_list(HyHash_s *handle,
+                                hy_u32_t index, hy_s32_t type,
+                                HyHashDumpItemCb_t dump_item_cb, void *args)
+{
+    _list_item_s *pos;
     struct hy_hlist_node *n;
 
-    pthread_mutex_lock(&context->bucket_mutex[index]);
-    hy_hlist_for_each_entry_safe(pos, n, &context->bucket_head[index], list) {
+    HyThreadMutexLock(handle->list_mutex_h[index]);
+    hy_hlist_for_each_entry_safe(pos, n, &handle->list[index], entry) {
         if (dump_item_cb) {
             if (type) {
-                dump_item_cb(pos->val, args);
+                dump_item_cb(&pos->item, args);
             } else {
-                dump_item_cb(pos, args);
+                // NOTE: 为了对外接口而进行的强制类型转换
+                dump_item_cb((HyHashItem_s *)pos, args);
             }
         }
     }
-    pthread_mutex_unlock(&context->bucket_mutex[index]);
+    HyThreadMutexUnLock(handle->list_mutex_h[index]);
 }
 
-void HyHashDump(void *handle, HyHashDumpItemCb_t dump_item_cb, void *args)
+void HyHashDump(HyHash_s *handle, const char *key,
+                HyHashDumpItemCb_t dump_item_cb, void *args)
+{
+    hy_u32_t index;
+    _list_item_s *pos;
+    struct hy_hlist_node *n;
+    hy_s32_t flag = 0;
+
+    index = _key_2_index(handle->save_c.bucket_cnt, key);
+
+    HyThreadMutexLock(handle->list_mutex_h[index]);
+    hy_hlist_for_each_entry_safe(pos, n, &handle->list[index], entry) {
+        if (dump_item_cb) {
+            dump_item_cb(&pos->item, args);
+            flag = 1;
+            break;
+        }
+    }
+    HyThreadMutexUnLock(handle->list_mutex_h[index]);
+
+    if (!flag) {
+        LOGI("don't find %s \n", key);
+    }
+}
+
+void HyHashDumpAll(HyHash_s *handle, HyHashDumpItemCb_t dump_item_cb, void *args)
 {
     HY_ASSERT_RET(!handle || !dump_item_cb);
+    LOGI("hash dump all: \n");
 
-    _hash_context_t *context = handle;
-
-    for (hy_u32_t i = 0; i < context->save_config.bucket_cnt; i++) {
-        LOGD("index: %d \n", i);
-        _traverse_item_list(context, i, 1, dump_item_cb, args);
+    for (hy_u32_t i = 0; i < handle->save_c.bucket_cnt; i++) {
+        _traverse_item_list(handle, i, 1, dump_item_cb, args);
     }
 }
 
-static void _destroy_item_from_list(void *val, void *args)
+static void _destroy_item_from_list(HyHashItem_s *list_item, void *args)
 {
-    _del_item_from_list((_item_t *)val, (HyHashItem_t *)args);
+    // NOTE: 为了对外接口而进行的强制类型转换，跟上面是同一个注意事项
+    _item_val_del((_list_item_s *)list_item, NULL);
 }
 
-void HyHashDestroy(void **handle)
+void HyHashDestroy(HyHash_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle || !*handle);
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+    HyHash_s *handle = *handle_pp;
 
-    _hash_context_t *context = *handle;
+    for (size_t i = 0; i < handle->save_c.bucket_cnt; i++) {
+        _traverse_item_list(handle, i, 0, _destroy_item_from_list, NULL);
 
-    for (size_t i = 0; i < context->save_config.bucket_cnt; i++) {
-        _traverse_item_list(context, i, 0, _destroy_item_from_list, NULL);
-
-        pthread_mutex_destroy(&context->bucket_mutex[i]);
+        HyThreadMutexDestroy(&handle->list_mutex_h[i]);
     }
 
-    HY_MEM_FREE_PP(&context->bucket_mutex);
+    HY_MEM_FREE_PP(&handle->list_mutex_h);
+    HY_MEM_FREE_PP(&handle->list);
 
-    HY_MEM_FREE_PP(&context->bucket_head);
-
-    HY_MEM_FREE_PP(handle);
-
-    LOGI("hash destroy successful \n");
+    LOGI("hash destroy successful, handle: %p \n", handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
-void *HyHashCreate(HyHashConfig_t *config)
+HyHash_s *HyHashCreate(HyHashConfig_s *hash_c)
 {
-    HY_ASSERT_RET_VAL(!config, NULL);
+    HY_ASSERT_RET_VAL(!hash_c, NULL);
+    HyHash_s *handle = NULL;
+    hy_u32_t bucket_cnt;
 
-    size_t bucket_cnt;
-    _hash_context_t *context = NULL;
     do {
-        bucket_cnt = config->save_config.bucket_cnt;
+        handle = HY_MEM_CALLOC_BREAK(HyHash_s *, sizeof(*handle));
+        HY_MEMCPY(&handle->save_c, &hash_c->save_c, sizeof(hash_c->save_c));
 
-        context = HY_MEM_MALLOC_BREAK(_hash_context_t *, sizeof(*context));
-        context->bucket_head = HY_MEM_MALLOC_BREAK(struct hy_hlist_head *, bucket_cnt * sizeof(struct hy_hlist_head));
-        context->bucket_mutex = HY_MEM_MALLOC_BREAK(pthread_mutex_t *, bucket_cnt * sizeof(pthread_mutex_t));
+        bucket_cnt = hash_c->save_c.bucket_cnt;
 
-        HY_MEMCPY(&context->save_config, &config->save_config, sizeof(config->save_config));
+        handle->list = HY_MEM_CALLOC_BREAK(struct hy_hlist_head *, bucket_cnt * sizeof(struct hy_hlist_head));
+        handle->list_mutex_h = HY_MEM_CALLOC_BREAK(HyThreadMutex_s **, bucket_cnt * sizeof(HyThreadMutex_s *));
 
         for (size_t i = 0; i < bucket_cnt; i++) {
-            if (0 != pthread_mutex_init(&context->bucket_mutex[i], NULL)) {
-                LOGE("pthread_mutex_init failed \n");
-                goto _ERR_CREATE_1;
+            handle->list_mutex_h[i] = HyThreadMutexCreate_m();
+            if (!handle->list_mutex_h[i]) {
+                LOGE("HyThreadMutexCreate_m failed \n");
+                break;
             }
 
-            HY_INIT_HLIST_HEAD(&context->bucket_head[i]);
+            HY_INIT_HLIST_HEAD(&handle->list[i]);
         }
 
-        LOGI("hash create successful \n");
-        return context;
-    } while (0);
+        LOGI("hash create successful, handle: %p \n", handle);
+        return handle;
+    } while(0);
 
-_ERR_CREATE_1:
-    HyHashDestroy((void **)&context);
+    LOGE("hash create failed \n");
     return NULL;
 }

@@ -99,6 +99,14 @@ hy_gpio_interrupt_demo_CXXFLAGS = $(_cxxflags_com)
 hy_gpio_interrupt_demo_LDFLAGS  = $(_ldflags_com)
 hy_gpio_interrupt_demo_LDADD    = $(_ldadd_com)
 
+bin_PROGRAMS                    += hy_hash_demo
+hy_hash_demo_SOURCES            = $(_sources_com) hy_hash_demo.c
+hy_hash_demo_CPPFLAGS           = $(_cppflags_com)
+hy_hash_demo_CFLAGS             = $(_cflags_com)
+hy_hash_demo_CXXFLAGS           = $(_cxxflags_com)
+hy_hash_demo_LDFLAGS            = $(_ldflags_com)
+hy_hash_demo_LDADD              = $(_ldadd_com)
+
 bin_PROGRAMS                    += hy_hex_demo
 hy_hex_demo_SOURCES             = $(_sources_com) hy_hex_demo.c
 hy_hex_demo_CPPFLAGS            = $(_cppflags_com)
