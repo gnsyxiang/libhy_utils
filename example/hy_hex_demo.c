@@ -33,7 +33,7 @@
 
 int main(int argc, char *argv[])
 {
-    HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
+    HyLogInit_m(10 * 1024, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
 
     char *buf = "1234567890abcdefghi";
     HY_HEX_ASCII(buf, HY_STRLEN(buf));
