@@ -39,7 +39,7 @@
 typedef struct {
     void        *net_h;
 
-    hy_s32_t    exit_flag;
+    hy_s32_t    is_exit;
 } _main_context_t;
 
 static void _signal_error_cb(void *args)
@@ -47,7 +47,7 @@ static void _signal_error_cb(void *args)
     LOGE("------error cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _signal_user_cb(void *args)
@@ -55,7 +55,7 @@ static void _signal_user_cb(void *args)
     LOGW("------user cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _bool_module_destroy(void)
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
         LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-        while (!context->exit_flag) {
+        while (!context->is_exit) {
             sleep(1);
         }
     } while (0);

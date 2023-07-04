@@ -38,7 +38,7 @@
 typedef struct {
     void        *timer_handle;
 
-    hy_s32_t    exit_flag;
+    hy_s32_t    is_exit;
 } _main_context_t;
 
 static void _timer_cb(void *args)
@@ -47,7 +47,7 @@ static void _timer_cb(void *args)
 
     static int cnt = 0;
     if (++cnt >= 5) {
-        context->exit_flag = 1;
+        context->is_exit = 1;
     }
 
     LOGD("------cnt: %d \n", cnt);
@@ -58,7 +58,7 @@ static void _signal_error_cb(void *args)
     LOGE("------error cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _signal_user_cb(void *args)
@@ -66,7 +66,7 @@ static void _signal_user_cb(void *args)
     LOGI("------user cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _bool_module_destroy(void)
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
             LOGE("HyTimerAdd failed \n");
         }
 
-        while (!context->exit_flag) {
+        while (!context->is_exit) {
             sleep(1);
         }
 

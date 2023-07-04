@@ -41,7 +41,7 @@ typedef struct {
     HyThread_s      *read_fifo_thread_h;
     HyThread_s      *write_fifo_thread_h;
 
-    hy_s32_t        exit_flag;
+    hy_s32_t        is_exit;
 } _main_context_t;
 
 static hy_s32_t _write_fifo_loop_cb(void *args)
@@ -51,7 +51,7 @@ static hy_s32_t _write_fifo_loop_cb(void *args)
     char c = 'a';
     hy_u32_t ret = 0;
 
-    while (!context->exit_flag) {
+    while (!context->is_exit) {
         ret = HyFifoLockWrite(context->fifo_h, &c, 1);
         if (ret > 0) {
             cnt += 1;
@@ -76,7 +76,7 @@ static hy_s32_t _read_fifo_loop_cb(void *args)
 
     hy_u32_t len;
     char c;
-    while (!context->exit_flag) {
+    while (!context->is_exit) {
         len = HyFifoLockGetUsedLen(context->fifo_h);
         if (len > 0) {
             HyFifoLockRead(context->fifo_h, &c, 1);
@@ -94,7 +94,7 @@ static void _signal_error_cb(void *args)
     LOGE("------error cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _signal_user_cb(void *args)
@@ -102,7 +102,7 @@ static void _signal_user_cb(void *args)
     LOGI("------user cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _bool_module_destroy(void)
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
         LOGI("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
 
-        while (!context->exit_flag) {
+        while (!context->is_exit) {
             sleep(1);
 
             LOGI("free len: %d, used len: %d \n",

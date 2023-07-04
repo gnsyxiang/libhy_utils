@@ -38,7 +38,7 @@
 typedef struct {
     void        *phy_led_h;
 
-    hy_s32_t    exit_flag;
+    hy_s32_t    is_exit;
 } _main_context_t;
 
 static void _signal_error_cb(void *args)
@@ -46,7 +46,7 @@ static void _signal_error_cb(void *args)
     LOGE("------error cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _signal_user_cb(void *args)
@@ -54,7 +54,7 @@ static void _signal_user_cb(void *args)
     LOGW("------user cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _bool_module_destroy(void)
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
         HyPHYLedSetLed(HY_PHY_LED_NUM_0, HY_PHY_LED_MODE_SLOW_BLINK);
         HyPHYLedSetLed(HY_PHY_LED_NUM_1, HY_PHY_LED_MODE_FAST_BLINK);
 
-        while (!context->exit_flag) {
+        while (!context->is_exit) {
             // HyNetLedSetLed(HY_NET_LED_LED_0, HY_NET_LED_LED_MODE_ON);
             // HyNetLedSetLed(HY_NET_LED_LED_1, HY_NET_LED_LED_MODE_OFF);
             // usleep(100 * 1000);

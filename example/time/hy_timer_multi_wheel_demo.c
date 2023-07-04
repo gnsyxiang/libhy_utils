@@ -37,7 +37,7 @@
 #define _APP_NAME "hy_timer_multi_wheel_demo"
 
 typedef struct {
-    hy_s32_t    exit_flag;
+    hy_s32_t    is_exit;
 } _main_context_t;
 
 static void _signal_error_cb(void *args)
@@ -45,7 +45,7 @@ static void _signal_error_cb(void *args)
     LOGE("------error cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _signal_user_cb(void *args)
@@ -53,7 +53,7 @@ static void _signal_user_cb(void *args)
     LOGW("------user cb\n");
 
     _main_context_t *context = args;
-    context->exit_flag = 1;
+    context->is_exit = 1;
 }
 
 static void _bool_module_destroy(void)
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             HyTimerMultiWheelAdd(&timer_c);
         }
 
-        while (!context->exit_flag) {
+        while (!context->is_exit) {
             sleep(1);
         }
 
