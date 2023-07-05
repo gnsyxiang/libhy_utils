@@ -31,6 +31,8 @@
 #include "hy_module.h"
 #include "hy_utils.h"
 
+#include "config.h"
+
 #define _APP_NAME "hy_template_demo"
 
 typedef struct {
@@ -135,7 +137,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
         while (!context->is_exit) {
             sleep(1);
