@@ -61,7 +61,7 @@ _install_headers_com    += \
                            hy_dynamic_array.h \
                            hy_file.h \
                            hy_gpio.h \
-                           hy_gpio_interrupt.h \
+                           hy_gpio_isr.h \
                            hy_hash.h \
                            hy_hex.h \
                            hy_list.h \

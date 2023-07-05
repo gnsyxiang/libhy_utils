@@ -2,7 +2,7 @@
  * 
  * Release under GPLv-3.0.
  * 
- * @file    hy_gpio_interrupt.c
+ * @file    hy_gpio_isr.c
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    26/04 2023 19:26
@@ -33,21 +33,21 @@
 #include "hy_gpio.h"
 #include "hy_utils.h"
 
-#include "hy_gpio_interrupt.h"
+#include "hy_gpio_isr.h"
 
-struct HyGpioInterrupt_s {
-    HyGpioInterruptSaveConfig_s save_c;
+struct HyGpioIsr_s {
+    HyGpioIsrSaveConfig_s   save_c;
 
-    HyThread_s                  *thread_h;
-    hy_s32_t                    fd;
+    HyThread_s              *thread_h;
+    hy_s32_t                fd;
 
-    hy_s32_t                    is_exit;
+    hy_s32_t                is_exit;
 };
 
-static hy_s32_t _gpio_interrupt_loop_cb(void *args)
+static hy_s32_t _gpio_isr_loop_cb(void *args)
 {
-    HyGpioInterrupt_s *handle = args;
-    HyGpioInterruptSaveConfig_s *save_c = &handle->save_c;
+    HyGpioIsr_s *handle = args;
+    HyGpioIsrSaveConfig_s *save_c = &handle->save_c;
     hy_s32_t epfd;
     hy_s32_t nfds;
     struct epoll_event ev;
@@ -68,10 +68,10 @@ static hy_s32_t _gpio_interrupt_loop_cb(void *args)
         nfds=epoll_wait(epfd, events, HY_UTILS_ARRAY_CNT(events),
                         save_c->timeout_ms);
         if (nfds == 0) {
-            LOGW("gpio interrupt epoll_wait timeout \n");
+            LOGW("gpio isr epoll_wait timeout \n");
 
-            if (save_c->gpio_interrupt_timeout_cb) {
-                save_c->gpio_interrupt_timeout_cb(save_c->timeout_args);
+            if (save_c->gpio_isr_timeout_cb) {
+                save_c->gpio_isr_timeout_cb(save_c->timeout_args);
             }
             continue;
         }
@@ -88,8 +88,8 @@ static hy_s32_t _gpio_interrupt_loop_cb(void *args)
                     break;
                 }
 
-                if (save_c->gpio_interrupt_cb) {
-                    save_c->gpio_interrupt_cb(val, save_c->args);
+                if (save_c->gpio_isr_cb) {
+                    save_c->gpio_isr_cb(val, save_c->args);
                 }
             }
         }
@@ -100,10 +100,10 @@ static hy_s32_t _gpio_interrupt_loop_cb(void *args)
     return -1;
 }
 
-void HyGpioInterruptDestroy(HyGpioInterrupt_s **handle_pp)
+void HyGpioIsrDestroy(HyGpioIsr_s **handle_pp)
 {
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
-    HyGpioInterrupt_s *handle = *handle_pp;
+    HyGpioIsr_s *handle = *handle_pp;
 
     handle->is_exit = 1;
 
@@ -113,24 +113,24 @@ void HyGpioInterruptDestroy(HyGpioInterrupt_s **handle_pp)
 
     // HyGpioExport(hy_u32_t gpio, HyGpioExport_e export)
 
-    LOGI("HyGpioInterrupt destroy, handle: %p \n", handle);
+    LOGI("HyGpioIsr destroy, handle: %p \n", handle);
     HY_MEM_FREE_PP(handle_pp);
 }
 
-HyGpioInterrupt_s *HyGpioInterruptCreate(HyGpioInterruptConfig_s *gpio_interrupt_c)
+HyGpioIsr_s *HyGpioIsrCreate(HyGpioIsrConfig_s *gpio_isr_c)
 {
-    HY_ASSERT_RET_VAL(!gpio_interrupt_c, NULL);
-    HyGpioInterrupt_s *handle = NULL;
+    HY_ASSERT_RET_VAL(!gpio_isr_c, NULL);
+    HyGpioIsr_s *handle = NULL;
 
     do {
-        handle = HY_MEM_MALLOC_BREAK(HyGpioInterrupt_s *, sizeof(*handle));
-        HY_MEMCPY(&handle->save_c, &gpio_interrupt_c->save_c, sizeof(handle->save_c));
+        handle = HY_MEM_MALLOC_BREAK(HyGpioIsr_s *, sizeof(*handle));
+        HY_MEMCPY(&handle->save_c, &gpio_isr_c->save_c, sizeof(handle->save_c));
 
         HyGpio_s gpio;
-        gpio.gpio = gpio_interrupt_c->gpio;
-        gpio.direction = gpio_interrupt_c->direction;
-        gpio.active_val = gpio_interrupt_c->active_val;
-        gpio.trigger = gpio_interrupt_c->trigger;
+        gpio.gpio = gpio_isr_c->gpio;
+        gpio.direction = gpio_isr_c->direction;
+        gpio.active_val = gpio_isr_c->active_val;
+        gpio.trigger = gpio_isr_c->trigger;
         if (0 != HyGpioConfig(&gpio)) {
             LOGE("init gpio failed \n");
             break;
@@ -149,12 +149,12 @@ HyGpioInterrupt_s *HyGpioInterruptCreate(HyGpioInterruptConfig_s *gpio_interrupt
         read(handle->fd, &val, 1);
 
         HyThreadConfig_s thread_c;
-        const char *thread_name = "gpio_interrupt_loop";
+        const char *thread_name = "gpio_isr_loop";
         HY_MEMSET(&thread_c, sizeof(thread_c));
         thread_c.save_c.args = handle;
         thread_c.save_c.policy = HY_THREAD_POLICY_SCHED_RR;
         thread_c.save_c.priority = 10;
-        thread_c.save_c.thread_loop_cb = _gpio_interrupt_loop_cb;
+        thread_c.save_c.thread_loop_cb = _gpio_isr_loop_cb;
         HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
                    thread_name, HY_STRLEN(thread_name));
         handle->thread_h = HyThreadCreate(&thread_c);
@@ -163,11 +163,11 @@ HyGpioInterrupt_s *HyGpioInterruptCreate(HyGpioInterruptConfig_s *gpio_interrupt
             break;
         }
 
-        LOGI("HyGpioInterrupt create, handle: %p \n", handle);
+        LOGI("HyGpioIsr create, handle: %p \n", handle);
         return handle;
     } while(0);
 
-    LOGE("HyGpioInterrupt create failed \n");
-    HyGpioInterruptDestroy(&handle);
+    LOGE("HyGpioIsr create failed \n");
+    HyGpioIsrDestroy(&handle);
     return NULL;
 }

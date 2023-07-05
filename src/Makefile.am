@@ -70,7 +70,7 @@ _sources_com    += \
                    hy_dynamic_array.c \
                    hy_file.c \
                    hy_gpio.c \
-                   hy_gpio_interrupt.c \
+                   hy_gpio_isr.c \
                    hy_hash.c \
                    hy_hex.c \
                    hy_md5sum.c \
