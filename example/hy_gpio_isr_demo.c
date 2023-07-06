@@ -45,7 +45,7 @@
 typedef struct {
     hy_s32_t            is_exit;
 
-    HyGpioIsr_s   *gpio_isr_h;
+    HyGpioIsr_s         *gpio_isr_h;
     struct timeval      sync_key_time;
     hy_u32_t            sync_key_cnt;
     hy_u32_t            sync_key_spend_time;
@@ -153,19 +153,19 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 {
     HyGpioIsrConfig_s gpio_isr_c;
     HY_MEMSET(&gpio_isr_c, sizeof(gpio_isr_c));
-    gpio_isr_c.gpio = _SYNC_KEY_GPIO;
-    gpio_isr_c.direction = HY_GPIO_DIRECTION_IN;
-    gpio_isr_c.active_val = HY_GPIO_ACTIVE_VAL_0;
-    gpio_isr_c.trigger = HY_GPIO_TRIGGER_RISING;
-    gpio_isr_c.save_c.gpio_isr_cb = _sync_key_cb;
-    gpio_isr_c.save_c.args = context;
-    gpio_isr_c.save_c.gpio_isr_timeout_cb = _sync_key_timeout_cb;
-    gpio_isr_c.save_c.timeout_args = context;
-    gpio_isr_c.save_c.timeout_ms = _TEST_SYNC_KEY_MS + 3;
+    gpio_isr_c.gpio                         = _SYNC_KEY_GPIO;
+    gpio_isr_c.direction                    = HY_GPIO_DIRECTION_IN;
+    gpio_isr_c.active_val                   = HY_GPIO_ACTIVE_VAL_0;
+    gpio_isr_c.trigger                      = HY_GPIO_TRIGGER_RISING;
+    gpio_isr_c.save_c.gpio_isr_cb           = _sync_key_cb;
+    gpio_isr_c.save_c.args                  = context;
+    gpio_isr_c.save_c.gpio_isr_timeout_cb   = _sync_key_timeout_cb;
+    gpio_isr_c.save_c.timeout_args          = context;
+    gpio_isr_c.save_c.timeout_ms            = _TEST_SYNC_KEY_MS + 3;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
-        {"gpio_isr",           (void **)&context->gpio_isr_h,    &gpio_isr_c,           (HyModuleCreateHandleCb_t)HyGpioIsrCreate, (HyModuleDestroyHandleCb_t)HyGpioIsrDestroy},
+        {"gpio_isr", (void **)&context->gpio_isr_h, &gpio_isr_c, (HyModuleCreateHandleCb_t)HyGpioIsrCreate, (HyModuleDestroyHandleCb_t)HyGpioIsrDestroy},
     };
 
     HY_MODULE_RUN_CREATE_HANDLE(module);

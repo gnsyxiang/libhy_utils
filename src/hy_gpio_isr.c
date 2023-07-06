@@ -100,6 +100,14 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
     return -1;
 }
 
+void HyGpioIsrSetTimeout(HyGpioIsr_s *handle, hy_u32_t timeout_ms)
+{
+    HY_ASSERT_RET(!handle);
+
+    LOGI("set timeout: %d \n", timeout_ms);
+    handle->save_c.timeout_ms = timeout_ms;
+}
+
 void HyGpioIsrDestroy(HyGpioIsr_s **handle_pp)
 {
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
@@ -151,10 +159,10 @@ HyGpioIsr_s *HyGpioIsrCreate(HyGpioIsrConfig_s *gpio_isr_c)
         HyThreadConfig_s thread_c;
         const char *thread_name = "gpio_isr_loop";
         HY_MEMSET(&thread_c, sizeof(thread_c));
-        thread_c.save_c.args = handle;
-        thread_c.save_c.policy = HY_THREAD_POLICY_SCHED_RR;
-        thread_c.save_c.priority = 10;
-        thread_c.save_c.thread_loop_cb = _gpio_isr_loop_cb;
+        thread_c.save_c.args            = handle;
+        thread_c.save_c.policy          = HY_THREAD_POLICY_SCHED_RR;
+        thread_c.save_c.priority        = 10;
+        thread_c.save_c.thread_loop_cb  = _gpio_isr_loop_cb;
         HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
                    thread_name, HY_STRLEN(thread_name));
         handle->thread_h = HyThreadCreate(&thread_c);

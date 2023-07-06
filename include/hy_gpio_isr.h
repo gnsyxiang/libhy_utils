@@ -44,7 +44,7 @@ typedef struct {
     void                    *args;                  ///< 中断回调函数参数
     HyGpioIsrTimeoutCb_t    gpio_isr_timeout_cb;    ///< 中断超时回调函数
     void                    *timeout_args;          ///< 中断超时回调函数参数
-    hy_s32_t                timeout_ms;             ///< 中断超时时间
+    hy_s32_t                timeout_ms;             ///< 中断超时时间，-1为阻塞
 } HyGpioIsrSaveConfig_s;
 
 /**
@@ -75,6 +75,14 @@ HyGpioIsr_s *HyGpioIsrCreate(HyGpioIsrConfig_s *gpio_isr_c);
  * @param handle_pp 句柄的地址（二级指针）
  */
 void HyGpioIsrDestroy(HyGpioIsr_s **handle_pp);
+
+/**
+ * @brief 设置超时时间
+ *
+ * @param handle 句柄
+ * @param timeout_ms 超时时间，单位ms
+ */
+void HyGpioIsrSetTimeout(HyGpioIsr_s *handle, hy_u32_t timeout_ms);
 
 #ifdef __cplusplus
 }
