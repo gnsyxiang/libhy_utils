@@ -68,7 +68,7 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
         nfds=epoll_wait(epfd, events, HY_UTILS_ARRAY_CNT(events),
                         save_c->timeout_ms);
         if (nfds == 0) {
-            LOGW("gpio isr epoll_wait timeout \n");
+            LOGW("gpio isr epoll_wait timeout(%dms) \n", save_c->timeout_ms);
 
             if (save_c->gpio_isr_timeout_cb) {
                 save_c->gpio_isr_timeout_cb(save_c->timeout_args);
