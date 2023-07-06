@@ -24,6 +24,8 @@
 
 #include <hy_log/hy_log.h>
 
+#include "config.h"
+
 #include "hy_type.h"
 #include "hy_mem.h"
 #include "hy_string.h"
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
 {
     HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
 
-    LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+    LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
     _test_int();
     _test_struct();

@@ -22,6 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
+
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
@@ -45,21 +47,21 @@ typedef struct {
 
 static void _signal_error_cb(void *args)
 {
-    LOGE("------error cb\n");
+    _main_context_s *context = args;
+    context->is_exit = 1;
 
-    _main_context_t *context = args;
-    context->exit_flag = 1;
+    LOGE("------error cb\n");
 }
 
 static void _signal_user_cb(void *args)
 {
-    LOGW("------user cb\n");
+    _main_context_s *context = args;
+    context->is_exit = 1;
 
-    _main_context_t *context = args;
-    context->exit_flag = 1;
+    LOGW("------user cb\n");
 }
 
-static void _bool_module_destroy(void)
+static void _bool_module_destroy(_main_context_s **context_pp)
 {
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
@@ -118,8 +120,10 @@ static void _ipc_link_manager_accept_cb(void *ipc_link_h, void *args)
     LOGD("ipc_link_h: %p \n", ipc_link_h);
 }
 
-static void _handle_module_destroy(_main_context_t *context)
+static void _handle_module_destroy(_main_context_s **context_pp)
 {
+    _main_context_s *context = *context_pp;
+
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
         {"ipc link manager",    &context->ipc_link_manager_h,   ipc_link_manager_destroy},
@@ -150,17 +154,22 @@ int main(int argc, char *argv[])
     do {
         context = HY_MEM_MALLOC_BREAK(_main_context_t *, sizeof(*context));
 
-        if (0 != _bool_module_create(context)) {
-            printf("_bool_module_create failed \n");
-            break;
+        struct {
+            const char *name;
+            hy_s32_t (*create)(_main_context_s *context);
+        } create_arr[] = {
+            {"_bool_module_create",     _bool_module_create},
+            {"_handle_module_create",   _handle_module_create},
+        };
+        for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
+            if (create_arr[i].create) {
+                if (0 != create_arr[i].create(context)) {
+                    LOGE("%s failed \n", create_arr[i].name);
+                }
+            }
         }
 
-        if (0 != _handle_module_create(context)) {
-            LOGE("_handle_module_create failed \n");
-            break;
-        }
-
-        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
         while (!context->exit_flag) {
             sleep(1);
@@ -170,8 +179,15 @@ int main(int argc, char *argv[])
 
     ipc_link_destroy(&context->ipc_link_h);
 
-    _handle_module_destroy(context);
-    _bool_module_destroy();
+    void (*destroy_arr[])(_main_context_s **context_pp) = {
+        _handle_module_destroy,
+        _bool_module_destroy
+    };
+    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
+        if (destroy_arr[i]) {
+            destroy_arr[i](&context);
+        }
+    }
     HY_MEM_FREE_PP(&context);
 
     return 0;

@@ -22,6 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
+
 #include "hy_hal/hy_type.h"
 #include "hy_hal/hy_mem.h"
 #include "hy_hal/hy_string.h"
@@ -51,21 +53,21 @@ typedef struct {
 
 static void _signal_error_cb(void *args)
 {
-    LOGE("------error cb\n");
+    _main_context_s *context = args;
+    context->is_exit = 1;
 
-    _main_context_t *context = args;
-    context->exit_flag = 1;
+    LOGE("------error cb\n");
 }
 
 static void _signal_user_cb(void *args)
 {
-    LOGW("------user cb\n");
+    _main_context_s *context = args;
+    context->is_exit = 1;
 
-    _main_context_t *context = args;
-    context->exit_flag = 1;
+    LOGW("------user cb\n");
 }
 
-static void _bool_module_destroy(void)
+static void _bool_module_destroy(_main_context_s **context_pp)
 {
     HyModuleDestroyBool_s bool_module[] = {
         {"signal",          HySignalDestroy },
@@ -179,7 +181,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        LOGE("version: %s, data: %s, time: %s \n", "0.1.0", __DATE__, __TIME__);
+        LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
         context->ipc_socket_h = HyIpcSocketCreate_m(_IPC_SOCKET_IPC_NAME,
                 HY_IPC_SOCKET_TYPE_SERVER);
@@ -210,7 +212,14 @@ int main(int argc, char *argv[])
     // mem leak for waitting thread exit
     sleep(2);
 
-    _bool_module_destroy();
+    void (*destroy_arr[])(_main_context_s **context_pp) = {
+        _bool_module_destroy
+    };
+    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
+        if (destroy_arr[i]) {
+            destroy_arr[i](&context);
+        }
+    }
     HY_MEM_FREE_PP(&context);
 
     return 0;
