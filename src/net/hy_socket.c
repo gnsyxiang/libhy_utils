@@ -64,7 +64,7 @@ hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
     do {
         socket_fd = HySocketCreate(HY_SOCKET_DOMAIN_TCP);
         if (socket_fd < 0) {
-            LOGES("HySocketCreate failed \n");
+            LOGE("HySocketCreate failed \n");
             break;
         }
 
@@ -162,6 +162,7 @@ void HySocketUnixDestroy(hy_s32_t *socket_fd, const char *file_path)
 {
     if (socket_fd && *socket_fd) {
         LOGI("close socket fd: %d \n", *socket_fd);
+
         close(*socket_fd);
         *socket_fd = -1;
     }
@@ -254,7 +255,7 @@ hy_s32_t HySocketConnect(hy_s32_t socket_fd, const char *ip, const hy_u16_t port
 
     ret = connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if(ret < 0) {
-        LOGES("socket connect failed \n");
+        LOGES("socket connect %s:%d failed \n", ip, port);
         return -1;
     } else {
         return 0;
@@ -264,7 +265,7 @@ hy_s32_t HySocketConnect(hy_s32_t socket_fd, const char *ip, const hy_u16_t port
 void HySocketDestroy(hy_s32_t *socket_fd)
 {
     if (socket_fd && *socket_fd) {
-        LOGI("close socket fd: %d \n", *socket_fd);
+        LOGD("close socket fd: %d \n", *socket_fd);
 
         close(*socket_fd);
         *socket_fd = -1;
@@ -283,7 +284,7 @@ hy_s32_t HySocketCreate(HySocketDomain_e domain)
                 socket_fd = -1;
                 break;
             }
-            LOGI("tcp socket fd: %d \n", socket_fd);
+            LOGD("tcp socket fd: %d \n", socket_fd);
             break;
         case HY_SOCKET_DOMAIN_UDP:
             socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -292,7 +293,7 @@ hy_s32_t HySocketCreate(HySocketDomain_e domain)
                 socket_fd = -1;
                 break;
             }
-            LOGI("udp socket fd: %d \n", socket_fd);
+            LOGD("udp socket fd: %d \n", socket_fd);
             break;
         default:
             LOGE("the domain is error \n");
