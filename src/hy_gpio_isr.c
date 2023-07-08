@@ -50,8 +50,7 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
     HyGpioIsrSaveConfig_s *save_c = &handle->save_c;
     hy_s32_t epfd;
     hy_s32_t nfds;
-    struct epoll_event ev;
-    struct epoll_event events[4];
+    struct epoll_event events;
     char val;
 
     epfd = epoll_create1(0);
@@ -60,38 +59,35 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
         return -1;
     }
 
-    ev.data.fd = handle->fd;
-    ev.events = EPOLLPRI | EPOLLET;
+    struct epoll_event ev;
+    HY_MEMSET(&ev, sizeof(ev));
+    ev.data.fd  = handle->fd;
+    ev.events   = EPOLLIN | EPOLLET;
     epoll_ctl(epfd, EPOLL_CTL_ADD, handle->fd, &ev);
 
     while (!handle->is_exit) {
-        nfds=epoll_wait(epfd, events, HY_UTILS_ARRAY_CNT(events),
-                        save_c->timeout_ms);
+        nfds=epoll_wait(epfd, &events, 1, save_c->timeout_ms);
         if (nfds == 0) {
             LOGW("gpio isr epoll_wait timeout(%dms) \n", save_c->timeout_ms);
 
             if (save_c->gpio_isr_timeout_cb) {
-                save_c->gpio_isr_timeout_cb(save_c->timeout_args);
+                save_c->gpio_isr_timeout_cb(save_c->args);
             }
             continue;
         }
 
-        for(hy_s32_t i = 0; i < nfds; ++i) {
-            if (events[i].events & EPOLLPRI) {
-                if (0 > lseek(events[i].data.fd, 0, SEEK_SET)) {//将读位置移动到头部
-                    LOGES("lseek failed \n");
-                    break;
-                }
+        if (0 > lseek(events.data.fd, 0, SEEK_SET)) {//将读位置移动到头部
+            LOGES("lseek failed \n");
+            break;
+        }
 
-                if (0 > read(events[i].data.fd, &val, 1)) {
-                    LOGES("read failed \n");
-                    break;
-                }
+        if (0 > read(events.data.fd, &val, 1)) {
+            LOGES("read failed \n");
+            break;
+        }
 
-                if (save_c->gpio_isr_cb) {
-                    save_c->gpio_isr_cb(val, save_c->args);
-                }
-            }
+        if (save_c->gpio_isr_cb) {
+            save_c->gpio_isr_cb(val, save_c->args);
         }
     }
 

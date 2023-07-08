@@ -40,11 +40,11 @@ typedef void (*HyGpioIsrTimeoutCb_t)(void *args);
  * @brief 配置参数
  */
 typedef struct {
-    HyGpioIsrCb_t           gpio_isr_cb;            ///< 中断回调函数
-    void                    *args;                  ///< 中断回调函数参数
-    HyGpioIsrTimeoutCb_t    gpio_isr_timeout_cb;    ///< 中断超时回调函数
-    void                    *timeout_args;          ///< 中断超时回调函数参数
     hy_s32_t                timeout_ms;             ///< 中断超时时间，-1为阻塞
+
+    HyGpioIsrCb_t           gpio_isr_cb;            ///< 中断回调函数
+    HyGpioIsrTimeoutCb_t    gpio_isr_timeout_cb;    ///< 中断超时回调函数
+    void                    *args;                  ///< 中断回调函数参数
 } HyGpioIsrSaveConfig_s;
 
 /**

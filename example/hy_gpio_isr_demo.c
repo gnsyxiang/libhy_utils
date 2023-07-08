@@ -40,9 +40,9 @@
 
 #define _APP_NAME "hy_gpio_isr_demo"
 
-#define _SYNC_KEY_GPIO          (42)
-#define _TEST_SYNC_KEY_HZ       (40)
-#define _TEST_SYNC_KEY_MS       (1000 / _TEST_SYNC_KEY_HZ)
+#define _SYNC_KEY_GPIO      (42)
+#define _SYNC_KEY_HZ        (40)
+#define _SYNC_KEY_MS        (1000 / _SYNC_KEY_HZ)
 
 typedef struct {
     hy_s32_t            is_exit;
@@ -164,8 +164,7 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     gpio_isr_c.save_c.gpio_isr_cb           = _sync_key_cb;
     gpio_isr_c.save_c.args                  = context;
     gpio_isr_c.save_c.gpio_isr_timeout_cb   = _sync_key_timeout_cb;
-    gpio_isr_c.save_c.timeout_args          = context;
-    gpio_isr_c.save_c.timeout_ms            = _TEST_SYNC_KEY_MS + 3;
+    gpio_isr_c.save_c.timeout_ms            = _SYNC_KEY_MS + 3;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
