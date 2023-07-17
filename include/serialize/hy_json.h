@@ -53,14 +53,116 @@ typedef struct {
  *
  * @return 成功返回root节点，失败返回NULL
  */
-void *HyJsonCreate(const char *buf);
+void *HyJsonCreateFromBuf(const char *buf);
 
 /**
  * @brief 销毁从buf中创建的json
  *
  * @param root root根节点
  */
+void HyJsonDestroyFromBuf(void *root);
+
+/**
+ * @brief 创建json节点
+ *
+ * @return 成功返回json节点，失败返回NULL
+ */
+void *HyJsonCreate(void);
+
+/**
+ * @brief 销毁json
+ *
+ * @param root json节点
+ */
 void HyJsonDestroy(void *root);
+
+/**
+ * @brief 从整数创建json节点
+ *
+ * @param val 整数数值
+ *
+ * @return 成功返回json节点，失败返回NULL
+ */
+void *HyJsonFromInt(hy_s64_t val);
+
+/**
+ * @brief 从浮点数创建json节点
+ *
+ * @param val 浮点数
+ *
+ * @return 成功返回json节点，失败返回NULL
+ */
+void *HyJsonFromReal(hy_double_t val);
+
+/**
+ * @brief 从字符串创建json节点
+ *
+ * @param val 字符串
+ *
+ * @return 成功返回json节点，失败返回NULL
+ */
+void *HyJsonFromStr(const char *val);
+
+/**
+ * @brief 向指定域中加入整数值
+ *
+ * @param root json节点
+ * @param field 指定域名称
+ * @param val 整数值
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyJsonAddInt(void *root, const char *field, hy_s64_t val);
+
+/**
+ * @brief 向指定域中加入浮点数
+ *
+ * @param root json节点
+ * @param field 指定域名称
+ * @param val 浮点数
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyJsonAddReal(void *root, const char *field, hy_double_t val);
+
+/**
+ * @brief 向指定域中加入字符串
+ *
+ * @param root json节点
+ * @param field 指定域名称
+ * @param val 字符串
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyJsonAddStr(void *root, const char *field, const char *val);
+
+/**
+ * @brief 向指定域中加入json节点
+ *
+ * @param root json节点
+ * @param field 指定域名称
+ * @param item 需要加入的json节点
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyJsonAddObject(void *root, const char *field, void *item);
+
+/**
+ * @brief 创建json数组节点
+ *
+ * @return 成功返回json节点，失败返回NULL
+ */
+void *HyJsonArrayNew(void);
+
+/**
+ * @brief 向json数组加入元素
+ *
+ * @param array json数组
+ * @param item json元素
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyJsonArrayAdd(void *array, void *item);
 
 /**
  * @brief 打印root中的信息

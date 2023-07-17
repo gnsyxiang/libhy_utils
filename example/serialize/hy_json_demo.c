@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
         }\n\
     }";
 
-    void *root = HyJsonCreate(text_json);
+    void *root = HyJsonCreateFromBuf(text_json);
     _test_json(root);
     HyJsonDestroy(root);
 

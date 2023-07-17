@@ -356,6 +356,26 @@ char *HyJsonDump(void *root)
     return json_impl.item_print_str(root);
 }
 
+void HyJsonDestroyFromBuf(void *root)
+{
+    HY_ASSERT_RET(!root);
+
+    json_impl.item_destroy(root);
+}
+
+void *HyJsonCreateFromBuf(const char *buf)
+{
+    HY_ASSERT_RET_VAL(!buf, NULL);
+
+    void *root = json_impl.item_create(buf);
+    if (!root) {
+        LOGE("create json failed \n");
+        return NULL;
+    }
+
+    return root;
+}
+
 void HyJsonDestroy(void *root)
 {
     HY_ASSERT_RET(!root);
@@ -363,11 +383,9 @@ void HyJsonDestroy(void *root)
     json_impl.item_destroy(root);
 }
 
-void *HyJsonCreate(const char *buf)
+void *HyJsonCreate(void)
 {
-    HY_ASSERT_RET_VAL(!buf, NULL);
-
-    void *root = json_impl.item_create(buf);
+    void *root = json_impl.item_new();
     if (!root) {
         LOGE("create json failed \n");
     }
@@ -375,3 +393,97 @@ void *HyJsonCreate(const char *buf)
     return root;
 }
 
+void *HyJsonArrayNew(void)
+{
+    void *root = json_impl.item_array_new();
+    if (!root) {
+        LOGE("create array failed \n");
+        return NULL;
+    }
+
+    return root;
+}
+
+hy_s32_t HyJsonArrayAdd(void *array, void *item)
+{
+    return json_impl.item_array_add(array, item);
+}
+
+void *HyJsonFromInt(hy_s64_t val)
+{
+    void *root = json_impl.item_from_int(val);
+    if (!root) {
+        LOGE("create json from int failed \n");
+        return NULL;
+    }
+
+    return root;
+}
+
+void *HyJsonFromReal(hy_double_t val)
+{
+    void *root = json_impl.item_from_real(val);
+    if (!root) {
+        LOGE("create json from real failed \n");
+        return NULL;
+    }
+
+    return root;
+}
+
+void *HyJsonFromStr(const char *val)
+{
+    void *root = json_impl.item_from_str(val);
+    if (!root) {
+        LOGE("create json from str failed \n");
+        return NULL;
+    }
+
+    return root;
+}
+
+hy_s32_t HyJsonAddInt(void *root, const char *field, hy_s64_t val)
+{
+    HY_ASSERT_RET_VAL(!root || !field, -1);
+
+    void *item = json_impl.item_from_int(val);
+    if (!item) {
+        LOGE("create num item failed \n");
+        return -1;
+    }
+
+    return json_impl.item_add(root, field, item);
+}
+
+hy_s32_t HyJsonAddReal(void *root, const char *field, hy_double_t val)
+{
+    HY_ASSERT_RET_VAL(!root || !field, -1);
+
+    void *item = json_impl.item_from_real(val);
+    if (!item) {
+        LOGE("create num item failed \n");
+        return -1;
+    }
+
+    return json_impl.item_add(root, field, item);
+}
+
+hy_s32_t HyJsonAddStr(void *root, const char *field, const char *val)
+{
+    HY_ASSERT_RET_VAL(!root || !field, -1);
+
+    void *item = json_impl.item_from_str(val);
+    if (!item) {
+        LOGE("create num item failed \n");
+        return -1;
+    }
+
+    return json_impl.item_add(root, field, item);
+}
+
+hy_s32_t HyJsonAddObject(void *root, const char *field, void *item)
+{
+    HY_ASSERT_RET_VAL(!root || !field || !item, -1);
+
+    return json_impl.item_add(root, field, item);
+}
