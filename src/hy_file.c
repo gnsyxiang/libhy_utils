@@ -383,3 +383,28 @@ hy_s32_t file_close_on_exec(hy_s32_t fd)
     return _set_fcntl(fd, FD_CLOEXEC);
 }
 
+hy_s32_t HyFileSaveBuf(const char *path, const char *buf, hy_s32_t len)
+{
+    FILE *fp = NULL;
+    hy_s32_t ret;
+
+    do {
+        fp = fopen(path, "w");
+        if (!fp) {
+            LOGES("fopen failed \n");
+            break;
+        }
+
+        ret = fwrite(buf, len, 1, fp);
+        if (ret != 1) {
+            LOGES("fwrite failed, ret: %d \n", ret);
+            break;
+        }
+
+        fclose(fp);
+        return 0;
+    } while(0);
+
+    fclose(fp);
+    return -1;
+}

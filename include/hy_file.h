@@ -193,6 +193,17 @@ hy_s32_t HyFileBlockStateSet(hy_s32_t fd, HyFileBlockState_e state);
  */
 HyFileBlockState_e HyFileBlockStateGet(hy_s32_t fd);
 
+/**
+ * @brief 保存指定长度的buf到文件中
+ *
+ * @param path 文件路径
+ * @param buf 保存的信息
+ * @param len 保存信息的长度
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyFileSaveBuf(const char *path, const char *buf, hy_s32_t len);
+
 #ifdef __cplusplus
 }
 #endif
