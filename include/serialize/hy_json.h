@@ -325,8 +325,8 @@ hy_s32_t HyJsonSetItemStr_va(const char *val, void *root, hy_s32_t n, ...);
 /**
  * @brief 根据可变参数设置item的char *值，失败返回-1
  */
-#define HyJsonSetItemStr(val, item, x...) \
-    HyJsonSetItemStr_va(val, item, comac_argc(x), x)
+#define HyJsonSetItemStr(val, root, x...) \
+    HyJsonSetItemStr_va(val, root, comac_argc(x), x)
 
 #endif
 
