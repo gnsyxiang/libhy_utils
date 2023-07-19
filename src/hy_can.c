@@ -190,6 +190,13 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
     return 0;
 }
 
+hy_s32_t HyCanGetFd(HyCan_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return handle->fd;
+}
+
 hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
 {
     HY_ASSERT(handle);

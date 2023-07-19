@@ -127,6 +127,14 @@ hy_s32_t HyCanRead(HyCan_s *handle, void *buf, hy_u32_t len);
  */
 hy_s32_t HyCanReadTimeout(HyCan_s *handle, void *buf, hy_u32_t len, hy_u32_t ms);
 
+/**
+ * @brief 获取can的fd句柄
+ *
+ * @param handle 句柄
+ * @return 成功返回句柄，失败返回-1
+ */
+hy_s32_t HyCanGetFd(HyCan_s *handle);
+
 #ifdef __cplusplus
 }
 #endif
