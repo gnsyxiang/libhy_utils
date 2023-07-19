@@ -30,74 +30,63 @@
 
 #include "hy_pipe.h"
 
-typedef struct {
+struct HyPipe_s {
     hy_s32_t            pfd[2];
-} _pipe_context_t;
+};
 
-hy_s32_t HyPipeReadFdGet(void *pipe_h)
+hy_s32_t HyPipeReadFdGet(HyPipe_s *handle)
 {
-    LOGT("pipe_h: %p \n", pipe_h);
-    HY_ASSERT_RET_VAL(!pipe_h, -1);
+    HY_ASSERT_RET_VAL(!handle, -1);
 
-    _pipe_context_t *context = pipe_h;
-
-    return context->pfd[0];
+    return handle->pfd[0];
 }
 
-hy_s32_t HyPipeWriteFdGet(void *pipe_h)
+hy_s32_t HyPipeWriteFdGet(HyPipe_s *handle)
 {
-    LOGT("pipe_h: %p \n", pipe_h);
-    HY_ASSERT_RET_VAL(!pipe_h, -1);
+    HY_ASSERT_RET_VAL(!handle, -1);
 
-    _pipe_context_t *context = pipe_h;
-
-    return context->pfd[1];
+    return handle->pfd[1];
 }
 
-hy_s32_t HyPipeRead(void *pipe_h, void *buf, hy_s32_t len)
+hy_s32_t HyPipeRead(HyPipe_s *handle, void *buf, hy_s32_t len)
 {
-    LOGT("pipe_h: %p, buf: %p, len: %d \n", pipe_h, buf, len);
-    HY_ASSERT(pipe_h);
+    HY_ASSERT(handle);
     HY_ASSERT(buf);
 
-    _pipe_context_t *context = pipe_h;
-
-    return HyFileRead(context->pfd[0], buf, len);
+    return HyFileRead(handle->pfd[0], buf, len);
 
 }
 
-hy_s32_t HyPipeWrite(void *pipe_h, const void *buf, hy_s32_t len)
+hy_s32_t HyPipeWrite(HyPipe_s *handle, const void *buf, hy_s32_t len)
 {
-    LOGT("pipe_h: %p, buf: %p, len: %d \n", pipe_h, buf, len);
-    HY_ASSERT(pipe_h);
+    HY_ASSERT(handle);
     HY_ASSERT(buf);
 
-    _pipe_context_t *context = pipe_h;
-
-    return HyFileWriteN(context->pfd[1], buf, len);
+    return HyFileWriteN(handle->pfd[1], buf, len);
 }
 
-void HyPipeDestroy(void **pipe_h)
+void HyPipeDestroy(HyPipe_s **handle_pp)
 {
-    LOGT("&pipe_h: %p, pipe_h: %p \n", pipe_h, *pipe_h);
-    HY_ASSERT_RET(!pipe_h || !*pipe_h);
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
 
-    _pipe_context_t *context = *pipe_h;
+    HyPipe_s *handle = *handle_pp;
 
-    LOGI("hy pipe destroy, context: %p \n", context);
-    HY_MEM_FREE_PP(pipe_h);
+    close(handle->pfd[1]);
+    close(handle->pfd[0]);
+
+    LOGI("hy pipe destroy, handle: %p \n", handle);
+    HY_MEM_FREE_PP(handle_pp);
 }
 
-void *HyPipeCreate(HyPipeConfig_s *pipe_c)
+HyPipe_s *HyPipeCreate(HyPipeConfig_s *pipe_c)
 {
-    LOGT("pipe_c: %p \n", pipe_c);
     HY_ASSERT_RET_VAL(!pipe_c, NULL);
 
-    _pipe_context_t *context = NULL;
+    HyPipe_s *context = NULL;
     HyFileBlockState_e state = HY_FILE_BLOCK_STATE_BLOCK;
 
     do {
-        context = HY_MEM_MALLOC_BREAK(_pipe_context_t *, sizeof(*context));
+        context = HY_MEM_MALLOC_BREAK(HyPipe_s *, sizeof(*context));
 
         if (0 != pipe(context->pfd)) {
             LOGE("pipe failed \n");
@@ -112,12 +101,12 @@ void *HyPipeCreate(HyPipeConfig_s *pipe_c)
             break;
         }
 
-        LOGI("hy pipe create, context: %p \n", context);
+        LOGI("hy pipe create, handle: %p \n", context);
         return context;
     } while (0);
 
-    LOGI("hy pipe create failed \n");
-    HyPipeDestroy((void **)&context);
+    LOGE("hy pipe create failed \n");
+    HyPipeDestroy(&context);
     return NULL;
 }
 

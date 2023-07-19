@@ -63,7 +63,7 @@ typedef struct {
     HyFifo_s                        *ack_fifo_h;
     HyThread_s                      *handle_ack_thread_h;
 
-    void                            *pipe_h;
+    HyPipe_s                        *pipe_h;
     HyThread_s                      *handle_ipc_link_msg_thread_h;
 
     hy_s32_t                        exit_flag:1;

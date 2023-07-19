@@ -38,8 +38,17 @@ typedef enum {
  * @brief 配置参数
  */
 typedef struct {
+} HyPipeSaveConfig_s;
+
+/**
+ * @brief 配置参数
+ */
+typedef struct {
+    HyPipeSaveConfig_s  save_c;
     HyPipeBlockState_e  read_block_state;   ///< 读端阻塞状态
 } HyPipeConfig_s;
+
+typedef struct HyPipe_s HyPipe_s;
 
 /**
  * @brief 创建pipe
@@ -48,14 +57,29 @@ typedef struct {
  *
  * @return 成功返回句柄，失败返回NULL
  */
-void *HyPipeCreate(HyPipeConfig_s *pipe_c);
+HyPipe_s *HyPipeCreate(HyPipeConfig_s *pipe_c);
+
+/**
+ * @brief 创建pipe宏
+ *
+ * @param _read_block_state 读端阻塞状态
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
+#define HyPipeCreate_m(_read_block_state)                       \
+    ({                                                          \
+        HyPipeConfig_s pipe_c;                                  \
+        memset(&pipe_c, 0, sizeof(pipe_c));                     \
+        pipe_c.read_block_state = _read_block_state;            \
+        HyPipeCreate(&pipe_c);                                  \
+     })
 
 /**
  * @brief 销毁pipe
  *
- * @param handle 句柄的地址(二级指针)
+ * @param handle_pp 句柄的地址(二级指针)
  */
-void HyPipeDestroy(void **handle);
+void HyPipeDestroy(HyPipe_s **handle_pp);
 
 /**
  * @brief 向pipe中读取数据
@@ -69,7 +93,7 @@ void HyPipeDestroy(void **handle);
  *   失败返回-1，
  *   被中断返回0
  */
-hy_s32_t HyPipeRead(void *handle, void *buf, hy_s32_t len);
+hy_s32_t HyPipeRead(HyPipe_s *handle, void *buf, hy_s32_t len);
 
 /**
  * @brief 向pipe中写入数据
@@ -80,7 +104,7 @@ hy_s32_t HyPipeRead(void *handle, void *buf, hy_s32_t len);
  *
  * @return 成功返回len，失败返回-1
  */
-hy_s32_t HyPipeWrite(void *handle, const void *buf, hy_s32_t len);
+hy_s32_t HyPipeWrite(HyPipe_s *handle, const void *buf, hy_s32_t len);
 
 /**
  * @brief 获取读端fd
@@ -89,7 +113,7 @@ hy_s32_t HyPipeWrite(void *handle, const void *buf, hy_s32_t len);
  *
  * @return 成功返回fd，失败返回-1
  */
-hy_s32_t HyPipeReadFdGet(void *handle);
+hy_s32_t HyPipeReadFdGet(HyPipe_s *handle);
 
 /**
  * @brief 获取写端fd
@@ -98,22 +122,7 @@ hy_s32_t HyPipeReadFdGet(void *handle);
  *
  * @return 成功返回fd，失败返回-1
  */
-hy_s32_t HyPipeWriteFdGet(void *handle);
-
-/**
- * @brief 创建pipe宏
- *
- * @param _read_block_state 读端阻塞状态
- *
- * @return 成功返回句柄，失败返回NULL
- */
-#define HyPipeCreate_m(_read_block_state)                       \
-    ({                                                          \
-        HyPipeConfig_s pipe_c;                                  \
-        HY_MEMSET(&pipe_c, sizeof(pipe_c));                     \
-        pipe_c.read_block_state = _read_block_state;            \
-        HyPipeCreate(&pipe_c);                                  \
-     })
+hy_s32_t HyPipeWriteFdGet(HyPipe_s *handle);
 
 #ifdef __cplusplus
 }
