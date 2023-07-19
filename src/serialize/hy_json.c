@@ -337,16 +337,33 @@ HyJsonFile_s *HyJsonFileCreate(const char *file)
     char *buf = NULL;
     HyJsonFile_s *json_file = NULL;
 
-    json_file = HY_MEM_CALLOC_RETURN_VAL(HyJsonFile_s *, sizeof(*json_file), NULL);
-    json_file->file = file;
+    do {
+        json_file = HY_MEM_CALLOC_BREAK(HyJsonFile_s *, sizeof(*json_file));
 
-    len = _file_content_create(file, &buf);
-    if (len > 0) {
+        json_file->file = file;
+
+        len = _file_content_create(file, &buf);
+        if (0 == len) {
+            LOGE("get json content failed \n");
+            break;
+        }
+
         json_file->root = json_impl.item_create(buf);
-        _file_content_destroy((char **)&buf);
-    }
+        if (!json_file->root) {
+            LOGE("the param is NULL \n");
+            break;
+        }
 
-    return json_file;
+        _file_content_destroy((char **)&buf);
+
+        return json_file;
+    } while(0);
+
+    _file_content_destroy((char **)&buf);
+
+    HY_MEM_FREE_PP(&json_file);
+
+    return NULL;
 }
 
 char *HyJsonDump(void *root)
