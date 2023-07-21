@@ -40,6 +40,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
+                   -I$(top_srcdir)/include/thread \
                    -I$(top_srcdir)/include/libevent \
                    -I$(top_srcdir)/include
 
