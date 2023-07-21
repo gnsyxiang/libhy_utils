@@ -77,7 +77,7 @@ hy_s32_t HySocketListen(hy_s32_t socket_fd, const char *ip, hy_u16_t port);
  *
  * @param socket_fd fd
  * @param client_addr 客户端地址
- * @return 成功返回0，失败返回-1
+ * @return 成功返回客户端fd，失败返回-1
  */
 hy_s32_t HySocketAccept(hy_s32_t socket_fd, struct sockaddr_in *client_addr);
 
