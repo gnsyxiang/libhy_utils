@@ -36,6 +36,7 @@
 #include "hy_string.h"
 #include "hy_utils.h"
 #include "hy_file.h"
+#include "hy_thread_mutex.h"
 
 #include "hy_can.h"
 
@@ -45,6 +46,7 @@ struct HyCan_s {
     hy_u32_t            *filter_id;
     hy_u32_t            filter_id_cnt;
 
+    HyThreadMutex_s     *mutex_h;
     hy_s32_t            fd;
 };
 
@@ -204,30 +206,39 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
     HY_MEMSET(&tx_frame, sizeof(tx_frame));
     hy_s32_t shang = len / 8;
     hy_s32_t yushu = len % 8;
+    hy_s32_t ret = -1;
 
     tx_frame.can_id = handle->save_c.can_id;
     tx_frame.can_dlc = 8;
 
-    for (hy_s32_t i = 0; i < shang; ++i) {
-        memcpy(tx_frame.data, buf + 8 * i, 8);
+    HyThreadMutexLock_m(handle->mutex_h);
 
-        if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
-            LOGE("HyFileWrite failed \n");
-            return -1;
+    do {
+        for (hy_s32_t i = 0; i < shang; ++i) {
+            HY_MEMCPY(tx_frame.data, buf + 8 * i, 8);
+
+            if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
+                LOGE("HyFileWrite failed \n");
+                break;
+            }
         }
-    }
 
-    if (yushu > 0) {
-        tx_frame.can_dlc = yushu;
-        memcpy(tx_frame.data, buf + 8 * shang, yushu);
+        if (yushu > 0) {
+            tx_frame.can_dlc = yushu;
+            HY_MEMCPY(tx_frame.data, buf + 8 * shang, yushu);
 
-        if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
-            LOGE("HyFileWrite failed \n");
-            return -1;
+            if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
+                LOGE("HyFileWrite failed \n");
+                break;
+            }
         }
-    }
 
-    return len;
+        ret = len;
+    } while(0);
+
+    HyThreadMutexUnLock_m(handle->mutex_h);
+
+    return ret;
 }
 
 hy_s32_t HyCanRead(HyCan_s *handle, void *buf, hy_u32_t len)
@@ -309,6 +320,8 @@ void HyCanDestroy(HyCan_s **handle_pp)
         HY_MEM_FREE_PP(&handle->filter_id);
     }
 
+    HyThreadMutexDestroy(&handle->mutex_h);
+
     LOGI("can destroy, handle: %p \n", handle);
     HY_MEM_FREE_PP(&handle);
 }
@@ -321,6 +334,12 @@ HyCan_s *HyCanCreate(HyCanConfig_s *can_c)
     do {
         handle = HY_MEM_CALLOC_BREAK(HyCan_s *, sizeof(*handle));
         HY_MEMCPY(&handle->save_c, &can_c->save_c, sizeof(handle->save_c));
+
+        handle->mutex_h = HyThreadMutexCreate_m();
+        if (!handle->mutex_h) {
+            LOGE("HyThreadMutexCreate_m failed \n");
+            break;
+        }
 
         HyCanSaveConfig_s *save_c = &can_c->save_c;
 
