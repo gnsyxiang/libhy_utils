@@ -111,9 +111,9 @@ static hy_s32_t _can_bind_socket(HyCan_s *handle, hy_s32_t file_block)
     HY_MEMSET(&addr, sizeof(addr));
     strcpy(ifr.ifr_name, handle->save_c.name);
     ioctl(handle->fd, SIOCGIFINDEX, &ifr);
-    ifr.ifr_ifindex = if_nametoindex(ifr.ifr_name);
-    addr.can_family = AF_CAN;
-    addr.can_ifindex = ifr.ifr_ifindex;
+    ifr.ifr_ifindex     = if_nametoindex(ifr.ifr_name);
+    addr.can_family     = AF_CAN;
+    addr.can_ifindex    = ifr.ifr_ifindex;
 
     if (bind(handle->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         LOGES("bind error! \n");
@@ -125,9 +125,7 @@ static hy_s32_t _can_bind_socket(HyCan_s *handle, hy_s32_t file_block)
 
 static void _can_deinit(const char *name)
 {
-    char param[64];
-
-    HY_MEMSET(param, sizeof(param));
+    char param[64] = {0};
     snprintf(param, sizeof(param), "ip link set %s down", name);
     HyUtilsSystemCmd_m(param, 0);
 }
