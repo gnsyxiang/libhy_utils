@@ -28,6 +28,7 @@
 #include "hy_mem.h"
 #include "hy_thread_mutex.h"
 #include "hy_thread_cond.h"
+
 #include "hy_package_list.h"
 
 struct HyPackageList_s {
@@ -36,12 +37,14 @@ struct HyPackageList_s {
 
     HyThreadCond_s              *cond_h;
     HyThreadMutex_s             *mutex_h;
+
     struct hy_list_head         list;
 };
 
 hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT(handle);
+
     hy_u32_t cnt;
 
     HyThreadMutexLock_m(handle->mutex_h);
@@ -53,7 +56,8 @@ hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle)
 
 HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, NULL);
+    HY_ASSERT(handle);
+
     HyPackageListNode_s *pos;
 
     HyThreadMutexLock_m(handle->mutex_h);
@@ -62,6 +66,8 @@ HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
 
         if (1 == handle->is_exit) {
             HyThreadMutexUnLock_m(handle->mutex_h);
+
+            LOGI("called destroy for exit \n");
             return NULL;
         }
     }
@@ -75,7 +81,8 @@ HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
 
 void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node)
 {
-    HY_ASSERT_RET(!handle || !node);
+    HY_ASSERT(handle);
+    HY_ASSERT(node);
 
     HyThreadMutexLock_m(handle->mutex_h);
     handle->save_c.num++;
@@ -88,35 +95,33 @@ void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node)
 void HyPackageListDestroy(HyPackageList_s **handle_pp)
 {
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
+
     HyPackageListNode_s *pos, *n;
     HyPackageList_s *handle = *handle_pp;
     HyPackageListSaveConfig_s *save_c = &handle->save_c;
 
-    if (handle) {
-        handle->is_exit = 1;
+    handle->is_exit = 1;
 
-        HyThreadCondBroadcast_m(handle->cond_h);
+    HyThreadCondBroadcast_m(handle->cond_h);
 
-        if (handle->mutex_h) {
-            HyThreadMutexLock_m(handle->mutex_h);
-            hy_list_for_each_entry_safe(pos, n, &handle->list, entry) {
-                hy_list_del(&pos->entry);
-                HyThreadMutexUnLock_m(handle->mutex_h);
+    if (handle->mutex_h) {
+        HyThreadMutexLock_m(handle->mutex_h);
+        hy_list_for_each_entry_safe(pos, n, &handle->list, entry) {
+            hy_list_del(&pos->entry);
 
-                if (save_c->node_destroy_cb) {
-                    save_c->node_destroy_cb(&pos);
-                }
-
-                HyThreadMutexLock_m(handle->mutex_h);
-            }
             HyThreadMutexUnLock_m(handle->mutex_h);
-
-            HyThreadMutexDestroy(&handle->mutex_h);
+            if (save_c->node_destroy_cb) {
+                save_c->node_destroy_cb(&pos);
+            }
+            HyThreadMutexLock_m(handle->mutex_h);
         }
+        HyThreadMutexUnLock_m(handle->mutex_h);
 
-        if (handle->cond_h) {
-            HyThreadCondDestroy(&handle->cond_h);
-        }
+        HyThreadMutexDestroy(&handle->mutex_h);
+    }
+
+    if (handle->cond_h) {
+        HyThreadCondDestroy(&handle->cond_h);
     }
 
     LOGI("package list destroy, handle: %p \n", handle);
