@@ -24,7 +24,10 @@
 extern "C" {
 #endif
 
+#include <pthread.h>
+
 #include "hy_type.h"
+#include "hy_assert.h"
 
 /**
  * @brief 配置参数
@@ -33,7 +36,9 @@ typedef struct {
     hy_s32_t    reserved;   ///< 预留
 } HyThreadMutexConfig_s;
 
-typedef struct HyThreadMutex_s HyThreadMutex_s;
+typedef struct HyThreadMutex_s {
+    pthread_mutex_t mutex;
+} HyThreadMutex_s;
 
 /**
  * @brief 创建模块
@@ -64,7 +69,12 @@ void HyThreadMutexDestroy(HyThreadMutex_s **handle_pp);
  *
  * @return 成功返回0，失败返回其他值
  */
-hy_s32_t HyThreadMutexLock(HyThreadMutex_s *handle);
+static inline hy_s32_t HyThreadMutexLock(HyThreadMutex_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return pthread_mutex_lock(&handle->mutex) == 0 ? 0 : -1;
+}
 
 #define HyThreadMutexLock_m(_handle)                \
 do {                                                \
@@ -80,7 +90,12 @@ do {                                                \
  *
  * @return 成功返回0，失败返回其他值
  */
-hy_s32_t HyThreadMutexUnLock(HyThreadMutex_s *handle);
+static inline hy_s32_t HyThreadMutexUnLock(HyThreadMutex_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return pthread_mutex_unlock(&handle->mutex) == 0 ? 0 : -1;
+}
 
 #define HyThreadMutexUnLock_m(_handle)              \
 do {                                                \
@@ -96,7 +111,12 @@ do {                                                \
  *
  * @return 成功返回0，失败返回其他值
  */
-hy_s32_t HyThreadMutexTryLock(HyThreadMutex_s *handle);
+static inline hy_s32_t HyThreadMutexTryLock(HyThreadMutex_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return pthread_mutex_trylock(&handle->mutex) == 0 ? 0 : -1;
+}
 
 #define HyThreadMutexTryLock_m(_handle)             \
 do {                                                \
@@ -112,7 +132,12 @@ do {                                                \
  *
  * @return 成功返回锁的地址，失败返回NULL
  */
-void *HyThreadMutexGetLock(HyThreadMutex_s *handle);
+static inline void *HyThreadMutexGetLock(HyThreadMutex_s *handle)
+{
+    HY_ASSERT(handle);
+
+    return &handle->mutex;
+}
 
 #ifdef __cplusplus
 }
