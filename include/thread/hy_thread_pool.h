@@ -30,6 +30,10 @@ extern "C" {
 
 /**
  * @brief 任务回调函数
+ *
+ * note:
+ * args: 任务的回调参数
+ * run_befor_cb_args: 任务调度前初始化返回的参数
  */
 typedef void (*HyThreadPoolsTaskCb_t)(void *args, void *run_befor_cb_args);
 
@@ -37,8 +41,8 @@ typedef void (*HyThreadPoolsTaskCb_t)(void *args, void *run_befor_cb_args);
  * @brief 任务
  */
 typedef struct {
-    HyThreadPoolsTaskCb_t   task_cb;    ///< 回调函数
-    void                    *args;      ///< 回调函数的参数
+    HyThreadPoolsTaskCb_t   task_cb;                        ///< 回调函数
+    void                    *args;                          ///< 回调函数的参数
 } HyThreadPoolsTask_s;
 
 /**
@@ -58,6 +62,7 @@ typedef struct {
     HyThreadPoolRunBeforCb_t    run_befor_cb;               ///< 任务调度前初始化
     HyThreadPoolRunAfterCb_t    run_after_cb;               ///< 任务调度后释放资源
     void                        *run_befor_args;            ///< 任务初始化后参数回调
+
     hy_s32_t                    thread_cnt_min;             ///< 创建最小线程数
     hy_s32_t                    thread_cnt_max;             ///< 创建最大线程数
 } HyThreadPoolSaveConfig_s;
@@ -66,10 +71,9 @@ typedef struct {
  * @brief 配置参数
  */
 typedef struct {
-    HyThreadPoolSaveConfig_s save_c;    ///< 配置参数，详见HyThreadPoolSaveConfig_s
+    HyThreadPoolSaveConfig_s    save_c;                     ///< 配置参数，详见HyThreadPoolSaveConfig_s
 
-    hy_u32_t task_item_cnt;             ///< 队列总个数
-    hy_u32_t task_item_len;             ///< 队列中单个元素的长度
+    hy_u32_t                    task_item_cnt;              ///< 最多可容纳的任务数
 } HyThreadPoolConfig_s;
 
 typedef struct HyThreadPools_s HyThreadPools_s;
