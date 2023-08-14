@@ -41,15 +41,16 @@ _no_error_com   +=
 _define_com     += -D_GNU_SOURCE
 
 _include_com    += \
-                   -I$(top_srcdir)/include/thread \
-                   -I$(top_srcdir)/include/time \
+                   -I$(top_srcdir)/include/thread   \
+                   -I$(top_srcdir)/include/time     \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_thread.c          \
-                   hy_thread_cond.c     \
-                   hy_thread_mutex.c    \
-                   hy_thread_pool.c     \
+                   hy_thread.c                  \
+                   hy_thread_cond.c             \
+                   hy_thread_mutex.c            \
+                   hy_thread_pool.c             \
+                   hy_thread_pool_dynamic.c     \
                    hy_thread_sem.c
 
 _cppflags_com   += \
