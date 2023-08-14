@@ -64,7 +64,7 @@ typedef struct {
 #endif
 
     HyPackageList_s         *client_plist_h;
-    HyThreadPools_s         *thread_pool_h;
+    HyThreadPool_s          *thread_pool_h;
     HyThreadMutex_s         *client_mutext_h[10];
     hy_u32_t                client_cnt[10];
 
@@ -336,7 +336,7 @@ static void _listener_cb(struct evconnlistener *listener, evutil_socket_t sock,
              context->client_cnt[4], sock);
     }
 
-    HyThreadPoolsTask_s task;
+    HyThreadPoolTask_s task;
     task.task_cb    = _task_client_read_cb;
     task.args       = list_node;
     HyThreadPoolAddTask(context->thread_pool_h, &task);

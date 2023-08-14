@@ -35,15 +35,15 @@ extern "C" {
  * args: 任务的回调参数
  * run_befor_cb_args: 任务调度前初始化返回的参数
  */
-typedef void (*HyThreadPoolsTaskCb_t)(void *args, void *run_befor_cb_args);
+typedef void (*HyThreadPoolTaskCb_t)(void *args, void *run_befor_cb_args);
 
 /**
  * @brief 任务
  */
 typedef struct {
-    HyThreadPoolsTaskCb_t   task_cb;                        ///< 回调函数
+    HyThreadPoolTaskCb_t    task_cb;                        ///< 回调函数
     void                    *args;                          ///< 回调函数的参数
-} HyThreadPoolsTask_s;
+} HyThreadPoolTask_s;
 
 /**
  * @brief 任务调度前的初始化
@@ -76,7 +76,7 @@ typedef struct {
     hy_u32_t                    task_item_cnt;              ///< 最多可容纳的任务数
 } HyThreadPoolConfig_s;
 
-typedef struct HyThreadPools_s HyThreadPools_s;
+typedef struct HyThreadPool_s HyThreadPool_s;
 
 /**
  * @brief 创建线程池模块
@@ -84,14 +84,14 @@ typedef struct HyThreadPools_s HyThreadPools_s;
  * @param thread_pool_c 配置参数，详见HyThreadPoolConfig_s
  * @return 成功返回句柄，失败返回NULL
  */
-HyThreadPools_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c);
+HyThreadPool_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c);
 
 /**
  * @brief 销毁线程池模块
  *
  * @param handle_pp 句柄的地址（二级指针）
  */
-void HyThreadPoolDestroy(HyThreadPools_s **handle_pp);
+void HyThreadPoolDestroy(HyThreadPool_s **handle_pp);
 
 /**
  * @brief 向线程池中加入任务
@@ -99,7 +99,7 @@ void HyThreadPoolDestroy(HyThreadPools_s **handle_pp);
  * @param handle 句柄
  * @param task 任务结构体的地址，详见HyThreadPoolsTask_s
  */
-void HyThreadPoolAddTask(HyThreadPools_s *handle, HyThreadPoolsTask_s *task);
+void HyThreadPoolAddTask(HyThreadPool_s *handle, HyThreadPoolTask_s *task);
 
 /**
  * @brief 获取工作的线程的个数
@@ -107,7 +107,7 @@ void HyThreadPoolAddTask(HyThreadPools_s *handle, HyThreadPoolsTask_s *task);
  * @param handle 句柄
  * @return 返回工作的线程的个数
  */
-hy_s32_t HyThreadPoolGetBusyNum(HyThreadPools_s* handle);
+hy_s32_t HyThreadPoolGetBusyNum(HyThreadPool_s* handle);
 
 /**
  * @brief 获取存活的线程的个数
@@ -115,7 +115,7 @@ hy_s32_t HyThreadPoolGetBusyNum(HyThreadPools_s* handle);
  * @param handle 句柄
  * @return 返回活着的线程的个数
  */
-hy_s32_t HyThreadPoolGetAliveNum(HyThreadPools_s* handle);
+hy_s32_t HyThreadPoolGetAliveNum(HyThreadPool_s* handle);
 
 #ifdef __cplusplus
 }

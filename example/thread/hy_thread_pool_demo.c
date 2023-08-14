@@ -40,7 +40,7 @@
 typedef struct {
     hy_s32_t        is_exit;
 
-    HyThreadPools_s *thread_pool_h;
+    HyThreadPool_s  *thread_pool_h;
 } _main_context_s;
 
 static void _signal_error_cb(void *args)
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
         LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
-        HyThreadPoolsTask_s task;
+        HyThreadPoolTask_s task;
         task.task_cb = _task_cb;
         for (int i = 0; i < 100; ++i) {
             hy_s32_t *num = calloc(1, sizeof(hy_s32_t));

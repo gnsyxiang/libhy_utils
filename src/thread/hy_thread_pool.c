@@ -38,7 +38,7 @@ typedef struct {
     hy_s32_t                    flag;
 } _worker_thread_s;
 
-struct HyThreadPools_s {
+struct HyThreadPool_s {
     HyThreadPoolSaveConfig_s    save_c;
     hy_s32_t                    is_exit;
 
@@ -53,7 +53,7 @@ struct HyThreadPools_s {
     hy_s32_t                    busy_num;
 };
 
-static void _thread_exit(HyThreadPools_s* handle)
+static void _thread_exit(HyThreadPool_s* handle)
 {
     _worker_thread_s *worker_thread;
     pthread_t tid;
@@ -74,9 +74,9 @@ static void _thread_exit(HyThreadPools_s* handle)
 
 static hy_s32_t _worker_loop_cb(void* args)
 {
-    HyThreadPools_s *handle = (HyThreadPools_s*)args;
+    HyThreadPool_s *handle = (HyThreadPool_s*)args;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
-    HyThreadPoolsTask_s task;
+    HyThreadPoolTask_s task;
     void *run_befor_cb_args = NULL;
 
     if (save_c->run_after_cb) {
@@ -131,7 +131,7 @@ static hy_s32_t _worker_loop_cb(void* args)
 
 static hy_s32_t _manager_loop_cb(void* arg)
 {
-    HyThreadPools_s* handle = (HyThreadPools_s*)arg;
+    HyThreadPool_s* handle = (HyThreadPool_s*)arg;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
     hy_s32_t queue_size = 0;
     hy_s32_t liveNum = 0;
@@ -206,12 +206,12 @@ static hy_s32_t _manager_loop_cb(void* arg)
     return -1;
 }
 
-void HyThreadPoolAddTask(HyThreadPools_s* handle, HyThreadPoolsTask_s *task)
+void HyThreadPoolAddTask(HyThreadPool_s* handle, HyThreadPoolTask_s *task)
 {
     HyQueueWrite(handle->queue_h, task);
 }
 
-hy_s32_t HyThreadPoolGetBusyNum(HyThreadPools_s* handle)
+hy_s32_t HyThreadPoolGetBusyNum(HyThreadPool_s* handle)
 {
     hy_s32_t num = 0;
 
@@ -222,7 +222,7 @@ hy_s32_t HyThreadPoolGetBusyNum(HyThreadPools_s* handle)
     return num;
 }
 
-hy_s32_t HyThreadPoolGetAliveNum(HyThreadPools_s* handle)
+hy_s32_t HyThreadPoolGetAliveNum(HyThreadPool_s* handle)
 {
     hy_s32_t num = 0;
 
@@ -233,11 +233,11 @@ hy_s32_t HyThreadPoolGetAliveNum(HyThreadPools_s* handle)
     return num;
 }
 
-void HyThreadPoolDestroy(HyThreadPools_s **handle_pp)
+void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
 {
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
 
-    HyThreadPools_s *handle = *handle_pp;
+    HyThreadPool_s *handle = *handle_pp;
     _worker_thread_s *worker_thread;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
 
@@ -269,11 +269,11 @@ void HyThreadPoolDestroy(HyThreadPools_s **handle_pp)
     HY_MEM_FREE_PP(&handle);
 }
 
-HyThreadPools_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
+HyThreadPool_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
 {
     HY_ASSERT_RET_VAL(!thread_pool_c, NULL);
 
-    HyThreadPools_s* handle = NULL;
+    HyThreadPool_s* handle = NULL;
     HyThreadPoolSaveConfig_s *save_c;
     _worker_thread_s *worker_thread;
     char name[HY_THREAD_NAME_LEN_MAX];
@@ -281,7 +281,7 @@ HyThreadPools_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
     do {
         save_c = &thread_pool_c->save_c;
 
-        handle = HY_MEM_MALLOC_BREAK(HyThreadPools_s *, sizeof(*handle));
+        handle = HY_MEM_MALLOC_BREAK(HyThreadPool_s *, sizeof(*handle));
         HY_MEMCPY(&handle->save_c, save_c, sizeof(handle->save_c));
 
         handle->mutex_h = HyThreadMutexCreate_m();
@@ -296,7 +296,7 @@ HyThreadPools_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
             break;
         }
 
-        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt, sizeof(HyThreadPoolsTask_s));
+        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt, sizeof(HyThreadPoolTask_s));
         if (!handle->queue_h) {
             LOGE("HyQueueCreate failed \n");
             break;
