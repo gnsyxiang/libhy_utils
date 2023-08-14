@@ -122,8 +122,7 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyThreadPoolConfig_s thread_pool_c;
     HY_MEMSET(&thread_pool_c, sizeof(thread_pool_c));
     thread_pool_c.task_item_cnt         = 50;
-    thread_pool_c.save_c.thread_cnt_min = 10;
-    thread_pool_c.save_c.thread_cnt_max = 10;
+    thread_pool_c.save_c.thread_cnt     = 10;
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {

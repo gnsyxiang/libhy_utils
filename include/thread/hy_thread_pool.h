@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#include <pthread.h>
-
 #include "hy_type.h"
 
 /**
@@ -63,8 +61,7 @@ typedef struct {
     HyThreadPoolRunAfterCb_t    run_after_cb;               ///< 任务调度后释放资源
     void                        *run_befor_args;            ///< 任务初始化后参数回调
 
-    hy_s32_t                    thread_cnt_min;             ///< 创建最小线程数
-    hy_s32_t                    thread_cnt_max;             ///< 创建最大线程数
+    hy_s32_t                    thread_cnt;                 ///< 创建线程数
 } HyThreadPoolSaveConfig_s;
 
 /**
@@ -100,22 +97,6 @@ void HyThreadPoolDestroy(HyThreadPool_s **handle_pp);
  * @param task 任务结构体的地址，详见HyThreadPoolsTask_s
  */
 void HyThreadPoolAddTask(HyThreadPool_s *handle, HyThreadPoolTask_s *task);
-
-/**
- * @brief 获取工作的线程的个数
- *
- * @param handle 句柄
- * @return 返回工作的线程的个数
- */
-hy_s32_t HyThreadPoolGetBusyNum(HyThreadPool_s* handle);
-
-/**
- * @brief 获取存活的线程的个数
- *
- * @param handle 句柄
- * @return 返回活着的线程的个数
- */
-hy_s32_t HyThreadPoolGetAliveNum(HyThreadPool_s* handle);
 
 #ifdef __cplusplus
 }

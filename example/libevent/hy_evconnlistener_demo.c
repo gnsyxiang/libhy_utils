@@ -204,11 +204,10 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 {
     HyThreadPoolConfig_s thread_pool_c;
     HY_MEMSET(&thread_pool_c, sizeof(thread_pool_c));
-    thread_pool_c.task_item_cnt            = 8;
-    thread_pool_c.save_c.run_befor_cb      = _event_base_create_cb;
-    thread_pool_c.save_c.run_after_cb      = _event_base_destroy_cb;
-    thread_pool_c.save_c.thread_cnt_min    = 100;
-    thread_pool_c.save_c.thread_cnt_max    = 100;
+    thread_pool_c.task_item_cnt         = 8;
+    thread_pool_c.save_c.run_befor_cb   = _event_base_create_cb;
+    thread_pool_c.save_c.run_after_cb   = _event_base_destroy_cb;
+    thread_pool_c.save_c.thread_cnt     = 100;
 
     HyPackageListConfig_s client_plist_c;
     HY_MEMSET(&client_plist_c, sizeof(client_plist_c));
