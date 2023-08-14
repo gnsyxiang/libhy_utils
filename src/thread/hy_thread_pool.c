@@ -17,19 +17,15 @@
  * 
  *     last modified: 24/04 2023 10:51
  */
-#include <pthread.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
+#include "hy_assert.h"
 #include "hy_type.h"
 #include "hy_mem.h"
+#include "hy_string.h"
 #include "hy_queue.h"
-#include "hy_assert.h"
-#include "hy_mem.h"
 #include "hy_thread_mutex.h"
 #include "hy_thread.h"
 
@@ -38,19 +34,18 @@
 #define NUMBER 2
 
 typedef struct {
-    pthread_t   threadIDs;
-    hy_s32_t    flag;
-} _thread_s;
+    HyThread_s                  *worker_thread_h;
+    hy_s32_t                    flag;
+} _worker_thread_s;
 
 struct HyThreadPools_s {
     HyThreadPoolSaveConfig_s    save_c;
     hy_s32_t                    is_exit;
 
-    HyQueue_s                   *queue_h;
-    pthread_t                   managerID;
-
     HyThreadMutex_s             *mutex_h;
-    _thread_s                   *worker_thread;
+    HyQueue_s                   *queue_h;
+    HyThread_s                  *manager_thread_h;
+    _worker_thread_s            *worker_thread;
     hy_s32_t                    live_num;
     hy_s32_t                    exit_num;
 
@@ -60,21 +55,24 @@ struct HyThreadPools_s {
 
 static void _thread_exit(HyThreadPools_s* handle)
 {
-    pthread_t tid = pthread_self();
+    _worker_thread_s *worker_thread;
+    pthread_t tid;
+
+    tid = pthread_self();
 
     for (hy_s32_t i = 0; i < handle->save_c.thread_cnt_max; ++i) {
-        if (handle->worker_thread[i].threadIDs == tid) {
-            handle->worker_thread[i].flag = 0;
+        worker_thread = &handle->worker_thread[i];
+
+        if (HyThreadGetId(worker_thread->worker_thread_h) == tid) {
+            worker_thread->flag = 0;
 
             LOGI("thread %ld exiting \n", tid);
             break;
         }
     }
-
-    pthread_exit(NULL);
 }
 
-static void *_worker_loop_cb(void* args)
+static hy_s32_t _worker_loop_cb(void* args)
 {
     HyThreadPools_s *handle = (HyThreadPools_s*)args;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
@@ -87,7 +85,7 @@ static void *_worker_loop_cb(void* args)
             LOGE("run_befor_cb failed \n");
 
             _thread_exit(handle);
-            return NULL;
+            return -1;
         }
     }
 
@@ -107,6 +105,7 @@ static void *_worker_loop_cb(void* args)
         HyThreadMutexUnLock(handle->mutex_h);
 
         if (0 != HyQueueRead(handle->queue_h, &task)) {
+            LOGI("queue read failed \n");
             continue;
         }
 
@@ -127,10 +126,10 @@ static void *_worker_loop_cb(void* args)
 
     _thread_exit(handle);
 
-    return NULL;
+    return -1;
 }
 
-static void *manager(void* arg)
+static hy_s32_t _manager_loop_cb(void* arg)
 {
     HyThreadPools_s* handle = (HyThreadPools_s*)arg;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
@@ -138,6 +137,8 @@ static void *manager(void* arg)
     hy_s32_t liveNum = 0;
     hy_s32_t busyNum = 0;
     hy_s32_t counter = 0;
+    _worker_thread_s *worker_thread;
+    char name[HY_THREAD_NAME_LEN_MAX];
 
     while (!handle->is_exit) {
         sleep(3);
@@ -160,11 +161,20 @@ static void *manager(void* arg)
             HyThreadMutexLock(handle->mutex_h);
             counter = 0;
             for (hy_s32_t i = 0; i < save_c->thread_cnt_max && counter < NUMBER && handle->live_num < save_c->thread_cnt_max; ++i) {
-                if (handle->worker_thread[i].flag == 0 && handle->worker_thread[i].threadIDs == 0) {
+                worker_thread = &handle->worker_thread[i];
+
+                HY_MEMSET(name, sizeof(name));
+                snprintf(name, sizeof(name), "threadP_worker%d", i);
+
+                if (worker_thread->flag == 0 && !worker_thread->worker_thread_h) {
                     LOGI("create worker thread \n");
 
-                    pthread_create(&handle->worker_thread[i].threadIDs, NULL, _worker_loop_cb, handle);
-                    handle->worker_thread[i].flag = 1;
+                    worker_thread->worker_thread_h = HyThreadCreate_m(name, _worker_loop_cb, handle);
+                    if (!worker_thread->worker_thread_h) {
+                        LOGE("HyThreadCreate_m failed \n");
+                        break;
+                    }
+                    worker_thread->flag = 1;
                     counter++;
                     handle->live_num++;
                 }
@@ -183,16 +193,17 @@ static void *manager(void* arg)
                 HyQueueWakeup(handle->queue_h);
 
                 for (hy_s32_t j = 0; j < save_c->thread_cnt_max; j++) {
-                    if (handle->worker_thread[j].flag == 0 && handle->worker_thread[j].threadIDs) {
-                        pthread_join(handle->worker_thread[j].threadIDs, NULL);
-                        handle->worker_thread[j].threadIDs = 0;
+                    worker_thread = &handle->worker_thread[j];
+
+                    if (worker_thread->flag == 0 && worker_thread->worker_thread_h) {
+                        HyThreadDestroy(&worker_thread->worker_thread_h);
                     }
                 }
             }
         }
     }
 
-    return NULL;
+    return -1;
 }
 
 void HyThreadPoolAddTask(HyThreadPools_s* handle, HyThreadPoolsTask_s *task)
@@ -227,21 +238,23 @@ void HyThreadPoolDestroy(HyThreadPools_s **handle_pp)
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
 
     HyThreadPools_s *handle = *handle_pp;
+    _worker_thread_s *worker_thread;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
 
     handle->is_exit = 1;
-    pthread_join(handle->managerID, NULL);
+    HyThreadDestroy(&handle->manager_thread_h);
 
     hy_s32_t thread_min = save_c->thread_cnt_min;
     save_c->thread_cnt_min = 0; // 等待所有任务都执行完
     for (hy_s32_t i = 0; i < thread_min; ++i) {
         HyQueueWakeup(handle->queue_h);
     }
-    sleep(1);
 
     for (hy_s32_t i = 0; i < save_c->thread_cnt_max; i++) {
-        if (handle->worker_thread[i].threadIDs) {
-            pthread_join(handle->worker_thread[i].threadIDs, NULL);
+        worker_thread = &handle->worker_thread[i];
+
+        if (worker_thread->worker_thread_h) {
+            HyThreadDestroy(&worker_thread->worker_thread_h);
         }
     }
 
@@ -262,6 +275,8 @@ HyThreadPools_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
 
     HyThreadPools_s* handle = NULL;
     HyThreadPoolSaveConfig_s *save_c;
+    _worker_thread_s *worker_thread;
+    char name[HY_THREAD_NAME_LEN_MAX];
 
     do {
         save_c = &thread_pool_c->save_c;
@@ -287,12 +302,25 @@ HyThreadPools_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
             break;
         }
 
-        pthread_create(&handle->managerID, NULL, manager, handle);
+        handle->manager_thread_h = HyThreadCreate_m("threadP_manager", _manager_loop_cb, handle);
+        if (!handle->manager_thread_h) {
+            LOGE("HyThreadCreate_m failed \n");
+            break;
+        }
 
-        handle->worker_thread = HY_MEM_CALLOC_BREAK(_thread_s *, sizeof(_thread_s) * save_c->thread_cnt_max);
+        handle->worker_thread = HY_MEM_CALLOC_BREAK(_worker_thread_s *, sizeof(_worker_thread_s) * save_c->thread_cnt_max);
         for (hy_s32_t i = 0; i < save_c->thread_cnt_min; ++i) {
-            pthread_create(&handle->worker_thread[i].threadIDs, NULL, _worker_loop_cb, handle);
-            handle->worker_thread[i].flag = 1;
+            worker_thread = &handle->worker_thread[i];
+
+            HY_MEMSET(name, sizeof(name));
+            snprintf(name, sizeof(name), "threadP_worker%d", i);
+
+            worker_thread->worker_thread_h = HyThreadCreate_m(name, _worker_loop_cb, handle);
+            if (!worker_thread->worker_thread_h) {
+                LOGE("HyThreadCreate_m failed \n");
+                break;
+            }
+            worker_thread->flag = 1;
         }
 
         handle->live_num = save_c->thread_cnt_min;
