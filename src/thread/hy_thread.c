@@ -36,12 +36,41 @@
 
 struct HyThread_s {
     HyThreadSaveConfig_s    save_c;
-    pthread_key_t           key;
-    hy_s32_t                is_init_key;
+    hy_u32_t                is_exit;
 
     pthread_t               id;
-    hy_u32_t                is_exit;
+    pthread_key_t           key;
+    hy_s32_t                is_init_key;
 };
+
+static void *_thread_cb(void *args)
+{
+    HyThread_s *handle = (HyThread_s *)args;
+    HyThreadSaveConfig_s *save_c = &handle->save_c;
+    hy_s32_t ret = 0;
+
+    LOGI("<%s> thread loop start \n", save_c->name);
+
+#ifdef HAVE_PTHREAD_SETNAME_NP
+    pthread_setname_np(handle->id, save_c->name);
+    // ret = prctl(PR_SET_NAME, name);
+#endif
+
+    while (0 == ret) {
+        ret = save_c->thread_loop_cb(save_c->args);
+
+        // pthread_testcancel();
+    }
+
+    handle->is_exit = 1;
+    LOGI("%s thread loop stop \n", save_c->name);
+
+    if (HY_THREAD_DETACH_MODE_YES == save_c->detach_mode) {
+        HyThreadDestroy(&handle);
+    }
+
+    return NULL;
+}
 
 hy_s32_t HyThreadAttachCPU(hy_s32_t cpu_index)
 {
@@ -63,8 +92,7 @@ hy_s32_t HyThreadAttachCPU(hy_s32_t cpu_index)
     return 0;
 }
 
-hy_s32_t HyThreadKeySet(HyThread_s *handle,
-        void *key, HyThreadKeyDestroyCb_t destroy_cb)
+hy_s32_t HyThreadKeySet(HyThread_s *handle, void *key, HyThreadKeyDestroyCb_t destroy_cb)
 {
     HY_ASSERT(handle);
     HY_ASSERT(key);
@@ -108,35 +136,6 @@ pthread_t HyThreadGetId(HyThread_s *handle)
     return handle->id;
 }
 
-static void *_thread_cb(void *args)
-{
-    HyThread_s *handle = args;
-    HyThreadSaveConfig_s *save_c = &handle->save_c;
-    hy_s32_t ret = 0;
-
-    LOGI("<%s> thread loop start, tid: 0x%lx \n", save_c->name, handle->id);
-
-#ifdef HAVE_PTHREAD_SETNAME_NP
-    pthread_setname_np(handle->id, save_c->name);
-    // ret = prctl(PR_SET_NAME, name);
-#endif
-
-    while (0 == ret) {
-        ret = save_c->thread_loop_cb(save_c->args);
-
-        // pthread_testcancel();
-    }
-
-    handle->is_exit = 1;
-    LOGI("%s thread loop stop \n", save_c->name);
-
-    if (HY_THREAD_DETACH_MODE_YES == save_c->detach_mode) {
-        HyThreadDestroy(&handle);
-    }
-
-    return NULL;
-}
-
 void HyThreadDestroy(HyThread_s **handle_pp)
 {
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
@@ -154,7 +153,7 @@ void HyThreadDestroy(HyThread_s **handle_pp)
         }
     }
 
-    pthread_join(handle->id, NULL);
+    pthread_join(handle->id, NULL); // 触发线程资源的回收
 
     LOGI("%s thread destroy, handle: %p \n", handle->save_c.name, handle);
     HY_MEM_FREE_PP(handle_pp);
@@ -163,6 +162,7 @@ void HyThreadDestroy(HyThread_s **handle_pp)
 HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
 {
     HY_ASSERT_RET_VAL(!thread_c, NULL);
+
     HyThread_s *handle = NULL;
     pthread_attr_t attr;
     struct sched_param param;
@@ -215,8 +215,7 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
             break;
         }
 
-        LOGI("%s thread create, handle: %p, id: 0x%lx \n",
-             handle->save_c.name, handle, handle->id);
+        LOGI("%s thread create, handle: %p \n", handle->save_c.name, handle);
         return handle;
     } while (0);
 

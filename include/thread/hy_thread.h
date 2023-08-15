@@ -142,8 +142,7 @@ void HyThreadDestroy(HyThread_s **handle_pp);
  *
  * @note 使用线程私有数据的好处是，多个线程同时使用同一个名字，但是内容不一样
  */
-hy_s32_t HyThreadKeySet(HyThread_s *handle,
-                        void *key, HyThreadKeyDestroyCb_t destroy_cb);
+hy_s32_t HyThreadKeySet(HyThread_s *handle, void *key, HyThreadKeyDestroyCb_t destroy_cb);
 
 /**
  * @brief 获取线程的私有数据
