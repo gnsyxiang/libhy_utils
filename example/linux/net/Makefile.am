@@ -40,6 +40,7 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
+                   -I$(top_srcdir)/include/$(run_os)/gpio \
                    -I$(top_srcdir)/include/$(run_os)/net \
                    -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include

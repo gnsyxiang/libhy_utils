@@ -22,6 +22,7 @@ noinst_LTLIBRARIES = lib@project_name@_@run_os@.la
 
 SUBDIRS = \
           fifo \
+          gpio \
           ipc \
           net \
           thread \
@@ -69,8 +70,6 @@ _sources_com    += \
                    hy_can.c \
                    hy_dynamic_array.c \
                    hy_file.c \
-                   hy_gpio.c \
-                   hy_gpio_isr.c \
                    hy_hash.c \
                    hy_package_list.c \
                    hy_pipe.c \
@@ -87,10 +86,11 @@ _cflags_com     +=
 _cxxflags_com   +=
 
 _ldadd_com      += \
+                   $(top_builddir)/src/$(run_os)/fifo/libhy_fifo.la \
+                   $(top_builddir)/src/$(run_os)/gpio/libhy_gpio.la \
                    $(top_builddir)/src/$(run_os)/net/libhy_net.la \
                    $(top_builddir)/src/$(run_os)/thread/libhy_thread.la \
                    $(top_builddir)/src/$(run_os)/time/libhy_time.la \
-                   $(top_builddir)/src/$(run_os)/fifo/libhy_fifo.la \
                    $(top_builddir)/src/$(run_os)/uart/libhy_uart.la
 
 if COMPILE_LIBCJSON

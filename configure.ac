@@ -101,6 +101,7 @@ AC_CONFIG_FILES([Makefile
                  example/Makefile
                  example/linux/Makefile
                  example/linux/fifo/Makefile
+                 example/linux/gpio/Makefile
                  example/linux/ipc/Makefile
                  example/linux/ipc/ipc_process/Makefile
                  example/linux/ipc/ipc_socket/Makefile
@@ -115,6 +116,7 @@ AC_CONFIG_FILES([Makefile
                  include/linux/Makefile
                  include/linux/download/Makefile
                  include/linux/fifo/Makefile
+                 include/linux/gpio/Makefile
                  include/linux/ipc/Makefile
                  include/linux/ipc/ipc_process/Makefile
                  include/linux/ipc/ipc_socket/Makefile
@@ -133,6 +135,7 @@ AC_CONFIG_FILES([Makefile
                  src/linux/Makefile
                  src/linux/download/Makefile
                  src/linux/fifo/Makefile
+                 src/linux/gpio/Makefile
                  src/linux/ipc/Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
