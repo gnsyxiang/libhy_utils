@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    05/03 2021 10:35
+# @date    17/08 2023 14:29
 # @version v0.0.1
 # 
 # @since    note
@@ -13,32 +13,12 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        05/03 2021      create the file
+#     00      zhenquan.qiu        17/08 2023      create the file
 # 
-#     last modified: 05/03 2021 10:35
+#     last modified: 17/08 2023 14:29
 # ===============================================================
 
 noinst_LTLIBRARIES = lib@project_name@_@run_os@.la
-
-SUBDIRS = \
-          fifo \
-          ipc \
-          net \
-          thread \
-          time \
-          uart
-
-if COMPILE_LIBCURL
-SUBDIRS += download
-endif
-
-if COMPILE_LIBEVENT
-SUBDIRS += libevent
-endif
-
-if COMPILE_LIBCJSON
-SUBDIRS += serialize
-endif
 
 # ------------------
 # defining variables
@@ -61,21 +41,10 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/$(run_os)/thread \
                    -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
-_sources_com    += \
-                   hy_can.c \
-                   hy_dynamic_array.c \
-                   hy_file.c \
-                   hy_gpio.c \
-                   hy_gpio_isr.c \
-                   hy_hash.c \
-                   hy_package_list.c \
-                   hy_pipe.c \
-                   hy_queue.c \
-                   hy_signal.c
+_sources_com    +=
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -86,20 +55,7 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldadd_com      += \
-                   $(top_builddir)/src/$(run_os)/net/libhy_net.la \
-                   $(top_builddir)/src/$(run_os)/thread/libhy_thread.la \
-                   $(top_builddir)/src/$(run_os)/time/libhy_time.la \
-                   $(top_builddir)/src/$(run_os)/fifo/libhy_fifo.la \
-                   $(top_builddir)/src/$(run_os)/uart/libhy_uart.la
-
-if COMPILE_LIBCJSON
-_ldadd_com      += $(top_builddir)/src/$(run_Os)/serialize/libhy_serialize.la
-endif
-
-if COMPILE_LIBEVENT
-_ldadd_com      += $(top_builddir)/src/$(run_Os)/libevent/libhy_event.la
-endif
+_ldadd_com      +=
 
 lib@project_name@_@run_os@_la_SOURCES    = $(_sources_com)
 lib@project_name@_@run_os@_la_CPPFLAGS   = $(_cppflags_com)

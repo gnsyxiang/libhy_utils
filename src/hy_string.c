@@ -73,4 +73,3 @@ void HyStrCopyRight2(const char *src, char *dst, hy_u32_t len, char ch, char ch2
 
     HY_MEMCPY(dst, str + 1, cnt);
 }
-

@@ -110,6 +110,7 @@ AC_CONFIG_FILES([Makefile
                  example/linux/thread/Makefile
                  example/linux/time/Makefile
                  example/linux/uart/Makefile
+                 example/mcu/Makefile
                  include/Makefile
                  include/linux/Makefile
                  include/linux/download/Makefile
@@ -141,6 +142,7 @@ AC_CONFIG_FILES([Makefile
                  src/linux/thread/Makefile
                  src/linux/time/Makefile
                  src/linux/uart/Makefile
+                 src/mcu/Makefile
                  test/Makefile])
 AC_OUTPUT
 

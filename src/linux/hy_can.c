@@ -36,6 +36,7 @@
 #include "hy_string.h"
 #include "hy_utils.h"
 #include "hy_file.h"
+#include "hy_linux.h"
 #include "hy_thread_mutex.h"
 
 #include "hy_can.h"

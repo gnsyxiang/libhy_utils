@@ -112,5 +112,3 @@ void HySortQuick(void *array, hy_s32_t low, hy_s32_t high,
         HySortQuick(array, positiion + 1, high, item_len, swap_cb);
     }
 }
-
-

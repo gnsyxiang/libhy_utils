@@ -30,6 +30,11 @@
 
 #include "hy_utils.h"
 
+void HyUtilsChenk(void)
+{
+
+}
+
 void HyUtilsIpStr2Int(const char *ip_str, hy_u32_t *ip_num)
 {
     HY_ASSERT_RET(!ip_str);
@@ -134,4 +139,3 @@ hy_s32_t HyUtilsCheckEndianness(void)
 
     return (1 == c.a) ? 0 : 1;
 }
-

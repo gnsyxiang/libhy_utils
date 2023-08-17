@@ -2,10 +2,10 @@
 # 
 # Release under GPLv-3.0.
 # 
-# @file    Makefile.am
+# @file    Makefile.ma
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    17/08 2023 10:03
+# @date    17/08 2023 14:30
 # @version v0.0.1
 # 
 # @since    note
@@ -15,25 +15,22 @@
 #     NO.     Author              Date            Modified
 #     00      zhenquan.qiu        17/08 2023      create the file
 # 
-#     last modified: 17/08 2023 10:03
+#     last modified: 17/08 2023 14:30
 # ===============================================================
-
-SUBDIRS = $(run_os)
-
-lib_LTLIBRARIES = lib@project_name@.la
 
 # ------------------
 # defining variables
 # ------------------
 _no_error_com   =
 _define_com     =
-_include_com    = $(include_com)
+_include_com    =
 _sources_com    =
 _cppflags_com   =
 _cflags_com     =
 _cxxflags_com   =
 _ldflags_com    =
 _ldadd_com      =
+bin_PROGRAMS    =
 
 # ---------------------
 # add necessary content
@@ -43,16 +40,10 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
+                   -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
-_sources_com    += \
-                   hy_bit.c \
-                   hy_hex.c \
-                   hy_md5sum.c \
-                   hy_mem.c \
-                   hy_sort.c \
-                   hy_string.c \
-                   hy_utils.c
+_sources_com    +=
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -63,17 +54,7 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    += -version-info @current@:@revision@:@age@
+_ldflags_com    +=
 
-if !COMPILE_DEBUG_INFO
-_ldflags_com    += -export-symbols-regex 'Hy*'
-endif
+_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
-_ldadd_com      += $(top_builddir)/src/$(run_os)/libhy_utils_$(run_os).la
-
-lib@project_name@_la_SOURCES    = $(_sources_com)
-lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)
-lib@project_name@_la_CFLAGS     = $(_cflags_com)
-lib@project_name@_la_CXXFLAGS   = $(_cxxflags_com)
-lib@project_name@_la_LDFLAGS    = $(_ldflags_com)
-lib@project_name@_la_LIBADD     = $(_ldadd_com)
