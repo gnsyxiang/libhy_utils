@@ -66,13 +66,13 @@ HyPipe_s *HyPipeCreate(HyPipeConfig_s *pipe_c);
  *
  * @return 成功返回句柄，失败返回NULL
  */
-#define HyPipeCreate_m(_read_block_state)                       \
-    ({                                                          \
-        HyPipeConfig_s pipe_c;                                  \
-        memset(&pipe_c, 0, sizeof(pipe_c));                     \
-        pipe_c.read_block_state = _read_block_state;            \
-        HyPipeCreate(&pipe_c);                                  \
-     })
+#define HyPipeCreate_m(_read_block_state)           \
+({                                                  \
+    HyPipeConfig_s pipe_c;                          \
+    memset(&pipe_c, 0, sizeof(pipe_c));             \
+    pipe_c.read_block_state = _read_block_state;    \
+    HyPipeCreate(&pipe_c);                          \
+})
 
 /**
  * @brief 销毁pipe
@@ -129,4 +129,3 @@ hy_s32_t HyPipeWriteFdGet(HyPipe_s *handle);
 #endif
 
 #endif
-

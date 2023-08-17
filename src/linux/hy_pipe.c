@@ -31,7 +31,7 @@
 #include "hy_pipe.h"
 
 struct HyPipe_s {
-    hy_s32_t            pfd[2];
+    hy_s32_t pfd[2];
 };
 
 hy_s32_t HyPipeReadFdGet(HyPipe_s *handle)
@@ -109,4 +109,3 @@ HyPipe_s *HyPipeCreate(HyPipeConfig_s *pipe_c)
     HyPipeDestroy(&context);
     return NULL;
 }
-
