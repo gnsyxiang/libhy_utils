@@ -101,6 +101,8 @@ void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
 
     HyQueueDestroy(&handle->queue_h);
 
+    HY_MEM_FREE_PP(&handle->worker_thread_h);
+
     LOGI("thread_pool destroy, handle: %p \n", handle);
     HY_MEM_FREE_PP(&handle);
 }
