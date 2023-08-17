@@ -124,6 +124,8 @@ hy_s32_t HyQueueRead(HyQueue_s *handle, void *item)
 
 hy_s32_t HyQueueWrite(HyQueue_s *handle, const void *item)
 {
+    HY_ASSERT(handle);
+
     HyQueueSaveConfig_s *save_c = &handle->save_c;
     hy_s32_t pos = 0;
 

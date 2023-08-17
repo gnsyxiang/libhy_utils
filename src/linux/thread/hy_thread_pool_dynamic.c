@@ -34,31 +34,29 @@
 #define NUMBER 2
 
 typedef struct {
-    HyThread_s                  *worker_thread_h;
-    hy_s32_t                    flag;
+    HyThread_s                          *worker_thread_h;
+    hy_s32_t                            flag;
 } _worker_thread_s;
 
 struct HyThreadPoolDynamic_s {
-    HyThreadPoolDynamicSaveConfig_s    save_c;
-    hy_s32_t                    is_exit;
+    HyThreadPoolDynamicSaveConfig_s     save_c;
+    hy_s32_t                            is_exit;
 
-    HyThreadMutex_s             *mutex_h;
-    HyQueue_s                   *queue_h;
-    HyThread_s                  *manager_thread_h;
-    _worker_thread_s            *worker_thread;
-    hy_s32_t                    live_num;
-    hy_s32_t                    exit_num;
+    HyThreadMutex_s                     *mutex_h;
+    HyQueue_s                           *queue_h;
+    HyThread_s                          *manager_thread_h;
+    _worker_thread_s                    *worker_thread;
+    hy_s32_t                            live_num;
+    hy_s32_t                            exit_num;
 
-    HyThreadMutex_s             *busy_mutex_h;
-    hy_s32_t                    busy_num;
+    HyThreadMutex_s                     *busy_mutex_h;
+    hy_s32_t                            busy_num;
 };
 
 static void _thread_exit(HyThreadPoolDynamic_s* handle)
 {
     _worker_thread_s *worker_thread;
-    pthread_t tid;
-
-    tid = pthread_self();
+    pthread_t tid = pthread_self();
 
     for (hy_s32_t i = 0; i < handle->save_c.thread_cnt_max; ++i) {
         worker_thread = &handle->worker_thread[i];
@@ -76,8 +74,8 @@ static hy_s32_t _worker_loop_cb(void* args)
 {
     HyThreadPoolDynamic_s *handle = (HyThreadPoolDynamic_s*)args;
     HyThreadPoolDynamicSaveConfig_s *save_c = &handle->save_c;
-    HyThreadPoolTask_s task;
     void *run_befor_cb_args = NULL;
+    HyThreadPoolTask_s task;
 
     if (save_c->run_after_cb) {
         run_befor_cb_args = save_c->run_befor_cb(save_c->run_befor_args);
@@ -208,11 +206,16 @@ static hy_s32_t _manager_loop_cb(void* arg)
 
 void HyThreadPoolDynamicAddTask(HyThreadPoolDynamic_s* handle, HyThreadPoolTask_s *task)
 {
+    HY_ASSERT(handle);
+    HY_ASSERT(task);
+
     HyQueueWrite(handle->queue_h, task);
 }
 
 hy_s32_t HyThreadPoolDynamicGetBusyNum(HyThreadPoolDynamic_s* handle)
 {
+    HY_ASSERT(handle);
+
     hy_s32_t num = 0;
 
     HyThreadMutexLock(handle->busy_mutex_h);
@@ -224,6 +227,8 @@ hy_s32_t HyThreadPoolDynamicGetBusyNum(HyThreadPoolDynamic_s* handle)
 
 hy_s32_t HyThreadPoolDynamicGetAliveNum(HyThreadPoolDynamic_s* handle)
 {
+    HY_ASSERT(handle);
+
     hy_s32_t num = 0;
 
     HyThreadMutexLock(handle->mutex_h);
@@ -335,4 +340,3 @@ HyThreadPoolDynamic_s *HyThreadPoolDynamicCreate(HyThreadPoolDynamicConfig_s *th
     HyThreadPoolDynamicDestroy(&handle);
     return NULL;
 }
-

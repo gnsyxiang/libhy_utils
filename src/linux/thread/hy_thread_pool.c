@@ -40,7 +40,7 @@ struct HyThreadPool_s {
     HyThread_s                  **worker_thread_h;
 };
 
-static hy_s32_t _worker_loop_cb(void* args)
+static hy_s32_t _worker_loop_cb(void *args)
 {
     HyThreadPool_s *handle = (HyThreadPool_s*)args;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
@@ -74,6 +74,9 @@ static hy_s32_t _worker_loop_cb(void* args)
 
 void HyThreadPoolAddTask(HyThreadPool_s* handle, HyThreadPoolTask_s *task)
 {
+    HY_ASSERT(handle);
+    HY_ASSERT(task);
+
     HyQueueWrite(handle->queue_h, task);
 }
 
