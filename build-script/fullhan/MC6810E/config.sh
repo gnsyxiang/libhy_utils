@@ -11,11 +11,13 @@ cross_gcc_path=/mnt/data/toolchain/fullhan/MC6810E/molchipv500-armgcc-uclibc/bin
 
 configure_param=
 
-cppflag=
+cppflag=-fstack-protector-all
 cflag=
 cxxflag=
-ldflag=
+ldflag=-rdynamic
 lib=
+debug=-g -O0
+release=-O2 -DNDEBUG
 
 install_path=/mnt/nfs/fullhan/MC6810E
 

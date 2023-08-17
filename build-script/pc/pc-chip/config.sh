@@ -11,11 +11,13 @@ cross_gcc_path=
 
 configure_param=
 
-cppflag=-Wno-error=stringop-truncation
+cppflag=-fstack-protector-all
 cflag=
 cxxflag=
-ldflag=
+ldflag=-rdynamic
 lib=
+debug=-g -O0
+release=-O2 -DNDEBUG
 
 install_path=/mnt/nfs/pc/pc-chip
 
