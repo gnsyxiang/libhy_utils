@@ -41,8 +41,8 @@ _define_com     +=
 
 _include_com    += \
                    -I$(top_srcdir)/include/$(run_os)/libevent \
-                   -I$(top_srcdir)/include/thrun_os)/liread \
-                   -I$(top_srcdir)/include/thrun_os) \
+                   -I$(top_srcdir)/include/$(run_os)/thread \
+                   -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
 _sources_com    +=

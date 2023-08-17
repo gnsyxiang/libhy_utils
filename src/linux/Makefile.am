@@ -94,11 +94,11 @@ _ldadd_com      += \
                    $(top_builddir)/src/$(run_os)/uart/libhy_uart.la
 
 if COMPILE_LIBCJSON
-_ldadd_com      += $(top_builddir)/src/$(run_Os)/serialize/libhy_serialize.la
+_ldadd_com      += $(top_builddir)/src/$(run_os)/serialize/libhy_serialize.la
 endif
 
 if COMPILE_LIBEVENT
-_ldadd_com      += $(top_builddir)/src/$(run_Os)/libevent/libhy_event.la
+_ldadd_com      += $(top_builddir)/src/$(run_os)/libevent/libhy_event.la
 endif
 
 lib@project_name@_@run_os@_la_SOURCES    = $(_sources_com)

@@ -30,6 +30,7 @@
 #include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_mem.h"
+#include "hy_linux.h"
 #include "hy_utils.h"
 
 #include "cjson_impl.h"
