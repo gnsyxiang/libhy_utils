@@ -112,6 +112,7 @@ static hy_s32_t _can_bind_socket(HyCan_s *handle, hy_s32_t file_block)
     }
 
     HY_MEMSET(&addr, sizeof(addr));
+    HY_MEMSET(&ifr, sizeof(ifr));
     strcpy(ifr.ifr_name, handle->save_c.name);
     ioctl(handle->fd, SIOCGIFINDEX, &ifr);
     ifr.ifr_ifindex     = if_nametoindex(ifr.ifr_name);
