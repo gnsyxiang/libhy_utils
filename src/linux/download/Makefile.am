@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    17/08 2023 10:03
+# @date    26/04 2023 09:39
 # @version v0.0.1
 # 
 # @since    note
@@ -13,14 +13,12 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        17/08 2023      create the file
+#     00      zhenquan.qiu        26/04 2023      create the file
 # 
-#     last modified: 17/08 2023 10:03
+#     last modified: 26/04 2023 09:39
 # ===============================================================
 
-SUBDIRS = $(run_os)
-
-lib_LTLIBRARIES = lib@project_name@.la
+noinst_LTLIBRARIES = libhy_download.la
 
 # ------------------
 # defining variables
@@ -42,9 +40,16 @@ _no_error_com   +=
 
 _define_com     +=
 
-_include_com    +=
+_include_com    += \
+                   -I$(top_srcdir)/include/$(run_os)/download \
+                   -I$(top_srcdir)/include/$(run_os) \
+                   -I$(top_srcdir)/include
 
 _sources_com    +=
+
+if COMPILE_LIBCURL
+_sources_com    += hy_curl.c
+endif
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -55,17 +60,14 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    += -version-info @current@:@revision@:@age@
+_ldflags_com    +=
 
-if !COMPILE_DEBUG_INFO
-_ldflags_com    += -export-symbols-regex 'Hy*'
-endif
+_ldadd_com      += $(ldadd_com)
 
-_ldadd_com      += $(top_builddir)/src/$(run_os)/libhy_utils_$(run_os).la
+libhy_download_la_SOURCES    = $(_sources_com)
+libhy_download_la_CPPFLAGS   = $(_cppflags_com)
+libhy_download_la_CFLAGS     = $(_cflags_com)
+libhy_download_la_CXXFLAGS   = $(_cxxflags_com)
+libhy_download_la_LDFLAGS    = $(_ldflags_com)
+libhy_download_la_LIBADD     = $(_ldadd_com)
 
-lib@project_name@_la_SOURCES    = $(_sources_com)
-lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)
-lib@project_name@_la_CFLAGS     = $(_cflags_com)
-lib@project_name@_la_CXXFLAGS   = $(_cxxflags_com)
-lib@project_name@_la_LDFLAGS    = $(_ldflags_com)
-lib@project_name@_la_LIBADD     = $(_ldadd_com)

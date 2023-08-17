@@ -5,7 +5,7 @@
 # @file    Makefile.am
 # @brief   
 # @author  gnsyxiang <gnsyxiang@163.com>
-# @date    17/08 2023 10:03
+# @date    24/02 2022 14:22
 # @version v0.0.1
 # 
 # @since    note
@@ -13,14 +13,16 @@
 # 
 #     change log:
 #     NO.     Author              Date            Modified
-#     00      zhenquan.qiu        17/08 2023      create the file
+#     00      zhenquan.qiu        24/02 2022      create the file
 # 
-#     last modified: 17/08 2023 10:03
+#     last modified: 24/02 2022 14:22
 # ===============================================================
 
-SUBDIRS = $(run_os)
+SUBDIRS = \
+          ipc_process \
+          ipc_socket
 
-lib_LTLIBRARIES = lib@project_name@.la
+noinst_LTLIBRARIES = libhy_ipc.la
 
 # ------------------
 # defining variables
@@ -55,17 +57,16 @@ _cflags_com     +=
 
 _cxxflags_com   +=
 
-_ldflags_com    += -version-info @current@:@revision@:@age@
+_ldflags_com    +=
 
-if !COMPILE_DEBUG_INFO
-_ldflags_com    += -export-symbols-regex 'Hy*'
-endif
+_ldadd_com      += \
+                   $(top_builddir)/src/$(run_os)/ipc/ipc_socket/libhy_ipc_socket.la \
+                   $(top_builddir)/src/$(run_os)/ipc/ipc_process/libhy_ipc_process.la
 
-_ldadd_com      += $(top_builddir)/src/$(run_os)/libhy_utils_$(run_os).la
+libhy_ipc_la_SOURCES    = $(_sources_com)
+libhy_ipc_la_CPPFLAGS   = $(_cppflags_com)
+libhy_ipc_la_CFLAGS     = $(_cflags_com)
+libhy_ipc_la_CXXFLAGS   = $(_cxxflags_com)
+libhy_ipc_la_LDFLAGS    = $(_ldflags_com)
+libhy_ipc_la_LIBADD     = $(_ldadd_com)
 
-lib@project_name@_la_SOURCES    = $(_sources_com)
-lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)
-lib@project_name@_la_CFLAGS     = $(_cflags_com)
-lib@project_name@_la_CXXFLAGS   = $(_cxxflags_com)
-lib@project_name@_la_LDFLAGS    = $(_ldflags_com)
-lib@project_name@_la_LIBADD     = $(_ldadd_com)

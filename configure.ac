@@ -78,7 +78,7 @@ AC_TYPE_UINT8_T
 # AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit clock_gettime gettimeofday localtime_r memset putenv select socket strerror strstr tzset])
+AC_CHECK_FUNCS([atexit clock_gettime gettimeofday inet_ntoa localtime_r memset putenv select socket strerror strstr tzset])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -97,44 +97,48 @@ AC_CONFIG_FILES([Makefile
                  build-script/rock-chips/rk3568/Makefile
                  doc/Makefile
                  example/Makefile
-                 example/fifo/Makefile
-                 example/ipc/Makefile
-                 example/ipc/ipc_process/Makefile
-                 example/ipc/ipc_socket/Makefile
-                 example/libevent/Makefile
-                 example/net/Makefile
-                 example/serialize/Makefile
-                 example/thread/Makefile
-                 example/time/Makefile
-                 example/uart/Makefile
+                 example/linux/Makefile
+                 example/linux/fifo/Makefile
+                 example/linux/ipc/Makefile
+                 example/linux/ipc/ipc_process/Makefile
+                 example/linux/ipc/ipc_socket/Makefile
+                 example/linux/libevent/Makefile
+                 example/linux/net/Makefile
+                 example/linux/serialize/Makefile
+                 example/linux/thread/Makefile
+                 example/linux/time/Makefile
+                 example/linux/uart/Makefile
                  include/Makefile
-                 include/download/Makefile
-                 include/fifo/Makefile
-                 include/ipc/Makefile
-                 include/ipc/ipc_process/Makefile
-                 include/ipc/ipc_socket/Makefile
-                 include/libevent/Makefile
-                 include/net/Makefile
-                 include/serialize/Makefile
-                 include/thread/Makefile
-                 include/time/Makefile
-                 include/uart/Makefile
+                 include/linux/Makefile
+                 include/linux/download/Makefile
+                 include/linux/fifo/Makefile
+                 include/linux/ipc/Makefile
+                 include/linux/ipc/ipc_process/Makefile
+                 include/linux/ipc/ipc_socket/Makefile
+                 include/linux/libevent/Makefile
+                 include/linux/net/Makefile
+                 include/linux/serialize/Makefile
+                 include/linux/thread/Makefile
+                 include/linux/time/Makefile
+                 include/linux/uart/Makefile
+                 include/mcu/Makefile
                  res/Makefile
                  res/voice/Makefile
                  res/voice/cn/Makefile
                  res/voice/en/Makefile
                  src/Makefile
-                 src/download/Makefile
-                 src/fifo/Makefile
-                 src/ipc/Makefile
-                 src/ipc/ipc_process/Makefile
-                 src/ipc/ipc_socket/Makefile
-                 src/libevent/Makefile
-                 src/net/Makefile
-                 src/serialize/Makefile
-                 src/thread/Makefile
-                 src/time/Makefile
-                 src/uart/Makefile
+                 src/linux/Makefile
+                 src/linux/download/Makefile
+                 src/linux/fifo/Makefile
+                 src/linux/ipc/Makefile
+                 src/linux/ipc/ipc_process/Makefile
+                 src/linux/ipc/ipc_socket/Makefile
+                 src/linux/libevent/Makefile
+                 src/linux/net/Makefile
+                 src/linux/serialize/Makefile
+                 src/linux/thread/Makefile
+                 src/linux/time/Makefile
+                 src/linux/uart/Makefile
                  test/Makefile])
 AC_OUTPUT
 
