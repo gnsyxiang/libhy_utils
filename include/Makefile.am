@@ -39,6 +39,11 @@ _install_headers_com    += \
                            hy_compile.h \
                            hy_hex.h \
                            hy_list.h \
+                           hy_md5sum.h \
+                           hy_mem.h \
+                           hy_module.h \
+                           hy_sort.h \
+                           hy_string.h \
                            hy_type.h \
                            hy_utils.h
 

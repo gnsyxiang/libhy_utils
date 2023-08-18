@@ -61,7 +61,6 @@ _install_headers_com    += \
                            hy_hash.h \
                            hy_math.h \
                            hy_misc.h \
-                           hy_module.h \
                            hy_package_list.h \
                            hy_pipe.h \
                            hy_queue.h \
