@@ -46,6 +46,11 @@ extern "C" {
 #define HY_UTILS_IS_POWER_OF_2(x)       ((x) != 0 && (((x) & ((x) - 1)) == 0))              ///< 判断x是否为2^n，是返回1，否返回0
 
 /**
+ * @brief 用于autotools检查libhy_utils使用
+ */
+void HyUtilsCheck(void);
+
+/**
  * @brief 把num转成2^n幂
  *
  * @param num 数字

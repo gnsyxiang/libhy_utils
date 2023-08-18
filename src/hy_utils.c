@@ -30,10 +30,7 @@
 
 #include "hy_utils.h"
 
-void HyUtilsChenk(void)
-{
-
-}
+void HyUtilsCheck(void) {}
 
 void HyUtilsIpStr2Int(const char *ip_str, hy_u32_t *ip_num)
 {
