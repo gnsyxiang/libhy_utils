@@ -74,7 +74,8 @@ _sources_com    += \
                    hy_package_list.c \
                    hy_pipe.c \
                    hy_queue.c \
-                   hy_signal.c
+                   hy_signal.c \
+                   hy_utils_linux.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

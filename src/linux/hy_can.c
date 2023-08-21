@@ -34,9 +34,9 @@
 #include "hy_assert.h"
 #include "hy_mem.h"
 #include "hy_string.h"
-#include "hy_utils.h"
 #include "hy_file.h"
-#include "hy_linux.h"
+#include "hy_utils.h"
+#include "hy_utils_linux.h"
 #include "hy_thread_mutex.h"
 
 #include "hy_can.h"
@@ -131,7 +131,7 @@ static void _can_deinit(const char *name)
 {
     char param[64] = {0};
     snprintf(param, sizeof(param), "ip link set %s down", name);
-    HyUtilsSystemCmd_m(param, 0);
+    HyUtilsLinuxSystemCmd_m(param, 0);
 }
 
 static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
@@ -174,20 +174,20 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "echo 4096 > /sys/class/net/can0/tx_queue_len");
-    HyUtilsSystemCmd_m(param, 0);
+    HyUtilsLinuxSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "ip link set %s down", name);
-    HyUtilsSystemCmd_m(param, 0);
+    HyUtilsLinuxSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "ip link set %s up type can bitrate %d dbitrate 2000000  fd on", name, speed_num);
     // snprintf(param, sizeof(param), "ip link set %s type can bitrate %d", name, speed_num);
-    HyUtilsSystemCmd_m(param, 0);
+    HyUtilsLinuxSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "ip link set %s up", name);
-    HyUtilsSystemCmd_m(param, 0);
+    HyUtilsLinuxSystemCmd_m(param, 0);
 
     return 0;
 }

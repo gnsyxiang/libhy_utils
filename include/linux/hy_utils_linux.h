@@ -2,7 +2,7 @@
  *
  * Release under GPLv-3.0.
  * 
- * @file    hy_linux.h
+ * @file    hy_utils_linux.h
  * @brief   
  * @author  gnsyxiang <gnsyxiang@163.com>
  * @date    17/08 2023 11:17
@@ -17,12 +17,14 @@
  * 
  *     last modified: 17/08 2023 11:17
  */
-#ifndef __LIBHY_UTILS_INCLUDE_HY_LINUX_H_
-#define __LIBHY_UTILS_INCLUDE_HY_LINUX_H_
+#ifndef __LIBHY_UTILS_INCLUDE_HY_UTILS_LINUX_H_
+#define __LIBHY_UTILS_INCLUDE_HY_UTILS_LINUX_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "hy_type.h"
 
 /**
  * @brief 执行命令
@@ -31,7 +33,7 @@ extern "C" {
  *
  * @return 无
  */
-#define HyUtilsSystemCmd_m(_cmd, _ret)                      \
+#define HyUtilsLinuxSystemCmd_m(_cmd, _ret)                 \
     ({                                                      \
         hy_s32_t ret = 0xffffffff;                          \
         do {                                                \
@@ -47,6 +49,15 @@ extern "C" {
         } while (0);                                        \
         (ret == _ret) ? 0 : -1;                             \
      })
+
+/**
+ * @brief 生成随机数
+ *
+ * @param range 限定随机数的范围
+ *
+ * @return 生成1到range之间的任意一个数
+ */
+hy_u32_t HyUtilsLinuxRandomNum(hy_u32_t range);
 
 #ifdef __cplusplus
 }

@@ -65,6 +65,7 @@ _install_headers_com    += \
                            hy_pipe.h \
                            hy_queue.h \
                            hy_signal.h \
+                           hy_utils_linux.h \
                            hy_video.h
 
 # ------------------

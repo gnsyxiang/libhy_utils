@@ -30,7 +30,7 @@
 #include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_mem.h"
-#include "hy_linux.h"
+#include "hy_utils_linux.h"
 #include "hy_utils.h"
 
 #include "cjson_impl.h"
@@ -300,7 +300,7 @@ static size_t _save_file_content(HyJsonFile_s *json_file)
 
         HY_MEMSET(file, 1024);
         snprintf(file, 1024, "mv %s-bak %s", json_file->file, json_file->file);
-        ret = HyUtilsSystemCmd_m(file, 0);
+        ret = HyUtilsLinuxSystemCmd_m(file, 0);
         if (0 != ret) {
             return -1;
         }

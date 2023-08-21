@@ -127,15 +127,6 @@ hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len);
 void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len, char *bit_str, size_t str_len);
 
 /**
- * @brief 生成随机数
- *
- * @param range 限定随机数的范围
- *
- * @return 生成1到range之间的任意一个数
- */
-hy_u32_t HyUtilsLinuxRandomNum(hy_u32_t range);
-
-/**
  * @brief 检查网络大小端序
  *
  * @return 返回1为小端序，返回0为大端序
