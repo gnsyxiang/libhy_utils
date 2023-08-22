@@ -18,19 +18,15 @@
  *     last modified: 05/05 2023 15:52
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
 #include "config.h"
 
-#include "hy_type.h"
+#include "hy_module.h"
+#include "hy_signal.h"
 #include "hy_mem.h"
 #include "hy_string.h"
-#include "hy_signal.h"
-#include "hy_module.h"
 #include "hy_utils.h"
 
 #include "hy_thread.h"
@@ -154,30 +150,30 @@ static void _handle_module_destroy(_main_context_s **context_pp)
 static hy_s32_t _handle_module_create(_main_context_s *context)
 {
     HyThreadConfig_s normal_thread_c;
-    const char *normal_thread_name = "normal_thread";
+    const char *normal_thread_name          = "normal_thread";
     HY_MEMSET(&normal_thread_c, sizeof(normal_thread_c));
-    normal_thread_c.save_c.thread_loop_cb = _normal_loop_cb;
-    normal_thread_c.save_c.args = context;
+    normal_thread_c.save_c.thread_loop_cb   = _normal_loop_cb;
+    normal_thread_c.save_c.args             = context;
     HY_STRNCPY(normal_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
-               normal_thread_name, HY_STRLEN("normal_thread_name"));
+               normal_thread_name, HY_STRLEN(normal_thread_name));
 
     HyThreadConfig_s low_thread_c;
-    const char *low_thread_name = "low_thread";
+    const char *low_thread_name             = "low_thread";
     HY_MEMSET(&low_thread_c, sizeof(low_thread_c));
-    low_thread_c.save_c.policy = HY_THREAD_POLICY_SCHED_FIFO;
-    low_thread_c.save_c.priority = 10;
-    low_thread_c.save_c.thread_loop_cb = _rt_loop_cb;
-    low_thread_c.save_c.args = (void *)"low";
+    low_thread_c.save_c.policy              = HY_THREAD_POLICY_SCHED_FIFO;
+    low_thread_c.save_c.priority            = 10;
+    low_thread_c.save_c.thread_loop_cb      = _rt_loop_cb;
+    low_thread_c.save_c.args                = (void *)"low";
     HY_STRNCPY(low_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
                low_thread_name, HY_STRLEN(low_thread_name));
 
     HyThreadConfig_s high_thread_c;
-    const char *high_thread_name = "high_thread";
+    const char *high_thread_name            = "high_thread";
     HY_MEMSET(&high_thread_c, sizeof(high_thread_c));
-    high_thread_c.save_c.policy = HY_THREAD_POLICY_SCHED_FIFO;
-    high_thread_c.save_c.priority = 20;
-    high_thread_c.save_c.thread_loop_cb = _rt_loop_cb;
-    high_thread_c.save_c.args = (void *)"high";
+    high_thread_c.save_c.policy             = HY_THREAD_POLICY_SCHED_FIFO;
+    high_thread_c.save_c.priority           = 20;
+    high_thread_c.save_c.thread_loop_cb     = _rt_loop_cb;
+    high_thread_c.save_c.args               = (void *)"high";
     HY_STRNCPY(high_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
                high_thread_name, HY_STRLEN(high_thread_name));
 
@@ -200,14 +196,14 @@ int main(int argc, char *argv[])
         struct {
             const char *name;
             hy_s32_t (*create)(_main_context_s *context);
-        } create_arr[] = {
+        } _create_arr[] = {
             {"_bool_module_create",     _bool_module_create},
             {"_handle_module_create",   _handle_module_create},
         };
-        for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
-            if (create_arr[i].create) {
-                if (0 != create_arr[i].create(context)) {
-                    LOGE("%s failed \n", create_arr[i].name);
+        for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(_create_arr); i++) {
+            if (_create_arr[i].create) {
+                if (0 != _create_arr[i].create(context)) {
+                    LOGE("%s failed \n", _create_arr[i].name);
                 }
             }
         }
@@ -232,4 +228,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
