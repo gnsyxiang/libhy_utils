@@ -39,8 +39,8 @@ typedef void (*HyThreadPoolTaskCb_t)(void *args, void *run_befor_cb_args);
  * @brief 任务
  */
 typedef struct {
-    HyThreadPoolTaskCb_t    task_cb;                        ///< 回调函数
-    void                    *args;                          ///< 回调函数的参数
+    HyThreadPoolTaskCb_t        task_cb;                    ///< 回调函数
+    void                        *args;                      ///< 回调函数的参数
 } HyThreadPoolTask_s;
 
 /**
@@ -57,7 +57,7 @@ typedef void (*HyThreadPoolRunAfterCb_t)(void *args);
  * @brief 配置参数
  */
 typedef struct {
-    HyThreadPoolRunBeforCb_t    run_befor_cb;               ///< 任务调度前初始化
+    HyThreadPoolRunBeforCb_t    run_befor_cb;               ///< 任务调度前申请资源
     HyThreadPoolRunAfterCb_t    run_after_cb;               ///< 任务调度后释放资源
     void                        *run_befor_args;            ///< 任务初始化后参数回调
 

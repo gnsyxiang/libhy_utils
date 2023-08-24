@@ -18,9 +18,6 @@
  *     last modified: 29/12 2021 17:18
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
@@ -32,14 +29,19 @@
 #include "hy_signal.h"
 #include "hy_module.h"
 #include "hy_utils.h"
+#include "hy_thread_mutex.h"
 
 #include "hy_thread_pool.h"
 
 #define _APP_NAME "hy_thread_pool_demo"
 
+#define _TEST_TASK_NUM (500)
+
 typedef struct {
     hy_s32_t        is_exit;
 
+    HyThreadMutex_s *mutex_h;
+    hy_u32_t        num;
     HyThreadPool_s  *thread_pool_h;
 } _main_context_s;
 
@@ -111,7 +113,8 @@ static void _handle_module_destroy(_main_context_s **context_pp)
 
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
-        {"thread_pool",        (void *)&context->thread_pool_h,       (HyModuleDestroyHandleCb_t)HyThreadPoolDestroy},
+        {"thread_pool",     (void *)&context->thread_pool_h,    (HyModuleDestroyHandleCb_t)HyThreadPoolDestroy},
+        {"mutext",          (void *)&context->mutex_h,          (HyModuleDestroyHandleCb_t)HyThreadMutexDestroy},
     };
 
     HY_MODULE_RUN_DESTROY_HANDLE(module);
@@ -121,11 +124,15 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 {
     HyThreadPoolConfig_s thread_pool_c;
     HY_MEMSET(&thread_pool_c, sizeof(thread_pool_c));
-    thread_pool_c.task_item_cnt         = 50;
-    thread_pool_c.save_c.thread_cnt     = 10;
+    thread_pool_c.task_item_cnt         = _TEST_TASK_NUM;
+    thread_pool_c.save_c.thread_cnt     = 100;
+
+    HyThreadMutexConfig_s mutex_c;
+    HY_MEMSET(&mutex_c, sizeof(mutex_c));
 
     // note: 增加或删除要同步到HyModuleDestroyHandle_s中
     HyModuleCreateHandle_s module[] = {
+        {"mutext",          (void *)&context->mutex_h,          &mutex_c,           (HyModuleCreateHandleCb_t)HyThreadMutexCreate,    (HyModuleDestroyHandleCb_t)HyThreadMutexDestroy},
         {"thread_pool",     (void *)&context->thread_pool_h,    &thread_pool_c,     (HyModuleCreateHandleCb_t)HyThreadPoolCreate,     (HyModuleDestroyHandleCb_t)HyThreadPoolDestroy},
     };
 
@@ -134,13 +141,12 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 
 static void _task_cb(void* args, void *run_befor_cb_args)
 {
-    hy_s32_t *num = args;
+    _main_context_s *context = args;
 
-    LOGI("tid: %ld, num: %d \n", pthread_self(), *num);
-
-    sleep(1);
-
-    HY_MEM_FREE_PP(&num);
+    HyThreadMutexLock(context->mutex_h);
+    context->num++;
+    LOGI("num: %d \n", context->num);
+    HyThreadMutexUnLock(context->mutex_h);
 }
 
 int main(int argc, char *argv[])
@@ -167,13 +173,9 @@ int main(int argc, char *argv[])
         LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
         HyThreadPoolTask_s task;
-        task.task_cb = _task_cb;
-        for (int i = 0; i < 100; ++i) {
-            hy_s32_t *num = calloc(1, sizeof(hy_s32_t));
-
-            *num = i;
-            task.args = num;
-
+        task.task_cb    = _task_cb;
+        task.args       = context;
+        for (int i = 0; i < _TEST_TASK_NUM; ++i) {
             HyThreadPoolAddTask(context->thread_pool_h, &task);
         }
 
