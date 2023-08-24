@@ -33,15 +33,22 @@ extern "C" {
  * @brief 配置参数
  */
 typedef struct {
-    hy_s32_t    reserved;   ///< 预留
+    hy_s32_t                    reserved;                   ///< 预留
+} HyThreadMutexSaveConfig_s;
+
+/**
+ * @brief 配置参数
+ */
+typedef struct {
+    HyThreadMutexSaveConfig_s   save_c;                     ///< 配置参数
 } HyThreadMutexConfig_s;
 
 typedef struct HyThreadMutex_s {
-    pthread_mutex_t mutex;
+    pthread_mutex_t             mutex;
 } HyThreadMutex_s;
 
 /**
- * @brief 创建模块
+ * @brief 创建线程锁模块
  *
  * @param mutex_c 配置参数
  *
@@ -49,14 +56,22 @@ typedef struct HyThreadMutex_s {
  */
 HyThreadMutex_s *HyThreadMutexCreate(HyThreadMutexConfig_s *mutex_c);
 
-#define HyThreadMutexCreate_m()                     \
-({                                                  \
-    HyThreadMutexConfig_s thread_mutex_c;           \
-    HyThreadMutexCreate(&thread_mutex_c);           \
-})
+/**
+ * @brief 创建线程锁模块宏
+ *
+ * @param mutex_c 配置参数
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
+#define HyThreadMutexCreate_m()                             \
+({                                                          \
+    HyThreadMutexConfig_s _thread_mutex_c;                  \
+    HY_MEMSET(&_thread_mutex_c, sizeof(_thread_mutex_c));   \
+    HyThreadMutexCreate(&_thread_mutex_c);                  \
+ })
 
 /**
- * @brief 销毁模块
+ * @brief 销毁线程锁模块
  *
  * @param handle_pp 句柄的地址（二级指针）
  */
@@ -76,11 +91,11 @@ static inline hy_s32_t HyThreadMutexLock(HyThreadMutex_s *handle)
     return pthread_mutex_lock(&handle->mutex) == 0 ? 0 : -1;
 }
 
-#define HyThreadMutexLock_m(_handle)                \
-do {                                                \
-    if (0 != HyThreadMutexLock(_handle)) {          \
-        LOGES("HyThreadMutexLock failed \n");       \
-    }                                               \
+#define HyThreadMutexLock_m(_handle)                        \
+do {                                                        \
+    if (0 != HyThreadMutexLock(_handle)) {                  \
+        LOGES("HyThreadMutexLock failed \n");               \
+    }                                                       \
 } while (0)
 
 /**
@@ -97,11 +112,11 @@ static inline hy_s32_t HyThreadMutexUnLock(HyThreadMutex_s *handle)
     return pthread_mutex_unlock(&handle->mutex) == 0 ? 0 : -1;
 }
 
-#define HyThreadMutexUnLock_m(_handle)              \
-do {                                                \
-    if (0 != HyThreadMutexUnLock(_handle)) {        \
-        LOGES("HyThreadMutexUnLock failed \n");     \
-    }                                               \
+#define HyThreadMutexUnLock_m(_handle)                      \
+do {                                                        \
+    if (0 != HyThreadMutexUnLock(_handle)) {                \
+        LOGES("HyThreadMutexUnLock failed \n");             \
+    }                                                       \
 } while (0)
 
 /**
@@ -118,11 +133,11 @@ static inline hy_s32_t HyThreadMutexTryLock(HyThreadMutex_s *handle)
     return pthread_mutex_trylock(&handle->mutex) == 0 ? 0 : -1;
 }
 
-#define HyThreadMutexTryLock_m(_handle)             \
-do {                                                \
-    if (0 != HyThreadMutexTryLock(_handle)) {       \
-        LOGES("HyThreadMutexTryLock failed \n");    \
-    }                                               \
+#define HyThreadMutexTryLock_m(_handle)                     \
+do {                                                        \
+    if (0 != HyThreadMutexTryLock(_handle)) {               \
+        LOGES("HyThreadMutexTryLock failed \n");            \
+    }                                                       \
 } while (0)
 
 /**
