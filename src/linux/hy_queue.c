@@ -33,9 +33,10 @@ struct HyQueue_s {
     HyQueueSaveConfig_s     save_c;
 
     void                    *buf;
-    hy_u32_t                size;
+    hy_u32_t                len;
     hy_u32_t                read_pos;
     hy_u32_t                write_pos;
+
     HyThreadMutex_s         *mutex;
     HyThreadCond_s          *not_full;
     HyThreadCond_s          *not_empty;
@@ -49,30 +50,27 @@ hy_s32_t HyQueueWakeup(HyQueue_s *handle)
     return 0;
 }
 
-hy_s32_t HyQueueGetItemCount(HyQueue_s *handle)
+hy_s32_t HyQueueLenGet(HyQueue_s *handle)
 {
     hy_u32_t cnt = 0;
     HY_ASSERT_RET_VAL(!handle, -1);
 
     HyThreadMutexLock(handle->mutex);
-    cnt = handle->size;
+    cnt = handle->len;
     HyThreadMutexUnLock(handle->mutex);
 
     return cnt;
 }
 
-hy_s32_t HyQueueReadPeek(HyQueue_s *handle, void *item)
+hy_s32_t HyQueueRemove(HyQueue_s *handle, hy_u32_t len)
 {
-    HyQueueSaveConfig_s *save_c = &handle->save_c;
-    hy_s32_t pos = 0;
-
     HyThreadMutexLock(handle->mutex);
-    while (handle->size == 0) {
+    while (handle->len == 0) {
         HyThreadCondWait(handle->not_empty, handle->mutex, 0);
     }
 
-    pos = handle->read_pos * save_c->item_len;
-    HY_MEMCPY(item, handle->buf + pos, save_c->item_len);
+    handle->read_pos = (handle->read_pos + len) & (handle->save_c.capacity - 1);
+    handle->len -= len;
 
     HyThreadCondSignal(handle->not_full);
     HyThreadMutexUnLock(handle->mutex);
@@ -80,41 +78,41 @@ hy_s32_t HyQueueReadPeek(HyQueue_s *handle, void *item)
     return 0;
 }
 
-hy_s32_t HyQueueReadDel(HyQueue_s *handle, hy_u32_t item_cnt)
+hy_s32_t HyQueueReadPeek(HyQueue_s *handle, void *buf, hy_u32_t len)
 {
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
+
     HyThreadMutexLock(handle->mutex);
-    while (handle->size == 0) {
+    while (handle->len == 0) {
         HyThreadCondWait(handle->not_empty, handle->mutex, 0);
     }
 
-    handle->read_pos = (handle->read_pos + item_cnt) & (handle->save_c.item_cnt - 1);
-    handle->size -= item_cnt;
+    HY_MEMCPY(buf, handle->buf + handle->read_pos, len);
 
-    HyThreadCondSignal(handle->not_full);
     HyThreadMutexUnLock(handle->mutex);
 
     return 0;
 }
 
-hy_s32_t HyQueueRead(HyQueue_s *handle, void *item)
+hy_s32_t HyQueueRead(HyQueue_s *handle, void *buf, hy_u32_t len)
 {
-    HyQueueSaveConfig_s *save_c = &handle->save_c;
-    hy_s32_t pos = 0;
+    HY_ASSERT(handle);
+    HY_ASSERT(buf);
 
     HyThreadMutexLock(handle->mutex);
-    while (handle->size == 0) {
+    while (handle->len == 0) {
         HyThreadCondWait(handle->not_empty, handle->mutex, 0);
 
-        if (handle->size == 0) {
+        if (handle->len == 0) {
             HyThreadMutexUnLock(handle->mutex);
             return -1;
         }
     }
 
-    pos = handle->read_pos * save_c->item_len;
-    HY_MEMCPY(item, handle->buf + pos, save_c->item_len);
-    handle->read_pos = (handle->read_pos + 1) & (handle->save_c.item_cnt - 1);
-    handle->size--;
+    HY_MEMCPY(buf, handle->buf + handle->read_pos, len);
+    handle->read_pos = (handle->read_pos + len) & (handle->save_c.capacity - 1);
+    handle->len -= len;
 
     HyThreadCondSignal(handle->not_full);
     HyThreadMutexUnLock(handle->mutex);
@@ -122,22 +120,19 @@ hy_s32_t HyQueueRead(HyQueue_s *handle, void *item)
     return 0;
 }
 
-hy_s32_t HyQueueWrite(HyQueue_s *handle, const void *item)
+hy_s32_t HyQueueWrite(HyQueue_s *handle, const void *buf, hy_u32_t len)
 {
     HY_ASSERT(handle);
-
-    HyQueueSaveConfig_s *save_c = &handle->save_c;
-    hy_s32_t pos = 0;
+    HY_ASSERT(buf);
 
     HyThreadMutexLock(handle->mutex);
-    while (handle->size == handle->save_c.item_cnt) {
+    while (handle->len + len > handle->save_c.capacity) {
         HyThreadCondWait(handle->not_full, handle->mutex, 0);
     }
 
-    pos = handle->write_pos * save_c->item_len;
-    HY_MEMCPY(handle->buf + pos, item, save_c->item_len);
-    handle->write_pos = (handle->write_pos + 1) & (handle->save_c.item_cnt - 1);
-    handle->size++;
+    HY_MEMCPY(handle->buf + handle->write_pos, buf, len);
+    handle->write_pos = (handle->write_pos + len) & (handle->save_c.capacity - 1);
+    handle->len += len;
 
     HyThreadCondSignal(handle->not_empty);
     HyThreadMutexUnLock(handle->mutex);
@@ -170,15 +165,13 @@ HyQueue_s *HyQueueCreate(HyQueueConfig_s *queue_c)
         HY_MEMCPY(&handle->save_c, &queue_c->save_c, sizeof(queue_c->save_c));
 
         HyQueueSaveConfig_s  *save_c = &handle->save_c;
+        if (!HY_UTILS_IS_POWER_OF_2(save_c->capacity)) {
+            LOGW("old len: %d \n", save_c->capacity);
 
-        if (!HY_UTILS_IS_POWER_OF_2(save_c->item_cnt)) {
-            LOGW("old item_cnt: %d \n", save_c->item_cnt);
-            save_c->item_cnt = HyUtilsNumTo2N(save_c->item_cnt);
-            LOGW("item_cnt must be power of 2, new item_cnt: %d \n", save_c->item_cnt);
+            save_c->capacity = HyUtilsNumTo2N(save_c->capacity);
+            LOGW("len must be power of 2, new len: %d \n", save_c->capacity);
         }
-
-        handle->buf = HY_MEM_MALLOC_BREAK(void *,
-                                          save_c->item_cnt * save_c->item_len);
+        handle->buf = HY_MEM_MALLOC_BREAK(void *, save_c->capacity);
 
         handle->write_pos = handle->read_pos = 0;
 

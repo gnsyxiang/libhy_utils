@@ -102,7 +102,7 @@ static hy_s32_t _worker_loop_cb(void* args)
         }
         HyThreadMutexUnLock(handle->mutex_h);
 
-        if (0 != HyQueueRead(handle->queue_h, &task)) {
+        if (0 != HyQueueRead(handle->queue_h, &task, sizeof(task))) {
             LOGI("queue read failed \n");
             continue;
         }
@@ -145,7 +145,7 @@ static hy_s32_t _manager_loop_cb(void* arg)
             break;
         }
 
-        queue_size = HyQueueGetItemCount(handle->queue_h);
+        queue_size = HyQueueLenGet(handle->queue_h);
 
         HyThreadMutexLock(handle->mutex_h);
         liveNum = handle->live_num;
@@ -209,7 +209,7 @@ void HyThreadPoolDynamicAddTask(HyThreadPoolDynamic_s* handle, HyThreadPoolTask_
     HY_ASSERT(handle);
     HY_ASSERT(task);
 
-    HyQueueWrite(handle->queue_h, task);
+    HyQueueWrite(handle->queue_h, task, sizeof(*task));
 }
 
 hy_s32_t HyThreadPoolDynamicGetBusyNum(HyThreadPoolDynamic_s* handle)
@@ -301,7 +301,7 @@ HyThreadPoolDynamic_s *HyThreadPoolDynamicCreate(HyThreadPoolDynamicConfig_s *th
             break;
         }
 
-        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt, sizeof(HyThreadPoolTask_s));
+        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt * sizeof(HyThreadPoolTask_s));
         if (!handle->queue_h) {
             LOGE("HyQueueCreate failed \n");
             break;

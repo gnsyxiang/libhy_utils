@@ -56,7 +56,7 @@ static hy_s32_t _worker_loop_cb(void *args)
     }
 
     while (!handle->is_exit) {
-        if (0 != HyQueueRead(handle->queue_h, &task)) {
+        if (0 != HyQueueRead(handle->queue_h, &task, sizeof(task))) {
             LOGD("queue read failed \n");
 
             continue;
@@ -77,7 +77,7 @@ void HyThreadPoolAddTask(HyThreadPool_s* handle, HyThreadPoolTask_s *task)
     HY_ASSERT(handle);
     HY_ASSERT(task);
 
-    HyQueueWrite(handle->queue_h, task);
+    HyQueueWrite(handle->queue_h, task, sizeof(*task));
 }
 
 void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
@@ -127,7 +127,7 @@ HyThreadPool_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
             break;
         }
 
-        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt, sizeof(HyThreadPoolTask_s));
+        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt * sizeof(HyThreadPoolTask_s));
         if (!handle->queue_h) {
             LOGE("HyQueueCreate failed \n");
             break;
