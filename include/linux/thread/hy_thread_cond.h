@@ -24,16 +24,28 @@
 extern "C" {
 #endif
 
+#include <assert.h>
+#include <pthread.h>
+
 #include "hy_type.h"
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    hy_s32_t    reserved;       ///< 预留
+    hy_s32_t                    reserved;           ///< 预留
+} HyThreadSaveCondConfig_s;
+
+/**
+ * @brief 配置参数
+ */
+typedef struct {
+    HyThreadSaveCondConfig_s    save_c;             ///< 配置参数
 } HyThreadCondConfig_s;
 
-typedef struct HyThreadCond_s HyThreadCond_s;
+typedef struct HyThreadCond_s {
+    pthread_cond_t              cond;
+} HyThreadCond_s;
 
 /**
  * @brief 创建条件变量模块
@@ -44,15 +56,20 @@ typedef struct HyThreadCond_s HyThreadCond_s;
  */
 HyThreadCond_s *HyThreadCondCreate(HyThreadCondConfig_s *cond_c);
 
+/**
+ * @brief 创建条件变量模块宏
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
 #define HyThreadCondCreate_m()                      \
 ({                                                  \
     HyThreadCondConfig_s cond_c;                    \
     HY_MEMSET(&cond_c, sizeof(cond_c));             \
     HyThreadCondCreate(&cond_c);                    \
-})
+ })
 
 /**
- * @brief 销毁天剑变量模块
+ * @brief 销毁条件变量模块
  *
  * @param handle 句柄的地址（二级指针）
  */
@@ -65,7 +82,12 @@ void HyThreadCondDestroy(HyThreadCond_s **handle_pp);
  *
  * @return 成功返回0，失败返回-1
  */
-hy_s32_t HyThreadCondSignal(HyThreadCond_s *handle);
+static inline hy_s32_t HyThreadCondSignal(HyThreadCond_s *handle)
+{
+    assert(handle);
+
+    return pthread_cond_signal(&handle->cond) == 0 ? 0 : -1;
+}
 
 #define HyThreadCondSignal_m(_handle)               \
 do {                                                \
@@ -81,7 +103,12 @@ do {                                                \
  *
  * @return 成功返回0，失败返回-1
  */
-hy_s32_t HyThreadCondBroadcast(HyThreadCond_s *handle);
+static inline hy_s32_t HyThreadCondBroadcast(HyThreadCond_s *handle)
+{
+    assert(handle);
+
+    return pthread_cond_broadcast(&handle->cond) == 0 ? 0 : -1;
+}
 
 #define HyThreadCondBroadcast_m(_handle)            \
 do {                                                \

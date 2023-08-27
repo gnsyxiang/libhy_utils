@@ -18,34 +18,14 @@
  *     last modified: 31/03 2022 09:39
  */
 #include <stdio.h>
-#include <pthread.h>
 
 #include <hy_log/hy_log.h>
 
 #include "hy_assert.h"
 #include "hy_mem.h"
-
-#include "hy_thread_mutex.h"
 #include "hy_time.h"
+#include "hy_thread_mutex.h"
 #include "hy_thread_cond.h"
-
-struct HyThreadCond_s {
-    pthread_cond_t cond;
-};
-
-hy_s32_t HyThreadCondSignal(HyThreadCond_s *handle)
-{
-    HY_ASSERT(handle);
-
-    return pthread_cond_signal(&handle->cond) == 0 ? 0 : -1;
-}
-
-hy_s32_t HyThreadCondBroadcast(HyThreadCond_s *handle)
-{
-    HY_ASSERT(handle);
-
-    return pthread_cond_broadcast(&handle->cond) == 0 ? 0 : -1;
-}
 
 hy_s32_t HyThreadCondWait(HyThreadCond_s *handle, HyThreadMutex_s *mutex_h, hy_u32_t timeout_ms)
 {
@@ -98,7 +78,6 @@ HyThreadCond_s *HyThreadCondCreate(HyThreadCondConfig_s *cond_c)
     } while (0);
 
     LOGE("thread cond create failed \n");
-    HyThreadCondDestroy((HyThreadCond_s **)&handle);
+    HyThreadCondDestroy(&handle);
     return NULL;
 }
-
