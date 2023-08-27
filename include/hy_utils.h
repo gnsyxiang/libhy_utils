@@ -50,8 +50,9 @@ extern "C" {
  */
 void HyUtilsCheck(void);
 
+#if 1
 /**
- * @brief 把num转成2^n幂
+ * @brief 把num向上对齐到2^n幂
  *
  * @param num 数字
  *
@@ -62,12 +63,42 @@ static inline hy_u32_t HyUtilsNumTo2N(hy_u32_t num)
     hy_u32_t i = 1;
     hy_u32_t num_tmp = num;
 
-    while (num >>= 1) {
-        i <<= 1;
-    }
+    if (num == 0) {
+        return 0;
+    } else {
+        while (num >>= 1) {
+            i <<= 1;
+        }
 
-    return (i < num_tmp) ? i << 1U : i;
+        return (i < num_tmp) ? i << 1U : i;
+    }
 }
+#else
+// 内核的实现方式
+static inline hy_s32_t Hy_fls(hy_s32_t x)
+{
+    hy_s32_t r;
+
+    __asm__("bsrl %1,%0\n\t"
+            "jnz 1f\n\t"
+            "movl $-1,%0\n"
+            "1:" : "=r" (r) : "rm" (x));
+
+    return (r + 1);
+}
+
+/**
+ * @brief 把num向上对齐到2^n幂
+ *
+ * @param num 数字
+ *
+ * @return 对齐到2^n幂的数字
+ */
+static inline hy_u32_t Hy_roundup_pow_of_two(hy_u32_t x)
+{
+    return 1UL << Hy_fls(x - 1);
+}
+#endif
 
 /**
  * @brief 把IP字符串转化为整数
