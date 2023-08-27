@@ -28,16 +28,18 @@ extern "C" {
 
 /**
  * @brief 配置参数
+ *
+ * capacity: 该参数必须是2^N次幂，否则创建模块时会重新调整该值对齐到2^N次幂
  */
 typedef struct {
-    hy_u32_t            len;            ///< fifo数据空间长度
+    hy_u32_t            capacity;               ///< fifo数据空间长度
 } HyFifoSaveConfig_s;
 
 /**
  * @brief 配置参数
  */
 typedef struct {
-    HyFifoSaveConfig_s  save_c;         ///< 配置参数
+    HyFifoSaveConfig_s  save_c;                 ///< 配置参数
 } HyFifoConfig_s;
 
 typedef struct HyFifo_s HyFifo_s;
@@ -58,17 +60,17 @@ HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c);
 /**
  * @brief 创建无锁fifo模块宏
  *
- * @param _len fifo长度
+ * @param _capacity fifo容量
  *
  * @return 成功返回句柄，失败返回NULL
  */
-#define HyFifoCreate_m(_len)                        \
-    ({                                              \
-        HyFifoConfig_s fifo_c;                      \
-        HY_MEMSET(&fifo_c, sizeof(fifo_c));         \
-        fifo_c.save_c.len       = _len;             \
-        HyFifoCreate(&fifo_c);                      \
-     })
+#define HyFifoCreate_m(_capacity)               \
+({                                              \
+    HyFifoConfig_s fifo_c;                      \
+    HY_MEMSET(&fifo_c, sizeof(fifo_c));         \
+    fifo_c.save_c.capacity  = _capacity;        \
+    HyFifoCreate(&fifo_c);                      \
+ })
 
 /**
  * @brief 销毁无锁fifo模块
@@ -134,26 +136,12 @@ hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len);
 void HyFifoReset(HyFifo_s *handle);
 
 /**
- * @brief 打印整个fifo
- *
- * @param handle 句柄
- */
-void HyFifoDumpAll(HyFifo_s *handle);
-
-/**
- * @brief 打印fifo中的内容
- *
- * @param handle 句柄
- */
-void HyFifoDumpContent(HyFifo_s *handle);
-
-/**
- * @brief 获取fifo中未使用的长度
+ * @brief 获取fifo使用的长度
  *
  * @param handle 句柄
  * @return 成功返回对应值，失败返回-1
  */
-hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle);
+hy_s32_t HyFifoGetTotalLen(HyFifo_s *handle);
 
 /**
  * @brief 获取fifo使用的长度
@@ -164,12 +152,12 @@ hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle);
 hy_s32_t HyFifoGetUsedLen(HyFifo_s *handle);
 
 /**
- * @brief 获取fifo使用的长度
+ * @brief 获取fifo中未使用的长度
  *
  * @param handle 句柄
  * @return 成功返回对应值，失败返回-1
  */
-hy_s32_t HyFifoGetTotalLen(HyFifo_s *handle);
+hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle);
 
 /**
  * @brief fifo是否为空
@@ -188,6 +176,20 @@ hy_s32_t HyFifoIsEmpty(HyFifo_s *handle);
  * @return 满返回1，没满返回0，失败返回-1
  */
 hy_s32_t HyFifoIsFull(HyFifo_s *handle);
+
+/**
+ * @brief 打印整个fifo
+ *
+ * @param handle 句柄
+ */
+void HyFifoDumpAll(HyFifo_s *handle);
+
+/**
+ * @brief 打印fifo中的内容
+ *
+ * @param handle 句柄
+ */
+void HyFifoDumpContent(HyFifo_s *handle);
 
 #ifdef __cplusplus
 }

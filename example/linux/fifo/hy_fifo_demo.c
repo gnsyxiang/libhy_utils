@@ -18,9 +18,6 @@
  *     last modified: 30/10 2021 10:57
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
@@ -30,13 +27,14 @@
 #include "hy_mem.h"
 #include "hy_signal.h"
 #include "hy_string.h"
-#include "hy_type.h"
 #include "hy_utils.h"
 #include "hy_thread.h"
 
 #include "hy_fifo.h"
 
 #define _APP_NAME "hy_fifo_demo"
+
+// #define _TEST_FIFO_SPEED
 
 typedef struct {
     HyFifo_s        *fifo_h;
@@ -58,7 +56,7 @@ static hy_s32_t _write_fifo_loop_cb(void *args)
         if (ret > 0) {
             cnt += 1;
 
-            LOGD("--write--, c: %c, cnt: %d \n", c, cnt);
+            LOGI("--write--, c: %c, cnt: %d \n", c, cnt);
 
             c += 1;
             if (c - 'a' >= 26) {
@@ -66,7 +64,11 @@ static hy_s32_t _write_fifo_loop_cb(void *args)
             }
         }
 
-        usleep(20 * 1000);
+#ifdef _TEST_FIFO_SPEED
+        usleep(800 * 1000);
+#else
+        usleep(400 * 1000);
+#endif
     }
 
     return -1;
@@ -76,16 +78,16 @@ static hy_s32_t _read_fifo_loop_cb(void *args)
 {
     _main_context_s *context = args;
 
-    hy_u32_t len;
     char c;
     while (!context->is_exit) {
-        len = HyFifoGetUsedLen(context->fifo_h);
-        if (len > 0) {
-            HyFifoRead(context->fifo_h, &c, 1);
-            LOGI("--read---------, c: %c \n", c);
-        }
+        HyFifoRead(context->fifo_h, &c, 1);
+        LOGI("--read---------, c: %c \n", c);
 
-        usleep(10 * 1000);
+#ifdef _TEST_FIFO_SPEED
+        usleep(400 * 1000);
+#else
+        usleep(800 * 1000);
+#endif
     }
 
     return -1;
@@ -171,21 +173,21 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 {
     HyFifoConfig_s fifo_c;
     HY_MEMSET(&fifo_c, sizeof(fifo_c));
-    fifo_c.save_c.len           = 25;
+    fifo_c.save_c.capacity           = 25;
 
     HyThreadConfig_s read_fifo_thread_c;
-    const char *read_thread_name = "read_fifo_thread";
     HY_MEMSET(&read_fifo_thread_c, sizeof(read_fifo_thread_c));
-    read_fifo_thread_c.save_c.thread_loop_cb = _read_fifo_loop_cb;
-    read_fifo_thread_c.save_c.args = context;
+    const char *read_thread_name                = "read_fifo_thread";
+    read_fifo_thread_c.save_c.thread_loop_cb    = _read_fifo_loop_cb;
+    read_fifo_thread_c.save_c.args              = context;
     HY_STRNCPY(read_fifo_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
             read_thread_name, HY_STRLEN(read_thread_name));
 
     HyThreadConfig_s write_fifo_thread_c;
-    const char *write_thread_name = "read_fifo_thread";
     HY_MEMSET(&write_fifo_thread_c, sizeof(write_fifo_thread_c));
-    write_fifo_thread_c.save_c.thread_loop_cb = _write_fifo_loop_cb;
-    write_fifo_thread_c.save_c.args = context;
+    const char *write_thread_name               = "read_fifo_thread";
+    write_fifo_thread_c.save_c.thread_loop_cb   = _write_fifo_loop_cb;
+    write_fifo_thread_c.save_c.args             = context;
     HY_STRNCPY(write_fifo_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
                write_thread_name, HY_STRLEN(write_thread_name));
 
