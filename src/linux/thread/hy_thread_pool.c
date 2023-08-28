@@ -21,13 +21,12 @@
 
 #include <hy_log/hy_log.h>
 
-#include "hy_assert.h"
-#include "hy_type.h"
 #include "hy_mem.h"
+#include "hy_hex.h"
 #include "hy_string.h"
-#include "hy_queue.h"
-#include "hy_thread_mutex.h"
+#include "hy_fifo_lock.h"
 #include "hy_thread.h"
+#include "hy_thread_mutex.h"
 
 #include "hy_thread_pool.h"
 
@@ -35,7 +34,7 @@ struct HyThreadPool_s {
     HyThreadPoolSaveConfig_s    save_c;
     hy_s32_t                    is_exit;
 
-    HyQueue_s                   *queue_h;
+    HyFifoLock_s                *fifo_lock_h;
     HyThread_s                  **worker_thread_h;
 };
 
@@ -55,10 +54,10 @@ static hy_s32_t _worker_loop_cb(void *args)
     }
 
     while (!handle->is_exit) {
-        if (0 != HyQueueRead(handle->queue_h, &task, sizeof(task))) {
-            LOGD("queue read failed \n");
+        if (HyFifoLockRead(handle->fifo_lock_h, &task, sizeof(task)) == 0) {
+            LOGD("HyFifoLockRead is failed \n");
 
-            continue;
+            break;
         }
 
         task.task_cb(task.args, run_befor_cb_args);
@@ -71,12 +70,12 @@ static hy_s32_t _worker_loop_cb(void *args)
     return -1;
 }
 
-void HyThreadPoolAddTask(HyThreadPool_s* handle, HyThreadPoolTask_s *task)
+void HyThreadPoolAddTask(HyThreadPool_s *handle, HyThreadPoolTask_s *task)
 {
     HY_ASSERT(handle);
     HY_ASSERT(task);
 
-    HyQueueWrite(handle->queue_h, task, sizeof(*task));
+    HyFifoLockWrite(handle->fifo_lock_h, task, sizeof(*task));
 }
 
 void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
@@ -88,15 +87,11 @@ void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
 
     handle->is_exit = 1;
 
-    for (hy_s32_t i = 0; i < save_c->thread_cnt; ++i) {
-        HyQueueWakeup(handle->queue_h);
-    }
+    HyFifoLockDestroy(&handle->fifo_lock_h);
 
     for (hy_s32_t i = 0; i < save_c->thread_cnt; ++i) {
         HyThreadDestroy(&handle->worker_thread_h[i]);
     }
-
-    HyQueueDestroy(&handle->queue_h);
 
     HY_MEM_FREE_PP(&handle->worker_thread_h);
 
@@ -118,9 +113,9 @@ HyThreadPool_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
         handle = HY_MEM_MALLOC_BREAK(HyThreadPool_s *, sizeof(*handle));
         HY_MEMCPY(&handle->save_c, save_c, sizeof(handle->save_c));
 
-        handle->queue_h = HyQueueCreate_m(thread_pool_c->task_item_cnt * sizeof(HyThreadPoolTask_s));
-        if (!handle->queue_h) {
-            LOGE("HyQueueCreate failed \n");
+        handle->fifo_lock_h = HyFifoLockCreate_m(thread_pool_c->task_item_cnt * sizeof(HyThreadPoolTask_s));
+        if (!handle->fifo_lock_h) {
+            LOGE("HyFifoLockCreate_m failed \n");
             break;
         }
 

@@ -18,6 +18,7 @@
  *     last modified: 29/12 2021 17:18
  */
 #include <stdio.h>
+#include <sys/prctl.h>
 
 #include <hy_log/hy_log.h>
 
@@ -76,7 +77,7 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
     log_c.config_file               = "../res/hy_log/zlog.conf";
-    log_c.fifo_len                  = 10 * 1024;
+    log_c.fifo_len                  = 100 * 1024;
     log_c.save_c.level              = HY_LOG_LEVEL_INFO;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
 
@@ -142,11 +143,15 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
 static void _task_cb(void* args, void *run_befor_cb_args)
 {
     _main_context_s *context = args;
+    char thread_name[16];
+
+    prctl(PR_GET_NAME, thread_name);
 
     HyThreadMutexLock(context->mutex_h);
     context->num++;
-    LOGI("num: %d \n", context->num);
+    LOGI("thread name: %s, num: %d \n", thread_name, context->num);
     HyThreadMutexUnLock(context->mutex_h);
+    sleep(1);
 }
 
 int main(int argc, char *argv[])

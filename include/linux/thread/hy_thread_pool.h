@@ -79,6 +79,7 @@ typedef struct HyThreadPool_s HyThreadPool_s;
  * @brief 创建线程池模块
  *
  * @param thread_pool_c 配置参数，详见HyThreadPoolConfig_s
+ *
  * @return 成功返回句柄，失败返回NULL
  */
 HyThreadPool_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c);
@@ -95,6 +96,8 @@ void HyThreadPoolDestroy(HyThreadPool_s **handle_pp);
  *
  * @param handle 句柄
  * @param task 任务结构体的地址，详见HyThreadPoolsTask_s
+ *
+ * note: 返回表示增加成功，否则阻塞等待
  */
 void HyThreadPoolAddTask(HyThreadPool_s *handle, HyThreadPoolTask_s *task);
 
