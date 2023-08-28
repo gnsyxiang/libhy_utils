@@ -124,6 +124,7 @@ const char *HyThreadGetName(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, NULL);
 
+    // int pthread_getname_np(pthread_t thread, char *name, size_t len);
     // ret = prctl(PR_GET_NAME, name);
 
     return handle->save_c.name;
@@ -132,6 +133,8 @@ const char *HyThreadGetName(HyThread_s *handle)
 pthread_t HyThreadGetId(HyThread_s *handle)
 {
     HY_ASSERT_RET_VAL(!handle, -1);
+
+    // pthread_self();
 
     return handle->id;
 }
