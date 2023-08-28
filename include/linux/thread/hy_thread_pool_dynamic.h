@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (C), 2010-2011,江西科萌科技控股有限公司
+ * Release under GPLv-3.0.
  * 
  * @file    hy_thread_pool_dynamic.h
  * @brief   
@@ -80,7 +80,10 @@ typedef struct HyThreadPoolDynamic_s HyThreadPoolDynamic_s;
  * @brief 创建线程池模块
  *
  * @param thread_pool_c 配置参数，详见HyThreadPoolConfig_s
+ *
  * @return 成功返回句柄，失败返回NULL
+ *
+ * @note 根据任务的数量，动态的创建工作线程
  */
 HyThreadPoolDynamic_s *HyThreadPoolDynamicCreate(HyThreadPoolDynamicConfig_s *thread_pool_dynamic_c);
 
@@ -103,6 +106,7 @@ void HyThreadPoolDynamicAddTask(HyThreadPoolDynamic_s *handle, HyThreadPoolTask_
  * @brief 获取工作的线程的个数
  *
  * @param handle 句柄
+ *
  * @return 返回工作的线程的个数
  */
 hy_s32_t HyThreadPoolDynamicGetBusyNum(HyThreadPoolDynamic_s* handle);
@@ -111,6 +115,7 @@ hy_s32_t HyThreadPoolDynamicGetBusyNum(HyThreadPoolDynamic_s* handle);
  * @brief 获取存活的线程的个数
  *
  * @param handle 句柄
+ *
  * @return 返回活着的线程的个数
  */
 hy_s32_t HyThreadPoolDynamicGetAliveNum(HyThreadPoolDynamic_s* handle);

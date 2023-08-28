@@ -73,7 +73,6 @@ _sources_com    += \
                    hy_hash.c \
                    hy_package_list.c \
                    hy_pipe.c \
-                   hy_queue.c \
                    hy_signal.c \
                    hy_utils_linux.c
 

@@ -48,15 +48,17 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_thread.c                  \
-                   hy_thread_cond.c             \
-                   hy_thread_mutex.c            \
-                   hy_thread_pool.c             \
+                   queue.c \
+                   hy_thread.c \
+                   hy_thread_cond.c \
+                   hy_thread_mutex.c \
+                   hy_thread_pool.c \
+                   hy_thread_pool_dynamic.c \
                    hy_thread_sem.c
 
 _cppflags_com   += \
-                   $(_no_error_com)     \
-                   $(_include_com)      \
+                   $(_no_error_com) \
+                   $(_include_com) \
                    $(_define_com)
 
 _cflags_com     +=
@@ -73,4 +75,3 @@ libhy_thread_la_CFLAGS      = $(_cflags_com)
 libhy_thread_la_CXXFLAGS    = $(_cxxflags_com)
 libhy_thread_la_LDFLAGS     = $(_ldflags_com)
 libhy_thread_la_LIBADD      = $(_ldadd_com)
-
