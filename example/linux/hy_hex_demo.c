@@ -39,6 +39,10 @@ int main(int argc, char *argv[])
     HY_HEX_ASCII(buf, HY_STRLEN(buf));
     HY_HEX(buf, HY_STRLEN(buf));
 
+    hy_u32_t a = 0x5ffabf;
+
+    HY_HEX_BIT(&a, sizeof(a));
+
     sleep(3);
 
     HyLogDeInit();

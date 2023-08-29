@@ -27,6 +27,25 @@
 #include "hy_hex.h"
 
 HY_WEAK void HyHex(const void *_buf, size_t len, hy_s32_t flag)
+void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)
+{
+    unsigned char tmp;
+    hy_u32_t ret = 0;
+    hy_u32_t cnt;
+
+    for (hy_u32_t i = 0; i < len; i++) {
+        tmp = *(unsigned char *)(buf + i);
+        if (tmp) {
+            ret += snprintf(out_buf + ret, out_len - ret, "(%d, 0x%x)<", tmp, tmp);
+            cnt = 8;
+            while (cnt--) {
+                ret += snprintf(out_buf + ret, out_len - ret, "%d", (tmp >> cnt) & 0x1);
+            }
+            ret += snprintf(out_buf + ret, out_len - ret, "> ");
+        }
+    }
+}
+
 {
     hy_s32_t cnt = 0;
     const hy_u8_t *buf = (const hy_u8_t *)_buf;

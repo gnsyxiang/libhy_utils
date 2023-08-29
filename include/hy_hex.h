@@ -27,6 +27,29 @@ extern "C" {
 #include "hy_type.h"
 
 /**
+ * @brief 打印二进制bit信息
+ *
+ * @param buf 数据
+ * @param len 数据长度
+ * @param out_buf 输出数据
+ * @param out_len 输出数据长度
+ */
+void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len);
+
+/**
+ * @brief 打印二进制bit信息宏
+ *
+ * @param buf 数据
+ * @param len 长度
+ */
+#define HY_HEX_BIT(_buf, _len)                  \
+do {                                            \
+    char buf[1024] = {0};                       \
+    HyHexBit(_buf, _len, buf, sizeof(buf));     \
+    LOGI("%s\n", buf);                          \
+} while (0)
+
+/**
  * @brief 打印二进制信息
  *
  * @param buf 数据
