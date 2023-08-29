@@ -217,16 +217,54 @@ void HyFifoDumpContent(HyFifo_s *handle)
 
     hy_u32_t len;
     hy_u32_t out = handle->out & (handle->save_c.capacity - 1);
-    hy_u32_t free_len = handle->in - handle->out;
+    hy_u32_t used_len = handle->in - handle->out;
+    hy_u32_t buf_len = 10 * handle->save_c.capacity;
+    hy_u32_t ret = 0;
+    hy_s32_t cnt = 0;
+    const hy_u8_t *str;
+
+    char *buf = HY_MEM_CALLOC_RETURN(char *, buf_len);
 
     len = handle->save_c.capacity - out;
-    len = HY_UTILS_MIN(len, free_len);
+    len = HY_UTILS_MIN(len, used_len);
 
     LOGD("used len: %u, write_pos: %u, read_pos: %u \n",
-         free_len, handle->in, handle->out);
+         used_len, handle->in, handle->out);
 
-    HyHex(handle->buf + out, len, 1);
-    HyHex(handle->buf, free_len - len, 1);
+    str = (const hy_u8_t *)(handle->buf + out);
+    for (hy_u32_t i = 0; i < len; i++) {
+        if (str[i] == 0x0d || str[i] == 0x0a || str[i] < 32 || str[i] >= 127) {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[ ]  ", str[i]);
+        } else {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[%c]  ", str[i], str[i]);
+        }
+
+        cnt++;
+        if (cnt == 16) {
+            cnt = 0;
+            ret += snprintf(buf + ret, buf_len - ret, "\r\n");
+        }
+    }
+
+    str = (const hy_u8_t *)handle->buf;
+    for (hy_u32_t i = 0; i < used_len - len; i++) {
+        if (str[i] == 0x0d || str[i] == 0x0a || str[i] < 32 || str[i] >= 127) {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[ ]  ", str[i]);
+        } else {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[%c]  ", str[i], str[i]);
+        }
+
+        cnt++;
+        if (cnt == 16) {
+            cnt = 0;
+            ret += snprintf(buf + ret, buf_len - ret, "\r\n");
+        }
+    }
+    ret += snprintf(buf + ret, buf_len - ret, "\r\n");
+
+    LOGI("len: %d \n%s\n", used_len, buf);
+
+    HY_MEM_FREE_PP(&buf);
 }
 
 void HyFifoDestroy(HyFifo_s **handle_pp)

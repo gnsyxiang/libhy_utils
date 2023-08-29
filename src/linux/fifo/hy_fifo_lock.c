@@ -226,15 +226,55 @@ void HyFifoLockDumpContent(HyFifoLock_s *handle)
     HY_ASSERT_RET(!handle);
 
     hy_u32_t len;
+    hy_u32_t out = handle->out & (handle->save_c.capacity - 1);
+    hy_u32_t used_len = handle->in - handle->out;
+    hy_u32_t buf_len = 10 * handle->save_c.capacity;
+    hy_u32_t ret = 0;
+    hy_s32_t cnt = 0;
+    const hy_u8_t *str;
 
-    len = handle->save_c.capacity - _FIFO_OUT_POS(handle);
-    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(handle));
+    char *buf = HY_MEM_CALLOC_RETURN(char *, buf_len);
+
+    len = handle->save_c.capacity - out;
+    len = HY_UTILS_MIN(len, used_len);
 
     LOGD("used len: %u, write_pos: %u, read_pos: %u \n",
-         _FIFO_USED_LEN(handle), handle->in, handle->out);
+         used_len, handle->in, handle->out);
 
-    HyHex(handle->buf + _FIFO_OUT_POS(handle), len, 1);
-    HyHex(handle->buf, _FIFO_USED_LEN(handle) - len, 1);
+    str = (const hy_u8_t *)(handle->buf + out);
+    for (hy_u32_t i = 0; i < len; i++) {
+        if (str[i] == 0x0d || str[i] == 0x0a || str[i] < 32 || str[i] >= 127) {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[ ]  ", str[i]);
+        } else {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[%c]  ", str[i], str[i]);
+        }
+
+        cnt++;
+        if (cnt == 16) {
+            cnt = 0;
+            ret += snprintf(buf + ret, buf_len - ret, "\r\n");
+        }
+    }
+
+    str = (const hy_u8_t *)handle->buf;
+    for (hy_u32_t i = 0; i < used_len - len; i++) {
+        if (str[i] == 0x0d || str[i] == 0x0a || str[i] < 32 || str[i] >= 127) {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[ ]  ", str[i]);
+        } else {
+            ret += snprintf(buf + ret, buf_len - ret, "%02x[%c]  ", str[i], str[i]);
+        }
+
+        cnt++;
+        if (cnt == 16) {
+            cnt = 0;
+            ret += snprintf(buf + ret, buf_len - ret, "\r\n");
+        }
+    }
+    ret += snprintf(buf + ret, buf_len - ret, "\r\n");
+
+    LOGI("len: %d \n%s\n", used_len, buf);
+
+    HY_MEM_FREE_PP(&buf);
 }
 
 hy_s32_t HyFifoLockGetTotalLen(HyFifoLock_s *handle)

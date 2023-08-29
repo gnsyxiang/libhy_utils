@@ -21,12 +21,8 @@
 
 #include <hy_log/hy_log.h>
 
-#include "hy_type.h"
-#include "hy_compile.h"
-
 #include "hy_hex.h"
 
-HY_WEAK void HyHex(const void *_buf, size_t len, hy_s32_t flag)
 void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)
 {
     unsigned char tmp;
@@ -46,30 +42,34 @@ void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)
     }
 }
 
+hy_u32_t HyHex(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len, hy_s32_t flag)
 {
     hy_s32_t cnt = 0;
-    const hy_u8_t *buf = (const hy_u8_t *)_buf;
+    hy_s32_t ret = 0;
+    const hy_u8_t *str = (const hy_u8_t *)buf;
 
     if (len <= 0) {
-        return;
+        return 0;
     }
 
-    for (size_t i = 0; i < len; i++) {
+    for (hy_u32_t i = 0; i < len; i++) {
         if (flag == 1) {
-            if (buf[i] == 0x0d || buf[i] == 0x0a || buf[i] < 32 || buf[i] >= 127) {
-                printf("%02x[ ]  ", buf[i]);
+            if (str[i] == 0x0d || str[i] == 0x0a || str[i] < 32 || str[i] >= 127) {
+                ret += snprintf(out_buf + ret, out_len - ret, "%02x[ ]  ", str[i]);
             } else {
-                printf("%02x[%c]  ", buf[i], buf[i]);
+                ret += snprintf(out_buf + ret, out_len - ret, "%02x[%c]  ", str[i], str[i]);
             }
         } else {
-            printf("%02x ", buf[i]);
+            ret += snprintf(out_buf + ret, out_len - ret, "%02x  ", str[i]);
         }
 
         cnt++;
         if (cnt == 16) {
             cnt = 0;
-            printf("\r\n");
+            ret += snprintf(out_buf + ret, out_len - ret, "\r\n");
         }
     }
-    printf("\r\n");
+    ret += snprintf(out_buf + ret, out_len - ret, "\r\n");
+
+    return ret;
 }
