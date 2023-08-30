@@ -20,6 +20,7 @@
 #include <stdio.h>
 
 #include <hy_log/hy_log.h>
+#include <unistd.h>
 
 #include "hy_mem.h"
 #include "hy_hex.h"
@@ -88,6 +89,8 @@ void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
     handle->is_exit = 1;
 
     HyFifoLockDestroy(&handle->fifo_lock_h);
+
+    usleep(1 * 1000);
 
     for (hy_s32_t i = 0; i < save_c->thread_cnt; ++i) {
         HyThreadDestroy(&handle->worker_thread_h[i]);
