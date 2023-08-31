@@ -18,6 +18,7 @@
  *     last modified: 30/10 2021 10:57
  */
 #include <stdio.h>
+#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 

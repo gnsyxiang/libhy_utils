@@ -18,6 +18,7 @@
  *     last modified: 29/12 2021 17:18
  */
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/prctl.h>
 
 #include <hy_log/hy_log.h>
