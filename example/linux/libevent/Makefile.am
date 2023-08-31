@@ -40,6 +40,8 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
+                   -I$(top_srcdir)/include/$(run_os)/time \
+                   -I$(top_srcdir)/include/$(run_os)/serialize \
                    -I$(top_srcdir)/include/$(run_os)/libevent \
                    -I$(top_srcdir)/include/$(run_os)/thread \
                    -I$(top_srcdir)/include/$(run_os) \
@@ -77,3 +79,11 @@ hy_evconnlistener_demo_CFLAGS       = $(_cflags_com)
 hy_evconnlistener_demo_CXXFLAGS     = $(_cxxflags_com)
 hy_evconnlistener_demo_LDFLAGS      = $(_ldflags_com)
 hy_evconnlistener_demo_LDADD        = $(_ldadd_com)
+
+bin_PROGRAMS                        += hy_event_server_demo
+hy_event_server_demo_SOURCES        = $(_sources_com) hy_event_server_demo.c collect_bends.c
+hy_event_server_demo_CPPFLAGS       = $(_cppflags_com)
+hy_event_server_demo_CFLAGS         = $(_cflags_com)
+hy_event_server_demo_CXXFLAGS       = $(_cxxflags_com)
+hy_event_server_demo_LDFLAGS        = $(_ldflags_com)
+hy_event_server_demo_LDADD          = $(_ldadd_com)
