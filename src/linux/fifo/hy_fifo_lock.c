@@ -135,7 +135,7 @@ hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len)
     hy_u32_t l;
 
     if (handle->is_exit) {
-        LOGE("the lock fifo is exit \n");
+        LOGE("the lock fifo is exit, handle: %p \n", handle);
         return 0;
     }
 
@@ -147,7 +147,7 @@ hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len)
         if (handle->is_exit) {
             HyThreadMutexUnLock_m(handle->empty_mutex_h);
 
-            LOGE("the lock fifo is exit \n");
+            LOGE("the lock fifo is exit, handle: %p \n", handle);
             return 0;
         }
     }

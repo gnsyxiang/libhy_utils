@@ -33,7 +33,7 @@ void HyThreadMutexDestroy(HyThreadMutex_s **handle_pp)
     HyThreadMutex_s *handle = *handle_pp;
 
     if (0 != pthread_mutex_destroy(&handle->mutex)) {
-        LOGES("pthread_mutex_destroy failed \n");
+        LOGES("pthread_mutex_destroy failed, handle: %p \n", handle);
     }
 
     LOGI("thread mutex destroy, handle: %p \n", handle);
