@@ -85,50 +85,61 @@ do {                                                                        \
  *
  * @return 微妙
  */
-hy_u64_t HyTimeGetUTCUs(void);
+hy_u64_t HyTimeGetUTC_us(void);
 
 /**
  * @brief 获取utc时间
  *
  * @return 毫秒
  */
-hy_u64_t HyTimeGetUTCMs(void);
+hy_u64_t HyTimeGetUTC_ms(void);
 
 /**
  * @brief 获取utc时间
  *
- * @return 秒数
+ * @return 秒
  */
-time_t HyTimeGetUTC(void);
+time_t HyTimeGetUTC_s(void);
+
+/**
+ * @brief 转换时间
+ *
+ * @param ms ms
+ *
+ * @return 转换struct timespec
+ */
+struct timespec HyTimeGetTimespec(hy_u32_t ms);
 
 /**
  * @brief 获取当前时间
  *
  * @param tm 当前时间
+ *
+ * @return 成功返回当前时间，失败回复NULL
+ *
+ * @note 返回值就是返回传入的指针，这样设计方便不同场景下的应用
  */
-void HyTimeGetLocalTime(struct tm *tm);
+struct tm *HyTimeGetLocalTime(struct tm *tm);
 
 /**
  * @brief 获取并格式化当前时间
  *
- * @param buf 存储数组
- * @param len 数组的长度
+ * @param buf 数据
+ * @param len 数据长度
  *
-* @return 返回buf中实际的长度
- *
- * @note 2021-12-20_19-00-00，时分秒不用分号的原因是在fat32文件系统中无法识别
+ * @return 返回buf中实际的长度
  */
 hy_u32_t HyTimeFormatLocalTime(char *buf, hy_u32_t len);
 
 /**
- * @brief 获取并格式化当前时间（提供到微妙）
-*
- * @param buf 存储数组
- * @param len 数组的长度
-*
-* @return 返回buf中实际的长度
-*/
-hy_u32_t HyTimeFormatLocalTime2(char *buf, hy_u32_t len);
+ * @brief 获取并格式化当前时间（提供到毫秒）
+ *
+ * @param buf 数据
+ * @param len 数据长度
+ *
+ * @return 返回buf中的实际长度
+ */
+hy_u32_t HyTimeFormatLocalTime_ms(char *buf, hy_u32_t len);
 
 /**
  * @brief 把格式化时间转成UTC时间
@@ -137,7 +148,7 @@ hy_u32_t HyTimeFormatLocalTime2(char *buf, hy_u32_t len);
  *
  * @return UTC时间
  *
- * @note 2021-12-20_19-00-00，时分秒不用分号的原因是在fat32文件系统中无法识别
+ * @note 时间格式为: 2021-12-20 19:00:00
  */
 time_t HyTimeFormatTime2UTC(const char *data_time);
 
@@ -154,30 +165,21 @@ void HyTimeGetCurDayRegion(const time_t cur_utc, time_t *start, time_t *end);
  *
  * @param us 延时时间
  */
-void HyTimeDelayUs(hy_u32_t us);
+void HyTimeDelay_us(hy_u32_t us);
 
 /**
  * @brief 延时ms
  *
  * @param ms 延时时间
  */
-void HyTimeDelayMs(hy_u32_t ms);
+void HyTimeDelay_ms(hy_u32_t ms);
 
 /**
  * @brief 延时s
  *
  * @param s 延时时间
  */
-void HyTimeDelayS(hy_u32_t s);
-
-/**
- * @brief 转换时间
- *
- * @param ms ms
- *
- * @return 转换struct timespec
- */
-struct timespec HyTimeGetTimespec(hy_u32_t ms);
+void HyTimeDelay_s(hy_u32_t s);
 
 #ifdef __cplusplus
 }

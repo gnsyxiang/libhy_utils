@@ -38,9 +38,10 @@
 #define _APP_NAME "hy_time_demo"
 
 typedef struct {
-    void        *timer_handle;
+    HyTimerServer_s     *timer_server_h;
+    HyTimer_s           *timer_h;
 
-    hy_s32_t    is_exit;
+    hy_s32_t            is_exit;
 } _main_context_s;
 
 static void _timer_cb(void *args)
@@ -52,7 +53,7 @@ static void _timer_cb(void *args)
         context->is_exit = 1;
     }
 
-    LOGD("------cnt: %d \n", cnt);
+    LOGI("------cnt: %d \n", cnt);
 }
 
 static void _signal_error_cb(void *args)
@@ -117,6 +118,33 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
 }
 
+static void _handle_module_destroy(_main_context_s **context_pp)
+{
+    _main_context_s *context = *context_pp;
+
+    // note: 增加或删除要同步到HyModuleCreateHandle_s中
+    HyModuleDestroyHandle_s module[] = {
+        {"timer_server", (void **)&context->timer_server_h, (HyModuleDestroyHandleCb_t)HyTimerServerDestroy},
+    };
+
+    HY_MODULE_RUN_DESTROY_HANDLE(module);
+}
+
+static hy_s32_t _handle_module_create(_main_context_s *context)
+{
+    HyTimerServerConfig_s timer_server_c;
+    HY_MEMSET(&timer_server_c, sizeof(timer_server_c));
+    timer_server_c.save_c.slot_interval_ms = 1;
+    timer_server_c.save_c.slot_num = 1000;
+
+    // note: 增加或删除要同步到HyModuleDestroyHandle_s中
+    HyModuleCreateHandle_s module[] = {
+        {"timer_server", (void **)&context->timer_server_h, &timer_server_c, (HyModuleCreateHandleCb_t)HyTimerServerCreate, (HyModuleDestroyHandleCb_t)HyTimerServerDestroy},
+    };
+
+    HY_MODULE_RUN_CREATE_HANDLE(module);
+}
+
 int main(int argc, char *argv[])
 {
     _main_context_s *context = NULL;
@@ -128,6 +156,7 @@ int main(int argc, char *argv[])
             hy_s32_t (*create)(_main_context_s *context);
         } create_arr[] = {
             {"_bool_module_create",     _bool_module_create},
+            {"_handle_module_create",   _handle_module_create},
         };
         for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
             if (create_arr[i].create) {
@@ -139,10 +168,9 @@ int main(int argc, char *argv[])
 
         LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
-        HyTimerCreate(1, 1000);
-
-        context->timer_handle = HyTimerAdd_m(500, HY_TYPE_FLAG_ENABLE, _timer_cb, context);
-        if (!context->timer_handle) {
+        context->timer_h = HyTimerAdd_m(context->timer_server_h, 500,
+                                        HY_TIMER_MODE_REPEAT, _timer_cb, context);
+        if (!context->timer_h) {
             LOGE("HyTimerAdd failed \n");
         }
 
@@ -152,10 +180,9 @@ int main(int argc, char *argv[])
 
     } while (0);
 
-    HyTimerDel(&context->timer_handle);
-
     void (*destroy_arr[])(_main_context_s **context_pp) = {
-        _bool_module_destroy
+        _bool_module_destroy,
+        _handle_module_destroy,
     };
     for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
         if (destroy_arr[i]) {

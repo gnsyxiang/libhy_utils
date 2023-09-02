@@ -89,7 +89,7 @@ static void _handle_cmd_report_bends(struct bufferevent *bev, char *buf)
     const char *sn = HyJsonGetItemStr("err", root, "sn");
 
     char local_time[64] = {0};
-    HyTimeFormatLocalTime2(local_time, sizeof(local_time));
+    HyTimeFormatLocalTime(local_time, sizeof(local_time));
     local_time[10] = ' ';
 
     time_t time_utc = HyTimeFormatTime2UTC(time_str);
