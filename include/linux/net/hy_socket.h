@@ -33,9 +33,19 @@ extern "C" {
  * @brief domain类型
  */
 typedef enum {
-    HY_SOCKET_DOMAIN_TCP,       ///< 创建面向连接的TCP
-    HY_SOCKET_DOMAIN_UDP,       ///< 创建流式的UDP
+    HY_SOCKET_DOMAIN_TCP,                   ///< 创建面向连接的TCP
+    HY_SOCKET_DOMAIN_UDP,                   ///< 创建流式的UDP
 } HySocketDomain_e;
+
+#define HY_SOCKET_IP_LEN_MAX    (46)        ///< IPv4的长度是16，IPv6的长度是46
+
+/**
+ * @brief ip地址和端口号
+ */
+typedef struct {
+    char        ip[HY_SOCKET_IP_LEN_MAX];   ///< ip地址
+    hy_u16_t    port;                       ///< 端口号
+} HySocketInfo_s;
 
 /**
  * @brief 根据domain创建指定类型的socket
