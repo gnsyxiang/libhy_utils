@@ -18,9 +18,9 @@
  *     last modified: 01/09 2023 09:17
  */
 #include <stdio.h>
+#include <arpa/inet.h>
 
 #include <hy_log/hy_log.h>
-#include <stdlib.h>
 
 #include "hy_mem.h"
 #include "hy_string.h"
@@ -29,15 +29,6 @@
 #include "hy_time.h"
 
 #include "collect_bends.h"
-
-static hy_s32_t protocol_check_crc(char *json, hy_u32_t json_len, char *crc)
-{
-    unsigned char decrypt[16];
-
-    HyMd5sum((const uint8_t *)json, json_len, decrypt);
-
-    return (memcmp(decrypt, crc, 6) == 0 ? 0 : -1);
-}
 
 static char *_protocol_fill_data(hy_u32_t cmd, char *json, hy_s32_t json_len)
 {
@@ -61,24 +52,31 @@ static char *_protocol_fill_data(hy_u32_t cmd, char *json, hy_s32_t json_len)
     return buf;
 }
 
-static void _dump_info_client(protocol_head_s *head, struct evbuffer *evbuf, char *tmp_buf)
+static void _dump_info_client(struct bufferevent *bev, protocol_head_s *head,
+                              struct evbuffer *evbuf, char *tmp_buf)
 {
     hy_s32_t ret;
     char buf[1024] = {0};
 
+    HySocketInfo_s socket_info;
+    protocol_get_ip(bev, &socket_info);
+
     ret = 0;
-    ret += snprintf(buf + ret, sizeof(buf) - ret, "magic: %x, ", head->magic); 
+    ret += snprintf(buf + ret, sizeof(buf) - ret, "socket-->%s:%d, ",
+                    socket_info.ip, socket_info.port); 
+
+    // ret += snprintf(buf + ret, sizeof(buf) - ret, "magic: %x, ", head->magic); 
     ret += snprintf(buf + ret, sizeof(buf) - ret, "crc: "); 
     for (hy_s32_t i = 0; i < protocol_crc_len; i++) {
         ret += snprintf(buf + ret, sizeof(buf) - ret, "%02x", head->crc[i]); 
     }
     ret += snprintf(buf + ret, sizeof(buf) - ret, ", "); 
-    ret += snprintf(buf + ret, sizeof(buf) - ret, "cmd: %x, ", head->cmd); 
-    ret += snprintf(buf + ret, sizeof(buf) - ret, "len: %d, ", head->len); 
+    // ret += snprintf(buf + ret, sizeof(buf) - ret, "cmd: %x, ", head->cmd); 
+    // ret += snprintf(buf + ret, sizeof(buf) - ret, "len: %d, ", head->len); 
 
     ret += snprintf(buf + ret, sizeof(buf) - ret, "json: %s", tmp_buf); 
 
-    LOGI("buf: %s \n", buf);
+    LOGI("%s \n", buf);
 }
 
 static void _handle_cmd_report_bends(struct bufferevent *bev, char *buf)
@@ -149,7 +147,7 @@ void protocol_handle_frame(struct bufferevent *bev, struct evbuffer *evbuf)
             evbuffer_copyout(evbuf, tmp_buf, head->len);
             evbuffer_drain(evbuf, head->len);
 
-            _dump_info_client(head, evbuf, tmp_buf);
+            _dump_info_client(bev, head, evbuf, tmp_buf);
 
             switch (head->cmd) {
                 case 0x2:
@@ -168,5 +166,27 @@ void protocol_handle_frame(struct bufferevent *bev, struct evbuffer *evbuf)
         }
     } else {
         LOGE("evbuffer_peek error \n");
+    }
+}
+
+void protocol_get_ip(struct bufferevent *bev, HySocketInfo_s *socket_info)
+{
+    struct sockaddr_storage addr;
+    socklen_t addr_len = sizeof(addr);
+    hy_s32_t fd;
+
+    HY_MEMSET(socket_info, sizeof(*socket_info));
+
+    fd = bufferevent_getfd(bev);
+    if (getpeername(fd, (struct sockaddr*)&addr, &addr_len) == 0) {
+        if (addr.ss_family == AF_INET) {
+            struct sockaddr_in *s = (struct sockaddr_in *)&addr;
+            inet_ntop(AF_INET, &s->sin_addr, socket_info->ip, INET_ADDRSTRLEN);
+            socket_info->port = s->sin_port;
+        } else if (addr.ss_family == AF_INET6) {
+            struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
+            inet_ntop(AF_INET6, &s->sin6_addr, socket_info->ip, INET6_ADDRSTRLEN);
+            socket_info->port = s->sin6_port;
+        }
     }
 }

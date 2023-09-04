@@ -31,6 +31,8 @@ extern "C" {
 
 #include "hy_type.h"
 
+#include "hy_socket.h"
+
 #define protocol_magic (0x55aa)
 #define protocol_crc_len (6)
 
@@ -44,6 +46,7 @@ typedef struct {
 } protocol_head_s;
 
 void protocol_handle_frame(struct bufferevent *bev, struct evbuffer *evbuf);
+void protocol_get_ip(struct bufferevent *bev, HySocketInfo_s *socket_info);
 
 #ifdef __cplusplus
 }

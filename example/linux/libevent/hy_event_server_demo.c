@@ -45,7 +45,17 @@
 #define _APP_NAME       "hy_event_server_demo"
 
 #define _SERVER_IP      "0.0.0.0"
+
+// #define _TEST_SERVER
+#define _TEST_LOG
+
+#ifdef _TEST_SERVER
 #define _SERVER_PORT    (30000)
+#endif
+
+#ifdef _TEST_LOG
+#define _SERVER_PORT    (30001)
+#endif
 
 typedef struct {
     hy_s32_t                is_exit;
@@ -91,7 +101,12 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
 {
     HyLogConfig_s log_c;
     HY_MEMSET(&log_c, sizeof(log_c));
+#ifdef _TEST_SERVER
     log_c.config_file               = "../res/hy_log/zlog.conf";
+#endif
+#ifdef _TEST_LOG
+    log_c.config_file               = "./zlog-log.conf";
+#endif
     log_c.fifo_len                  = 10 * 1024;
     log_c.save_c.level              = HY_LOG_LEVEL_INFO;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
@@ -155,37 +170,38 @@ static void _listener_error_cb(struct evconnlistener *listener, void *args)
 
 static void _client_read_cb(struct bufferevent *bev, void *args)
 {
-    _client_data_s *client_data = args;
-    char buf[1024];
+    char buf[5 * 1024];
     hy_s32_t ret;
 
-    while (ret = bufferevent_read(bev, buf, 1024), ret > 0) {
+#ifdef _TEST_LOG
+    do {
+        HY_MEMSET(buf, sizeof(buf));
+        ret = bufferevent_read(bev, buf, sizeof(buf) - 1);
+        if (ret > 0) {
+            LOGI("%s\n", buf);
+        }
+    } while(ret > 0);
+#else
+    _client_data_s *client_data = args;
+
+    while (ret = bufferevent_read(bev, buf, sizeof(buf)), ret > 0) {
         evbuffer_add(client_data->evbuf, buf, ret);
     }
 
     protocol_handle_frame(bev, client_data->evbuf);
+#endif
+
 }
 
 static void _client_event_cb(struct bufferevent *bev, short event, void *args)
 {
-    struct sockaddr_storage addr;
-    socklen_t addr_len = sizeof(addr);
-    char ip[INET6_ADDRSTRLEN] = {0};
     _client_data_s *client_data = args;
 
-    hy_s32_t fd = bufferevent_getfd(bev);
-    if (getpeername(fd, (struct sockaddr*)&addr, &addr_len) == 0) {
-        if (addr.ss_family == AF_INET) {
-            struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-            inet_ntop(AF_INET, &s->sin_addr, ip, INET_ADDRSTRLEN);
-        } else if (addr.ss_family == AF_INET6) {
-            struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
-            inet_ntop(AF_INET6, &s->sin6_addr, ip, INET6_ADDRSTRLEN);
-        }
-    }
+    HySocketInfo_s socket_info;
+    protocol_get_ip(bev, &socket_info);
 
     if (BEV_EVENT_EOF & event) {
-        LOGE("client disconnect, ip: %s \n", ip);
+        LOGE("client disconnect, ip: %s \n", socket_info.ip);
     } else if(BEV_ERROR & event) {
         LOGE("Error occured.\n");
     }
