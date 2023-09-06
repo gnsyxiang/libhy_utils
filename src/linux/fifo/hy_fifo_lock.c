@@ -18,6 +18,7 @@
  *     last modified: 15/05 2023 20:12
  */
 #include <stdio.h>
+#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
@@ -25,8 +26,8 @@
 #include "hy_mem.h"
 #include "hy_hex.h"
 #include "hy_utils.h"
-#include "thread/hy_thread_mutex.h"
-#include "thread/hy_thread_cond.h"
+#include "hy_thread_mutex.h"
+#include "hy_thread_cond.h"
 
 #include "hy_fifo_lock.h"
 
@@ -41,33 +42,30 @@
 
 #define _FIFO_USED_LEN(_handle)     ((_handle)->in - (_handle)->out)
 #define _FIFO_FREE_LEN(_handle)     ((_handle)->save_c.capacity - (_FIFO_USED_LEN(_handle)))
-#define _FIFO_IN_POS(_handle)       ((_handle)->in & ((_handle)->save_c.capacity - 1))   // 优化 _handle->write_pos % _handle->save_c.len
-#define _FIFO_OUT_POS(_handle)      ((_handle)->out & ((_handle)->save_c.capacity - 1))    // 优化 _handle->read_pos % _handle->save_c.len
+#define _FIFO_IN_POS(_handle)       ((_handle)->in & ((_handle)->save_c.capacity - 1))   // 优化 _handle->write_pos % _handle->save_c.capacity
+#define _FIFO_OUT_POS(_handle)      ((_handle)->out & ((_handle)->save_c.capacity - 1))    // 优化 _handle->read_pos % _handle->save_c.capacity
 
 struct HyFifoLock_s {
     HyFifoLockSaveConfig_s      save_c;
 
     char                        *buf;
-    hy_u32_t                    out;
-    hy_u32_t                    in;
 
-    hy_s32_t                    is_exit;
-    HyThreadMutex_s             *full_mutex_h;
-    HyThreadCond_s              *full_cond_h;
     HyThreadMutex_s             *empty_mutex_h;
     HyThreadCond_s              *empty_cond_h;
+    hy_u32_t                    out;                // 读取标记
+
+    HyThreadMutex_s             *full_mutex_h;
+    HyThreadCond_s              *full_cond_h;
+    hy_u32_t                    in;                 // 写入标记
+
+    hy_s32_t                    is_exit;
 };
 
 hy_s32_t HyFifoLockWrite(HyFifoLock_s *handle, const void *buf, hy_u32_t len)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(buf);
     hy_u32_t l;
 
-    if (handle->is_exit) {
-        LOGE("the lock fifo is exit \n");
-        return 0;
-    }
+    HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit == 1, -1);
 
     HyThreadMutexLock_m(handle->full_mutex_h);
 
@@ -83,13 +81,16 @@ hy_s32_t HyFifoLockWrite(HyFifoLock_s *handle, const void *buf, hy_u32_t len)
     }
 
     l = HY_UTILS_MIN(len, handle->save_c.capacity - _FIFO_IN_POS(handle));
-    memcpy(handle->buf + _FIFO_IN_POS(handle), buf, l);
-    memcpy(handle->buf, buf + l, len - l);
+    HY_MEMCPY(handle->buf + _FIFO_IN_POS(handle), buf, l);
+    HY_MEMCPY(handle->buf, buf + l, len - l);
 
     handle->in += len;
 
     HyThreadMutexUnLock_m(handle->full_mutex_h);
 
+    // NOTE: 解锁之后进行信号发送，保证等待信号的线程在获取锁后可以开始执行
+    // 这种顺序确保了等待线程在获得互斥锁之前不会执行，以避免竞争条件的发生。
+    // 因此，发送信号在解锁后进行是为了保证线程安全性和正确性。
     HyThreadCondSignal_m(handle->empty_cond_h);
 
     return len;
@@ -97,14 +98,9 @@ hy_s32_t HyFifoLockWrite(HyFifoLock_s *handle, const void *buf, hy_u32_t len)
 
 hy_s32_t HyFifoLockReadPeek(HyFifoLock_s *handle, void *buf, hy_u32_t len)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(buf);
     hy_u32_t l;
 
-    if (handle->is_exit) {
-        LOGE("the lock fifo is exit \n");
-        return 0;
-    }
+    HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit == 1, -1);
 
     HyThreadMutexLock_m(handle->empty_mutex_h);
 
@@ -120,8 +116,8 @@ hy_s32_t HyFifoLockReadPeek(HyFifoLock_s *handle, void *buf, hy_u32_t len)
     }
 
     l = HY_UTILS_MIN(len, handle->save_c.capacity - _FIFO_OUT_POS(handle));
-    memcpy(buf, handle->buf + _FIFO_OUT_POS(handle), l);
-    memcpy(buf + l, handle->buf, len - l);
+    HY_MEMCPY(buf, handle->buf + _FIFO_OUT_POS(handle), l);
+    HY_MEMCPY(buf + l, handle->buf, len - l);
 
     HyThreadMutexUnLock_m(handle->empty_mutex_h);
 
@@ -130,14 +126,9 @@ hy_s32_t HyFifoLockReadPeek(HyFifoLock_s *handle, void *buf, hy_u32_t len)
 
 hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(buf);
     hy_u32_t l;
 
-    if (handle->is_exit) {
-        LOGE("the lock fifo is exit, handle: %p \n", handle);
-        return 0;
-    }
+    HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit == 1, -1);
 
     HyThreadMutexLock_m(handle->empty_mutex_h);
 
@@ -152,15 +143,17 @@ hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len)
         }
     }
 
-    len = HY_UTILS_MIN(len, _FIFO_USED_LEN(handle));
-
     l = HY_UTILS_MIN(len, handle->save_c.capacity - _FIFO_OUT_POS(handle));
-    memcpy(buf, handle->buf + _FIFO_OUT_POS(handle), l);
-    memcpy(buf + l, handle->buf, len - l);
+    HY_MEMCPY(buf, handle->buf + _FIFO_OUT_POS(handle), l);
+    HY_MEMCPY(buf + l, handle->buf, len - l);
+
     handle->out += len;
 
     HyThreadMutexUnLock_m(handle->empty_mutex_h);
 
+    // NOTE: 解锁之后进行信号发送，保证等待信号的线程在获取锁后可以开始执行
+    // 这种顺序确保了等待线程在获得互斥锁之前不会执行，以避免竞争条件的发生。
+    // 因此，发送信号在解锁后进行是为了保证线程安全性和正确性。
     HyThreadCondSignal_m(handle->full_cond_h);
 
     return len;
@@ -168,12 +161,7 @@ hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len)
 
 hy_s32_t HyFifoLockReadDel(HyFifoLock_s *handle, hy_u32_t len)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
-
-    if (handle->is_exit) {
-        LOGE("the lock fifo is exit \n");
-        return 0;
-    }
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     HyThreadMutexLock_m(handle->empty_mutex_h);
     while (len > _FIFO_USED_LEN(handle)) {
@@ -191,6 +179,9 @@ hy_s32_t HyFifoLockReadDel(HyFifoLock_s *handle, hy_u32_t len)
 
     HyThreadMutexUnLock_m(handle->empty_mutex_h);
 
+    // NOTE: 解锁之后进行信号发送，保证等待信号的线程在获取锁后可以开始执行
+    // 这种顺序确保了等待线程在获得互斥锁之前不会执行，以避免竞争条件的发生。
+    // 因此，发送信号在解锁后进行是为了保证线程安全性和正确性。
     HyThreadCondSignal_m(handle->full_cond_h);
 
     return len;
@@ -198,12 +189,7 @@ hy_s32_t HyFifoLockReadDel(HyFifoLock_s *handle, hy_u32_t len)
 
 void HyFifoLockReset(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET(!handle);
-
-    if (handle->is_exit) {
-        LOGE("the lock fifo is exit \n");
-        return ;
-    }
+    HY_ASSERT_RET(!handle || handle->is_exit == 1);
 
     HyThreadMutexLock_m(handle->empty_mutex_h);
     HyThreadMutexLock_m(handle->full_mutex_h);
@@ -216,14 +202,14 @@ void HyFifoLockReset(HyFifoLock_s *handle)
 
 void HyFifoLockDumpAll(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET(!handle);
+    HY_ASSERT_RET(!handle || handle->is_exit == 1);
 
     HY_HEX_ASCII(handle->buf, handle->save_c.capacity);
 }
 
 void HyFifoLockDumpContent(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET(!handle);
+    HY_ASSERT_RET(!handle || handle->is_exit == 1);
 
     hy_u32_t len;
     hy_u32_t out = handle->out & (handle->save_c.capacity - 1);
@@ -279,48 +265,59 @@ void HyFifoLockDumpContent(HyFifoLock_s *handle)
 
 hy_s32_t HyFifoLockGetTotalLen(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return handle->save_c.capacity;
 }
 
 hy_s32_t HyFifoLockGetUsedLen(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return _FIFO_USED_LEN(handle);
 }
 
 hy_s32_t HyFifoLockGetFreeLen(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return _FIFO_FREE_LEN(handle);
 }
 
 hy_s32_t HyFifoLockIsEmpty(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return handle->in == handle->out;
 }
 
 hy_s32_t HyFifoLockIsFull(HyFifoLock_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return handle->save_c.capacity == _FIFO_USED_LEN(handle);
 }
 
 void HyFifoLockDestroy(HyFifoLock_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle_pp || !*handle_pp);
-    HyFifoLock_s *handle = *handle_pp;
+    HyFifoLock_s *handle;
 
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+
+    handle = *handle_pp;
+
+    // 保证在之后的读取和写入都直接返回
     handle->is_exit = 1;
 
+    // 保证读取和写入要么操作完成，要么在信号量上等待
+    usleep(1 * 1000);
+
+    // 唤醒所有等待信号量的操作
     HyThreadCondBroadcast_m(handle->empty_cond_h);
     HyThreadCondBroadcast_m(handle->full_cond_h);
+
+    // 保证信号量被唤醒后，锁正常释放
+    usleep(1 * 1000);
 
     HyThreadCondDestroy(&handle->empty_cond_h);
     HyThreadCondDestroy(&handle->full_cond_h);
@@ -336,8 +333,9 @@ void HyFifoLockDestroy(HyFifoLock_s **handle_pp)
 
 HyFifoLock_s *HyFifoLockCreate(HyFifoLockConfig_s *fifo_lock_c)
 {
-    HY_ASSERT_RET_VAL(!fifo_lock_c, NULL);
     HyFifoLock_s *handle = NULL;
+
+    HY_ASSERT_RET_VAL(!fifo_lock_c, NULL);
 
     do {
         HyFifoLockSaveConfig_s *save_c = &fifo_lock_c->save_c;

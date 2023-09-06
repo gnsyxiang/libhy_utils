@@ -56,7 +56,7 @@ HyFifoLock_s *HyFifoLockCreate(HyFifoLockConfig_s *fifo_lock_c);
 /**
  * @brief 创建加锁fifo模块宏
  *
- * @param _len fifo长度
+ * @param _capacity fifo长度
  *
  * @return 成功返回句柄，失败返回NULL
  */
@@ -82,8 +82,11 @@ void HyFifoLockDestroy(HyFifoLock_s **handle_pp);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回写入len字节数，返回0表示销毁了加锁fifo模块，
- *         否则阻塞等待
+ * @return 
+ *    0: 表示已经正在销毁加锁fifo模块;
+ *   -1: 表示传入参数为非法值;
+ *  > 0: 表示成功写入len字节;
+ * 阻塞: 表示空间不足len，等待空间插入，插入成功后返回.
  */
 hy_s32_t HyFifoLockWrite(HyFifoLock_s *handle, const void *buf, hy_u32_t len);
 
@@ -94,8 +97,11 @@ hy_s32_t HyFifoLockWrite(HyFifoLock_s *handle, const void *buf, hy_u32_t len);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回读取到len字节数，返回0表示销毁了加锁fifo模块，
- *         否则阻塞等待
+ * @return 
+ *    0: 表示已经正在销毁加锁fifo模块;
+ *   -1: 表示传入参数为非法值;
+ *  > 0: 表示成功读取len字节;
+ * 阻塞: 表示数据不足len，等待数据读取，读取成功后返回.
  *
  * @note 该操作不会删除数据
  */
@@ -108,8 +114,11 @@ hy_s32_t HyFifoLockReadPeek(HyFifoLock_s *handle, void *buf, hy_u32_t len);
  * @param buf 数据
  * @param len 大小
  *
- * @return 成功返回读取到len字节数，返回0表示销毁了加锁fifo模块，
- *         否则阻塞等待
+ * @return 
+ *    0: 表示已经正在销毁加锁fifo模块;
+ *   -1: 表示传入参数为非法值;
+ *  > 0: 表示成功读取len字节;
+ * 阻塞: 表示数据不足len，等待数据读取，读取成功后返回.
  */
 hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len);
 
@@ -119,8 +128,11 @@ hy_s32_t HyFifoLockRead(HyFifoLock_s *handle, void *buf, hy_u32_t len);
  * @param handle 句柄
  * @param len 长度
  *
- * @return 成功返回删除len字节数，返回0表示销毁了加锁fifo模块，
- *         否则阻塞等待
+ * @return 
+ *    0: 表示已经正在销毁加锁fifo模块;
+ *   -1: 表示传入参数为非法值;
+ *  > 0: 表示成功删除len字节;
+ * 阻塞: 表示数据不足len，等待数据删除，删除成功后返回.
  */
 hy_s32_t HyFifoLockReadDel(HyFifoLock_s *handle, hy_u32_t len);
 
