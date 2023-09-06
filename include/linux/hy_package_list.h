@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-
 #include "hy_type.h"
 #include "hy_list.h"
 
@@ -34,6 +32,7 @@ extern "C" {
  */
 typedef struct {
     void                    *user_data;                 ///< 用户数据
+
     struct hy_list_head     entry;                      ///< 链表索引
 } HyPackageListNode_s;
 
@@ -73,6 +72,7 @@ typedef struct HyPackageList_s HyPackageList_s;
  * @brief 创建package_list模块
  *
  * @param package_list_c 配置参数，详见HyPackageListConfig_s
+ *
  * @return 成功返回句柄，失败返回NULL
  */
 HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c);
@@ -88,6 +88,7 @@ void HyPackageListDestroy(HyPackageList_s **handle_pp);
  * @brief 从package_list中获取节点
  *
  * @param handle 句柄，详见HyPackageList_s
+ *
  * @return 返回node节点，详见HyPackageListNode_s
  */
 HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle);
@@ -104,6 +105,7 @@ void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node);
  * @brief 获取package_list中包含的个数
  *
  * @param handle 句柄，详见HyPackageList_s
+ *
  * @return 返回package_list中链表的个数
  */
 hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle);

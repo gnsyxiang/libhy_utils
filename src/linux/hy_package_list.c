@@ -18,9 +18,7 @@
  *     last modified: 21/04 2023 11:32
  */
 #include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
@@ -33,6 +31,7 @@
 
 struct HyPackageList_s {
     HyPackageListSaveConfig_s   save_c;
+
     hy_s32_t                    is_exit;
 
     HyThreadCond_s              *cond_h;
@@ -43,9 +42,9 @@ struct HyPackageList_s {
 
 hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle)
 {
-    HY_ASSERT(handle);
-
     hy_u32_t cnt;
+
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     HyThreadMutexLock_m(handle->mutex_h);
     cnt = handle->save_c.num;
@@ -56,9 +55,9 @@ hy_u32_t HyPackageListGetNodeCount(HyPackageList_s *handle)
 
 HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
 {
-    HY_ASSERT(handle);
-
     HyPackageListNode_s *pos;
+
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, NULL);
 
     HyThreadMutexLock_m(handle->mutex_h);
     while (handle->save_c.num == 0) {
@@ -71,9 +70,11 @@ HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
             return NULL;
         }
     }
+
     pos = hy_list_first_entry(&handle->list, HyPackageListNode_s, entry);
     hy_list_del(&pos->entry);
     handle->save_c.num--;
+
     HyThreadMutexUnLock_m(handle->mutex_h);
 
     return pos;
@@ -81,8 +82,7 @@ HyPackageListNode_s *HyPackageListHeadGet(HyPackageList_s *handle)
 
 void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(node);
+    HY_ASSERT_RET(!handle || !node || handle->is_exit == 1);
 
     HyThreadMutexLock_m(handle->mutex_h);
     handle->save_c.num++;
@@ -94,35 +94,37 @@ void HyPackageListTailPut(HyPackageList_s *handle, HyPackageListNode_s *node)
 
 void HyPackageListDestroy(HyPackageList_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle_pp || !*handle_pp);
-
     HyPackageListNode_s *pos, *n;
     HyPackageList_s *handle = *handle_pp;
     HyPackageListSaveConfig_s *save_c = &handle->save_c;
 
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+
+    // 保证在之后的读取和写入都直接返回
     handle->is_exit = 1;
 
+    // 保证读取要么操作完成，要么在信号量上等待
+    usleep(1 * 1000);
+
+    // 唤醒所有等待信号量的操作
     HyThreadCondBroadcast_m(handle->cond_h);
 
-    if (handle->mutex_h) {
-        HyThreadMutexLock_m(handle->mutex_h);
-        hy_list_for_each_entry_safe(pos, n, &handle->list, entry) {
-            hy_list_del(&pos->entry);
+    // 保证信号量被唤醒后，锁正常释放
+    usleep(1 * 1000);
 
-            HyThreadMutexUnLock_m(handle->mutex_h);
-            if (save_c->node_destroy_cb) {
-                save_c->node_destroy_cb(&pos);
-            }
-            HyThreadMutexLock_m(handle->mutex_h);
+    HyThreadMutexLock_m(handle->mutex_h);
+    hy_list_for_each_entry_safe(pos, n, &handle->list, entry) {
+        hy_list_del(&pos->entry);
+
+        if (save_c->node_destroy_cb) {
+            save_c->node_destroy_cb(&pos);
         }
-        HyThreadMutexUnLock_m(handle->mutex_h);
-
-        HyThreadMutexDestroy(&handle->mutex_h);
     }
+    HyThreadMutexUnLock_m(handle->mutex_h);
 
-    if (handle->cond_h) {
-        HyThreadCondDestroy(&handle->cond_h);
-    }
+    HyThreadMutexDestroy(&handle->mutex_h);
+
+    HyThreadCondDestroy(&handle->cond_h);
 
     LOGI("package list destroy, handle: %p \n", handle);
     HY_MEM_FREE_PP(handle_pp);
@@ -130,12 +132,18 @@ void HyPackageListDestroy(HyPackageList_s **handle_pp)
 
 HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
 {
-    HY_ASSERT_RET_VAL(!package_list_c, NULL);
     HyPackageList_s *handle = NULL;
+    HyPackageListNode_s *node;
+    hy_u32_t num;
+    HyPackageListSaveConfig_s *save_c;
+
+    save_c = &package_list_c->save_c;
+
+    HY_ASSERT_RET_VAL(!package_list_c || !save_c->node_create_cb || !save_c->node_destroy_cb, NULL);
 
     do {
         handle = HY_MEM_CALLOC_BREAK(HyPackageList_s *, sizeof(*handle));
-        HY_MEMCPY(&handle->save_c, &package_list_c->save_c, sizeof(handle->save_c));
+        HY_MEMCPY(&handle->save_c, save_c, sizeof(handle->save_c));
 
         HY_INIT_LIST_HEAD(&handle->list);
 
@@ -151,14 +159,7 @@ HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
             break;
         }
 
-        HyPackageListSaveConfig_s *save_c = &handle->save_c;
-        if (!save_c->node_create_cb) {
-            LOGE("the node_create_cb is NULL \n");
-            break;
-        }
-
-        HyPackageListNode_s *node;
-        hy_u32_t num = handle->save_c.num;
+        num = save_c->num;
         while (num-- != 0) {
             node = save_c->node_create_cb();
             if (!node) {
@@ -175,7 +176,7 @@ HyPackageList_s *HyPackageListCreate(HyPackageListConfig_s *package_list_c)
         return handle;
     } while (0);
 
-    LOGI("package list create failed \n");
+    LOGE("package list create failed \n");
     HyPackageListDestroy(&handle);
     return NULL;
 }
