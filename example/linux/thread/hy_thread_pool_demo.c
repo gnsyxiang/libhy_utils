@@ -37,7 +37,8 @@
 
 #define _APP_NAME "hy_thread_pool_demo"
 
-#define _TEST_TASK_NUM (500)
+#define _TEST_TASK_NUM      (500)
+#define _TEST_THREAD_NUM    (100)
 
 typedef struct {
     hy_s32_t        is_exit;
@@ -127,7 +128,7 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyThreadPoolConfig_s thread_pool_c;
     HY_MEMSET(&thread_pool_c, sizeof(thread_pool_c));
     thread_pool_c.task_item_cnt         = _TEST_TASK_NUM;
-    thread_pool_c.save_c.thread_cnt     = 100;
+    thread_pool_c.save_c.thread_cnt     = _TEST_THREAD_NUM;
 
     HyThreadMutexConfig_s mutex_c;
     HY_MEMSET(&mutex_c, sizeof(mutex_c));

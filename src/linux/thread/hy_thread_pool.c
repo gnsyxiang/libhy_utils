@@ -33,6 +33,7 @@
 
 struct HyThreadPool_s {
     HyThreadPoolSaveConfig_s    save_c;
+
     hy_s32_t                    is_exit;
 
     HyFifoLock_s                *fifo_lock_h;
@@ -55,13 +56,15 @@ static hy_s32_t _worker_loop_cb(void *args)
     }
 
     while (!handle->is_exit) {
-        if (HyFifoLockRead(handle->fifo_lock_h, &task, sizeof(task)) == 0) {
-            LOGD("HyFifoLockRead is failed \n");
+        if (HyFifoLockRead(handle->fifo_lock_h, &task, sizeof(task)) <= 0) {
+            LOGE("HyFifoLockRead is failed \n");
 
             break;
         }
 
-        task.task_cb(task.args, run_befor_cb_args);
+        if (task.task_cb) {
+            task.task_cb(task.args, run_befor_cb_args);
+        }
     }
 
     if (save_c->run_after_cb) {
@@ -73,24 +76,21 @@ static hy_s32_t _worker_loop_cb(void *args)
 
 void HyThreadPoolAddTask(HyThreadPool_s *handle, HyThreadPoolTask_s *task)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(task);
+    HY_ASSERT_RET(!handle || !task);
 
     HyFifoLockWrite(handle->fifo_lock_h, task, sizeof(*task));
 }
 
 void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle_pp || !*handle_pp);
-
     HyThreadPool_s *handle = *handle_pp;
     HyThreadPoolSaveConfig_s *save_c = &handle->save_c;
+
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
 
     handle->is_exit = 1;
 
     HyFifoLockDestroy(&handle->fifo_lock_h);
-
-    usleep(1 * 1000);
 
     for (hy_s32_t i = 0; i < save_c->thread_cnt; ++i) {
         HyThreadDestroy(&handle->worker_thread_h[i]);
@@ -104,11 +104,11 @@ void HyThreadPoolDestroy(HyThreadPool_s **handle_pp)
 
 HyThreadPool_s *HyThreadPoolCreate(HyThreadPoolConfig_s *thread_pool_c)
 {
-    HY_ASSERT_RET_VAL(!thread_pool_c, NULL);
-
     HyThreadPool_s* handle = NULL;
     HyThreadPoolSaveConfig_s *save_c;
     char name[HY_THREAD_NAME_LEN_MAX];
+
+    HY_ASSERT_RET_VAL(!thread_pool_c, NULL);
 
     do {
         save_c = &thread_pool_c->save_c;
