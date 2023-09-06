@@ -100,6 +100,8 @@ hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len);
  * @param len 大小
  *
  * @return 成功返回读取到的字节数，返回为0表示fifo为空
+ *
+ * @note 如果此时的数据不足len，则会返回fifo中现有的数据
  */
 hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len);
 

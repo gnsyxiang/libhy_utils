@@ -40,6 +40,8 @@
 struct HyFifo_s {
     HyFifoSaveConfig_s      save_c;
 
+    hy_s32_t                is_exit;
+
     char                    *buf;
     hy_u32_t                out;
     hy_u32_t                in;
@@ -59,8 +61,8 @@ static void _fifo_write(HyFifo_s *handle, const void *buf, hy_u32_t len, hy_u32_
 
     l = HY_UTILS_MIN(len, handle->save_c.capacity - in);
 
-    memcpy(handle->buf + in, buf, l);
-    memcpy(handle->buf, buf + l, len - l);
+    HY_MEMCPY(handle->buf + in, buf, l);
+    HY_MEMCPY(handle->buf, buf + l, len - l);
 
     /**
       * make sure that the data in the fifo is up to date before
@@ -73,13 +75,13 @@ static void _fifo_write(HyFifo_s *handle, const void *buf, hy_u32_t len, hy_u32_
 
 hy_s32_t HyFifoWrite(HyFifo_s *handle, const void *buf, hy_u32_t len)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(buf);
     hy_u32_t l;
+
+    HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit, -1);
 
     l = _fifo_free_len(handle);
     if (len > l) {
-        LOGW("not enough space to write \n");
+        LOGW("not enough space to write, len: %d, free_len: %d \n", len, l);
 
         if (l == 0) {
             LOGE("fifo is full \n");
@@ -104,8 +106,8 @@ static void _fifo_read(HyFifo_s *handle, void *buf, hy_u32_t len, hy_u32_t out)
 
     l = HY_UTILS_MIN(len, handle->save_c.capacity - out);
 
-    memcpy(buf, handle->buf + out, l);
-    memcpy(buf + l, handle->buf, len - l);
+    HY_MEMCPY(buf, handle->buf + out, l);
+    HY_MEMCPY(buf + l, handle->buf, len - l);
 
     /**
       * make sure that the data in the fifo is up to date before
@@ -118,13 +120,13 @@ static void _fifo_read(HyFifo_s *handle, void *buf, hy_u32_t len, hy_u32_t out)
 
 hy_s32_t HyFifoReadPeek(HyFifo_s *handle, void *buf, hy_u32_t len)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(buf);
     hy_u32_t l;
+
+    HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit, -1);
 
     l = handle->in - handle->out;
     if (len > l) {
-        LOGW("not enough data to read \n");
+        LOGW("not enough data to read, len: %d, use_len: %d \n", len, l);
 
         if (l == 0) {
             LOGE("fifo is empty \n");
@@ -141,8 +143,7 @@ hy_s32_t HyFifoReadPeek(HyFifo_s *handle, void *buf, hy_u32_t len)
 
 hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len)
 {
-    HY_ASSERT(handle);
-    HY_ASSERT(buf);
+    HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit, -1);
 
     len = HyFifoReadPeek(handle, buf, len);
     handle->out += len;
@@ -152,7 +153,7 @@ hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len)
 
 hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit, -1);
 
     len = HY_UTILS_MIN(len, handle->in - handle->out);
     handle->out += len;
@@ -162,7 +163,7 @@ hy_s32_t HyFifoReadDel(HyFifo_s *handle, hy_u32_t len)
 
 void HyFifoReset(HyFifo_s *handle)
 {
-    HY_ASSERT_RET(!handle);
+    HY_ASSERT_RET(!handle || handle->is_exit == 1);
 
     handle->in  = 0;
     handle->out = 0;
@@ -171,50 +172,48 @@ void HyFifoReset(HyFifo_s *handle)
 
 hy_s32_t HyFifoGetTotalLen(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return handle->save_c.capacity;
 }
 
 hy_s32_t HyFifoGetUsedLen(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return (handle->in - handle->out);
 }
 
 hy_s32_t HyFifoGetFreeLen(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return _fifo_free_len(handle);
 }
 
 hy_s32_t HyFifoIsEmpty(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return handle->in == handle->out;
 }
 
 hy_s32_t HyFifoIsFull(HyFifo_s *handle)
 {
-    HY_ASSERT_RET_VAL(!handle, -1);
+    HY_ASSERT_RET_VAL(!handle || handle->is_exit == 1, -1);
 
     return handle->save_c.capacity == (handle->in - handle->out);
 }
 
 void HyFifoDumpAll(HyFifo_s *handle)
 {
-    HY_ASSERT_RET(!handle);
+    HY_ASSERT_RET(!handle || handle->is_exit == 1);
 
     HY_HEX_ASCII(handle->buf, handle->save_c.capacity);
 }
 
 void HyFifoDumpContent(HyFifo_s *handle)
 {
-    HY_ASSERT_RET(!handle);
-
     hy_u32_t len;
     hy_u32_t out = handle->out & (handle->save_c.capacity - 1);
     hy_u32_t used_len = handle->in - handle->out;
@@ -222,8 +221,11 @@ void HyFifoDumpContent(HyFifo_s *handle)
     hy_u32_t ret = 0;
     hy_s32_t cnt = 0;
     const hy_u8_t *str;
+    char *buf;
 
-    char *buf = HY_MEM_CALLOC_RETURN(char *, buf_len);
+    HY_ASSERT_RET(!handle || handle->is_exit == 1);
+
+    buf = HY_MEM_CALLOC_RETURN(char *, buf_len);
 
     len = handle->save_c.capacity - out;
     len = HY_UTILS_MIN(len, used_len);
@@ -269,8 +271,11 @@ void HyFifoDumpContent(HyFifo_s *handle)
 
 void HyFifoDestroy(HyFifo_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle_pp || !*handle_pp);
     HyFifo_s *handle = *handle_pp;
+
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
+
+    handle->is_exit = 1;
 
     HY_MEM_FREE_PP(&handle->buf);
 
@@ -280,8 +285,9 @@ void HyFifoDestroy(HyFifo_s **handle_pp)
 
 HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c)
 {
-    HY_ASSERT_RET_VAL(!fifo_c, NULL);
     HyFifo_s *handle = NULL;
+
+    HY_ASSERT_RET_VAL(!fifo_c, NULL);
 
     do {
         HyFifoSaveConfig_s *save_c = &fifo_c->save_c;
