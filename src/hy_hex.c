@@ -23,7 +23,7 @@
 
 #include "hy_hex.h"
 
-void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)
+char *HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)
 {
     unsigned char tmp;
     hy_u32_t ret = 0;
@@ -40,6 +40,8 @@ void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)
             ret += snprintf(out_buf + ret, out_len - ret, "> ");
         }
     }
+
+    return out_buf;
 }
 
 hy_u32_t HyHex(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len, hy_s32_t flag)

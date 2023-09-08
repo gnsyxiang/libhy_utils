@@ -33,8 +33,10 @@ extern "C" {
  * @param len 数据长度
  * @param out_buf 输出数据
  * @param out_len 输出数据长度
+ *
+ * @return 返回输出数据，就是out_buf指针
  */
-void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len);
+char *HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len);
 
 /**
  * @brief 打印二进制bit信息宏
@@ -42,11 +44,10 @@ void HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len);
  * @param _buf 数据
  * @param _len 长度
  */
-#define HY_HEX_BIT(_buf, _len)                      \
-do {                                                \
-    char __buf[1024] = {0};                         \
-    HyHexBit(_buf, _len, __buf, sizeof(__buf));     \
-    LOGI("%s\n", __buf);                            \
+#define HY_HEX_BIT(_buf, _len)                                  \
+do {                                                            \
+    char __buf[1024] = {0};                                     \
+    LOGI("%s\n", HyHexBit(_buf, _len, __buf, sizeof(__buf)));   \
 } while (0)
 
 /**
@@ -72,12 +73,12 @@ hy_u32_t HyHex(const void *buf, hy_u32_t len,
  *
  * @note 注意接收__buf大小，否则打印不全
  */
-#define HY_HEX_ASCII(_buf, _len)                            \
-do {                                                        \
-    char *__buf = HY_MEM_CALLOC_BREAK(char *, 10 * _len);   \
-    HyHex(_buf, _len, __buf, 10 * _len, 1);                 \
-    LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);          \
-    HY_MEM_FREE_PP(&__buf);                                 \
+#define HY_HEX_ASCII(_buf, _len)                                \
+do {                                                            \
+    char *__buf = HY_MEM_CALLOC_BREAK(char *, 10 * _len);       \
+    HyHex(_buf, _len, __buf, 10 * _len, 1);                     \
+    LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);              \
+    HY_MEM_FREE_PP(&__buf);                                     \
 } while (0)
 
 /**
@@ -88,12 +89,12 @@ do {                                                        \
  *
  * @note 注意接收__buf大小，否则打印不全
  */
-#define HY_HEX(_buf, _len)                                  \
-do {                                                        \
-    char *__buf = HY_MEM_CALLOC_BREAK(char *, 5 * _len);    \
-    HyHex(_buf, _len, __buf, 5 * _len, 1);                  \
-    LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);          \
-    HY_MEM_FREE_PP(&__buf);                                 \
+#define HY_HEX(_buf, _len)                                      \
+do {                                                            \
+    char *__buf = HY_MEM_CALLOC_BREAK(char *, 5 * _len);        \
+    HyHex(_buf, _len, __buf, 5 * _len, 1);                      \
+    LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);              \
+    HY_MEM_FREE_PP(&__buf);                                     \
 } while (0)
 
 #ifdef __cplusplus
