@@ -225,7 +225,7 @@ static void _listener_cb(struct evconnlistener *listener, evutil_socket_t sock,
     char *ip;
 
     ip = inet_ntoa(((struct sockaddr_in *)addr)->sin_addr);
-    LOGI("new client connect, ip: %s \n", ip);
+    LOGW("new client connect, ip: %s \n", ip);
 
     _client_data_s *client_data = HY_MEM_CALLOC_RETURN(_client_data_s *, sizeof(*client_data));
     client_data->context = context;
