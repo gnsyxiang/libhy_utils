@@ -92,7 +92,7 @@ do {                                                            \
 #define HY_HEX(_buf, _len)                                      \
 do {                                                            \
     char *__buf = HY_MEM_CALLOC_BREAK(char *, 5 * _len);        \
-    HyHex(_buf, _len, __buf, 5 * _len, 1);                      \
+    HyHex(_buf, _len, __buf, 5 * _len, 0);                      \
     LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);              \
     HY_MEM_FREE_PP(&__buf);                                     \
 } while (0)
