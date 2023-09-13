@@ -75,8 +75,9 @@ hy_u32_t HyHex(const void *buf, hy_u32_t len,
  */
 #define HY_HEX_ASCII(_buf, _len)                                \
 do {                                                            \
-    char *__buf = HY_MEM_CALLOC_BREAK(char *, 10 * _len);       \
-    HyHex(_buf, _len, __buf, 10 * _len, 1);                     \
+    hy_u32_t __buf_len = _len * 10;                             \
+    char *__buf = HY_MEM_CALLOC_BREAK(char *, __buf_len);       \
+    HyHex(_buf, _len, __buf, __buf_len, 1);                     \
     LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);              \
     HY_MEM_FREE_PP(&__buf);                                     \
 } while (0)
@@ -91,8 +92,9 @@ do {                                                            \
  */
 #define HY_HEX(_buf, _len)                                      \
 do {                                                            \
-    char *__buf = HY_MEM_CALLOC_BREAK(char *, 5 * _len);        \
-    HyHex(_buf, _len, __buf, 5 * _len, 0);                      \
+    hy_u32_t __buf_len = 5 * _len;                              \
+    char *__buf = HY_MEM_CALLOC_BREAK(char *, __buf_len);       \
+    HyHex(_buf, _len, __buf, __buf_len, 0);                     \
     LOGI("len: %d \n%s\n", (hy_u32_t)_len, __buf);              \
     HY_MEM_FREE_PP(&__buf);                                     \
 } while (0)
