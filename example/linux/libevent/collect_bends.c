@@ -118,10 +118,9 @@ static void _handle_cmd_report_bends(struct bufferevent *bev, char *buf)
         // printf("\n");
         // LOGE("str: %s \n", str + 16);
 
-        if (0 != bufferevent_write(bev, str, sizeof(protocol_head_s) + HY_STRLEN(time_root_str))) {
-            LOGE("write data failed \n");
-
-        }
+        // if (0 != bufferevent_write(bev, str, sizeof(protocol_head_s) + HY_STRLEN(time_root_str))) {
+        //     LOGE("write data failed \n");
+        // }
         HY_MEM_FREE_PP(&time_root_str);
         HY_MEM_FREE_PP(&str);
 
