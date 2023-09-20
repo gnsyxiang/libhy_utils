@@ -40,7 +40,7 @@
 
 #define _APP_NAME "hy_gpio_isr_demo"
 
-#define _SYNC_KEY_GPIO      (42)
+#define _SYNC_KEY_GPIO      (41)
 #define _SYNC_KEY_HZ        (40)
 #define _SYNC_KEY_MS        (1000 / _SYNC_KEY_HZ)
 
