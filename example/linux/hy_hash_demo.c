@@ -79,9 +79,10 @@ static void _bool_module_destroy(_main_context_s **context_pp)
 static hy_s32_t _bool_module_create(_main_context_s *context)
 {
     HyLogConfig_s log_c;
-    HY_MEMSET(&log_c, sizeof(log_c));
-    log_c.config_file               = "../res/hy_log/zlog.conf";
+    HY_MEMSET(&log_c, sizeof(HyLogConfig_s));
+    log_c.port                      = 56789;
     log_c.fifo_len                  = 10 * 1024;
+    log_c.config_file               = "../res/hy_log/zlog.conf";
     log_c.save_c.level              = HY_LOG_LEVEL_INFO;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
 

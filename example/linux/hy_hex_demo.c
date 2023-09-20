@@ -33,7 +33,13 @@
 
 int main(int argc, char *argv[])
 {
-    HyLogInit_m(10 * 1024, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL, "../res/hy_log/zlog.conf");
+    HyLogConfig_s log_c;
+    HY_MEMSET(&log_c, sizeof(HyLogConfig_s));
+    log_c.port                      = 56789;
+    log_c.fifo_len                  = 10 * 1024;
+    log_c.config_file               = "../res/hy_log/zlog.conf";
+    log_c.save_c.level              = HY_LOG_LEVEL_INFO;
+    log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
 
     char *buf = "1234567890abcdefghi";
     HY_HEX_ASCII(buf, HY_STRLEN(buf));
