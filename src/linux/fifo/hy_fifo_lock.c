@@ -193,9 +193,11 @@ void HyFifoLockReset(HyFifoLock_s *handle)
 
     HyThreadMutexLock_m(handle->empty_mutex_h);
     HyThreadMutexLock_m(handle->full_mutex_h);
+
     handle->in = 0;
     handle->out = 0;
     HY_MEMSET(handle->buf, handle->save_c.capacity);
+
     HyThreadMutexUnLock_m(handle->full_mutex_h);
     HyThreadMutexUnLock_m(handle->empty_mutex_h);
 }
@@ -334,21 +336,22 @@ void HyFifoLockDestroy(HyFifoLock_s **handle_pp)
 HyFifoLock_s *HyFifoLockCreate(HyFifoLockConfig_s *fifo_lock_c)
 {
     HyFifoLock_s *handle = NULL;
+    HyFifoLockSaveConfig_s *save_c;
 
     HY_ASSERT_RET_VAL(!fifo_lock_c, NULL);
 
     do {
-        HyFifoLockSaveConfig_s *save_c = &fifo_lock_c->save_c;
+        save_c = &fifo_lock_c->save_c;
         if (!HY_UTILS_IS_POWER_OF_2(save_c->capacity)) {
             LOGW("old fifo len: %d \n", save_c->capacity);
 
             save_c->capacity = HyUtilsNumTo2N(save_c->capacity);
-            LOGW("len must be power of 2, new fifo len: %d \n", save_c->capacity);
+            LOGW("must be power of 2, new fifo len: %d \n", save_c->capacity);
         }
 
-        handle = HY_MEM_MALLOC_BREAK(HyFifoLock_s *, sizeof(*handle));
+        handle = HY_MEM_MALLOC_BREAK(HyFifoLock_s *, sizeof(HyFifoLock_s));
         handle->buf = HY_MEM_MALLOC_BREAK(char *, save_c->capacity);
-        HY_MEMCPY(&handle->save_c, save_c, sizeof(*save_c));
+        HY_MEMCPY(&handle->save_c, save_c, sizeof(HyFifoLockSaveConfig_s));
 
         handle->in = 0;
         handle->out = 0;
