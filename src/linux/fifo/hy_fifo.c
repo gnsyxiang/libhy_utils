@@ -18,6 +18,7 @@
  *     last modified: 30/10 2021 10:52
  */
 #include <stdio.h>
+#include <unistd.h>
 
 #include <hy_log/hy_log.h>
 
@@ -143,9 +144,23 @@ hy_s32_t HyFifoReadPeek(HyFifo_s *handle, void *buf, hy_u32_t len)
 
 hy_s32_t HyFifoRead(HyFifo_s *handle, void *buf, hy_u32_t len)
 {
+    hy_u32_t l;
+
     HY_ASSERT_RET_VAL(!handle || !buf || handle->is_exit, -1);
 
-    len = HyFifoReadPeek(handle, buf, len);
+    l = handle->in - handle->out;
+    if (len > l) {
+        LOGW("not enough data to read, len: %d, use_len: %d \n", len, l);
+
+        if (l == 0) {
+            LOGE("fifo is empty \n");
+            return 0;
+        }
+
+        len = l;
+    }
+
+    _fifo_read(handle, buf, len, handle->out);
     handle->out += len;
 
     return len;
@@ -277,6 +292,8 @@ void HyFifoDestroy(HyFifo_s **handle_pp)
 
     handle->is_exit = 1;
 
+    usleep(1 * 1000);
+
     HY_MEM_FREE_PP(&handle->buf);
 
     LOGI("fifo destroy, handle: %p \n", handle);
@@ -286,21 +303,22 @@ void HyFifoDestroy(HyFifo_s **handle_pp)
 HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c)
 {
     HyFifo_s *handle = NULL;
+    HyFifoSaveConfig_s *save_c;
 
     HY_ASSERT_RET_VAL(!fifo_c, NULL);
 
     do {
-        HyFifoSaveConfig_s *save_c = &fifo_c->save_c;
+        save_c = &fifo_c->save_c;
         if (!HY_UTILS_IS_POWER_OF_2(save_c->capacity)) {
             LOGW("old fifo len: %d \n", save_c->capacity);
 
             save_c->capacity = HyUtilsNumTo2N(save_c->capacity);
-            LOGW("len must be power of 2, new fifo len: %d \n", save_c->capacity);
+            LOGW("must be power of 2, new fifo len: %d \n", save_c->capacity);
         }
 
-        handle = HY_MEM_MALLOC_BREAK(HyFifo_s *, sizeof(*handle));
+        handle = HY_MEM_MALLOC_BREAK(HyFifo_s *, sizeof(HyFifo_s));
         handle->buf = HY_MEM_MALLOC_BREAK(char *, save_c->capacity);
-        HY_MEMCPY(&handle->save_c, save_c, sizeof(*save_c));
+        HY_MEMCPY(&handle->save_c, save_c, sizeof(HyFifoSaveConfig_s));
 
         handle->in = 0;
         handle->out = 0;

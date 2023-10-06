@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 /**
  * @brief 配置参数
@@ -64,12 +64,12 @@ HyFifo_s *HyFifoCreate(HyFifoConfig_s *fifo_c);
  *
  * @return 成功返回句柄，失败返回NULL
  */
-#define HyFifoCreate_m(_capacity)               \
-({                                              \
-    HyFifoConfig_s fifo_c;                      \
-    HY_MEMSET(&fifo_c, sizeof(fifo_c));         \
-    fifo_c.save_c.capacity  = _capacity;        \
-    HyFifoCreate(&fifo_c);                      \
+#define HyFifoCreate_m(_capacity)                   \
+({                                                  \
+    HyFifoConfig_s fifo_c;                          \
+    HY_MEMSET(&fifo_c, sizeof(HyFifoConfig_s));     \
+    fifo_c.save_c.capacity  = _capacity;            \
+    HyFifoCreate(&fifo_c);                          \
  })
 
 /**
