@@ -47,12 +47,12 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_fifo_lock.c \
-                   hy_fifo.c
+                   hy_fifo.c \
+                   hy_fifo_lock.c
 
 _cppflags_com   += \
-                   $(_no_error_com)     \
-                   $(_include_com)      \
+                   $(_no_error_com) \
+                   $(_include_com) \
                    $(_define_com)
 
 _cflags_com     +=
@@ -69,4 +69,3 @@ libhy_fifo_la_CFLAGS        = $(_cflags_com)
 libhy_fifo_la_CXXFLAGS      = $(_cxxflags_com)
 libhy_fifo_la_LDFLAGS       = $(_ldflags_com)
 libhy_fifo_la_LIBADD        = $(_ldadd_com)
-
