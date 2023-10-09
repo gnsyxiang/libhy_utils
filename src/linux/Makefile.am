@@ -70,6 +70,7 @@ _sources_com    += \
                    hy_can.c \
                    hy_dir.c \
                    hy_dynamic_array.c \
+                   hy_dynamic_lib.c \
                    hy_file.c \
                    hy_hash.c \
                    hy_package_list.c \

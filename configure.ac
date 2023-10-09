@@ -47,8 +47,8 @@ AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lpthread':
 AC_CHECK_LIB([pthread], [pthread_create])
+AC_CHECK_LIB([dl], [dlopen])
 
 CHECK_LIBCUNIT
 CHECK_LIBHY_LOG

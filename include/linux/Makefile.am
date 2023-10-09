@@ -58,6 +58,7 @@ _install_headers_com    += \
                            hy_can.h \
                            hy_dir.h \
                            hy_dynamic_array.h \
+                           hy_dynamic_lib.h \
                            hy_file.h \
                            hy_hash.h \
                            hy_math.h \
