@@ -21,6 +21,7 @@
 noinst_LTLIBRARIES = lib@project_name@_@run_os@.la
 
 SUBDIRS = \
+          audio \
           fifo \
           gpio \
           ipc \
@@ -90,6 +91,7 @@ _cflags_com     +=
 _cxxflags_com   +=
 
 _ldadd_com      += \
+                   $(top_builddir)/src/$(run_os)/audio/libhy_audio.la \
                    $(top_builddir)/src/$(run_os)/fifo/libhy_fifo.la \
                    $(top_builddir)/src/$(run_os)/gpio/libhy_gpio.la \
                    $(top_builddir)/src/$(run_os)/net/libhy_net.la \

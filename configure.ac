@@ -72,6 +72,7 @@ AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 AC_TYPE_UINT8_T
 
 # Checks for library functions.
@@ -114,6 +115,7 @@ AC_CONFIG_FILES([Makefile
                  example/mcu/Makefile
                  include/Makefile
                  include/linux/Makefile
+                 include/linux/audio/Makefile
                  include/linux/download/Makefile
                  include/linux/fifo/Makefile
                  include/linux/gpio/Makefile
@@ -133,6 +135,7 @@ AC_CONFIG_FILES([Makefile
                  res/voice/en/Makefile
                  src/Makefile
                  src/linux/Makefile
+                 src/linux/audio/Makefile
                  src/linux/download/Makefile
                  src/linux/fifo/Makefile
                  src/linux/gpio/Makefile
