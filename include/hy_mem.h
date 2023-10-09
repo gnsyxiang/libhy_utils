@@ -28,7 +28,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 #define HY_MEM_BYTE(x)                          (*((unsigned char *)(x)))                                       ///< 得到指定地址上的一个字节
 #define HY_MEM_WORD(x)                          (*((unsigned short *)(x)))                                      ///< 得到指定地址上的一个字
@@ -45,90 +45,90 @@ extern "C" {
 #define HY_MEM_ALIGN4(_len)                     HY_MEM_ALIGN(_len, 4)                                           ///< 4字节对齐
 #define HY_MEM_ALIGN4_UP(_len)                  (HY_MEM_ALIGN(_len, 4) + HY_MEM_ALIGN4(1))                      ///< 4字节向上对齐(原来已经事4字节对齐，使用后再增加4个字节)
 
-#define HY_MEMCMP(_dst, _src, _size)            memcmp(_dst, _src, _size)
-#define HY_MEMSET(_ptr, _size)                  memset(_ptr, '\0', _size)
-#define HY_MEMCPY(_dst, _src, _size)            memcpy(_dst, _src, _size)
+#define HY_MEMCMP(_dst, _src, _len)             memcmp(_dst, _src, _len)
+#define HY_MEMSET(_ptr, _len)                   memset(_ptr, '\0', _len)
+#define HY_MEMCPY(_dst, _src, _len)             memcpy(_dst, _src, _len)
 
-#define HY_MEM_CALLOC_BREAK(type, size)             \
+#define HY_MEM_CALLOC_BREAK(_type, _len)            \
 ({                                                  \
-    void *ptr = calloc(1, size);                    \
+    void *ptr = calloc(1, _len);                    \
     if (!ptr) {                                     \
         LOGES("calloc failed \n");                  \
         break;                                      \
     }                                               \
-    (type)ptr;                                      \
+    (_type)ptr;                                     \
 })
 
-#define HY_MEM_CALLOC_RETURN(type, size)            \
+#define HY_MEM_CALLOC_RETURN(_type, _len)           \
 ({                                                  \
-    void *ptr = calloc(1, size);                    \
+    void *ptr = calloc(1, _len);                    \
     if (!ptr) {                                     \
         LOGES("calloc failed \n");                  \
         return;                                     \
     }                                               \
-    (type)ptr;                                      \
+    (_type)ptr;                                     \
 })
 
-#define HY_MEM_CALLOC_RETURN_VAL(type, size, val)   \
+#define HY_MEM_CALLOC_RETURN_VAL(_type, _len, _val) \
 ({                                                  \
-    void *ptr = calloc(1, size);                    \
+    void *ptr = calloc(1, _len);                    \
     if (!ptr) {                                     \
         LOGES("calloc failed \n");                  \
-        return val;                                 \
+        return _val;                                \
     }                                               \
-    (type)ptr;                                      \
+    (_type)ptr;                                     \
 })
 
-#define HY_MEM_MALLOC_BREAK(type, size)             \
+#define HY_MEM_MALLOC_BREAK(_type, _len)            \
 ({                                                  \
-    void *ptr = malloc((size));                     \
+    void *ptr = malloc(_len);                       \
     if (!ptr) {                                     \
         LOGES("malloc failed \n");                  \
         break;                                      \
     } else {                                        \
-        HY_MEMSET(ptr, (size));                     \
+        HY_MEMSET(ptr, _len);                       \
     }                                               \
-    (type)ptr;                                      \
+    (_type)ptr;                                     \
 })
 
-#define HY_MEM_MALLOC_RET(type, size)               \
+#define HY_MEM_MALLOC_RET(_type, _len)              \
 ({                                                  \
-    void *ptr = malloc((size));                     \
+    void *ptr = malloc(_len);                       \
     if (!ptr) {                                     \
         LOGES("malloc failed \n");                  \
         return;                                     \
     } else {                                        \
-        HY_MEMSET(ptr, (size));                     \
+        HY_MEMSET(ptr, _len);                       \
     }                                               \
-    (type)ptr;                                      \
+    (_type)ptr;                                     \
 })
 
-#define HY_MEM_MALLOC_RET_VAL(type, size, ret)      \
+#define HY_MEM_MALLOC_RET_VAL(_type, _len, ret)     \
 ({                                                  \
-    void *ptr = malloc((size));                     \
+    void *ptr = malloc(_len);                       \
     if (!ptr) {                                     \
         LOGES("malloc failed \n");                  \
         return ret;                                 \
     } else {                                        \
-        HY_MEMSET(ptr, (size));                     \
+        HY_MEMSET(ptr, _len);                       \
     }                                               \
-    (type)ptr;                                      \
+    (_type)ptr;                                     \
 })
 
-#define HY_MEM_FREE_P(ptr)                  \
-do {                                        \
-    if (ptr) {                              \
-        free(ptr);                          \
-        ptr = NULL;                         \
-    }                                       \
+#define HY_MEM_FREE_P(_ptr)                         \
+do {                                                \
+    if (_ptr) {                                     \
+        free(_ptr);                                 \
+        (_ptr) = NULL;                              \
+    }                                               \
 } while (0)
 
-#define HY_MEM_FREE_PP(pptr)                \
-do {                                        \
-    if (*pptr) {                            \
-        free(*pptr);                        \
-        *pptr = NULL;                       \
-    }                                       \
+#define HY_MEM_FREE_PP(_pptr)                       \
+do {                                                \
+    if (*_pptr) {                                   \
+        free(*_pptr);                               \
+        (*_pptr) = NULL;                            \
+    }                                               \
 } while (0)
 
 /**
