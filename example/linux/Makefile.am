@@ -85,6 +85,14 @@ hy_can_demo_CXXFLAGS            = $(_cxxflags_com)
 hy_can_demo_LDFLAGS             = $(_ldflags_com)
 hy_can_demo_LDADD               = $(_ldadd_com)
 
+bin_PROGRAMS                    += hy_dir_demo
+hy_dir_demo_SOURCES             = $(_sources_com) hy_dir_demo.c
+hy_dir_demo_CPPFLAGS            = $(_cppflags_com)
+hy_dir_demo_CFLAGS              = $(_cflags_com)
+hy_dir_demo_CXXFLAGS            = $(_cxxflags_com)
+hy_dir_demo_LDFLAGS             = $(_ldflags_com)
+hy_dir_demo_LDADD               = $(_ldadd_com)
+
 bin_PROGRAMS                    += hy_dynamic_array_demo
 hy_dynamic_array_demo_SOURCES   = $(_sources_com) hy_dynamic_array_demo.c
 hy_dynamic_array_demo_CPPFLAGS  = $(_cppflags_com)

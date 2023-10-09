@@ -68,6 +68,7 @@ _include_com    += \
 
 _sources_com    += \
                    hy_can.c \
+                   hy_dir.c \
                    hy_dynamic_array.c \
                    hy_file.c \
                    hy_hash.c \
