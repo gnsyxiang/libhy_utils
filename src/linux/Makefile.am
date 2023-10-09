@@ -63,6 +63,7 @@ _define_com     +=
 
 _include_com    += \
                    -I$(top_srcdir)/include/$(run_os)/thread \
+                   -I$(top_srcdir)/include/$(run_os)/time \
                    -I$(top_srcdir)/include/$(run_os) \
                    -I$(top_srcdir)/include
 
@@ -73,6 +74,7 @@ _sources_com    += \
                    hy_dynamic_lib.c \
                    hy_file.c \
                    hy_hash.c \
+                   hy_math.c \
                    hy_package_list.c \
                    hy_pipe.c \
                    hy_signal.c \
