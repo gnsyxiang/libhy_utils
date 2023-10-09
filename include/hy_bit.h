@@ -24,11 +24,13 @@
 extern "C" {
 #endif
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 void HyBitSet(char *byte, hy_u32_t index);
 
-hy_s32_t HyBitVal(char *byte, hy_u32_t index);
+void HyBitReSet(char *byte, hy_u32_t index);
+
+hy_s32_t HyBitGet(char *byte, hy_u32_t index);
 
 #ifdef __cplusplus
 }
