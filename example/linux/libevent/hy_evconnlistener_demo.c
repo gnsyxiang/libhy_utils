@@ -24,8 +24,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include <hy_log/hy_log.h>
-
 #include <event2/event.h>
 #include <event2/listener.h>
 #include <event2/bufferevent.h>

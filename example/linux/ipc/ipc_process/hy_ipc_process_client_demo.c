@@ -30,7 +30,6 @@
 #include "hy_hal/hy_signal.h"
 #include "hy_hal/hy_module.h"
 #include "hy_hal/hy_hal_utils.h"
-#include "hy_hal/hy_log.h"
 
 #include "hy_ipc_process.h"
 #include "hy_utils.h"

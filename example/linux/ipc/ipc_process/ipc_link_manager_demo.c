@@ -29,7 +29,6 @@
 #include "hy_hal/hy_signal.h"
 #include "hy_hal/hy_module.h"
 #include "hy_hal/hy_hal_utils.h"
-#include "hy_hal/hy_log.h"
 
 #include "ipc_link_manager.h"
 #include "ipc_link.h"

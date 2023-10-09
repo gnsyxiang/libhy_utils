@@ -20,8 +20,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <hy_log/hy_log.h>
-
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_assert.h"

@@ -22,8 +22,6 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include <hy_log/hy_log.h>
-
 #include "hy_assert.h"
 #include "hy_file.h"
 #include "hy_mem.h"

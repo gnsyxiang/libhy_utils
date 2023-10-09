@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include <hy_log/hy_log.h>
 #include <cjson/cJSON.h>
 
 #include "hy_assert.h"

@@ -19,8 +19,6 @@
  */
 #include <stdio.h>
 
-#include <hy_log/hy_log.h>
-
 #include "hy_hex.h"
 
 char *HyHexBit(const void *buf, hy_u32_t len, char *out_buf, hy_u32_t out_len)

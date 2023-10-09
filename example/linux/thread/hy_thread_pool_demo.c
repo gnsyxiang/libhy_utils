@@ -21,8 +21,6 @@
 #include <unistd.h>
 #include <sys/prctl.h>
 
-#include <hy_log/hy_log.h>
-
 #include "config.h"
 
 #include "hy_mem.h"

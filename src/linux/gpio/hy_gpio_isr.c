@@ -24,8 +24,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <hy_log/hy_log.h>
-
 #include "hy_assert.h"
 #include "hy_thread.h"
 #include "hy_pipe.h"

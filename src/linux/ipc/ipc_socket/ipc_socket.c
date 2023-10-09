@@ -22,8 +22,6 @@
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
 
-#include <hy_log/hy_log.h>
-
 #include "hy_assert.h"
 #include "hy_mem.h"
 #include "hy_string.h"

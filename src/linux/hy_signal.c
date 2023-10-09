@@ -21,8 +21,6 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-#include <hy_log/hy_log.h>
-
 #include "hy_signal.h"
 
 #if (__linux__ && __GLIBC__ && !__UCLIBC__) || __APPLE__

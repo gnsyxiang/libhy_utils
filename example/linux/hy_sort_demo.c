@@ -22,8 +22,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <hy_log/hy_log.h>
-
 #include "config.h"
 
 #include "hy_mem.h"
