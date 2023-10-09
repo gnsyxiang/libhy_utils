@@ -27,7 +27,7 @@ extern "C" {
 #include <arpa/inet.h>
 #include <sys/un.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 /**
  * @brief domain类型

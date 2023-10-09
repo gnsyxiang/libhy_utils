@@ -30,7 +30,6 @@
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_signal.h"
-#include "hy_type.h"
 
 #include "address_book.pb-c.h"
 

@@ -32,7 +32,6 @@
 
 #include "config.h"
 
-#include "hy_type.h"
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_signal.h"

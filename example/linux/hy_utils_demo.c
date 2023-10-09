@@ -26,7 +26,6 @@
 
 #include "config.h"
 
-#include "hy_type.h"
 #include "hy_utils.h"
 #include "hy_mem.h"
 #include "hy_string.h"
@@ -63,7 +62,7 @@ int main(int argc, char *argv[])
 
     {
         char addr[] = {0x10, 0x11, 0x12};
-        char buf[BUF_LEN] = {0};
+        char buf[1024] = {0};
 
         HyUtilsHex2Int2Str(addr, HY_UTILS_ARRAY_CNT(addr), buf, sizeof(buf));
         LOGE("buf: %s \n", buf);
@@ -88,7 +87,7 @@ int main(int argc, char *argv[])
 
     {
         hy_u32_t dec = 0xaa;
-        char buf[BUF_LEN] = {0};
+        char buf[1024] = {0};
 
         HyUtilsDec2BitStr(dec, 8, buf, sizeof(buf));
         LOGE("buf: %s \n", buf);

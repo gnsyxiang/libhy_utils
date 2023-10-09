@@ -26,7 +26,7 @@ extern "C" {
 
 #include <pthread.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 typedef void * (*HyThreadSpecificDataCreateCb_t)(void);
 typedef void (*HyThreadSpecificDataDestroyCb_t)(void *handle);

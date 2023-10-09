@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 typedef enum {
     HY_CAN_SPEED_5K,

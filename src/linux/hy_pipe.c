@@ -26,7 +26,6 @@
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_file.h"
-#include "hy_type.h"
 
 #include "hy_pipe.h"
 

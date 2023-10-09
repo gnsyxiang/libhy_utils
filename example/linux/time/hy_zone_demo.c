@@ -27,7 +27,6 @@
 #include "config.h"
 
 #include "hy_assert.h"
-#include "hy_type.h"
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_signal.h"
@@ -193,7 +192,7 @@ int main(int argc, char *argv[])
         LOGI("zoneinfo_path: %s \n", zone_info_get.zoneinfo_path);
         LOGI("zoneinfo_name: %s \n", zone_info_get.zoneinfo_name);
 
-        char time_buf[BUF_LEN] = {0};
+        char time_buf[1024] = {0};
         HyTimeFormatLocalTime(time_buf, sizeof(time_buf));
         LOGI("time_buf: %s \n", time_buf);
 

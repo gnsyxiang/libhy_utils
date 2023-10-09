@@ -25,7 +25,8 @@ extern "C" {
 #endif
 
 #include <sys/epoll.h>
-#include "hy_type.h"
+
+#include <hy_log/hy_type.h>
 
 /**
  * @brief 监控节点的类型

@@ -27,7 +27,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 #define HY_STRING_BUF_LEN_4             (4)
 #define HY_STRING_BUF_LEN_8             (8)
@@ -37,19 +37,19 @@ extern "C" {
 #define HY_STRING_BUF_LEN_128           (128)
 #define HY_STRING_BUF_LEN_256           (256)
 #define HY_STRING_BUF_LEN_512           (512)
-#define HY_STRING_BUF_LEN_512           (512)
+#define HY_STRING_BUF_LEN_1024          (1024)
 
 #define HY_STRLEN(_str)                 strlen(_str)
 #define HY_STRCMP(_src, _dst)           strcmp(_src, _dst)
 #define HY_STRNCMP(_src, _dst, _len)    strncmp(_src, _dst, _len)
 #define HY_STRCPY(_dst, _src)           strcpy(_dst, _src)
 
-#define HY_STRNCPY(_dst, _dst_len, _src, _src_len)              \
-do {                                                            \
-    hy_u32_t _len;                                              \
-    _len = (_src_len >= _dst_len) ? _dst_len - 1 : _src_len;    \
-    HY_MEMSET(_dst, _dst_len);                                  \
-    strncpy(_dst, _src, _len);                                  \
+#define HY_STRNCPY(_dst, _dst_len, _src, _src_len)                      \
+do {                                                                    \
+    hy_u32_t _len;                                                      \
+    _len = ((_src_len) >= (_dst_len)) ? (_dst_len) - 1 : (_src_len);    \
+    HY_MEMSET((_dst), (_dst_len));                                      \
+    strncpy((_dst), (_src), (_len));                                    \
 } while(0)
 
 /**

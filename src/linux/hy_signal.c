@@ -34,7 +34,6 @@
 #include <string.h>
 
 #include "hy_mem.h"
-#include "hy_type.h"
 #include "hy_assert.h"
 
 #define BACKTRACE_SIZE      (32)

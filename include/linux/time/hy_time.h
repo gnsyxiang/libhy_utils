@@ -27,7 +27,7 @@ extern "C" {
 #include <time.h>
 #include <sys/time.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 #define HY_TIME_CHECK_TYPE(_param1, _param_2)       \
 do {                                                \

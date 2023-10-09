@@ -24,8 +24,7 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdint.h>
+#include <hy_log/hy_type.h>
 
 #define MD5SUM_LEN (16)
 

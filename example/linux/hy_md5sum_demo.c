@@ -20,8 +20,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "hy_type.h"
-
 #include "hy_md5sum.h"
 
 int main(int argc, const char *argv[])

@@ -35,7 +35,6 @@
 #include "hy_thread.h"
 
 #include "hy_bufferevent_client.h"
-#include "hy_type.h"
 
 struct HyBuffereventClient_s {
     HyBuffereventClientSaveConfig_s save_c;

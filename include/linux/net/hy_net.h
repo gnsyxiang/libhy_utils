@@ -24,7 +24,8 @@
 extern "C" {
 #endif
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
+
 #include "hy_compile.h"
 #include "hy_gpio.h"
 

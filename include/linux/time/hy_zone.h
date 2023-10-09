@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 #define HY_ZONE_INFO_PATH_LEN_MAX   (64)
 #define HY_ZONE_INFO_NAME_LEN_MAX   (32)

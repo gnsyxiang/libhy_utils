@@ -26,7 +26,8 @@ extern "C" {
 
 #include <pthread.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
+
 #include "hy_assert.h"
 
 /**

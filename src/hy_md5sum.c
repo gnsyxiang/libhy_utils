@@ -21,8 +21,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hy_type.h"
-
 #include "hy_md5sum.h"
 
 // Constants are the integer part of the sines of integers (in radians) * 2^32.

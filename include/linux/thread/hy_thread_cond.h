@@ -27,7 +27,7 @@ extern "C" {
 #include <assert.h>
 #include <pthread.h>
 
-#include "hy_type.h"
+#include <hy_log/hy_type.h>
 
 /**
  * @brief 配置参数
