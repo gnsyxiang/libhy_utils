@@ -44,7 +44,6 @@ _install_headers_com    += \
                            hy_module.h \
                            hy_sort.h \
                            hy_string.h \
-                           hy_type.h \
                            hy_utils.h
 
 # ------------------
