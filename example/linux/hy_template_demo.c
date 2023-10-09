@@ -18,19 +18,16 @@
  *     last modified: 25/10 2021 19:56
  */
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 
 #include <hy_log/hy_log.h>
+
+#include "config.h"
 
 #include "hy_mem.h"
 #include "hy_string.h"
 #include "hy_signal.h"
 #include "hy_module.h"
 #include "hy_utils.h"
-
-#include "config.h"
 
 #define _APP_NAME "hy_template_demo"
 
@@ -103,8 +100,6 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
 
 static void _handle_module_destroy(_main_context_s **context_pp)
 {
-    _main_context_s *context = *context_pp;
-
     // note: 增加或删除要同步到HyModuleCreateHandle_s中
     HyModuleDestroyHandle_s module[] = {
         {NULL, NULL, NULL},
