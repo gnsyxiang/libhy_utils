@@ -170,9 +170,9 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
         return -1;
     }
 
-    HY_MEMSET(param, sizeof(param));
-    snprintf(param, sizeof(param), "echo 4096 > /sys/class/net/can0/tx_queue_len");
-    HyUtilsLinuxSystemCmd_m(param, 0);
+    // HY_MEMSET(param, sizeof(param));
+    // snprintf(param, sizeof(param), "echo 4096 > /sys/class/net/can0/tx_queue_len");
+    // HyUtilsLinuxSystemCmd_m(param, 0);
 
     HY_MEMSET(param, sizeof(param));
     snprintf(param, sizeof(param), "ip link set %s down", name);
