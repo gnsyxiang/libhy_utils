@@ -217,8 +217,8 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
         for (hy_s32_t i = 0; i < shang; ++i) {
             HY_MEMCPY(tx_frame.data, buf + 8 * i, 8);
 
-            if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
-                LOGE("HyFileWrite failed \n");
+            if (-1 == write(handle->fd, &tx_frame, sizeof(tx_frame))) {
+                LOGES("write failed \n");
                 break;
             }
         }
@@ -227,8 +227,8 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
             tx_frame.can_dlc = yushu;
             HY_MEMCPY(tx_frame.data, buf + 8 * shang, yushu);
 
-            if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
-                LOGE("HyFileWrite failed \n");
+            if (-1 == write(handle->fd, &tx_frame, sizeof(tx_frame))) {
+                LOGES("write failed \n");
                 break;
             }
         }
