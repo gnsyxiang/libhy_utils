@@ -28,7 +28,7 @@ extern "C" {
 
 #define MD5SUM_LEN (16)
 
-void HyMd5sum(const uint8_t *msg, size_t msg_len, uint8_t digest[MD5SUM_LEN]);
+void HyMd5sum(const hy_u8_t *msg, hy_u32_t msg_len, hy_u8_t digest[MD5SUM_LEN]);
 
 #ifdef __cplusplus
 }

@@ -52,7 +52,7 @@ static void _listener_error_cb(struct evconnlistener *listener, void *args)
 }
 
 static void _listener_cb(struct evconnlistener *listener, evutil_socket_t sock,
-                              struct sockaddr *addr, int socklen, void *args)
+                              struct sockaddr *addr, hy_s32_t socklen, void *args)
 {
     HyEventListener_s *handle = args;
 
@@ -85,7 +85,7 @@ void HyEventListenerDestroy(HyEventListener_s **handle_pp)
 
     evconnlistener_free(handle->listener);
 
-    for (size_t i = 0; i < handle->save_c.signal_cb_num; i++) {
+    for (hy_u32_t i = 0; i < handle->save_c.signal_cb_num; i++) {
         event_free(handle->signal_event[i]);
     }
 
@@ -126,7 +126,7 @@ HyEventListener_s *HyEventListenerCreate(HyEventListenerConfig_s *listener_c)
 
         handle->signal_event = HY_MEM_MALLOC_BREAK(struct event **,
                                                    sizeof(struct event *) * save_c->signal_cb_num);
-        for (size_t i = 0; i < save_c->signal_cb_num; i++) {
+        for (hy_u32_t i = 0; i < save_c->signal_cb_num; i++) {
 
             handle->signal_event[i] = evsignal_new(handle->listener_base,
                                                    save_c->signal_cb[i].signal,

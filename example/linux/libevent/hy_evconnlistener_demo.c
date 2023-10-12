@@ -158,12 +158,12 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
     log_c.save_c.level              = HY_LOG_LEVEL_INFO;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
 
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
         SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
     };
 
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
     };
 
@@ -259,7 +259,7 @@ static void _client_event_cb(struct bufferevent *bev, short event, void *args)
         bufferevent_free(bev);
     }
 
-    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(ip_arr); i++) {
+    for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(ip_arr); i++) {
         if (strcmp(client_node->ip, ip_arr[i]) == 0) {
             HyThreadMutexLock_m(context->client_mutext_h[i]);
             context->client_cnt[i]--;
@@ -267,7 +267,7 @@ static void _client_event_cb(struct bufferevent *bev, short event, void *args)
         }
     }
 
-    for (size_t i = 0; i < 10; i++) {
+    for (hy_u32_t i = 0; i < 10; i++) {
         if (context->client_cnt[i] > 2) {
             LOGI("check: %d, %d, %d, %d, %d, fd: %d \n",
                  context->client_cnt[0], context->client_cnt[1],
@@ -317,7 +317,7 @@ static void _listener_cb(struct evconnlistener *listener, evutil_socket_t sock,
     memset(client_node->ip, 0, 16);
     memcpy(client_node->ip, ip, strlen(ip));
 
-    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(ip_arr); i++) {
+    for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(ip_arr); i++) {
         if (strcmp(client_node->ip, ip_arr[i]) == 0) {
             HyThreadMutexLock_m(context->client_mutext_h[i]);
             context->client_cnt[i]++;
@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
             {"_bool_module_create",     _bool_module_create},
             {"_handle_module_create",   _handle_module_create},
         };
-        for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
+        for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
             if (create_arr[i].create) {
                 if (0 != create_arr[i].create(context)) {
                     LOGE("%s failed \n", create_arr[i].name);
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        for (size_t i = 0; i < 10; i++) {
+        for (hy_u32_t i = 0; i < 10; i++) {
             context->client_mutext_h[i] = HyThreadMutexCreate_m();
             if (!context->client_mutext_h[i]) {
                 LOGE("HyThreadMutexCreate_m faield \n");
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
         _handle_module_destroy,
         _bool_module_destroy
     };
-    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
+    for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
         if (destroy_arr[i]) {
             destroy_arr[i](&context);
         }

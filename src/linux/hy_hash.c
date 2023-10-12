@@ -59,7 +59,7 @@ static hy_u32_t _key_2_index(hy_u32_t bucket_cnt, const char *key)
     hy_u32_t len = HY_STRLEN(key);
     hy_s32_t index = (hy_s32_t)key[0];
 
-    for (size_t i = 0; i < len; i++) {
+    for (hy_u32_t i = 0; i < len; i++) {
         // index *= 1103515245 + (hy_s32_t)key[i];
         index *= 0x41C64E6D + (hy_s32_t)key[i];
     }
@@ -291,7 +291,7 @@ void HyHashDestroy(HyHash_s **handle_pp)
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
     HyHash_s *handle = *handle_pp;
 
-    for (size_t i = 0; i < handle->save_c.bucket_cnt; i++) {
+    for (hy_u32_t i = 0; i < handle->save_c.bucket_cnt; i++) {
         _traverse_item_list(handle, i, 0, _destroy_item_from_list, NULL);
 
         HyThreadMutexDestroy(&handle->list_mutex_h[i]);
@@ -319,7 +319,7 @@ HyHash_s *HyHashCreate(HyHashConfig_s *hash_c)
         handle->list = HY_MEM_CALLOC_BREAK(struct hy_hlist_head *, bucket_cnt * sizeof(struct hy_hlist_head));
         handle->list_mutex_h = HY_MEM_CALLOC_BREAK(HyThreadMutex_s **, bucket_cnt * sizeof(HyThreadMutex_s *));
 
-        for (size_t i = 0; i < bucket_cnt; i++) {
+        for (hy_u32_t i = 0; i < bucket_cnt; i++) {
             handle->list_mutex_h[i] = HyThreadMutexCreate_m();
             if (!handle->list_mutex_h[i]) {
                 LOGE("HyThreadMutexCreate_m failed \n");

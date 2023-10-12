@@ -52,26 +52,26 @@ static const hy_u32_t r[] = {
 // leftrotate function definition
 #define LEFTROTATE(x, c) (((x) << (c)) | ((x) >> (32 - (c))))
 
-static void to_bytes(hy_u32_t val, uint8_t *bytes) {
-    bytes[0] = (uint8_t) val;
-    bytes[1] = (uint8_t) (val >> 8);
-    bytes[2] = (uint8_t) (val >> 16);
-    bytes[3] = (uint8_t) (val >> 24);
+static void to_bytes(hy_u32_t val, hy_u8_t *bytes) {
+    bytes[0] = (hy_u8_t) val;
+    bytes[1] = (hy_u8_t) (val >> 8);
+    bytes[2] = (hy_u8_t) (val >> 16);
+    bytes[3] = (hy_u8_t) (val >> 24);
 }
 
-static hy_u32_t to_int32(const uint8_t *bytes) {
+static hy_u32_t to_int32(const hy_u8_t *bytes) {
     return (hy_u32_t) bytes[0] |
         ((hy_u32_t) bytes[1] << 8) |
         ((hy_u32_t) bytes[2] << 16) |
         ((hy_u32_t) bytes[3] << 24);
 }
 
-void HyMd5sum(const uint8_t *initial_msg, size_t initial_len, uint8_t digest[MD5SUM_LEN]) {
+void HyMd5sum(const hy_u8_t *initial_msg, hy_u32_t initial_len, hy_u8_t digest[MD5SUM_LEN]) {
     // These vars will contain the hash
     hy_u32_t h0, h1, h2, h3;
     // Message (to prepare)
-    uint8_t *msg = NULL;
-    size_t new_len, offset;
+    hy_u8_t *msg = NULL;
+    hy_u32_t new_len, offset;
     hy_u32_t w[16];
     hy_u32_t a, b, c, d, i, f, g, temp;
     // Initialize variables - simple count in nibbles:
@@ -84,7 +84,7 @@ void HyMd5sum(const uint8_t *initial_msg, size_t initial_len, uint8_t digest[MD5
     //append "0" bits until message length in bits ≡ 448 (mod 512)
     //append length mod (2^64) to message
     for (new_len = initial_len + 1; new_len % (512 / 8) != 448 / 8; new_len++);
-    msg = (uint8_t*)calloc(1, new_len + 8);
+    msg = (hy_u8_t*)calloc(1, new_len + 8);
     memcpy(msg, initial_msg, initial_len);
     msg[initial_len] = 0x80; // append the "1" bit; most significant bit is "first"
     for (offset = initial_len + 1; offset < new_len; offset++) {

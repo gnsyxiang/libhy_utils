@@ -63,13 +63,11 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stddef.h std
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
-AC_TYPE_INT8_T
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
-AC_TYPE_UINT8_T
 
 # Checks for library functions.
 # AC_FUNC_MALLOC

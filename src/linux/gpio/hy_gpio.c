@@ -300,7 +300,7 @@ hy_s32_t HyGpioConfig(HyGpio_s *gpio)
         return -1;
     }
 
-    for (size_t i = 0; i < sizeof(val) / sizeof(val[0]); i++) {
+    for (hy_u32_t i = 0; i < sizeof(val) / sizeof(val[0]); i++) {
         ret = _gpio_config(gpio->gpio, val[i][0], val[i][1]);
         if (ret != 0) {
             LOGE("gpio config failed \n");

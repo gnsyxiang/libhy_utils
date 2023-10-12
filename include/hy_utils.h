@@ -112,7 +112,7 @@ void HyUtilsIpStr2Int(const char *ip_str, hy_u32_t *ip_num);
  * @param ip_str ip字符串
  * @param ip_str_len ip字符串的长度
  */
-void HyUtilsIpInt2Str(hy_u32_t ip_num, char *ip_str, size_t ip_str_len);
+void HyUtilsIpInt2Str(hy_u32_t ip_num, char *ip_str, hy_u32_t ip_str_len);
 
 /**
  * @brief hex转化成整数，然后再转化成字符串
@@ -122,7 +122,7 @@ void HyUtilsIpInt2Str(hy_u32_t ip_num, char *ip_str, size_t ip_str_len);
  * @param str 转化成功后的字符串
  * @param str_len 字符串的长度
  */
-void HyUtilsHex2Int2Str(char *addr, size_t addr_len, char *str, size_t str_len);
+void HyUtilsHex2Int2Str(char *addr, hy_u32_t addr_len, char *str, hy_u32_t str_len);
 
 /**
  * @brief 字符串转化成整数，然后在转化成hex
@@ -132,7 +132,7 @@ void HyUtilsHex2Int2Str(char *addr, size_t addr_len, char *str, size_t str_len);
  * @param addr 转化成功后的hex数据地址
  * @param addr_len hex数据地址的长度
  */
-void HyUtilsStr2Int2Hex(char *str, size_t str_len, char *addr, size_t addr_len);
+void HyUtilsStr2Int2Hex(char *str, hy_u32_t str_len, char *addr, hy_u32_t addr_len);
 
 /**
  * @brief 把比特数组转化成整数
@@ -142,7 +142,7 @@ void HyUtilsStr2Int2Hex(char *str, size_t str_len, char *addr, size_t addr_len);
  *
  * @return 返回整数
  */
-hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len);
+hy_u32_t HyUtilsBitStr2Dec(char *bit_str, hy_u32_t len);
 
 /**
  * @brief 把整数转化成bit数组
@@ -152,7 +152,7 @@ hy_u32_t HyUtilsBitStr2Dec(char *bit_str, size_t len);
  * @param bit_str bit数组地址
  * @param str_len bit数组长度
  */
-void HyUtilsDec2BitStr(hy_u32_t num, size_t num_len, char *bit_str, size_t str_len);
+void HyUtilsDec2BitStr(hy_u32_t num, hy_u32_t num_len, char *bit_str, hy_u32_t str_len);
 
 /**
  * @brief 检查网络大小端序

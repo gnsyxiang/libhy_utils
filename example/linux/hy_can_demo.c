@@ -79,12 +79,12 @@ static hy_s32_t _bool_module_create(_main_context_s *context)
     log_c.save_c.level              = HY_LOG_LEVEL_INFO;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
 
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
         SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
     };
 
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
     };
 
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
             {"_bool_module_create",     _bool_module_create},
             {"_handle_module_create",   _handle_module_create},
         };
-        for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
+        for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
             if (create_arr[i].create) {
                 if (0 != create_arr[i].create(context)) {
                     LOGE("%s failed \n", create_arr[i].name);
@@ -175,8 +175,8 @@ int main(int argc, char *argv[])
 
         char buf[64];
         char data[8];
-        size_t ret;
-        size_t index = 0;
+        hy_u32_t ret;
+        hy_u32_t index = 0;
         hy_u32_t can_cnt = 0;
         while (!context->is_exit) {
             HY_MEMSET(data, sizeof(data));
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
             HyCanWrite(context->can_handle, data, sizeof(data));
             can_cnt++;
 
-            for (size_t i = 0; i < ret; i++) {
+            for (hy_u32_t i = 0; i < ret; i++) {
                 index += snprintf(buf + index, sizeof(buf) - index, "0x%x ", data[i]);
             }
             LOGI("can cnt: %d, buf: %s \n", can_cnt, buf);
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
         _handle_module_destroy,
         _bool_module_destroy
     };
-    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
+    for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
         if (destroy_arr[i]) {
             destroy_arr[i](&context);
         }

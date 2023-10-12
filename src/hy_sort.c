@@ -28,15 +28,14 @@
 #include "hy_sort.h"
 
 static inline void _mem_swap(void *dst, void *src,
-        void *tmp, hy_u32_t item_len)
+                             void *tmp, hy_u32_t item_len)
 {
     HY_MEMCPY(tmp, dst, item_len);
     HY_MEMCPY(dst, src, item_len);
     HY_MEMCPY(src, tmp, item_len);
 }
 
-void HySortBubble(void *array, size_t len,
-        size_t item_len, HySortSwapCb_t swap_cb)
+void HySortBubble(void *array, hy_u32_t len, hy_u32_t item_len, HySortSwapCb_t swap_cb)
 {
     HY_ASSERT_RET(!array || !swap_cb)
 
@@ -61,7 +60,7 @@ void HySortBubble(void *array, size_t len,
 }
 
 static hy_s32_t _partition(void *array, hy_s32_t low, hy_s32_t high,
-        hy_u32_t item_len, HySortSwapCb_t swap_cb)
+                           hy_u32_t item_len, HySortSwapCb_t swap_cb)
 {
     #define _ARRAY_LOW ((char *)array + low * item_len)
     #define _ARRAY_HIGHT ((char *)array + high * item_len)
@@ -92,7 +91,7 @@ static hy_s32_t _partition(void *array, hy_s32_t low, hy_s32_t high,
 }
 
 void HySortQuick(void *array, hy_s32_t low, hy_s32_t high,
-        size_t item_len, HySortSwapCb_t swap_cb)
+                 hy_u32_t item_len, HySortSwapCb_t swap_cb)
 {
     HY_ASSERT_RET(!array || !swap_cb);
 

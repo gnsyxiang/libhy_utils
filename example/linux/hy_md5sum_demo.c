@@ -24,12 +24,12 @@
 
 int main(int argc, const char *argv[])
 {
-    uint8_t digest[16] = {0};
-    uint8_t md5sum[16] = {
+    hy_u8_t digest[16] = {0};
+    hy_u8_t md5sum[16] = {
         0xe8, 0x07, 0xf1, 0xfc, 0xf8, 0x2d, 0x13, 0x2f,
         0x9b, 0xb0, 0x18, 0xca, 0x67, 0x38, 0xa1, 0x9f
     };
-    uint8_t msg[11] = {"1234567890"};
+    hy_u8_t msg[11] = {"1234567890"};
 
     printf("Encrypted data: %s \n", msg);
 

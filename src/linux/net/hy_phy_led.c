@@ -122,7 +122,7 @@ void HyPHYLedSetLed(HyPHYLedNum_e led, HyPHYLedMode_e mode)
 
 static hy_s32_t _led_loop_cb(void *args)
 {
-    size_t val = 0;
+    hy_u32_t val = 0;
     _led_mode_t led_mode;
     hy_s32_t i;
     _led_blink_mode_t *led_blink_mode = &context->led_blink_mode[0];

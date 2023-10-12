@@ -153,12 +153,12 @@ static hy_s32_t _cjson_item_array_add(void *array, void *item)
     return 0;
 }
 
-static void *_cjson_item_array_get(const void *array, size_t index)
+static void *_cjson_item_array_get(const void *array, hy_u32_t index)
 {
     return cJSON_GetArrayItem((cJSON *)array, index);
 }
 
-static size_t _cjson_item_array_size(const void *array)
+static hy_u32_t _cjson_item_array_size(const void *array)
 {
     return cJSON_GetArraySize((cJSON *)array);
 }

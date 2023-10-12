@@ -85,12 +85,12 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     log_c.save_c.level              = HY_LOG_LEVEL_TRACE;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL;
 
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
         SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
     };
 
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
     };
 
@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
     void (*destroy_arr[])(_main_context_s **context_pp) = {
         _bool_module_destroy
     };
-    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
+    for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
         if (destroy_arr[i]) {
             destroy_arr[i](&context);
         }

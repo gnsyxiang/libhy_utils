@@ -73,12 +73,12 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     log_c.save_c.level              = HY_LOG_LEVEL_INFO;
     log_c.save_c.output_format      = HY_LOG_OUTFORMAT_ALL_NO_PID_ID;
 
-    int8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_error_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,
         SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,
     };
 
-    int8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
+    hy_s8_t signal_user_num[HY_SIGNAL_NUM_MAX_32] = {
         SIGINT, SIGTERM, SIGUSR1, SIGUSR2,
     };
 
@@ -100,7 +100,7 @@ static hy_s32_t _bool_module_create(_main_context_t *context)
     HY_MODULE_RUN_CREATE_BOOL(bool_module);
 }
 
-static hy_s32_t _do_pack(uint8_t *buf)
+static hy_s32_t _do_pack(uhy_s8_t *buf)
 {
     Tutorial__Person__PhoneNumber phone_number = TUTORIAL__PERSON__PHONE_NUMBER__INIT;
     Tutorial__Person person = TUTORIAL__PERSON__INIT;
@@ -124,7 +124,7 @@ static hy_s32_t _do_pack(uint8_t *buf)
     return tutorial__addressbook__pack(&address_book, buf);
 }
 
-static hy_s32_t _do_unpack(const uint8_t *buf, size_t len)
+static hy_s32_t _do_unpack(const uhy_s8_t *buf, hy_u32_t len)
 {
     Tutorial__Addressbook *address_book = NULL;
 
@@ -134,7 +134,7 @@ static hy_s32_t _do_unpack(const uint8_t *buf, size_t len)
         return -1;
     }
 
-    for (size_t i = 0; i < address_book->n_people; ++i) {
+    for (hy_u32_t i = 0; i < address_book->n_people; ++i) {
         Tutorial__Person *people = address_book->people[i];
 
         LOGI("id: %d \n", people->id);
@@ -142,7 +142,7 @@ static hy_s32_t _do_unpack(const uint8_t *buf, size_t len)
         LOGI("email: %s \n", people->email);
 
         LOGI("phone_number: \n");
-        for (size_t j = 0; j < people->n_phones; ++j) {
+        for (hy_u32_t j = 0; j < people->n_phones; ++j) {
             Tutorial__Person__PhoneNumber *phones = people->phones[j];
 
             LOGI("\t\ttype: %d \n", phones->type);
@@ -168,7 +168,7 @@ int main(int argc, char const* argv[])
             {"_bool_module_create",     _bool_module_create},
             {"_handle_module_create",   _handle_module_create},
         };
-        for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
+        for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(create_arr); i++) {
             if (create_arr[i].create) {
                 if (0 != create_arr[i].create(context)) {
                     LOGE("%s failed \n", create_arr[i].name);
@@ -178,7 +178,7 @@ int main(int argc, char const* argv[])
 
         LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 
-        uint8_t buf[1024] = {0};
+        uhy_s8_t buf[1024] = {0};
         hy_s32_t len = 0;
 
         len = _do_pack(buf);
@@ -195,7 +195,7 @@ int main(int argc, char const* argv[])
     void (*destroy_arr[])(_main_context_s **context_pp) = {
         _bool_module_destroy
     };
-    for (size_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
+    for (hy_u32_t i = 0; i < HY_UTILS_ARRAY_CNT(destroy_arr); i++) {
         if (destroy_arr[i]) {
             destroy_arr[i](&context);
         }

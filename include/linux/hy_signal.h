@@ -48,8 +48,8 @@ typedef struct {
 typedef struct {
     HySignalSaveConfig_t    save_c;                             ///< 配置参数
 
-    int8_t                  user_num[HY_SIGNAL_NUM_MAX_32];     ///< 注册用户信号
-    int8_t                  error_num[HY_SIGNAL_NUM_MAX_32];    ///< 注册系统错误信号
+    hy_u8_t                 user_num[HY_SIGNAL_NUM_MAX_32];     ///< 注册用户信号
+    hy_u8_t                 error_num[HY_SIGNAL_NUM_MAX_32];    ///< 注册系统错误信号
 } HySignalConfig_t;
 
 /**
@@ -74,11 +74,11 @@ hy_s32_t HySignalCreate(HySignalConfig_t *signal_c);
  */
 #define HySignalCreate_m(_app_name, _core_path, _error_cb, _user_cb, args)  \
     ({                                                                      \
-        int8_t signal_error[HY_SIGNAL_NUM_MAX_32] = {                       \
+        hy_u8_t signal_error[HY_SIGNAL_NUM_MAX_32] = {                      \
             SIGQUIT, SIGILL, SIGTRAP, SIGABRT, SIGFPE,                      \
             SIGSEGV, SIGBUS, SIGSYS, SIGXCPU, SIGXFSZ,                      \
         };                                                                  \
-        int8_t signal_user[HY_SIGNAL_NUM_MAX_32] = {                        \
+        hy_u8_t signal_user[HY_SIGNAL_NUM_MAX_32] = {                       \
             SIGINT, SIGTERM, SIGUSR1, SIGUSR2,                              \
         };                                                                  \
         HySignalConfig_t signal_c;                                          \

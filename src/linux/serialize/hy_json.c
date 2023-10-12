@@ -149,10 +149,10 @@ static hy_s32_t _get_index(char *fmt)
     return -1;
 }
 
-static void *_get_item(void *root, char *fmt, size_t fmt_len)
+static void *_get_item(void *root, char *fmt, hy_u32_t fmt_len)
 {
-    size_t i;
-    size_t offset = 0;
+    hy_u32_t i;
+    hy_u32_t offset = 0;
     hy_s32_t index = 0;
     void *child = NULL;
     void *parent = root;
@@ -188,11 +188,11 @@ static void *_get_item(void *root, char *fmt, size_t fmt_len)
     return child;
 }
 
-static void *_get_item_com(void *root, const char *fmt, size_t fmt_len)
+static void *_get_item_com(void *root, const char *fmt, hy_u32_t fmt_len)
 {
     void *item = NULL;
     char *cp_fmt, *cp_fmt_tmp;
-    size_t len;
+    hy_u32_t len;
 
     len = HY_MEM_ALIGN4_UP(fmt_len);
     cp_fmt = HY_MEM_MALLOC_RET_VAL(char *, len, NULL);
@@ -208,7 +208,7 @@ static void *_get_item_com(void *root, const char *fmt, size_t fmt_len)
     return item;
 }
 
-hy_s32_t HyJsonGetItemInt2(hy_s32_t error_val, void *root, char *fmt, size_t fmt_len)
+hy_s32_t HyJsonGetItemInt2(hy_s32_t error_val, void *root, char *fmt, hy_u32_t fmt_len)
 {
     void *item = _get_item_com(root, fmt, fmt_len);
 
@@ -216,7 +216,7 @@ hy_s32_t HyJsonGetItemInt2(hy_s32_t error_val, void *root, char *fmt, size_t fmt
 }
 
 double HyJsonGetItemReal2(double error_val,
-        void *root, char *fmt, size_t fmt_len)
+        void *root, char *fmt, hy_u32_t fmt_len)
 {
     void *item = _get_item_com(root, fmt, fmt_len);
 
@@ -224,7 +224,7 @@ double HyJsonGetItemReal2(double error_val,
 }
 
 const char *HyJsonGetItemStr2(const char *error_val,
-        void *root, char *fmt, size_t fmt_len)
+        void *root, char *fmt, hy_u32_t fmt_len)
 {
     void *item = _get_item_com(root, fmt, fmt_len);
 
@@ -238,7 +238,7 @@ static inline void _file_content_destroy(char **buf)
     HY_MEM_FREE_PP(buf);
 }
 
-static size_t _file_content_create(const char *file, char **buf)
+static hy_u32_t _file_content_create(const char *file, char **buf)
 {
     hy_s32_t fd;
     off_t offset = 0;
@@ -274,7 +274,7 @@ static size_t _file_content_create(const char *file, char **buf)
     return 0;
 }
 
-static size_t _save_file_content(HyJsonFile_s *json_file)
+static hy_u32_t _save_file_content(HyJsonFile_s *json_file)
 {
     hy_s32_t fd;
     hy_s32_t ret;
@@ -332,7 +332,7 @@ void HyJsonFileDestroy(HyJsonFile_s **handle_pp)
 HyJsonFile_s *HyJsonFileCreate(const char *file)
 {
     HY_ASSERT_RET_VAL(!file, NULL);
-    size_t len;
+    hy_u32_t len;
     char *buf = NULL;
     HyJsonFile_s *json_file = NULL;
 

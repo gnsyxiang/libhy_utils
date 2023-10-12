@@ -136,7 +136,7 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
 {
     char param[128];
     hy_u32_t speed_num = 0;
-    size_t i = 0;
+    hy_u32_t i = 0;
     struct {
         HyCanSpeed_e    speed;
         hy_u32_t        speed_num;

@@ -31,8 +31,8 @@ typedef struct {
     CURL *curl;
 } _curl_context_s;
 
-static size_t _curl_write_cb(void *buffer, size_t size, size_t nmemb,
-        void *args)
+static hy_u32_t _curl_write_cb(void *buffer, hy_u32_t size,
+                               hy_u32_t nmemb, void *args)
 {
     HY_ASSERT(buffer);
     HY_ASSERT(args);

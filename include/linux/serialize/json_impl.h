@@ -64,8 +64,8 @@ typedef struct {
 
     void *(*item_array_new)(void);
     int (*item_array_add)(void *array, void *item);
-    void *(*item_array_get)(const void *array, size_t index);
-    size_t (*item_array_size)(const void *array);
+    void *(*item_array_get)(const void *array, hy_u32_t index);
+    hy_u32_t (*item_array_size)(const void *array);
 
     HyJsonType_t (*item_typeof)(const void *item);
     char *(*item_print_str)(const void *root);

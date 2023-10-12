@@ -42,8 +42,7 @@ typedef hy_s32_t (*HySortSwapCb_t)(void *src, void *dst);
  * @param item_len: 单个数据结构的长度
  * @param swap_cb: 用户提供的比较函数
  */
-void HySortBubble(void *array, size_t len, size_t item_len,
-                  HySortSwapCb_t swap_cb);
+void HySortBubble(void *array, hy_u32_t len, hy_u32_t item_len, HySortSwapCb_t swap_cb);
 
 /**
  * @brief 快速排序
@@ -55,7 +54,7 @@ void HySortBubble(void *array, size_t len, size_t item_len,
  * @param swap_cb: 用户提供的比较函数
  */
 void HySortQuick(void *array, hy_s32_t low, hy_s32_t high,
-                 size_t item_len, HySortSwapCb_t swap_cb);
+                 hy_u32_t item_len, HySortSwapCb_t swap_cb);
 
 #ifdef __cplusplus
 }

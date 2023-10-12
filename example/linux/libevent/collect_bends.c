@@ -43,9 +43,9 @@ static char *_protocol_fill_data(hy_u32_t cmd, char *json, hy_s32_t json_len)
 
     HY_MEMCPY(head->data, json, json_len);
 
-    HyMd5sum((const uint8_t *)json, json_len, decrypt);
+    HyMd5sum((const hy_u8_t *)json, json_len, decrypt);
 
-    for (size_t i = 0; i < sizeof(head->crc); i++) {
+    for (hy_u32_t i = 0; i < sizeof(head->crc); i++) {
         head->crc[i] = decrypt[i];
     }
 
@@ -112,7 +112,7 @@ static void _handle_cmd_report_bends(struct bufferevent *bev, char *buf)
         // LOGI("cmd: 0x%04x \n", head->cmd);
         // LOGI("len: 0x%02x \n", head->len);
         // LOGI("crc: ");
-        // for (size_t i = 0; i < sizeof(head->crc); i++) {
+        // for (hy_u32_t i = 0; i < sizeof(head->crc); i++) {
         //     printf("%02x", head->crc[i]);
         // }
         // printf("\n");
