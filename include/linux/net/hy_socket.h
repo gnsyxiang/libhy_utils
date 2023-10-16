@@ -142,8 +142,7 @@ hy_s32_t HySocketUnixAccept(hy_s32_t socket_fd, struct sockaddr_un *client_addr)
  * @param len 数据的长度
  * @return 成功返回数据的长度，失败返回-1
  */
-hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
-                                    void *buf, hy_u32_t len);
+hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u32_t len);
 
 #ifdef __cplusplus
 }

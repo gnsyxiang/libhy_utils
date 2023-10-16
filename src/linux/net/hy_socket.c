@@ -52,12 +52,12 @@
  * 因此只要保证接受方与发送发使用的字节序相同，就不需要进行转换
  */
 
-hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
-                                    void *buf, hy_u32_t len)
+hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u32_t len)
 {
-    HY_ASSERT_RET_VAL(!ip || !buf, -1);
     hy_s32_t socket_fd = -1;
     hy_s32_t ret;
+
+    HY_ASSERT_RET_VAL(!socket_info || !buf, -1);
 
     do {
         socket_fd = HySocketCreate(HY_SOCKET_DOMAIN_TCP);
@@ -66,7 +66,7 @@ hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
             break;
         }
 
-        if (-1 == HySocketConnect(socket_fd, ip, port)) {
+        if (-1 == HySocketConnect(socket_fd, socket_info->ip, socket_info->port)) {
             LOGE("HySocketConnect failed \n");
             break;
         }
