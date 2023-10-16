@@ -176,19 +176,6 @@ hy_s32_t HyJsonArrayAdd(void *array, void *item);
 char *HyJsonDump(void *root);
 
 /**
- * @brief 打印root中信息的宏
- *
- * @param root root根节点
- * @param log_level log打印函数，可以是printf, LOGD，LOGI等
- */
-#define HyJsonDump_m(root, log_level)       \
-    do {                                    \
-        char *buf = HyJsonDump(root);       \
-        log_level("%s \n", buf);            \
-        free(buf);                          \
-    } while(0);
-
-/**
  * @brief 从文件中创建json
  *
  * @param file 文件路径
