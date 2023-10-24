@@ -53,6 +53,7 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
     hy_s32_t epfd;
     hy_s32_t nfds;
     char val;
+    hy_s32_t pipe_fd = HyPipeReadFdGet(handle->pipe_h);
 
     epfd = epoll_create1(0);
     if (epfd < 0) {
@@ -64,6 +65,11 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
     ev.data.fd  = handle->fd;
     ev.events   = EPOLLIN | EPOLLET;
     epoll_ctl(epfd, EPOLL_CTL_ADD, handle->fd, &ev);
+
+    HY_MEMSET(&ev, sizeof(ev));
+    ev.data.fd  = pipe_fd;
+    ev.events   = EPOLLIN | EPOLLET;
+    epoll_ctl(epfd, EPOLL_CTL_ADD, pipe_fd, &ev);
 
     while (!handle->is_exit) {
         nfds = epoll_wait(epfd, &events, 1, save_c->timeout_ms);
@@ -91,7 +97,7 @@ static hy_s32_t _gpio_isr_loop_cb(void *args)
                 if (save_c->gpio_isr_cb) {
                     save_c->gpio_isr_cb(val, save_c->args);
                 }
-            } else if (events.data.fd == HyPipeReadFdGet(handle->pipe_h)) {
+            } else if (events.data.fd == pipe_fd) {
                 HyPipeRead(handle->pipe_h, &val, sizeof(val));
                 if (val == _PIPE_EXIT) {
                     LOGI("exit gpio_isr loop \n");
