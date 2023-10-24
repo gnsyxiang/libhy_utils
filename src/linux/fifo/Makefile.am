@@ -48,7 +48,8 @@ _include_com    += \
 
 _sources_com    += \
                    hy_fifo.c \
-                   hy_fifo_lock.c
+                   hy_fifo_lock.c \
+                   hy_fifo_lock_discard.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

@@ -60,18 +60,26 @@ _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
-bin_PROGRAMS                    += hy_fifo_demo
-hy_fifo_demo_SOURCES            = $(_sources_com) hy_fifo_demo.c
-hy_fifo_demo_CPPFLAGS           = $(_cppflags_com)
-hy_fifo_demo_CFLAGS             = $(_cflags_com)
-hy_fifo_demo_CXXFLAGS           = $(_cxxflags_com)
-hy_fifo_demo_LDFLAGS            = $(_ldflags_com)
-hy_fifo_demo_LDADD              = $(_ldadd_com)
+bin_PROGRAMS                        += hy_fifo_demo
+hy_fifo_demo_SOURCES                = $(_sources_com) hy_fifo_demo.c
+hy_fifo_demo_CPPFLAGS               = $(_cppflags_com)
+hy_fifo_demo_CFLAGS                 = $(_cflags_com)
+hy_fifo_demo_CXXFLAGS               = $(_cxxflags_com)
+hy_fifo_demo_LDFLAGS                = $(_ldflags_com)
+hy_fifo_demo_LDADD                  = $(_ldadd_com)
 
-bin_PROGRAMS                    += hy_fifo_lock_demo
-hy_fifo_lock_demo_SOURCES       = $(_sources_com) hy_fifo_lock_demo.c
-hy_fifo_lock_demo_CPPFLAGS      = $(_cppflags_com)
-hy_fifo_lock_demo_CFLAGS        = $(_cflags_com)
-hy_fifo_lock_demo_CXXFLAGS      = $(_cxxflags_com)
-hy_fifo_lock_demo_LDFLAGS       = $(_ldflags_com)
-hy_fifo_lock_demo_LDADD         = $(_ldadd_com)
+bin_PROGRAMS                        += hy_fifo_lock_demo
+hy_fifo_lock_demo_SOURCES           = $(_sources_com) hy_fifo_lock_demo.c
+hy_fifo_lock_demo_CPPFLAGS          = $(_cppflags_com)
+hy_fifo_lock_demo_CFLAGS            = $(_cflags_com)
+hy_fifo_lock_demo_CXXFLAGS          = $(_cxxflags_com)
+hy_fifo_lock_demo_LDFLAGS           = $(_ldflags_com)
+hy_fifo_lock_demo_LDADD             = $(_ldadd_com)
+
+bin_PROGRAMS                        += hy_fifo_lock_discard_demo
+hy_fifo_lock_discard_demo_SOURCES   = $(_sources_com) hy_fifo_lock_discard_demo.c
+hy_fifo_lock_discard_demo_CPPFLAGS  = $(_cppflags_com)
+hy_fifo_lock_discard_demo_CFLAGS    = $(_cflags_com)
+hy_fifo_lock_discard_demo_CXXFLAGS  = $(_cxxflags_com)
+hy_fifo_lock_discard_demo_LDFLAGS   = $(_ldflags_com)
+hy_fifo_lock_discard_demo_LDADD     = $(_ldadd_com)

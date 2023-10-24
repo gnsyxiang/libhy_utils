@@ -33,7 +33,8 @@ _no_install_headers_com +=
 
 _install_headers_com    += \
                            hy_fifo.h \
-                           hy_fifo_lock.h
+                           hy_fifo_lock.h \
+                           hy_fifo_lock_discard.h
 
 # ------------------
 # make install files
