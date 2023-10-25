@@ -219,7 +219,9 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
 
             if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
                 LOGE("HyFileWrite failed \n");
-                break;
+
+                ret = -1;
+                goto _CAN_WRITE_ERR;
             }
         }
 
@@ -229,12 +231,16 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
 
             if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
                 LOGE("HyFileWrite failed \n");
-                break;
+
+                ret = -1;
+                goto _CAN_WRITE_ERR;
             }
         }
 
         ret = len;
     } while(0);
+
+_CAN_WRITE_ERR:
 
     HyThreadMutexUnLock_m(handle->mutex_h);
 
