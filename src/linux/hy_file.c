@@ -295,7 +295,7 @@ _FILE_WRITE_AGAIN:
         LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
 
         usleep(1 * 1000);
-        if (cnt++ < 5) {
+        if (++cnt >= 5) {
             LOGE("try %d times \n", cnt);
             return -1;
         }
