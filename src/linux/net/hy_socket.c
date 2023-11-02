@@ -18,10 +18,14 @@
  *     last modified: 05/05 2023 10:30
  */
 #include <stdio.h>
+#include <errno.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/select.h>
+#include <sys/time.h>
 
 #include "hy_assert.h"
 #include "hy_mem.h"
@@ -68,6 +72,44 @@ hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u
 
         if (-1 == HySocketConnect(socket_fd, socket_info->ip, socket_info->port)) {
             LOGE("HySocketConnect failed \n");
+            break;
+        }
+
+        ret = write(socket_fd, buf, len);
+        if (-1 == ret) {
+            LOGES("write failed \n");
+            break;
+        }
+
+        HySocketDestroy(&socket_fd);
+
+        return ret;
+    } while(0);
+
+    if (socket_fd) {
+        HySocketDestroy(&socket_fd);
+    }
+
+    return -1;
+}
+
+hy_s32_t HySocketClientTCPWriteOnceTimeout(HySocketInfo_s *socket_info, hy_u32_t ms,
+                                           void *buf, hy_u32_t len)
+{
+    hy_s32_t socket_fd = -1;
+    hy_s32_t ret;
+
+    HY_ASSERT_RET_VAL(!socket_info || !buf, -1);
+
+    do {
+        socket_fd = HySocketCreate(HY_SOCKET_DOMAIN_TCP);
+        if (socket_fd < 0) {
+            LOGE("HySocketCreate failed \n");
+            break;
+        }
+
+        if (-1 == HySocketConnectTimeout(socket_fd, ms, socket_info->ip, socket_info->port)) {
+            LOGE("HySocketConnectTimeout failed \n");
             break;
         }
 
@@ -242,9 +284,10 @@ hy_s32_t HySocketListen(hy_s32_t socket_fd, const char *ip, hy_u16_t port)
 
 hy_s32_t HySocketConnect(hy_s32_t socket_fd, const char *ip, const hy_u16_t port)
 {
-    HY_ASSERT_RET_VAL(!ip, -1);
     hy_s32_t ret;
     struct sockaddr_in server_addr;
+
+    HY_ASSERT_RET_VAL(!ip, -1);
 
     HY_MEMSET(&server_addr, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -258,6 +301,56 @@ hy_s32_t HySocketConnect(hy_s32_t socket_fd, const char *ip, const hy_u16_t port
     } else {
         return 0;
     }
+}
+
+hy_s32_t HySocketConnectTimeout(hy_s32_t socket_fd, hy_u32_t ms,
+                                const char *ip, const hy_u16_t port)
+{
+    hy_s32_t ret, flag;
+    struct sockaddr_in server_addr;
+    struct timeval tv;
+    fd_set wset,rset;
+
+    HY_ASSERT_RET_VAL(!ip, -1);
+
+    HY_MEMSET(&server_addr, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(ip);
+
+    fcntl(socket_fd, F_SETFL, fcntl(socket_fd, F_GETFL, 0) | O_NONBLOCK);
+
+    ret = connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if (ret != 0) {
+        if (errno != EINPROGRESS) {
+            LOGES("connect failed \n");
+        } else {
+            tv.tv_sec = 0;
+            tv.tv_usec = ms * 1000;
+
+            FD_ZERO(&rset);
+            FD_ZERO(&wset);
+            FD_SET(socket_fd, &wset);
+            FD_SET(socket_fd, &rset);
+
+            flag = select(socket_fd + 1, &rset, &wset, NULL, &tv);
+            if (flag < 0) {
+                LOGES("select failed \n");
+            } else if (flag == 0) {
+                ret = -2;
+                LOGES("select timeout \n");
+            } else if (flag == 1) {
+                if (FD_ISSET(socket_fd, &wset)) {
+                    fcntl(socket_fd, F_SETFL, fcntl(socket_fd, F_GETFL, 0) & ~O_NONBLOCK);
+                    ret = 0;
+                } else {
+                    LOGES("select timeout \n");
+                }
+            }
+        }
+    }
+
+    return ret;
 }
 
 void HySocketDestroy(hy_s32_t *socket_fd)

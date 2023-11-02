@@ -73,6 +73,18 @@ void HySocketDestroy(hy_s32_t *socket_fd);
 hy_s32_t HySocketConnect(hy_s32_t socket_fd, const char *ip, const hy_u16_t port);
 
 /**
+ * @brief 连接服务端
+ *
+ * @param socket_fd fd
+ * @param ms 超时时间
+ * @param ip ip地址
+ * @param port 端口号
+ * @return 成功返回0，失败返回-1，超时返回-2
+ */
+hy_s32_t HySocketConnectTimeout(hy_s32_t socket_fd, hy_u32_t ms,
+                                const char *ip, const hy_u16_t port);
+
+/**
  * @brief 服务端监听连接
  *
  * @param socket_fd fd
@@ -136,13 +148,24 @@ hy_s32_t HySocketUnixAccept(hy_s32_t socket_fd, struct sockaddr_un *client_addr)
 /**
  * @brief TCP短连接发送数据
  *
- * @param ip ip地址
- * @param port 端口号
+ * @param socket_info ip和端口号
  * @param buf 发送数据的地址
  * @param len 数据的长度
  * @return 成功返回数据的长度，失败返回-1
  */
 hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u32_t len);
+
+/**
+ * @brief TCP短连接发送数据
+ *
+ * @param socket_info ip和端口号
+ * @param ms 超时时间
+ * @param buf 数据地址
+ * @param len 数据长度
+ * @return 成功返回发送的长度，失败返回-1
+ */
+hy_s32_t HySocketClientTCPWriteOnceTimeout(HySocketInfo_s *socket_info, hy_u32_t ms,
+                                           void *buf, hy_u32_t len);
 
 #ifdef __cplusplus
 }
