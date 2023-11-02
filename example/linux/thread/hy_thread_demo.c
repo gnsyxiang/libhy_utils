@@ -162,8 +162,8 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyThreadConfig_s low_thread_c;
     const char *low_thread_name             = "low_thread";
     HY_MEMSET(&low_thread_c, sizeof(low_thread_c));
-    low_thread_c.save_c.policy              = HY_THREAD_POLICY_SCHED_FIFO;
-    low_thread_c.save_c.priority            = 10;
+    low_thread_c.policy                     = HY_THREAD_POLICY_SCHED_FIFO;
+    low_thread_c.priority                   = 10;
     low_thread_c.save_c.thread_loop_cb      = _rt_loop_cb;
     low_thread_c.save_c.args                = (void *)"low";
     HY_STRNCPY(low_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
@@ -172,8 +172,8 @@ static hy_s32_t _handle_module_create(_main_context_s *context)
     HyThreadConfig_s high_thread_c;
     const char *high_thread_name            = "high_thread";
     HY_MEMSET(&high_thread_c, sizeof(high_thread_c));
-    high_thread_c.save_c.policy             = HY_THREAD_POLICY_SCHED_FIFO;
-    high_thread_c.save_c.priority           = 20;
+    high_thread_c.policy                    = HY_THREAD_POLICY_SCHED_FIFO;
+    high_thread_c.priority                  = 20;
     high_thread_c.save_c.thread_loop_cb     = _rt_loop_cb;
     high_thread_c.save_c.args               = (void *)"high";
     HY_STRNCPY(high_thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,

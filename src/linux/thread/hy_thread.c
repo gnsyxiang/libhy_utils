@@ -36,6 +36,7 @@ struct HyThread_s {
     hy_u32_t                is_exit;
 
     pthread_t               id;
+
     pthread_key_t           key;
     hy_s32_t                is_init_key;
 };
@@ -138,9 +139,10 @@ pthread_t HyThreadGetId(HyThread_s *handle)
 
 void HyThreadDestroy(HyThread_s **handle_pp)
 {
-    HY_ASSERT_RET(!handle_pp || !*handle_pp);
     HyThread_s *handle = *handle_pp;
     hy_u32_t cnt = 0;
+
+    HY_ASSERT_RET(!handle_pp || !*handle_pp);
 
     if (handle->save_c.destroy_mode == HY_THREAD_DESTROY_MODE_FORCE) {
         if (!handle->is_exit) {
@@ -161,29 +163,29 @@ void HyThreadDestroy(HyThread_s **handle_pp)
 
 HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
 {
-    HY_ASSERT_RET_VAL(!thread_c, NULL);
-
     HyThread_s *handle = NULL;
     pthread_attr_t attr;
     struct sched_param param;
+
+    HY_ASSERT_RET_VAL(!thread_c, NULL);
 
     do {
         handle = HY_MEM_MALLOC_BREAK(HyThread_s *, sizeof(*handle));
         HY_MEMCPY(&handle->save_c, &thread_c->save_c, sizeof(handle->save_c));
 
         if (0 != pthread_attr_init(&attr)) {
-            LOGES("pthread init failed \n");
+            LOGES("pthread_attr_init failed \n");
             break;
         }
 
-        if (thread_c->save_c.policy != HY_THREAD_POLICY_SCHED_OTHER) {
+        if (thread_c->policy != HY_THREAD_POLICY_SCHED_OTHER) {
             //设置继承的调度策略
             //必需设置为PTHREAD_EXPLICIT_SCHED，否则设置线程的优先级会被忽略
             if (0 != pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED)) {
                 LOGES("pthread_attr_setinheritsched failed \n");
                 break;
             }
-            if (0 != pthread_attr_setschedpolicy(&attr, thread_c->save_c.policy)) {
+            if (0 != pthread_attr_setschedpolicy(&attr, thread_c->policy)) {
                 LOGES("pthread_attr_setschedpolicy failed \n");
                 break;
             }
@@ -191,7 +193,7 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c)
             // pthread_attr_getschedpolicy(&attr, &policy);
             // sched_get_priority_min(policy);
 
-            param.sched_priority = thread_c->save_c.priority;
+            param.sched_priority = thread_c->priority;
             if (0 != pthread_attr_setschedparam(&attr, &param)) {
                 LOGES("pthread_attr_setschedparam failed \n");
                 break;

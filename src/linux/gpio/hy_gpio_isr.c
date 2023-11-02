@@ -18,11 +18,11 @@
  *     last modified: 26/04 2023 19:26
  */
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 #include "hy_assert.h"
 #include "hy_thread.h"
@@ -183,9 +183,9 @@ HyGpioIsr_s *HyGpioIsrCreate(HyGpioIsrConfig_s *gpio_isr_c)
         read(handle->fd, &val, 1);
 
         HY_MEMSET(&thread_c, sizeof(thread_c));
+        thread_c.policy                 = HY_THREAD_POLICY_SCHED_RR;
+        thread_c.priority               = 10;
         thread_c.save_c.args            = handle;
-        thread_c.save_c.policy          = HY_THREAD_POLICY_SCHED_RR;
-        thread_c.save_c.priority        = 10;
         thread_c.save_c.thread_loop_cb  = _gpio_isr_loop_cb;
         HY_STRNCPY(thread_c.save_c.name, HY_THREAD_NAME_LEN_MAX,
                    thread_name, HY_STRLEN(thread_name));

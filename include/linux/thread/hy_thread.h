@@ -53,6 +53,8 @@ typedef enum {
 
 /**
  * @brief 线程是否分离
+ *
+ * @note 最好不要使用分离线程
  */
 typedef enum {
     HY_THREAD_DETACH_MODE_NO,                   ///< 非分离属性
@@ -74,13 +76,6 @@ typedef enum {
 typedef hy_s32_t (*HyThreadLoopCb_t)(void *args);
 
 /**
- * @brief 线程私有数据销毁函数回调
- *
- * @param args 私有数据
- */
-typedef void (*HyThreadKeyDestroyCb_t)(void *args);
-
-/**
  * @brief 模块配置参数
  */
 typedef struct {
@@ -91,8 +86,6 @@ typedef struct {
 
     HyThreadDestroyMode_e   destroy_mode;                   ///< 线程退出方式
     HyThreadDetachMode_e    detach_mode;                    ///< 线程是否分离
-    HyThreadPolicy_e        policy;                         ///< 调度策略，实时线程执行必须有root权限
-    hy_u32_t                priority;                       ///< 线程优先级，只有实施线程才能设置优先级
 } HyThreadSaveConfig_s;
 
 /**
@@ -100,6 +93,9 @@ typedef struct {
  */
 typedef struct {
     HyThreadSaveConfig_s    save_c;                         ///< 模块配置参数
+
+    HyThreadPolicy_e        policy;                         ///< 调度策略，实时线程执行必须有root权限
+    hy_u32_t                priority;                       ///< 线程优先级，只有实施线程才能设置优先级
 } HyThreadConfig_s;
 
 typedef struct HyThread_s HyThread_s;
@@ -130,6 +126,13 @@ HyThread_s *HyThreadCreate(HyThreadConfig_s *thread_c);
  * @param handle_pp 线程句柄的地址(二级指针)
  */
 void HyThreadDestroy(HyThread_s **handle_pp);
+
+/**
+ * @brief 线程私有数据销毁函数回调
+ *
+ * @param args 私有数据
+ */
+typedef void (*HyThreadKeyDestroyCb_t)(void *args);
 
 /**
  * @brief 设置线程私有数据

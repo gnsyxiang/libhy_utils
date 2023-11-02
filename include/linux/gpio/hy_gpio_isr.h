@@ -64,7 +64,8 @@ typedef struct HyGpioIsr_s HyGpioIsr_s;
 /**
  * @brief 创建周期性获取gpio中断模块
  *
- * @param config 配置参数，详见HyGpioIsrConfig_s
+ * @param gpio_isr_c 配置参数，详见HyGpioIsrConfig_s
+ *
  * @return 成功返回句柄，失败返回NULL
  */
 HyGpioIsr_s *HyGpioIsrCreate(HyGpioIsrConfig_s *gpio_isr_c);
