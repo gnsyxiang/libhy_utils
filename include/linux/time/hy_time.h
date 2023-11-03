@@ -69,6 +69,24 @@ do {                                                                        \
 } while (0)
 
 /**
+ * @brief 计算(当前时间 - _tv2_ptr时间)(struct timeval)之差，返回相差ms值
+ */
+#define HY_TIME_TIMEVAL_CUR_SUB_MS(_tv_ptr)                                 \
+({                                                                          \
+    struct timeval _difference;                                             \
+    struct timeval _cur_time;                                               \
+    gettimeofday(&_cur_time, NULL);                                         \
+    HY_TIME_CHECK_TYPE(&_cur_time, &_tv_ptr);                               \
+    _difference.tv_sec = _cur_time.tv_sec - (_tv_ptr).tv_sec;               \
+    _difference.tv_usec = _cur_time.tv_usec - (_tv_ptr).tv_usec;            \
+    if (_difference.tv_usec < 0) {                                          \
+        _difference.tv_sec--;                                               \
+        _difference.tv_usec += 1000000;                                     \
+    }                                                                       \
+    _difference.tv_sec * 1000 + _difference.tv_usec / 1000;                 \
+})
+
+/**
  * @brief 计算当前时间-_tv时间(struct timeval)之差
  */
 #define HY_TIME_TIMEVAL_NOW_SUB(_tv, _now_sub_tv_ptr)                       \
