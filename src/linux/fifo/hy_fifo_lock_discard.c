@@ -18,6 +18,7 @@
  *     last modified: 23/10 2023 17:31
  */
 #include <stdio.h>
+#include <unistd.h>
 
 #include "hy_assert.h"
 #include "hy_utils.h"
