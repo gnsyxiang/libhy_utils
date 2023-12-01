@@ -9,7 +9,7 @@ language=cn en
 host=
 cross_gcc_path=
 
-configure_param=--enable-cjson --enable-event
+configure_param=--enable-cjson --enable-event --enable-libprotobuf_c
 
 cppflag=-fstack-protector-all
 cflag=

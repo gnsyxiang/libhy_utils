@@ -87,7 +87,5 @@ hy_utils.pc
 
 hy_*_demo
 hy_*_test
-*.pb-c.c
-*.pb-c.h
 
 
