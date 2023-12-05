@@ -43,6 +43,29 @@ extern "C" {
 #define HY_UTILS_IS_POWER_OF_2(x)       ((x) != 0 && (((x) & ((x) - 1)) == 0))              ///< 判断x是否为2^n，是返回1，否返回0
 
 /**
+ * @brief 向左移位操作
+ *
+ * @index 整数值(1, 2, 3, ...)
+ * @return 返回值(0x1, 0x2...)
+ */
+#define HY_UTILS_BIT_SHIFT(index)         (0x1UL << (index))
+
+/**
+ * @brief 在val中检查index索引位是否置1
+ *
+ * @param val 整数值
+ * @index 整数值(1, 2, 3, ...)
+ * @return 置1返回1，否者返回0
+ */
+#define HY_UTILS_BIT_IS_SET(val, index)   (((val) & HY_UTILS_BIT_SHIFT(index)) == HY_UTILS_BIT_SHIFT(index))
+
+/**
+ * @brief 在val中检查index索引位是否置0
+ * @return 置0返回1，否者返回0
+ */
+#define HY_UTILS_BIT_IS_RESET(val, index)   ((((val) & HY_UTILS_BIT_SHIFT(index)) ^ (HY_UTILS_BIT_SHIFT(index))) == (HY_UTILS_BIT_SHIFT(index)))
+
+/**
  * @brief 用于autotools检查libhy_utils使用
  */
 void HyUtilsCheck(void);
