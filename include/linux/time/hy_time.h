@@ -29,15 +29,18 @@ extern "C" {
 
 #include <hy_log/hy_type.h>
 
-#define HY_TIME_CHECK_TYPE(_param1, _param_2)       \
-do {                                                \
-    typeof(_param1) __param1= (_param1);            \
-    typeof(_param_2) __param_2= (_param_2);         \
-    (void) (&__param1 == &__param_2);               \
+/**
+ * @brief 判断指针类型是否相同，不同编译器会报错误
+ */
+#define HY_TIME_CHECK_TYPE(_ptr1, _ptr2)                                    \
+do {                                                                        \
+    typeof(_ptr1) __ptr1 = (_ptr1);                                         \
+    typeof(_ptr2) __ptr2 = (_ptr2);                                         \
+    (void) (&__ptr1 == &__ptr2);                                            \
 } while (0)
 
 /**
- * @brief 计算_tv1_ptr+_tv2_ptr时间(struct timeval)之和
+ * @brief 计算"_tv1_ptr + _tv2_ptr"时间(struct timeval)之和
  */
 #define HY_TIME_TIMEVAL_ADD(_tv1_ptr, _tv2_ptr, _sum_tv_ptr)                \
 do {                                                                        \
@@ -53,7 +56,7 @@ do {                                                                        \
 } while (0)
 
 /**
- * @brief 计算_tv1_ptr-_tv2_ptr时间(struct timeval)之差
+ * @brief 计算"_tv1_ptr - _tv2_ptr"时间(struct timeval)之差
  */
 #define HY_TIME_TIMEVAL_SUB(_tv1_ptr, _tv2_ptr, _sub_tv_ptr)                \
 do {                                                                        \
@@ -75,25 +78,53 @@ do {                                                                        \
 ({                                                                          \
     struct timeval _difference;                                             \
     struct timeval _cur_time;                                               \
-    gettimeofday(&_cur_time, NULL);                                         \
+                                                                            \
     HY_TIME_CHECK_TYPE(&_cur_time, &_tv_ptr);                               \
+                                                                            \
+    gettimeofday(&_cur_time, NULL);                                         \
+                                                                            \
     _difference.tv_sec = _cur_time.tv_sec - (_tv_ptr).tv_sec;               \
     _difference.tv_usec = _cur_time.tv_usec - (_tv_ptr).tv_usec;            \
     if (_difference.tv_usec < 0) {                                          \
         _difference.tv_sec--;                                               \
-        _difference.tv_usec += 1000000;                                     \
+        _difference.tv_usec += 1 * 1000 * 1000;                             \
     }                                                                       \
+                                                                            \
     _difference.tv_sec * 1000 + _difference.tv_usec / 1000;                 \
 })
 
 /**
- * @brief 计算当前时间-_tv时间(struct timeval)之差
+ * @brief 计算(当前时间 - _tv2_ptr时间)(struct timeval)之差，返回相差ms值，同时更新_tv_ptr
+ */
+#define HY_TIME_TIMEVAL_UPDATE_CUR_SUB_MS(_tv_ptr)                          \
+({                                                                          \
+    struct timeval _difference;                                             \
+    struct timeval _cur_time;                                               \
+                                                                            \
+    HY_TIME_CHECK_TYPE(&_cur_time, _tv_ptr);                                \
+                                                                            \
+    gettimeofday(&_cur_time, NULL);                                         \
+                                                                            \
+    _difference.tv_sec = _cur_time.tv_sec - (_tv_ptr)->tv_sec;              \
+    _difference.tv_usec = _cur_time.tv_usec - (_tv_ptr)->tv_usec;           \
+    if (_difference.tv_usec < 0) {                                          \
+        _difference.tv_sec--;                                               \
+        _difference.tv_usec += 1 * 1000 * 1000;                             \
+    }                                                                       \
+    *(_tv_ptr) = _cur_time;                                                 \
+                                                                            \
+    _difference.tv_sec * 1000 + _difference.tv_usec / 1000;                 \
+})
+
+/**
+ * @brief 计算(当前时间-_tv时间)(struct timeval)之差
  */
 #define HY_TIME_TIMEVAL_NOW_SUB(_tv, _now_sub_tv_ptr)                       \
 do {                                                                        \
+    struct timeval _now;                                                    \
+                                                                            \
     HY_TIME_CHECK_TYPE(_tv, _now_sub_tv_ptr);                               \
                                                                             \
-    struct timeval _now;                                                    \
     gettimeofday(&_now, NULL);                                              \
     HY_TIME_TIMEVAL_SUB(&_now, (_tv), (_now_sub_tv_ptr));                   \
 } while (0)
