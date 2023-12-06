@@ -45,25 +45,62 @@ extern "C" {
 /**
  * @brief 向左移位操作
  *
- * @index 整数值(1, 2, 3, ...)
+ * @param _index 整数值(1, 2, 3, ...)
  * @return 返回值(0x1, 0x2...)
  */
-#define HY_UTILS_BIT_SHIFT(index)         (0x1UL << (index))
+#define HY_UTILS_BIT_SHIFT(_index)              (0x1UL << (_index))
 
 /**
  * @brief 在val中检查index索引位是否置1
  *
- * @param val 整数值
- * @index 整数值(1, 2, 3, ...)
+ * @param _val 整数值
+ * @param _index 整数值(1, 2, 3, ...)
  * @return 置1返回1，否者返回0
  */
-#define HY_UTILS_BIT_IS_SET(val, index)   (((val) & HY_UTILS_BIT_SHIFT(index)) == HY_UTILS_BIT_SHIFT(index))
+#define HY_UTILS_BIT_IS_SET(_val, _index)       (((_val) & HY_UTILS_BIT_SHIFT(_index)) == HY_UTILS_BIT_SHIFT(_index))
 
 /**
  * @brief 在val中检查index索引位是否置0
+ *
+ * @param _val 整数值
+ * @param _index 整数值(1, 2, 3, ...)
  * @return 置0返回1，否者返回0
  */
-#define HY_UTILS_BIT_IS_RESET(val, index)   ((((val) & HY_UTILS_BIT_SHIFT(index)) ^ (HY_UTILS_BIT_SHIFT(index))) == (HY_UTILS_BIT_SHIFT(index)))
+#define HY_UTILS_BIT_IS_RESET(_val, _index)     ((((_val) & HY_UTILS_BIT_SHIFT(_index)) ^ (HY_UTILS_BIT_SHIFT(_index))) == (HY_UTILS_BIT_SHIFT(_index)))
+
+/**
+ * @brief 求整除后的商
+ *
+ * @param _num 整数
+ * @param _div 除数
+ * @return 返回商
+ */
+#define HY_UTILS_DIV(_num, _div)                ((_num) / (_div))
+
+/**
+ * @brief 求整除8后的商
+ *
+ * @param _num 整数
+ * @return 返回商
+ */
+#define HY_UTILS_DIV_8(_num)                    (HY_UTILS_DIV(_num, 8))
+
+/**
+ * @brief 求整除后的余数
+ *
+ * @param _num 整数
+ * @param _div 除数
+ * @return 返回余数
+ */
+#define HY_UTILS_REMAINDER(_num, _remainder)    ((_num) % (_remainder))
+
+/**
+ * @brief 求整除8后的余数
+ *
+ * @param _num 整数
+ * @return 返回余数
+ */
+#define HY_UTILS_REMAINDER_8(_num)              (HY_UTILS_REMAINDER(_num, 8))
 
 /**
  * @brief 用于autotools检查libhy_utils使用
