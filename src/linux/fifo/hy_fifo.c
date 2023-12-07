@@ -125,10 +125,10 @@ hy_s32_t HyFifoReadPeek(HyFifo_s *handle, void *buf, hy_u32_t len)
 
     l = handle->in - handle->out;
     if (len > l) {
-        LOGW("not enough data to read, len: %d, use_len: %d \n", len, l);
+        LOGD("not enough data to read, len: %d, use_len: %d \n", len, l);
 
         if (l == 0) {
-            LOGE("fifo is empty \n");
+            LOGD("fifo is empty \n");
             return 0;
         }
 
