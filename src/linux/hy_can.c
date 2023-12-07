@@ -190,6 +190,30 @@ static hy_s32_t _can_init(const char *name, HyCanSpeed_e speed)
     return 0;
 }
 
+static hy_s32_t _can_write(hy_s32_t fd, const void *buf, hy_u32_t len)
+{
+    hy_s32_t ret;
+    hy_u32_t cnt = 0;
+
+_FILE_WRITE_AGAIN:
+    ret = write(fd, buf, len);
+    if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
+        LOGW("errno: %d(%s), try again, cnt: %d\n", errno, strerror(errno), cnt);
+
+        usleep(1 * 1000);
+        if (++cnt >= 10) {
+            LOGE("try %d times \n", cnt);
+            return -1;
+        }
+        goto _FILE_WRITE_AGAIN;
+    } else if (ret == -1) {
+        LOGES("opposite fd close, fd: %d \n", fd);
+        return -1;
+    } else {
+        return ret;
+    }
+}
+
 hy_s32_t HyCanGetFd(HyCan_s *handle)
 {
     HY_ASSERT(handle);
@@ -217,8 +241,8 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
         for (hy_s32_t i = 0; i < shang; ++i) {
             HY_MEMCPY(tx_frame.data, buf + 8 * i, 8);
 
-            if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
-                LOGE("HyFileWrite failed \n");
+            if (-1 == _can_write(handle->fd, &tx_frame, sizeof(tx_frame))) {
+                LOGE("_can_write failed \n");
 
                 ret = -1;
                 goto _CAN_WRITE_ERR;
@@ -229,8 +253,8 @@ hy_s32_t HyCanWrite(HyCan_s *handle, char *buf, hy_u32_t len)
             tx_frame.can_dlc = yushu;
             HY_MEMCPY(tx_frame.data, buf + 8 * shang, yushu);
 
-            if (-1 == HyFileWrite(handle->fd, &tx_frame, sizeof(tx_frame))) {
-                LOGE("HyFileWrite failed \n");
+            if (-1 == _can_write(handle->fd, &tx_frame, sizeof(tx_frame))) {
+                LOGE("_can_write failed \n");
 
                 ret = -1;
                 goto _CAN_WRITE_ERR;
