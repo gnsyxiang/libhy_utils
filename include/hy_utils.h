@@ -51,22 +51,22 @@ extern "C" {
 #define HY_UTILS_BIT_SHIFT(_index)              (0x1UL << (_index))
 
 /**
- * @brief 在val中检查index索引位是否置1
+ * @brief 在val中检查bit索引位是否置1
  *
  * @param _val 整数值
- * @param _index 整数值(1, 2, 3, ...)
+ * @param _bit 整数值(0x1, 0x2, 0x4, ...)
  * @return 置1返回1，否者返回0
  */
-#define HY_UTILS_BIT_IS_SET(_val, _index)       (((_val) & HY_UTILS_BIT_SHIFT(_index)) == HY_UTILS_BIT_SHIFT(_index))
+#define HY_UTILS_BIT_IS_SET(_val, _bit)       (((_val) & (_bit)) == (_bit))
 
 /**
- * @brief 在val中检查index索引位是否置0
+ * @brief 在val中检查bit索引位是否置0
  *
  * @param _val 整数值
- * @param _index 整数值(1, 2, 3, ...)
+ * @param _bit 整数值(0x1, 0x2, 0x4, ...)
  * @return 置0返回1，否者返回0
  */
-#define HY_UTILS_BIT_IS_RESET(_val, _index)     ((((_val) & HY_UTILS_BIT_SHIFT(_index)) ^ (HY_UTILS_BIT_SHIFT(_index))) == (HY_UTILS_BIT_SHIFT(_index)))
+#define HY_UTILS_BIT_IS_RESET(_val, _bit)     ((((_val) & (_bit)) ^ (_bit)) == (_bit))
 
 /**
  * @brief 求整除后的商
