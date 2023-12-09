@@ -195,23 +195,25 @@ static hy_s32_t _can_write(hy_s32_t fd, const void *buf, hy_u32_t len)
     hy_s32_t ret;
     hy_u32_t cnt = 0;
 
-_FILE_WRITE_AGAIN:
-    ret = write(fd, buf, len);
-    if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
-        LOGW("errno: %d(%s), try again, cnt: %d\n", errno, strerror(errno), cnt);
+    do {
+        ret = write(fd, buf, len);
+        if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
+            if (cnt >= 1) {
+                LOGW("errno: %d(%s), try again, cnt: %d\n", errno, strerror(errno), cnt);
+            }
 
-        usleep(1 * 1000);
-        if (++cnt >= 10) {
-            LOGE("try %d times \n", cnt);
+            usleep(1 * 1000);
+            if (++cnt >= 10) {
+                LOGE("try %d times \n", cnt);
+                return -1;
+            }
+        } else if (ret == -1) {
+            LOGES("opposite fd close, fd: %d \n", fd);
             return -1;
+        } else {
+            return ret;
         }
-        goto _FILE_WRITE_AGAIN;
-    } else if (ret == -1) {
-        LOGES("opposite fd close, fd: %d \n", fd);
-        return -1;
-    } else {
-        return ret;
-    }
+    } while (1);
 }
 
 hy_s32_t HyCanGetFd(HyCan_s *handle)
