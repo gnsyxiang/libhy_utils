@@ -27,18 +27,56 @@ extern "C" {
 #include <hy_log/hy_type.h>
 
 /**
+ * @brief 获取一个字节从0位到指定位的掩码
+ *
+ * @param _index 整数值(0，1, 2, 3, 4, 5, 6, 7)
+ *
+ * @return 返回值指定位的掩码(0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80)
+ */
+#define HY_BIT_MASK_8(_index)               ((hy_u8_t)(0xff << (_index)))
+
+/**
+ * @brief 获取一个字节从0位到指定位的掩码
+ *
+ * @param _index 整数值(0，1, 2, 3 ...)
+ *
+ * @return 返回值指定位的掩码
+ */
+#define HY_BIT_MASK_16(_index)              ((hy_u16_t)(0xffff << (_index)))
+
+/**
+ * @brief 获取一个字节从0位到指定位的掩码
+ *
+ * @param _index 整数值(0，1, 2, 3 ...)
+ *
+ * @return 返回值指定位的掩码
+ */
+#define HY_BIT_MASK_32(_index)              ((hy_u32_t)(0xffffffff << (_index)))
+
+/**
+ * @brief 获取一个字节从0位到指定位的掩码
+ *
+ * @param _index 整数值(0，1, 2, 3 ...)
+ *
+ * @return 返回值指定位的掩码
+ */
+#define HY_BIT_MASK_64(_index)              ((hy_u64_t)(0xffffffffffffffff << (_index)))
+
+/**
  * @brief 向左移位操作
  *
  * @param _index 整数值(0，1, 2, 3, ...)
+ *
  * @return 返回值(0x1, 0x2...)
  */
-#define HY_BIT_SHIFT(_index)              (0x1ULL << (_index))
+#define HY_BIT_SHIFT(_index)                (0x1ULL << (_index))
 
 /**
  * @brief 在val中检查bit索引位是否置1
  *
  * @param _val 整数值
  * @param _bit_val 整数值(0x1, 0x2, 0x4, ...)
+ *
  * @return 置1返回1，否者返回0
  */
 #define HY_BIT_IS_SET(_val, _bit_val)       (((_val) & (_bit_val)) == (_bit_val))
@@ -48,6 +86,7 @@ extern "C" {
  *
  * @param _val 整数值
  * @param _bit_val 整数值(0x1, 0x2, 0x4, ...)
+ *
  * @return 置0返回1，否者返回0
  */
 #define HY_BIT_IS_RESET(_val, _bit_val)     ((((_val) & (_bit_val)) ^ (_bit_val)) == (_bit_val))
