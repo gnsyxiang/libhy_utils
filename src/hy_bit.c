@@ -19,37 +19,48 @@
  */
 #include <stdio.h>
 
+#include <hy_log/hy_log.h>
+
 #include "hy_assert.h"
 
 #include "hy_bit.h"
 
-void HyBitSet(char *byte, hy_u32_t index)
+void HyBitSet(char *byte, hy_u32_t len, hy_u32_t index)
 {
-    HY_ASSERT_RET(!byte);
+    if (!byte || index / 8 > len) {
+        LOGE("the param is error, byte: %p, %d / 8 > %d \n", byte, index, len);
+        return;
+    }
 
-    int byte_index = index / 8;
-    int bit_index = index % 8;
+    hy_u32_t byte_index = index / 8;
+    hy_u32_t bit_index = index % 8;
 
-    byte[byte_index] |= (1 << (7 - bit_index));
+    byte[byte_index] |= (0x1ULL << bit_index);
 }
 
-void HyBitReSet(char *byte, hy_u32_t index)
+void HyBitReSet(char *byte, hy_u32_t len, hy_u32_t index)
 {
-    HY_ASSERT_RET(!byte);
+    if (!byte || index / 8 > len) {
+        LOGE("the param is error, byte: %p, %d / 8 > %d \n", byte, index, len);
+        return;
+    }
 
-    int byte_index = index / 8;
-    int bit_index = index % 8;
+    hy_u32_t byte_index = index / 8;
+    hy_u32_t bit_index = index % 8;
 
-    byte[byte_index] &= ~(1 << (7 - bit_index));
+    byte[byte_index] &= ~(0x1ULL << bit_index);
 }
 
-hy_s32_t HyBitGet(char *byte, hy_u32_t index)
+hy_s32_t HyBitGet(char *byte, hy_u32_t len, hy_u32_t index)
 {
-    HY_ASSERT_RET_VAL(!byte, -1);
+    if (!byte || index / 8 > len) {
+        LOGE("the param is error, byte: %p, %d / 8 > %d \n", byte, index, len);
+        return -1;
+    }
 
-    int byte_index = index / 8;
-    int bit_index = index % 8;
+    hy_u32_t byte_index = index / 8;
+    hy_u32_t bit_index = index % 8;
 
-    return (byte[byte_index] & (1 << (7 - bit_index)));
+    return (byte[byte_index] & (0x1ULL << bit_index));
 }
 
