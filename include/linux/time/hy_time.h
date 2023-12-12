@@ -30,7 +30,10 @@ extern "C" {
 #include <hy_log/hy_type.h>
 
 /**
- * @brief 判断指针类型是否相同，不同编译器会报错误
+ * @brief 判断指针类型是否相同，类型不相同编译器会报错
+ *
+ * @param _ptr1 参数1，必须是指针
+ * @param _ptr2 参数2，必须是指针
  */
 #define HY_TIME_CHECK_TYPE(_ptr1, _ptr2)                                    \
 do {                                                                        \
@@ -40,94 +43,126 @@ do {                                                                        \
 } while (0)
 
 /**
- * @brief 计算"_tv1_ptr + _tv2_ptr"时间(struct timeval)之和
+ * @brief 计算"_tv1 + _tv2"时间(struct timeval)之和
+ *
+ * @param _tv1 时间1
+ * @param _tv2 时间2
+ * @param _sum_tv_ptr 时间之和（指针）
  */
-#define HY_TIME_TIMEVAL_ADD(_tv1_ptr, _tv2_ptr, _sum_tv_ptr)                \
+#define HY_TIME_TIMEVAL_ADD(_tv1, _tv2, _sum_tv_ptr)                        \
 do {                                                                        \
-    HY_TIME_CHECK_TYPE(_tv1_ptr, _tv2_ptr);                                 \
-    HY_TIME_CHECK_TYPE(_tv1_ptr, _sum_tv_ptr);                              \
+    if (NULL == _sum_tv_ptr) {                                              \
+        LOGE("the param is NULL \n");                                       \
+        break;                                                              \
+    }                                                                       \
                                                                             \
-    (_sum_tv_ptr)->tv_sec = (_tv1_ptr)->tv_sec + (_tv2_ptr)->tv_sec;        \
-    (_sum_tv_ptr)->tv_usec = (_tv1_ptr)->tv_usec + (_tv2_ptr)->tv_usec;     \
+    HY_TIME_CHECK_TYPE(&_tv1, &_tv2);                                       \
+    HY_TIME_CHECK_TYPE(&_tv1, _sum_tv_ptr);                                 \
+                                                                            \
+    (_sum_tv_ptr)->tv_sec = (_tv1).tv_sec + (_tv2).tv_sec;                  \
+    (_sum_tv_ptr)->tv_usec = (_tv1).tv_usec + (_tv2).tv_usec;               \
     if ((_sum_tv_ptr)->tv_usec >= 1000000) {                                \
         (_sum_tv_ptr)->tv_sec++;                                            \
-        (_sum_tv_ptr)->tv_usec -= 1000000;                                  \
+        (_sum_tv_ptr)->tv_usec -= 1 * 1000 * 1000;                          \
     }                                                                       \
 } while (0)
 
 /**
- * @brief 计算"_tv1_ptr - _tv2_ptr"时间(struct timeval)之差
+ * @brief 计算"_tv1 - _tv2"时间(struct timeval)之差
+ *
+ * @param _tv1 时间1
+ * @param _tv2 时间2
+ * @param _sum_tv_ptr 时间之差（指针）
  */
-#define HY_TIME_TIMEVAL_SUB(_tv1_ptr, _tv2_ptr, _sub_tv_ptr)                \
+#define HY_TIME_TIMEVAL_SUB(_tv1, _tv2, _sub_tv_ptr)                        \
 do {                                                                        \
-    HY_TIME_CHECK_TYPE(_tv1_ptr, _tv2_ptr);                                 \
-    HY_TIME_CHECK_TYPE(_tv1_ptr, _sub_tv_ptr);                              \
+    if (NULL == _sub_tv_ptr) {                                              \
+        LOGE("the param is NULL \n");                                       \
+        break;                                                              \
+    }                                                                       \
                                                                             \
-    (_sub_tv_ptr)->tv_sec = (_tv1_ptr)->tv_sec - (_tv2_ptr)->tv_sec;        \
-    (_sub_tv_ptr)->tv_usec = (_tv1_ptr)->tv_usec - (_tv2_ptr)->tv_usec;     \
+    HY_TIME_CHECK_TYPE(&_tv1, &_tv2);                                       \
+    HY_TIME_CHECK_TYPE(&_tv1, _sub_tv_ptr);                                 \
+                                                                            \
+    (_sub_tv_ptr)->tv_sec = (_tv1).tv_sec - (_tv2).tv_sec;                  \
+    (_sub_tv_ptr)->tv_usec = (_tv1).tv_usec - (_tv2).tv_usec;               \
     if ((_sub_tv_ptr)->tv_usec < 0) {                                       \
         (_sub_tv_ptr)->tv_sec--;                                            \
-        (_sub_tv_ptr)->tv_usec += 1000000;                                  \
+        (_sub_tv_ptr)->tv_usec += 1 * 1000 * 1000;                          \
     }                                                                       \
 } while (0)
 
 /**
- * @brief 计算(当前时间 - _tv2_ptr时间)(struct timeval)之差，返回相差ms值
+ * @brief 计算(当前时间 - _tv时间)(struct timeval)之差
+ *
+ * @param _tv 该时间为过去的时间
+ * @param _now_sub_tv_ptr 时间之差（指针）
  */
-#define HY_TIME_TIMEVAL_CUR_SUB_MS(_tv_ptr)                                 \
-({                                                                          \
+#define HY_TIME_TIMEVAL_CUR_SUB(_tv, _now_sub_tv_ptr)                       \
+do {                                                                        \
+    struct timeval _cur_time;                                               \
+                                                                            \
+    if (NULL == _now_sub_tv_ptr) {                                          \
+        LOGE("the param is NULL \n");                                       \
+        break;                                                              \
+    }                                                                       \
+                                                                            \
+    HY_TIME_CHECK_TYPE(&_tv, _now_sub_tv_ptr);                              \
+                                                                            \
+    gettimeofday(&_cur_time, NULL);                                         \
+    HY_TIME_TIMEVAL_SUB(_cur_time, (_tv), (_now_sub_tv_ptr));               \
+} while (0)
+
+/**
+ * @brief 计算(当前时间 - _tv时间)(struct timeval)之差，返回相差ms值
+ *
+ * @param _tv 该时间为过去的时间
+ * @param _sub_ms_ptr 返回与当前时间的差值
+ */
+#define HY_TIME_TIMEVAL_CUR_SUB_MS(_tv, _sub_ms_ptr)                        \
+do {                                                                        \
     struct timeval _difference;                                             \
     struct timeval _cur_time;                                               \
                                                                             \
-    HY_TIME_CHECK_TYPE(&_cur_time, &_tv_ptr);                               \
+    if (NULL == _sub_ms_ptr) {                                              \
+        LOGE("the param is NULL \n");                                       \
+        break;                                                              \
+    }                                                                       \
+                                                                            \
+    HY_TIME_CHECK_TYPE(&_cur_time, &_tv);                                   \
                                                                             \
     gettimeofday(&_cur_time, NULL);                                         \
                                                                             \
-    _difference.tv_sec = _cur_time.tv_sec - (_tv_ptr).tv_sec;               \
-    _difference.tv_usec = _cur_time.tv_usec - (_tv_ptr).tv_usec;            \
-    if (_difference.tv_usec < 0) {                                          \
-        _difference.tv_sec--;                                               \
-        _difference.tv_usec += 1 * 1000 * 1000;                             \
-    }                                                                       \
+    HY_TIME_TIMEVAL_SUB(_cur_time, _tv, &_difference);                      \
                                                                             \
-    _difference.tv_sec * 1000 + _difference.tv_usec / 1000;                 \
-})
+    *_sub_ms_ptr = _difference.tv_sec * 1000 + _difference.tv_usec / 1000;  \
+} while(0);
 
 /**
  * @brief 计算(当前时间 - _tv2_ptr时间)(struct timeval)之差，返回相差ms值，同时更新_tv_ptr
+ *
+ * @param _tv_ptr 该时间为过去的时间（地址）
+ * @param _sub_ms_ptr 返回与当前时间的差值
  */
-#define HY_TIME_TIMEVAL_UPDATE_CUR_SUB_MS(_tv_ptr)                          \
-({                                                                          \
+#define HY_TIME_TIMEVAL_UPDATE_CUR_SUB_MS(_tv_ptr, _sub_ms_ptr)             \
+do {                                                                        \
     struct timeval _difference;                                             \
     struct timeval _cur_time;                                               \
+                                                                            \
+    if (NULL == _sub_ms_ptr) {                                              \
+        LOGE("the param is NULL \n");                                       \
+        break;                                                              \
+    }                                                                       \
                                                                             \
     HY_TIME_CHECK_TYPE(&_cur_time, _tv_ptr);                                \
                                                                             \
     gettimeofday(&_cur_time, NULL);                                         \
                                                                             \
-    _difference.tv_sec = _cur_time.tv_sec - (_tv_ptr)->tv_sec;              \
-    _difference.tv_usec = _cur_time.tv_usec - (_tv_ptr)->tv_usec;           \
-    if (_difference.tv_usec < 0) {                                          \
-        _difference.tv_sec--;                                               \
-        _difference.tv_usec += 1 * 1000 * 1000;                             \
-    }                                                                       \
+    HY_TIME_TIMEVAL_SUB(_cur_time, (*_tv_ptr), &_difference);               \
+                                                                            \
     *(_tv_ptr) = _cur_time;                                                 \
-                                                                            \
-    _difference.tv_sec * 1000 + _difference.tv_usec / 1000;                 \
-})
-
-/**
- * @brief 计算(当前时间-_tv时间)(struct timeval)之差
- */
-#define HY_TIME_TIMEVAL_NOW_SUB(_tv, _now_sub_tv_ptr)                       \
-do {                                                                        \
-    struct timeval _now;                                                    \
-                                                                            \
-    HY_TIME_CHECK_TYPE(_tv, _now_sub_tv_ptr);                               \
-                                                                            \
-    gettimeofday(&_now, NULL);                                              \
-    HY_TIME_TIMEVAL_SUB(&_now, (_tv), (_now_sub_tv_ptr));                   \
-} while (0)
+    *_sub_ms_ptr = _difference.tv_sec * 1000 + _difference.tv_usec / 1000;  \
+} while(0);
 
 /**
  * @brief 获取utc时间

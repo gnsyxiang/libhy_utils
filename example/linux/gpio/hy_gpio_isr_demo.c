@@ -57,12 +57,7 @@ static void _sync_key_cb(hy_s32_t level, void *args)
     _main_context_s *context = args;
 
     if (level == '1') {
-        struct timeval newtime;
-        struct timeval difference;
-        gettimeofday(&newtime, NULL);
-        HY_TIME_TIMEVAL_SUB(&newtime, &context->sync_key_time, &difference);
-        context->sync_key_time = newtime;
-        context->sync_key_spend_time = difference.tv_usec / 1000;
+        HY_TIME_TIMEVAL_UPDATE_CUR_SUB_MS(&context->sync_key_time, &context->sync_key_spend_time);
 
         context->sync_key_cnt++;
 
