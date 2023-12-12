@@ -76,6 +76,24 @@ extern "C" {
  */
 #define HY_UTILS_REMAINDER_8(_num)              (HY_UTILS_REMAINDER(_num, 8))
 
+#if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && defined(__ORDER_BIG_ENDIAN__)
+/**
+ * @brief 判断字节序
+ */
+#define HY_UTILS_DETERMINE_BYTE_ORDER()                     \
+do {                                                        \
+    if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) {        \
+        LOGI("order little endian \n");                     \
+    } else if (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) {    \
+        LOGI("order big endian \n");                        \
+    } else {                                                \
+        LOGE("unable to determine machine byte order \n");  \
+    }                                                       \
+} while (0)
+#else
+#error "unable to determine machine byte order"
+#endif
+
 /**
  * @brief 用于autotools检查libhy_utils使用
  */
