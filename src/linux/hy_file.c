@@ -178,22 +178,33 @@ hy_s32_t HyFileGetContent2(const char *file, char *content, hy_u32_t content_len
 hy_s32_t HyFileRead(hy_s32_t fd, void *buf, hy_u32_t len)
 {
     hy_s32_t ret = 0;
+    hy_u32_t cnt = 0;
 
-_FILE_READ_AGAIN:
-    ret = read(fd, buf, len);
-    if (ret < 0) {
-        if (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno) {
-            LOGW("read failed, errno: %d(%s) \n", errno, strerror(errno));
-            ret = 0;
-            goto _FILE_READ_AGAIN;
-        } else {
+    do {
+        ret = read(fd, buf, len);
+        if (ret < 0) {
+            if (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno) {
+                LOGW("read failed, errno: %d(%s) \n", errno, strerror(errno));
+
+                usleep(1 * 1000);
+                if (++cnt >= 5) {
+                    LOGE("try %d times \n", cnt);
+                    ret = -1;
+                    break;
+                }
+            } else {
+                ret = -1;
+                LOGES("read failed \n");
+                break;
+            }
+        } else if (ret == 0) {
+            LOGES("opposite fd close, fd: %d \n", fd);
             ret = -1;
-            LOGES("read failed \n");
+            break;
+        } else {
+            break;
         }
-    } else if (ret == 0) {
-        LOGES("opposite fd close, fd: %d \n", fd);
-        ret = -1;
-    }
+    } while (1);
 
     return ret;
 }
@@ -289,23 +300,23 @@ hy_s32_t HyFileWrite(hy_s32_t fd, const void *buf, hy_u32_t len)
     hy_s32_t ret;
     hy_u32_t cnt = 0;
 
-_FILE_WRITE_AGAIN:
-    ret = write(fd, buf, len);
-    if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
-        LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
+    do {
+        ret = write(fd, buf, len);
+        if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
+            LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
 
-        usleep(1 * 1000);
-        if (++cnt >= 5) {
-            LOGE("try %d times \n", cnt);
+            usleep(1 * 1000);
+            if (++cnt >= 5) {
+                LOGE("try %d times \n", cnt);
+                return -1;
+            }
+        } else if (ret == -1) {
+            LOGES("opposite fd close, fd: %d \n", fd);
             return -1;
+        } else {
+            return ret;
         }
-        goto _FILE_WRITE_AGAIN;
-    } else if (ret == -1) {
-        LOGES("opposite fd close, fd: %d \n", fd);
-        return -1;
-    } else {
-        return ret;
-    }
+    } while (1);
 }
 
 hy_s32_t HyFileWriteN(hy_s32_t fd, const void *buf, hy_u32_t len)
@@ -319,24 +330,25 @@ hy_s32_t HyFileWriteN(hy_s32_t fd, const void *buf, hy_u32_t len)
     nleft = len;
 
     while (nleft > 0) {
-    _FILE_WRITEN_AGAIN:
-        ret = write(fd, ptr, nleft);
-        if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
-            LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
+        do {
+            ret = write(fd, ptr, nleft);
+            if (ret < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno)) {
+                LOGW("try again, errno: %d(%s) \n", errno, strerror(errno));
 
-            usleep(1 * 1000);
-            if (cnt++ < 5) {
-                LOGE("try %d times \n", cnt);
+                usleep(1 * 1000);
+                if (cnt++ < 5) {
+                    LOGE("try %d times \n", cnt);
+                    return -1;
+                }
+            } else if (ret == -1) {
+                LOGES("opposite fd close, fd: %d \n", fd);
                 return -1;
+            } else {
+                nleft -= ret;
+                ptr   += ret;
+                break;
             }
-            goto _FILE_WRITEN_AGAIN;
-        } else if (ret == -1) {
-            LOGES("opposite fd close, fd: %d \n", fd);
-            return -1;
-        } else {
-            nleft -= ret;
-            ptr   += ret;
-        }
+        } while (1);
     }
 
     return len;
