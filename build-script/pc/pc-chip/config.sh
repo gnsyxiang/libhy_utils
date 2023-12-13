@@ -11,7 +11,7 @@ cross_gcc_path=
 
 configure_param=--enable-cjson --enable-event --enable-libprotobuf_c
 
-cppflag=-fstack-protector-all
+cppflag=-fstack-protector-all -Wno-error=stringop-truncation -Wno-error=format-truncation= -Wno-error=format-overflow=
 cflag=
 cxxflag=
 ldflag=-rdynamic
