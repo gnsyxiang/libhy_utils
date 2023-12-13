@@ -218,12 +218,9 @@ int main(int argc, char *argv[])
         // _tcp_client_test(context);
         // _tcp_server_test(context);
 
-        HySocketInfo_s socket_info;
-        HY_MEMCPY(socket_info.ip, "192.168.0.15", HY_STRLEN("192.168.0.15"));
-        socket_info.port = 56789;
-
         while (!context->is_exit) {
-            HySocketClientTCPWriteOnceTimeout(&socket_info, 500, "hello world", HY_STRLEN("hello world"));
+            HySocketClientTCPWriteOnceTimeout("192.168.0.15", 56789, 500,
+                                              "hello world", HY_STRLEN("hello world"));
             sleep(1);
         }
     } while (0);

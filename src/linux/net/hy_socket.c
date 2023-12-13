@@ -55,13 +55,13 @@
  * 而发送的具体信息，并不被网络层所读取（只是传输），
  * 因此只要保证接受方与发送发使用的字节序相同，就不需要进行转换
  */
-
-hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u32_t len)
+hy_s32_t HySocketClientTCPWriteOnceTimeout(const char *ip, hy_u16_t port,
+                                           hy_u32_t ms, void *buf, hy_u32_t len)
 {
     hy_s32_t socket_fd = -1;
     hy_s32_t ret;
 
-    HY_ASSERT_RET_VAL(!socket_info || !buf, -1);
+    HY_ASSERT_RET_VAL(!ip || !buf, -1);
 
     do {
         socket_fd = HySocketCreate(HY_SOCKET_DOMAIN_TCP);
@@ -70,8 +70,8 @@ hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u
             break;
         }
 
-        if (-1 == HySocketConnect(socket_fd, socket_info->ip, socket_info->port)) {
-            LOGE("HySocketConnect failed \n");
+        if (-1 == HySocketConnectTimeout(socket_fd, ms, ip, port)) {
+            LOGE("HySocketConnectTimeout failed \n");
             break;
         }
 
@@ -93,13 +93,13 @@ hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u
     return -1;
 }
 
-hy_s32_t HySocketClientTCPWriteOnceTimeout(HySocketInfo_s *socket_info, hy_u32_t ms,
-                                           void *buf, hy_u32_t len)
+hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
+                                    const void *buf, hy_u32_t len)
 {
     hy_s32_t socket_fd = -1;
     hy_s32_t ret;
 
-    HY_ASSERT_RET_VAL(!socket_info || !buf, -1);
+    HY_ASSERT_RET_VAL(!ip || !buf, -1);
 
     do {
         socket_fd = HySocketCreate(HY_SOCKET_DOMAIN_TCP);
@@ -108,8 +108,8 @@ hy_s32_t HySocketClientTCPWriteOnceTimeout(HySocketInfo_s *socket_info, hy_u32_t
             break;
         }
 
-        if (-1 == HySocketConnectTimeout(socket_fd, ms, socket_info->ip, socket_info->port)) {
-            LOGE("HySocketConnectTimeout failed \n");
+        if (-1 == HySocketConnect(socket_fd, ip, port)) {
+            LOGE("HySocketConnect failed \n");
             break;
         }
 
@@ -355,12 +355,12 @@ hy_s32_t HySocketConnectTimeout(hy_s32_t socket_fd, hy_u32_t ms,
 
 void HySocketDestroy(hy_s32_t *socket_fd)
 {
-    if (socket_fd && *socket_fd) {
-        LOGD("close socket fd: %d \n", *socket_fd);
+    HY_ASSERT_RET(!socket_fd || *socket_fd < 0);
 
-        close(*socket_fd);
-        *socket_fd = -1;
-    }
+    LOGD("close socket fd: %d \n", *socket_fd);
+
+    close(*socket_fd);
+    *socket_fd = -1;
 }
 
 hy_s32_t HySocketCreate(HySocketDomain_e domain)

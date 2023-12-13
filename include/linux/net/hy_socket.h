@@ -29,6 +29,8 @@ extern "C" {
 
 #include <hy_log/hy_type.h>
 
+#define HY_SOCKET_IP_LEN_MAX    (46)        ///< IPv4的长度是16，IPv6的长度是46
+
 /**
  * @brief domain类型
  */
@@ -36,16 +38,6 @@ typedef enum {
     HY_SOCKET_DOMAIN_TCP,                   ///< 创建面向连接的TCP
     HY_SOCKET_DOMAIN_UDP,                   ///< 创建流式的UDP
 } HySocketDomain_e;
-
-#define HY_SOCKET_IP_LEN_MAX    (46)        ///< IPv4的长度是16，IPv6的长度是46
-
-/**
- * @brief ip地址和端口号
- */
-typedef struct {
-    char        ip[HY_SOCKET_IP_LEN_MAX];   ///< ip地址
-    hy_u16_t    port;                       ///< 端口号
-} HySocketInfo_s;
 
 /**
  * @brief 根据domain创建指定类型的socket
@@ -58,7 +50,7 @@ hy_s32_t HySocketCreate(HySocketDomain_e domain);
 /**
  * @brief 销毁socket
  *
- * @param socket_fd 需要销毁的socket fd
+ * @param socket_fd 需要销毁的socket fd（地址）
  */
 void HySocketDestroy(hy_s32_t *socket_fd);
 
@@ -148,24 +140,27 @@ hy_s32_t HySocketUnixAccept(hy_s32_t socket_fd, struct sockaddr_un *client_addr)
 /**
  * @brief TCP短连接发送数据
  *
- * @param socket_info ip和端口号
- * @param buf 发送数据的地址
- * @param len 数据的长度
- * @return 成功返回数据的长度，失败返回-1
- */
-hy_s32_t HySocketClientTCPWriteOnce(HySocketInfo_s *socket_info, void *buf, hy_u32_t len);
-
-/**
- * @brief TCP短连接发送数据
- *
- * @param socket_info ip和端口号
- * @param ms 超时时间
+ * @param ip IP地址
+ * @param port 端口号
  * @param buf 数据地址
  * @param len 数据长度
- * @return 成功返回发送的长度，失败返回-1
+ * @return 成功返回写入的长度，失败返回-1
  */
-hy_s32_t HySocketClientTCPWriteOnceTimeout(HySocketInfo_s *socket_info, hy_u32_t ms,
-                                           void *buf, hy_u32_t len);
+hy_s32_t HySocketClientTCPWriteOnce(const char *ip, hy_u16_t port,
+                                    const void *buf, hy_u32_t len);
+
+/**
+ * @brief TCP短连接发送数据，带超时
+ *
+ * @param ip IP地址
+ * @param port 端口号
+ * @param ms 超时时间，单位毫秒
+ * @param buf 数据地址
+ * @param len 数据长度
+ * @return 成功返回写入的长度，失败返回-1
+ */
+hy_s32_t HySocketClientTCPWriteOnceTimeout(const char *ip, hy_u16_t port,
+                                           hy_u32_t ms, void *buf, hy_u32_t len);
 
 #ifdef __cplusplus
 }
