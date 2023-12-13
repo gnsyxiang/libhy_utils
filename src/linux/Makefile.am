@@ -34,10 +34,6 @@ if COMPILE_LIBCURL
 SUBDIRS += download
 endif
 
-if COMPILE_LIBEVENT
-SUBDIRS += libevent
-endif
-
 if COMPILE_LIBCJSON
 SUBDIRS += serialize
 endif
@@ -101,10 +97,6 @@ _ldadd_com      += \
 
 if COMPILE_LIBCJSON
 _ldadd_com      += $(top_builddir)/src/$(run_os)/serialize/libhy_serialize.la
-endif
-
-if COMPILE_LIBEVENT
-_ldadd_com      += $(top_builddir)/src/$(run_os)/libevent/libhy_event.la
 endif
 
 lib@project_name@_@run_os@_la_SOURCES    = $(_sources_com)

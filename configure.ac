@@ -55,7 +55,6 @@ CHECK_LIBPROTOBUF_C
 CHECK_LIBZ
 CHECK_LIBSSL
 CHECK_LIBCURL
-CHECK_LIBEVENT
 CHECK_PTHREAD
 
 # Checks for header files.
@@ -100,7 +99,6 @@ AC_CONFIG_FILES([Makefile
                  example/linux/ipc/Makefile
                  example/linux/ipc/ipc_process/Makefile
                  example/linux/ipc/ipc_socket/Makefile
-                 example/linux/libevent/Makefile
                  example/linux/net/Makefile
                  example/linux/serialize/Makefile
                  example/linux/thread/Makefile
@@ -116,7 +114,6 @@ AC_CONFIG_FILES([Makefile
                  include/linux/ipc/Makefile
                  include/linux/ipc/ipc_process/Makefile
                  include/linux/ipc/ipc_socket/Makefile
-                 include/linux/libevent/Makefile
                  include/linux/net/Makefile
                  include/linux/serialize/Makefile
                  include/linux/thread/Makefile
@@ -136,7 +133,6 @@ AC_CONFIG_FILES([Makefile
                  src/linux/ipc/Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
-                 src/linux/libevent/Makefile
                  src/linux/net/Makefile
                  src/linux/serialize/Makefile
                  src/linux/thread/Makefile

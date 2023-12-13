@@ -30,10 +30,6 @@ if COMPILE_LIBCJSON
 SUBDIRS += serialize
 endif
 
-if COMPILE_LIBEVENT
-SUBDIRS += libevent
-endif
-
 # ------------------
 # defining variables
 # ------------------
