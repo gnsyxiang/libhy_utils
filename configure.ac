@@ -62,11 +62,14 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stddef.h std
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
+AC_TYPE_INT32_T
+AC_TYPE_INT8_T
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
+AC_TYPE_UINT8_T
 
 # Checks for library functions.
 # AC_FUNC_MALLOC
@@ -86,7 +89,8 @@ AC_CONFIG_FILES([Makefile
                  build-script/nxp/Makefile
                  build-script/nxp/mx6ull/Makefile
                  build-script/pc/Makefile
-                 build-script/pc/pc-chip/Makefile
+                 build-script/pc/ubuntu-pc/Makefile
+                 build-script/pc/windows-pc/Makefile
                  build-script/rock-chips/Makefile
                  build-script/rock-chips/rk3568/Makefile
                  build-script/stm32/Makefile
@@ -105,6 +109,7 @@ AC_CONFIG_FILES([Makefile
                  example/linux/time/Makefile
                  example/linux/uart/Makefile
                  example/mcu/Makefile
+                 example/windows/Makefile
                  include/Makefile
                  include/linux/Makefile
                  include/linux/audio/Makefile
@@ -120,6 +125,7 @@ AC_CONFIG_FILES([Makefile
                  include/linux/time/Makefile
                  include/linux/uart/Makefile
                  include/mcu/Makefile
+                 include/windows/Makefile
                  res/Makefile
                  res/voice/Makefile
                  res/voice/cn/Makefile
@@ -139,6 +145,7 @@ AC_CONFIG_FILES([Makefile
                  src/linux/time/Makefile
                  src/linux/uart/Makefile
                  src/mcu/Makefile
+                 src/windows/Makefile
                  test/Makefile])
 AC_OUTPUT
 
