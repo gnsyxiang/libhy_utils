@@ -339,8 +339,8 @@ hy_s32_t HySocketConnectTimeout(hy_s32_t socket_fd, hy_u32_t ms,
             } else if (flag == 0) {
                 ret = -2;
                 LOGES("select timeout \n");
-            } else if (flag == 1) {
-                if (FD_ISSET(socket_fd, &wset)) {
+            } else if (flag > 0) {
+                if (FD_ISSET(socket_fd, &wset) || FD_ISSET(socket_fd, &rset)) {
                     fcntl(socket_fd, F_SETFL, fcntl(socket_fd, F_GETFL, 0) & ~O_NONBLOCK);
                     ret = 0;
                 } else {
