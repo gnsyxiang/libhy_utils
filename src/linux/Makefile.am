@@ -34,10 +34,6 @@ if COMPILE_LIBCURL
 SUBDIRS += download
 endif
 
-if COMPILE_LIBCJSON
-SUBDIRS += serialize
-endif
-
 # ------------------
 # defining variables
 # ------------------
@@ -94,10 +90,6 @@ _ldadd_com      += \
                    $(top_builddir)/src/$(run_os)/thread/libhy_thread.la \
                    $(top_builddir)/src/$(run_os)/time/libhy_time.la \
                    $(top_builddir)/src/$(run_os)/uart/libhy_uart.la
-
-if COMPILE_LIBCJSON
-_ldadd_com      += $(top_builddir)/src/$(run_os)/serialize/libhy_serialize.la
-endif
 
 lib@project_name@_@run_os@_la_SOURCES    = $(_sources_com)
 lib@project_name@_@run_os@_la_CPPFLAGS   = $(_cppflags_com)

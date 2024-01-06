@@ -106,11 +106,11 @@ AC_CONFIG_FILES([Makefile
                  example/linux/ipc/ipc_process/Makefile
                  example/linux/ipc/ipc_socket/Makefile
                  example/linux/net/Makefile
-                 example/linux/serialize/Makefile
                  example/linux/thread/Makefile
                  example/linux/time/Makefile
                  example/linux/uart/Makefile
                  example/mcu/Makefile
+                 example/serialize/Makefile
                  example/windows/Makefile
                  include/Makefile
                  include/linux/Makefile
@@ -122,11 +122,11 @@ AC_CONFIG_FILES([Makefile
                  include/linux/ipc/ipc_process/Makefile
                  include/linux/ipc/ipc_socket/Makefile
                  include/linux/net/Makefile
-                 include/linux/serialize/Makefile
                  include/linux/thread/Makefile
                  include/linux/time/Makefile
                  include/linux/uart/Makefile
                  include/mcu/Makefile
+                 include/serialize/Makefile
                  include/windows/Makefile
                  res/Makefile
                  res/voice/Makefile
@@ -142,11 +142,11 @@ AC_CONFIG_FILES([Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
                  src/linux/net/Makefile
-                 src/linux/serialize/Makefile
                  src/linux/thread/Makefile
                  src/linux/time/Makefile
                  src/linux/uart/Makefile
                  src/mcu/Makefile
+                 src/serialize/Makefile
                  src/windows/Makefile
                  test/Makefile])
 AC_OUTPUT

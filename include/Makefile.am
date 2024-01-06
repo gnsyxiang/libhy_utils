@@ -20,6 +20,10 @@
 
 SUBDIRS = $(run_os)
 
+if COMPILE_LIBCJSON
+SUBDIRS += serialize
+endif
+
 # ------------------
 # defining variables
 # ------------------

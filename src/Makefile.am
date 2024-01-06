@@ -20,6 +20,10 @@
 
 SUBDIRS = $(run_os)
 
+if COMPILE_LIBCJSON
+SUBDIRS += serialize
+endif
+
 lib_LTLIBRARIES = lib@project_name@.la
 
 # ------------------
@@ -70,6 +74,10 @@ _ldflags_com    += -export-symbols-regex 'Hy*'
 endif
 
 _ldadd_com      += $(top_builddir)/src/$(run_os)/libhy_utils_$(run_os).la
+
+if COMPILE_LIBCJSON
+_ldadd_com      += $(top_builddir)/src/serialize/libhy_serialize.la
+endif
 
 lib@project_name@_la_SOURCES    = $(_sources_com)
 lib@project_name@_la_CPPFLAGS   = $(_cppflags_com)

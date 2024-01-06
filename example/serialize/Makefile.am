@@ -40,8 +40,8 @@ _no_error_com   +=
 _define_com     +=
 
 _include_com    += \
-                   -I$(top_srcdir)/include/$(run_os)/serialize \
                    -I$(top_srcdir)/include/$(run_os) \
+                   -I$(top_srcdir)/include/serialize \
                    -I$(top_srcdir)/include
 
 _sources_com    +=

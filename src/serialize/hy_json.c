@@ -28,7 +28,6 @@
 #include "hy_assert.h"
 #include "hy_string.h"
 #include "hy_mem.h"
-#include "hy_utils_linux.h"
 #include "hy_utils.h"
 
 #include "cjson_impl.h"
@@ -274,6 +273,7 @@ static hy_u32_t _file_content_create(const char *file, char **buf)
     return 0;
 }
 
+#if 0
 static hy_u32_t _save_file_content(HyJsonFile_s *json_file)
 {
     hy_s32_t fd;
@@ -314,6 +314,7 @@ static hy_u32_t _save_file_content(HyJsonFile_s *json_file)
 
     return 0;
 }
+#endif
 
 void HyJsonFileDestroy(HyJsonFile_s **handle_pp)
 {
@@ -321,7 +322,7 @@ void HyJsonFileDestroy(HyJsonFile_s **handle_pp)
     HyJsonFile_s *json_file = *handle_pp;
 
     if (json_file->save_flag) {
-        _save_file_content(json_file);
+        // _save_file_content(json_file);
     }
 
     json_impl.item_destroy(json_file->root);
