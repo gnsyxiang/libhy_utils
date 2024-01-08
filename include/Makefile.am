@@ -41,6 +41,7 @@ _install_headers_com    += \
                            hy_assert.h \
                            hy_bit.h \
                            hy_compile.h \
+                           hy_fifo.h \
                            hy_hex.h \
                            hy_list.h \
                            hy_md5sum.h \

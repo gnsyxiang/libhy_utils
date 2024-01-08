@@ -51,6 +51,7 @@ _include_com    += \
 
 _sources_com    += \
                    hy_bit.c \
+                   hy_fifo.c \
                    hy_hex.c \
                    hy_md5sum.c \
                    hy_mem.c \

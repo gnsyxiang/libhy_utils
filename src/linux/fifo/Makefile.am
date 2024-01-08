@@ -47,7 +47,6 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_fifo.c \
                    hy_fifo_lock.c \
                    hy_fifo_lock_discard.c
 
