@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #define HY_IPC_SOCKET_NAME_LEN_MAX              (64)
 

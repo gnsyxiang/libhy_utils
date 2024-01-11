@@ -27,7 +27,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #define HY_STRING_BUF_LEN_4             (4)
 #define HY_STRING_BUF_LEN_8             (8)

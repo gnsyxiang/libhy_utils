@@ -28,7 +28,7 @@ extern "C" {
 
 #include <alsa/asoundlib.h>
 
-#include "hy_utils/hy_type.h"
+#include <hy_os_type/hy_os_type.h>
 
 typedef enum {
     HY_ALSA_OPT_PLAY,

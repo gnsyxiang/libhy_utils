@@ -26,7 +26,7 @@ extern "C" {
 
 #include <signal.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #define HY_SIGNAL_NUM_MAX_32   (64)             ///< 系统信号最大值
 

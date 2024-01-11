@@ -27,7 +27,7 @@ extern "C" {
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #include "hy_compile.h"
 

@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #define HY_IPC_PROCESS_MSG_ID_SYNC_START        (0x0000)
 #define HY_IPC_PROCESS_MSG_ID_BROADCAST_START   (0x8000)

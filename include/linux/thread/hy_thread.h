@@ -26,7 +26,7 @@ extern "C" {
 
 #include <pthread.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #define HY_THREAD_NAME_LEN_MAX  (16)
 

@@ -27,7 +27,7 @@ extern "C" {
 #include <time.h>
 #include <sys/time.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 /**
  * @brief 判断指针类型是否相同，类型不相同编译器会报错
