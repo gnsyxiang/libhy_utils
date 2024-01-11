@@ -47,6 +47,7 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([dl], [dlopen])
 
 CHECK_LIBCUNIT
+CHECK_LIBHY_OS_TYPE
 CHECK_LIBHY_LOG
 CHECK_LIBCJSON
 
