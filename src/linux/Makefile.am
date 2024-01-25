@@ -23,12 +23,10 @@ noinst_LTLIBRARIES = lib@project_name@_@run_os@.la
 SUBDIRS = \
           audio \
           fifo \
-          gpio \
           ipc \
           net \
           thread \
-          time \
-          uart
+          time
 
 if COMPILE_LIBCURL
 SUBDIRS += download
@@ -61,17 +59,12 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_can.c \
                    hy_dir.c \
                    hy_dynamic_array.c \
                    hy_dynamic_lib.c \
-                   hy_file.c \
                    hy_hash.c \
                    hy_math.c \
-                   hy_package_list.c \
-                   hy_pipe.c \
-                   hy_signal.c \
-                   hy_utils_linux.c
+                   hy_package_list.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
@@ -85,11 +78,9 @@ _cxxflags_com   +=
 _ldadd_com      += \
                    $(top_builddir)/src/$(run_os)/audio/libhy_audio.la \
                    $(top_builddir)/src/$(run_os)/fifo/libhy_fifo.la \
-                   $(top_builddir)/src/$(run_os)/gpio/libhy_gpio.la \
                    $(top_builddir)/src/$(run_os)/net/libhy_net.la \
                    $(top_builddir)/src/$(run_os)/thread/libhy_thread.la \
-                   $(top_builddir)/src/$(run_os)/time/libhy_time.la \
-                   $(top_builddir)/src/$(run_os)/uart/libhy_uart.la
+                   $(top_builddir)/src/$(run_os)/time/libhy_time.la
 
 lib@project_name@_@run_os@_la_SOURCES    = $(_sources_com)
 lib@project_name@_@run_os@_la_CPPFLAGS   = $(_cppflags_com)

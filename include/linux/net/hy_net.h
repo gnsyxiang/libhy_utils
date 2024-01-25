@@ -24,10 +24,10 @@
 extern "C" {
 #endif
 
-#include <hy_os_type/hy_os_type.h>
+#include <hy_os_type/hy_type.h>
+#include <hy_os_type/hy_compile.h>
 
-#include "hy_compile.h"
-#include "hy_gpio.h"
+#include <hy_os/hy_gpio.h>
 
 #define HY_NET_CONFIG_PATH_LEN_MAX  (64)
 #define HY_NET_DEV_NAME_LEN_MAX     (8)

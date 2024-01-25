@@ -52,12 +52,8 @@ _include_com    += \
 _sources_com    += \
                    hy_bit.c \
                    hy_fifo.c \
-                   hy_hex.c \
                    hy_md5sum.c \
-                   hy_mem.c \
-                   hy_sort.c \
-                   hy_string.c \
-                   hy_utils.c
+                   hy_sort.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

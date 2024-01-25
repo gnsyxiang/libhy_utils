@@ -28,16 +28,16 @@ AC_DEFUN([SELECT_CHIP],
         run_os=""
 
         AC_ARG_WITH([chip],
-                    [AS_HELP_STRING([--with-chip=@<:@ubuntu-pc|windows-pc|MC6810E|mx6ull|esp32|stm32h7xx|rk3568|SV823|at32f4xx@:>@],
-                                    [select chip about @<:@ubuntu-pc|windows-pc|MC6810E|mx6ull|esp32|stm32h7xx|rk3568|SV823|at32f4xx@:>@ @<:@default=ubuntu-pc@:>@])],
+                    [AS_HELP_STRING([--with-chip=@<:@ubuntu|windows|MC6810E|mx6ull|esp32|stm32h7xx|rk3568|SV823|at32f4xx@:>@],
+                                    [select chip about @<:@ubuntu|windows|MC6810E|mx6ull|esp32|stm32h7xx|rk3568|SV823|at32f4xx@:>@ @<:@default=ubuntu@:>@])],
                     [],
-                    [with_chip=ubuntu-pc])
+                    [with_chip=ubuntu])
 
         case "$with_chip" in
-            ubuntu-pc)
+            ubuntu)
                 AC_DEFINE(HAVE_SELECT_CHIP_UBUNTU_PC,  1, [select ubuntu pc chip])
                 AC_DEFINE(HAVE_SELECT_OS_LINUX,  1, [select linux os])
-                chip="ubuntu-pc"
+                chip="ubuntu"
                 run_os="linux"
             ;;
             SV823)
@@ -64,10 +64,10 @@ AC_DEFUN([SELECT_CHIP],
                 chip="MC6810E"
                 run_os="linux"
             ;;
-            windows-pc)
+            windows)
                 AC_DEFINE(HAVE_SELECT_CHIP_WINDOWS_PC,  1, [select windows pc chip])
                 AC_DEFINE(HAVE_SELECT_OS_WINDOWS,  1, [select windows os])
-                chip="windows-pc"
+                chip="windows"
                 run_os="windows"
             ;;
             stm32h7xx)
@@ -89,19 +89,19 @@ AC_DEFUN([SELECT_CHIP],
                 run_os="mcu"
             ;;
             *)
-                AC_MSG_ERROR([bad value ${with_chip} for --with-chip=@<:@ubuntu-pc|windows-pc|MC6810E|mx6ull|esp32|stm32h7xx|rk3568|SV823|at32f4xx@:>@])
+                AC_MSG_ERROR([bad value ${with_chip} for --with-chip=@<:@ubuntu|windows|MC6810E|mx6ull|esp32|stm32h7xx|rk3568|SV823|at32f4xx@:>@])
             ;;
         esac
 
         AC_SUBST(chip)
         AC_SUBST(run_os)
 
-        AM_CONDITIONAL([COMPILE_SELECT_CHIP_UBUNTU_PC], [test "x$with_chip" = "xubuntu-pc"])
+        AM_CONDITIONAL([COMPILE_SELECT_CHIP_UBUNTU_PC], [test "x$with_chip" = "xubuntu"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_SV823],     [test "x$with_chip" = "xSV823"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_RK3568],    [test "x$with_chip" = "xrk3568"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_MX6ULL],    [test "x$with_chip" = "xmx6ull"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_MC6810E],   [test "x$with_chip" = "xMC6810E"])
-        AM_CONDITIONAL([COMPILE_SELECT_CHIP_WINDOWS_PC],[test "x$with_chip" = "xwindows-pc"])
+        AM_CONDITIONAL([COMPILE_SELECT_CHIP_WINDOWS_PC],[test "x$with_chip" = "xwindows"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_STM32H7XX], [test "x$with_chip" = "xstm32h7xx"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_ESP32],     [test "x$with_chip" = "xesp32"])
         AM_CONDITIONAL([COMPILE_SELECT_CHIP_AT32F4XX],  [test "x$with_chip" = "xat32f4xx"])

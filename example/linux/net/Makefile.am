@@ -62,6 +62,14 @@ _ldadd_com      += \
                    $(top_builddir)/src/lib@project_name@.la \
                    $(ldadd_com)
 
+if COMPILE_LIBHY_OS
+_ldadd_com      += $(HY_OS_LIBS)
+endif
+
+if COMPILE_LIBHY_OS_TYPE
+_ldadd_com      += $(HY_OS_TYPE_LIBS)
+endif
+
 bin_PROGRAMS                += hy_epoll_demo
 hy_epoll_demo_SOURCES       = $(_sources_com) hy_epoll_demo.c
 hy_epoll_demo_CPPFLAGS      = $(_cppflags_com)

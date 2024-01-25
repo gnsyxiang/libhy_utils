@@ -60,6 +60,14 @@ _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
+if COMPILE_LIBHY_OS
+_ldadd_com      += $(HY_OS_LIBS)
+endif
+
+if COMPILE_LIBHY_OS_TYPE
+_ldadd_com      += $(HY_OS_TYPE_LIBS)
+endif
+
 bin_PROGRAMS                        += hy_fifo_demo
 hy_fifo_demo_SOURCES                = $(_sources_com) hy_fifo_demo.c
 hy_fifo_demo_CPPFLAGS               = $(_cppflags_com)

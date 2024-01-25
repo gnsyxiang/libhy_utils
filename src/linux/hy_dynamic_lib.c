@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <dlfcn.h>
 
-#include "hy_assert.h"
+#include <hy_os_type/hy_assert.h>
 
 #include "hy_dynamic_lib.h"
 

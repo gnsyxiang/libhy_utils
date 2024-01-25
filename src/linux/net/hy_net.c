@@ -19,11 +19,12 @@
  */
 #include <stdio.h>
 
-#include "hy_assert.h"
-#include "hy_string.h"
-#include "hy_mem.h"
-#include "hy_file.h"
-#include "thread/hy_thread_mutex.h"
+#include <hy_os_type/hy_assert.h>
+#include <hy_os_type/hy_string.h>
+#include <hy_os_type/hy_mem.h>
+
+#include <hy_os/hy_thread_mutex.h>
+#include <hy_os/hy_file.h>
 
 #include "net_config.h"
 #include "net_wifi.h"

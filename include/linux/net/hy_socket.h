@@ -27,7 +27,7 @@ extern "C" {
 #include <arpa/inet.h>
 #include <sys/un.h>
 
-#include <hy_os_type/hy_os_type.h>
+#include <hy_os_type/hy_type.h>
 
 #define HY_SOCKET_IP_LEN_MAX    (46)        ///< IPv4的长度是16，IPv6的长度是46
 

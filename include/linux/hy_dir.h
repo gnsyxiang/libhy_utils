@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_os_type/hy_os_type.h>
+#include <hy_os_type/hy_type.h>
 
 typedef enum HyDirType_e {
     HY_DIR_TYPE_FILE,

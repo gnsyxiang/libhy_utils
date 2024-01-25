@@ -24,9 +24,8 @@
 extern "C" {
 #endif
 
-#include <hy_os_type/hy_os_type.h>
-
-#include "hy_list.h"
+#include <hy_os_type/hy_type.h>
+#include <hy_os_type/hy_list.h>
 
 /**
  * @brief 链表节点

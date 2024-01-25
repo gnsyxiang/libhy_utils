@@ -20,7 +20,6 @@
 
 SUBDIRS = \
           fifo \
-          gpio \
           net \
           thread \
           time \
@@ -69,13 +68,13 @@ _ldflags_com    +=
 
 _ldadd_com      += $(top_builddir)/src/lib@project_name@.la
 
-bin_PROGRAMS                    += hy_can_demo
-hy_can_demo_SOURCES             = $(_sources_com) hy_can_demo.c
-hy_can_demo_CPPFLAGS            = $(_cppflags_com)
-hy_can_demo_CFLAGS              = $(_cflags_com)
-hy_can_demo_CXXFLAGS            = $(_cxxflags_com)
-hy_can_demo_LDFLAGS             = $(_ldflags_com)
-hy_can_demo_LDADD               = $(_ldadd_com)
+if COMPILE_LIBHY_OS
+_ldadd_com      += $(HY_OS_LIBS)
+endif
+
+if COMPILE_LIBHY_OS_TYPE
+_ldadd_com      += $(HY_OS_TYPE_LIBS)
+endif
 
 bin_PROGRAMS                    += hy_dir_demo
 hy_dir_demo_SOURCES             = $(_sources_com) hy_dir_demo.c
@@ -109,14 +108,6 @@ hy_hash_demo_CXXFLAGS           = $(_cxxflags_com)
 hy_hash_demo_LDFLAGS            = $(_ldflags_com)
 hy_hash_demo_LDADD              = $(_ldadd_com)
 
-bin_PROGRAMS                    += hy_hex_demo
-hy_hex_demo_SOURCES             = $(_sources_com) hy_hex_demo.c
-hy_hex_demo_CPPFLAGS            = $(_cppflags_com)
-hy_hex_demo_CFLAGS              = $(_cflags_com)
-hy_hex_demo_CXXFLAGS            = $(_cxxflags_com)
-hy_hex_demo_LDFLAGS             = $(_ldflags_com)
-hy_hex_demo_LDADD               = $(_ldadd_com)
-
 bin_PROGRAMS                    += hy_md5sum_demo
 hy_md5sum_demo_SOURCES          = $(_sources_com) hy_md5sum_demo.c
 hy_md5sum_demo_CPPFLAGS         = $(_cppflags_com)
@@ -140,11 +131,3 @@ hy_template_demo_CFLAGS         = $(_cflags_com)
 hy_template_demo_CXXFLAGS       = $(_cxxflags_com)
 hy_template_demo_LDFLAGS        = $(_ldflags_com)
 hy_template_demo_LDADD          = $(_ldadd_com)
-
-bin_PROGRAMS                    += hy_utils_demo
-hy_utils_demo_SOURCES           = $(_sources_com) hy_utils_demo.c
-hy_utils_demo_CPPFLAGS          = $(_cppflags_com)
-hy_utils_demo_CFLAGS            = $(_cflags_com)
-hy_utils_demo_CXXFLAGS          = $(_cxxflags_com)
-hy_utils_demo_LDFLAGS           = $(_ldflags_com)
-hy_utils_demo_LDADD             = $(_ldadd_com)

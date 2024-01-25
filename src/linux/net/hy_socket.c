@@ -27,8 +27,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
+#include <hy_os_type/hy_assert.h>
+#include <hy_os_type/hy_mem.h>
 
 #include "hy_socket.h"
 

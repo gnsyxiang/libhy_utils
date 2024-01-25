@@ -19,9 +19,10 @@
  */
 #include <stdio.h>
 
-#include "hy_assert.h"
-#include "hy_barrier.h"
-#include "hy_mem.h"
+#include <hy_os_type/hy_assert.h>
+#include <hy_os_type/hy_mem.h>
+
+#include <hy_os/hy_barrier.h>
 
 #include "net_config.h"
 

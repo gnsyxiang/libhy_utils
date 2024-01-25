@@ -49,12 +49,8 @@ _include_com    += \
 
 _sources_com    += \
                    queue.c \
-                   hy_thread.c \
-                   hy_thread_cond.c \
-                   hy_thread_mutex.c \
                    hy_thread_pool.c \
-                   hy_thread_pool_dynamic.c \
-                   hy_thread_sem.c
+                   hy_thread_pool_dynamic.c
 
 _cppflags_com   += \
                    $(_no_error_com) \

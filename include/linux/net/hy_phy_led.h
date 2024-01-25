@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_os_type/hy_os_type.h>
+#include <hy_os_type/hy_type.h>
 
 #define HY_PHY_LED_DEV_NAME_LEN_MAX     (16)
 #define HY_PHY_LED_REG_VAL_GROUP        (2)

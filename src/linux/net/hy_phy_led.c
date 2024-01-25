@@ -28,11 +28,11 @@
 #include <linux/sockios.h>
 #include <linux/types.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_string.h"
+#include <hy_os_type/hy_assert.h>
+#include <hy_os_type/hy_mem.h>
+#include <hy_os_type/hy_string.h>
 
-#include "thread/hy_thread.h"
+#include <hy_os/hy_thread.h>
 
 #include "hy_fifo.h"
 

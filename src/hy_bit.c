@@ -21,7 +21,7 @@
 
 #include <hy_log/hy_log.h>
 
-#include "hy_assert.h"
+#include <hy_os_type/hy_assert.h>
 
 #include "hy_bit.h"
 

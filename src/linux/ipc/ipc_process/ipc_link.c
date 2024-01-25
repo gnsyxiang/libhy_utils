@@ -19,9 +19,9 @@
  */
 #include <stdio.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_string.h"
+#include <hy_os_type/hy_assert.h>
+#include <hy_os_type/hy_mem.h>
+#include <hy_os_type/hy_string.h>
 
 #include "ipc_link.h"
 #include "hy_ipc_socket.h"

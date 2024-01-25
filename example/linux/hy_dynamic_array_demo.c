@@ -22,7 +22,8 @@
 
 #include <hy_log/hy_log.h>
 
-#include "hy_mem.h"
+#include <hy_os_type/hy_mem.h>
+
 #include "hy_dynamic_array.h"
 
 int main(int argc, char *argv[])

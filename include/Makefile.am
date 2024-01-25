@@ -38,18 +38,10 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
-                           hy_assert.h \
                            hy_bit.h \
-                           hy_compile.h \
                            hy_fifo.h \
-                           hy_hex.h \
-                           hy_list.h \
                            hy_md5sum.h \
-                           hy_mem.h \
-                           hy_module.h \
-                           hy_sort.h \
-                           hy_string.h \
-                           hy_utils.h
+                           hy_sort.h
 
 # ------------------
 # make install files

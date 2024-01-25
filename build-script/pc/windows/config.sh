@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-chip=windows-pc
+chip=windows
 
 product=HY-pc
 
@@ -19,5 +19,5 @@ lib=
 debug=-g -O0
 release=-O2 -DNDEBUG
 
-install_path=/mnt/nfs/pc/windows-pc
+install_path=/mnt/nfs/pc/windows
 
