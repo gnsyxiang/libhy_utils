@@ -20,17 +20,18 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <hy_os_type/hy_mem.h>
-#include <hy_os_type/hy_string.h>
+#include <hy_log/hy_log.h>
 
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
 #include <hy_os/hy_thread.h>
 #include <hy_os/hy_thread_mutex.h>
-
-#include "hy_fifo_lock.h"
-
 #include <hy_os/hy_hex.h>
 
 #include "hy_thread_pool.h"
+
+#include "hy_fifo_lock.h"
 
 struct HyThreadPool_s {
     HyThreadPoolSaveConfig_s    save_c;

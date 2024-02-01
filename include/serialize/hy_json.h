@@ -175,6 +175,7 @@ hy_s32_t HyJsonArrayAdd(void *array, void *item);
  */
 char *HyJsonDump(void *root);
 
+#if 0
 /**
  * @brief 从文件中创建json
  *
@@ -190,6 +191,7 @@ HyJsonFile_s *HyJsonFileCreate(const char *file);
  * @param handle 句柄的地址（二级指针）
  */
 void HyJsonFileDestroy(HyJsonFile_s **handle_pp);
+#endif
 
 #if (HY_JSON_USE_TYPE == 1)
 /**

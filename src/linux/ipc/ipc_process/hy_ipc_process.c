@@ -19,7 +19,7 @@
  */
 #include <stdio.h>
 
-#include <hy_os_type/hy_assert.h>
+#include <hy_os/hy_assert.h>
 
 #include "hy_ipc_process.h"
 

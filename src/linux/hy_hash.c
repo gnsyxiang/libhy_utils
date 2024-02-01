@@ -19,10 +19,10 @@
  */
 #include <stdio.h>
 
-#include <hy_os_type/hy_assert.h>
-#include <hy_os_type/hy_mem.h>
-#include <hy_os_type/hy_string.h>
-#include <hy_os_type/hy_list.h>
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_list.h>
 
 #include <hy_os/hy_thread_mutex.h>
 

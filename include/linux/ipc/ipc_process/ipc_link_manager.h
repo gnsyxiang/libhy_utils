@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_os_type/hy_list.h>
+#include <hy_os/hy_list.h>
 
 typedef struct {
     struct hy_list_head             entry;

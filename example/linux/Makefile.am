@@ -66,7 +66,8 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
+_ldadd_com      += \
+                   $(top_builddir)/src/lib$(project_name).la
 
 if COMPILE_LIBHY_OS
 _ldadd_com      += $(HY_OS_LIBS)
@@ -123,6 +124,14 @@ hy_package_list_demo_CFLAGS     = $(_cflags_com)
 hy_package_list_demo_CXXFLAGS   = $(_cxxflags_com)
 hy_package_list_demo_LDFLAGS    = $(_ldflags_com)
 hy_package_list_demo_LDADD      = $(_ldadd_com)
+
+bin_PROGRAMS                    += hy_sort_demo
+hy_sort_demo_SOURCES            = $(_sources_com) hy_sort_demo.c
+hy_sort_demo_CPPFLAGS           = $(_cppflags_com)
+hy_sort_demo_CFLAGS             = $(_cflags_com)
+hy_sort_demo_CXXFLAGS           = $(_cxxflags_com)
+hy_sort_demo_LDFLAGS            = $(_ldflags_com)
+hy_sort_demo_LDADD              = $(_ldadd_com)
 
 bin_PROGRAMS                    += hy_template_demo
 hy_template_demo_SOURCES        = $(_sources_com) hy_template_demo.c

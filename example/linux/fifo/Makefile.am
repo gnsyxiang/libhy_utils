@@ -58,7 +58,8 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
+_ldadd_com      += \
+                   $(top_builddir)/src/lib$(project_name).la
 
 if COMPILE_LIBHY_OS
 _ldadd_com      += $(HY_OS_LIBS)
