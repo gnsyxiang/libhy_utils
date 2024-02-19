@@ -41,7 +41,8 @@ _install_headers_com    += \
                            hy_bit.h \
                            hy_fifo.h \
                            hy_md5sum.h \
-                           hy_sort.h
+                           hy_sort.h \
+                           hy_utils.h
 
 # ------------------
 # make install files
