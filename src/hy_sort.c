@@ -21,9 +21,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "hy_string.h"
-#include "hy_assert.h"
-#include "hy_mem.h"
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
 
 #include "hy_sort.h"
 

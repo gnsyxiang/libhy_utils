@@ -22,14 +22,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_module.h>
+#include <hy_os/hy_utils.h>
+#include <hy_os/hy_signal.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_string.h"
-#include "hy_signal.h"
-#include "hy_module.h"
-#include "hy_utils.h"
+#include "config.h"
 
 #include "hy_timer_multi_wheel.h"
 

@@ -19,8 +19,10 @@
  */
 #include <stdio.h>
 
-#include "hy_assert.h"
+#include <hy_os/hy_assert.h>
+
 #include "hy_ipc_process.h"
+
 #include "ipc_process_server.h"
 #include "ipc_process_client.h"
 

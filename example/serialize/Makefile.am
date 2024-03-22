@@ -58,7 +58,7 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += \
-                   $(top_builddir)/src/lib@project_name@.la \
+                   $(top_builddir)/src/lib$(project_name).la \
                    $(ldadd_com)
 
 bin_PROGRAMS            += hy_json_demo

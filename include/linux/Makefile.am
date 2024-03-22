@@ -21,12 +21,10 @@
 SUBDIRS = \
           audio \
           fifo \
-          gpio \
           ipc \
           net \
           thread \
-          time \
-          uart
+          time
 
 if COMPILE_LIBCURL
 SUBDIRS += download
@@ -38,7 +36,7 @@ endif
 _no_install_headers_com =
 _install_headers_com    =
 
-install_includedir      = $(includedir)/@project_name@
+install_includedir      = $(includedir)/$(project_name)
 
 # ---------------------
 # add necessary content
@@ -47,19 +45,13 @@ _no_install_headers_com +=
 
 _install_headers_com    += \
                            hy_audio.h \
-                           hy_barrier.h \
-                           hy_can.h \
                            hy_dir.h \
                            hy_dynamic_array.h \
                            hy_dynamic_lib.h \
-                           hy_file.h \
                            hy_hash.h \
                            hy_math.h \
                            hy_misc.h \
                            hy_package_list.h \
-                           hy_pipe.h \
-                           hy_signal.h \
-                           hy_utils_linux.h \
                            hy_video.h
 
 # ------------------

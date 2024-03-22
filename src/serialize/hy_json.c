@@ -25,13 +25,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "hy_assert.h"
-#include "hy_string.h"
-#include "hy_mem.h"
-#include "hy_utils.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_utils.h>
+
+#include "hy_json.h"
 
 #include "cjson_impl.h"
-#include "hy_json.h"
 
 #if (HY_JSON_USE_TYPE == 1)
 
@@ -316,6 +317,7 @@ static hy_u32_t _save_file_content(HyJsonFile_s *json_file)
 }
 #endif
 
+#if 0
 void HyJsonFileDestroy(HyJsonFile_s **handle_pp)
 {
     HY_ASSERT_RET(!handle_pp || !*handle_pp);
@@ -365,6 +367,7 @@ HyJsonFile_s *HyJsonFileCreate(const char *file)
 
     return NULL;
 }
+#endif
 
 char *HyJsonDump(void *root)
 {

@@ -19,11 +19,11 @@
  */
 #include <stdio.h>
 
-#include "hy_assert.h"
-#include "hy_utils.h"
-#include "hy_mem.h"
-#include "thread/hy_thread_mutex.h"
-#include "thread/hy_thread_cond.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_utils.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_thread_mutex.h>
+#include <hy_os/hy_thread_cond.h>
 
 #include "hy_queue.h"
 

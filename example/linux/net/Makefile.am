@@ -59,8 +59,16 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += \
-                   $(top_builddir)/src/lib@project_name@.la \
+                   $(top_builddir)/src/lib$(project_name).la \
                    $(ldadd_com)
+
+if COMPILE_LIBHY_OS
+_ldadd_com      += $(HY_OS_LIBS)
+endif
+
+if COMPILE_LIBHY_OS_TYPE
+_ldadd_com      += $(HY_OS_TYPE_LIBS)
+endif
 
 bin_PROGRAMS                += hy_epoll_demo
 hy_epoll_demo_SOURCES       = $(_sources_com) hy_epoll_demo.c
@@ -85,19 +93,3 @@ hy_phy_led_demo_CFLAGS      = $(_cflags_com)
 hy_phy_led_demo_CXXFLAGS    = $(_cxxflags_com)
 hy_phy_led_demo_LDFLAGS     = $(_ldflags_com)
 hy_phy_led_demo_LDADD       = $(_ldadd_com)
-
-bin_PROGRAMS                += hy_client_demo
-hy_client_demo_SOURCES     = $(_sources_com) hy_client_demo.c
-hy_client_demo_CPPFLAGS    = $(_cppflags_com)
-hy_client_demo_CFLAGS      = $(_cflags_com)
-hy_client_demo_CXXFLAGS    = $(_cxxflags_com)
-hy_client_demo_LDFLAGS     = $(_ldflags_com)
-hy_client_demo_LDADD       = $(_ldadd_com)
-
-bin_PROGRAMS                += hy_socket_demo
-hy_socket_demo_SOURCES      = $(_sources_com) hy_socket_demo.c
-hy_socket_demo_CPPFLAGS     = $(_cppflags_com)
-hy_socket_demo_CFLAGS       = $(_cflags_com)
-hy_socket_demo_CXXFLAGS     = $(_cxxflags_com)
-hy_socket_demo_LDFLAGS      = $(_ldflags_com)
-hy_socket_demo_LDADD        = $(_ldadd_com)

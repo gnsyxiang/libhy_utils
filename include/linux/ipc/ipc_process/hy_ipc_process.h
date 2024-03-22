@@ -27,7 +27,7 @@ extern "C" {
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_type.h>
 
 // note:
 // 1，该头文件需要用户提供，用来定义传输的数据（可以是结构体，也可以是json）

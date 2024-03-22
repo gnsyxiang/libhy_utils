@@ -58,8 +58,16 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += \
-                   $(top_builddir)/src/lib@project_name@.la \
+                   $(top_builddir)/src/lib$(project_name).la \
                    $(ldadd_com)
+
+if COMPILE_LIBHY_OS
+_ldadd_com      += $(HY_OS_LIBS)
+endif
+
+if COMPILE_LIBHY_OS_TYPE
+_ldadd_com      += $(HY_OS_TYPE_LIBS)
+endif
 
 bin_PROGRAMS                        += hy_timer_multi_wheel_demo
 hy_timer_multi_wheel_demo_SOURCES   = $(_sources_com) hy_timer_multi_wheel_demo.c
@@ -68,14 +76,6 @@ hy_timer_multi_wheel_demo_CFLAGS    = $(_cflags_com)
 hy_timer_multi_wheel_demo_CXXFLAGS  = $(_cxxflags_com)
 hy_timer_multi_wheel_demo_LDFLAGS   = $(_ldflags_com)
 hy_timer_multi_wheel_demo_LDADD     = $(_ldadd_com)
-
-bin_PROGRAMS                        += hy_zone_demo
-hy_zone_demo_SOURCES                = $(_sources_com) hy_zone_demo.c
-hy_zone_demo_CPPFLAGS               = $(_cppflags_com)
-hy_zone_demo_CFLAGS                 = $(_cflags_com)
-hy_zone_demo_CXXFLAGS               = $(_cxxflags_com)
-hy_zone_demo_LDFLAGS                = $(_ldflags_com)
-hy_zone_demo_LDADD                  = $(_ldadd_com)
 
 bin_PROGRAMS                        += hy_timer_demo
 hy_timer_demo_SOURCES               = $(_sources_com) hy_timer_demo.c

@@ -25,7 +25,7 @@ SUBDIRS = \
 # defining variables
 # ------------------
 _dist_file_com  =
-resdir          = $(prefix)/res/@project_name@
+resdir          = $(prefix)/res/$(project_name)
 res_DATA        =
 
 # ------------------

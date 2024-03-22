@@ -47,6 +47,8 @@ AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB([dl], [dlopen])
 
 CHECK_LIBCUNIT
+CHECK_LIBHY_OS_TYPE
+CHECK_LIBHY_OS
 CHECK_LIBHY_LOG
 CHECK_LIBCJSON
 
@@ -58,13 +60,12 @@ CHECK_LIBCURL
 CHECK_PTHREAD
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h termios.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h netdb.h netinet/in.h stddef.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
 AC_TYPE_INT32_T
 AC_TYPE_INT8_T
-AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
@@ -75,7 +76,7 @@ AC_TYPE_UINT8_T
 # AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit clock_gettime gettimeofday inet_ntoa localtime_r memset putenv select socket strerror strstr tzset])
+AC_CHECK_FUNCS([clock_gettime gettimeofday inet_ntoa localtime_r memset select socket strstr])
 
 AC_CONFIG_FILES([Makefile
                  $project_name.pc
@@ -91,8 +92,8 @@ AC_CONFIG_FILES([Makefile
                  build-script/nxp/Makefile
                  build-script/nxp/mx6ull/Makefile
                  build-script/pc/Makefile
-                 build-script/pc/ubuntu-pc/Makefile
-                 build-script/pc/windows-pc/Makefile
+                 build-script/pc/ubuntu/Makefile
+                 build-script/pc/windows/Makefile
                  build-script/rock-chips/Makefile
                  build-script/rock-chips/rk3568/Makefile
                  build-script/stm32/Makefile
@@ -101,7 +102,6 @@ AC_CONFIG_FILES([Makefile
                  example/Makefile
                  example/linux/Makefile
                  example/linux/fifo/Makefile
-                 example/linux/gpio/Makefile
                  example/linux/ipc/Makefile
                  example/linux/ipc/ipc_process/Makefile
                  example/linux/ipc/ipc_socket/Makefile
@@ -117,14 +117,12 @@ AC_CONFIG_FILES([Makefile
                  include/linux/audio/Makefile
                  include/linux/download/Makefile
                  include/linux/fifo/Makefile
-                 include/linux/gpio/Makefile
                  include/linux/ipc/Makefile
                  include/linux/ipc/ipc_process/Makefile
                  include/linux/ipc/ipc_socket/Makefile
                  include/linux/net/Makefile
                  include/linux/thread/Makefile
                  include/linux/time/Makefile
-                 include/linux/uart/Makefile
                  include/mcu/Makefile
                  include/serialize/Makefile
                  include/windows/Makefile
@@ -137,14 +135,12 @@ AC_CONFIG_FILES([Makefile
                  src/linux/audio/Makefile
                  src/linux/download/Makefile
                  src/linux/fifo/Makefile
-                 src/linux/gpio/Makefile
                  src/linux/ipc/Makefile
                  src/linux/ipc/ipc_process/Makefile
                  src/linux/ipc/ipc_socket/Makefile
                  src/linux/net/Makefile
                  src/linux/thread/Makefile
                  src/linux/time/Makefile
-                 src/linux/uart/Makefile
                  src/mcu/Makefile
                  src/serialize/Makefile
                  src/windows/Makefile

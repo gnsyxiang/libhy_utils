@@ -24,7 +24,7 @@
 _no_install_headers_com =
 _install_headers_com    =
 
-install_includedir      = $(includedir)/@project_name@
+install_includedir      = $(includedir)/$(project_name)
 
 # ---------------------
 # add necessary content
@@ -32,7 +32,6 @@ install_includedir      = $(includedir)/@project_name@
 _no_install_headers_com +=
 
 _install_headers_com    += \
-                           hy_zone.h \
                            hy_time.h \
                            hy_timer.h \
                            hy_timer_multi_wheel.h

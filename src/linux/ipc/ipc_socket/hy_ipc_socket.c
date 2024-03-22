@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "hy_assert.h"
-#include "hy_file.h"
-#include "hy_mem.h"
-#include "hy_string.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_file.h>
 
 #include "ipc_socket_client.h"
 #include "ipc_socket_server.h"

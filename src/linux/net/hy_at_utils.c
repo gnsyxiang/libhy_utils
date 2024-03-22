@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hy_hal/hy_type.h"
+#include <hy_os_type/hy_os_type.h>
 
 #include "hy_at_utils.h"
 

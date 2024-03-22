@@ -47,7 +47,6 @@ _include_com    += \
                    -I$(top_srcdir)/include
 
 _sources_com    += \
-                   hy_zone.c \
                    hy_time.c \
                    hy_timer.c \
                    hy_timer_multi_wheel.c

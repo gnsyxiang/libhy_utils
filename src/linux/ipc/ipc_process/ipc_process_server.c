@@ -20,13 +20,14 @@
 #include <stdio.h>
 #include <semaphore.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_string.h"
-#include "hy_thread.h"
-#include "hy_pipe.h"
-#include "hy_fifo.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
 
+#include <hy_os/hy_thread.h>
+#include <hy_os/hy_pipe.h>
+
+#include "hy_fifo.h"
 #include "ipc_process_server.h"
 #include "ipc_link_manager.h"
 #include "ipc_link.h"

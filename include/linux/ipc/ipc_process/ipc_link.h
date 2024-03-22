@@ -27,9 +27,8 @@ extern "C" {
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <hy_log/hy_type.h>
-
-#include "hy_compile.h"
+#include <hy_os_type/hy_type.h>
+#include <hy_os_type/hy_compile.h>
 
 #define IPC_LINK_IPC_NAME_LEN_MAX   (32)
 

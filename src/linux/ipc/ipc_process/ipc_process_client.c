@@ -21,11 +21,12 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_string.h"
-#include "hy_thread.h"
-#include "hy_list.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_list.h>
+
+#include <hy_os/hy_thread.h>
 
 #include "hy_fifo.h"
 

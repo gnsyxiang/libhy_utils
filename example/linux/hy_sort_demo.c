@@ -22,11 +22,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "config.h"
+#include <hy_log/hy_log.h>
 
-#include "hy_mem.h"
-#include "hy_string.h"
-#include "hy_utils.h"
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_utils.h>
+
+#include "config.h"
 
 #include "hy_sort.h"
 
@@ -49,7 +51,7 @@ static void _dump_int(hy_s32_t *a, hy_u32_t len)
 static void _test_int(void)
 {
     hy_s32_t a[] = {3, 4, 1, 5, 8, 0, 9};
-    hy_u32_t len = HyHalUtilsArrayCnt(a);
+    hy_u32_t len = HY_UTILS_ARRAY_CNT(a);
 
     _dump_int(a, len);
     // HySortBubble(a, len, sizeof(a[0]),  _swap_int_cb);
@@ -87,7 +89,7 @@ static void _test_struct(void)
         {1007, "jim", {44, 55, 99}},
         {1003, "jac", {11, 88, 66}},
     };
-    hy_u32_t len = HyHalUtilsArrayCnt(stu);
+    hy_u32_t len = HY_UTILS_ARRAY_CNT(stu);
 
     _dum_student(stu, len);
     // HySortBubble(stu, len, sizeof(stu[0]),  _swap_stu_cb);
@@ -97,7 +99,7 @@ static void _test_struct(void)
 
 int main(int argc, char *argv[])
 {
-    HyLogInit_m(10 * 1024, HY_LOG_MODE_PROCESS_SINGLE, HY_LOG_LEVEL_TRACE, HY_LOG_OUTFORMAT_ALL);
+    HyLogInit_m(10 * 1024, HY_LOG_LEVEL_INFO, HY_LOG_OUTFORMAT_ALL_NO_PID_ID, NULL, 9999);
 
     LOGE("version: %s, data: %s, time: %s \n", VERSION, __DATE__, __TIME__);
 

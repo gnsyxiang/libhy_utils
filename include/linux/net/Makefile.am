@@ -24,7 +24,7 @@
 _no_install_headers_com =
 _install_headers_com    =
 
-install_includedir      = $(includedir)/@project_name@
+install_includedir      = $(includedir)/$(project_name)
 
 # ---------------------
 # add necessary content
@@ -34,7 +34,6 @@ _no_install_headers_com += \
                            net_wifi.h
 
 _install_headers_com    += \
-                           hy_socket.h \
                            hy_epoll.h \
                            hy_net.h \
                            hy_phy_led.h

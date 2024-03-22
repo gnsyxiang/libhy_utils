@@ -26,7 +26,7 @@ extern "C" {
 
 #include <stdio.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_type.h>
 
 typedef enum {
     HY_JSON_OBJECT,

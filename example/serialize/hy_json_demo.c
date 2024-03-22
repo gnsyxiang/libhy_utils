@@ -24,10 +24,10 @@
 
 #include <hy_log/hy_log.h>
 
-#include "config.h"
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
 
-#include "hy_mem.h"
-#include "hy_string.h"
+#include "config.h"
 
 #include "hy_json.h"
 
@@ -72,6 +72,7 @@ static void _test_json(void *root)
 }
 #endif
 
+#if 0
 static void _test_json_file(void)
 {
     HyJsonFile_s *json_file = NULL;
@@ -85,6 +86,7 @@ static void _test_json_file(void)
         HyJsonFileDestroy(&json_file);
     }
 }
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -118,9 +120,7 @@ int main(int argc, char *argv[])
     _test_json(root);
     HyJsonDestroy(root);
 
-    _test_json_file();
-
-    sleep(3);
+    // _test_json_file();
 
     HyLogDeInit();
 

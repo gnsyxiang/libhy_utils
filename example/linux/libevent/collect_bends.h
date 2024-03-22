@@ -29,7 +29,7 @@ extern "C" {
 #include <event2/listener.h>
 #include <event2/bufferevent.h>
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_os_type.h>
 
 #include "hy_socket.h"
 

@@ -64,7 +64,8 @@ _cxxflags_com   +=
 
 _ldflags_com    +=
 
-_ldadd_com      += $(top_builddir)/src/lib@project_name@.la
+_ldadd_com      += \
+                   $(top_builddir)/src/lib$(project_name).la
 
 if COMPILE_LIBPROTOBUF_C
 address_book.pb-c.c: $(abs_srcdir)/address_book.proto

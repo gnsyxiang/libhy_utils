@@ -20,14 +20,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "hy_assert.h"
-#include "hy_string.h"
-#include "hy_mem.h"
-#include "hy_gpio.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_utils.h>
 
-#include "thread/hy_thread.h"
-
-#include "hy_utils.h"
+#include <hy_os/hy_thread.h>
+#include <hy_os/hy_gpio.h>
 
 #include "net_wifi.h"
 

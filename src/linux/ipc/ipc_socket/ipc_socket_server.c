@@ -24,9 +24,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_string.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
 
 #include "ipc_socket_server.h"
 

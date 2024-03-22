@@ -21,14 +21,16 @@
 #include <unistd.h>
 #include <sys/prctl.h>
 
-#include "config.h"
+#include <hy_log/hy_log.h>
 
-#include "hy_mem.h"
-#include "hy_string.h"
-#include "hy_signal.h"
-#include "hy_module.h"
-#include "hy_utils.h"
-#include "hy_thread_mutex.h"
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_string.h>
+#include <hy_os/hy_module.h>
+#include <hy_os/hy_utils.h>
+#include <hy_os/hy_signal.h>
+#include <hy_os/hy_thread_mutex.h>
+
+#include "config.h"
 
 #include "hy_thread_pool.h"
 

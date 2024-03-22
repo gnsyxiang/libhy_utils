@@ -24,7 +24,7 @@
 _no_install_headers_com =
 _install_headers_com    =
 
-install_includedir      = $(includedir)/@project_name@
+install_includedir      = $(includedir)/$(project_name)
 
 # ---------------------
 # add necessary content
@@ -33,12 +33,8 @@ _no_install_headers_com +=
 
 _install_headers_com    += \
                            hy_queue.h \
-                           hy_thread.h \
-                           hy_thread_cond.h \
-                           hy_thread_mutex.h \
                            hy_thread_pool.h \
-                           hy_thread_pool_dynamic.h \
-                           hy_thread_sem.h
+                           hy_thread_pool_dynamic.h
 
 # ------------------
 # make install files

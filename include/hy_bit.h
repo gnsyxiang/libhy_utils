@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_type.h>
 
 /**
  * @brief 获取一个字节从0位到指定位的掩码

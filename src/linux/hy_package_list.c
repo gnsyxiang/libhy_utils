@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "hy_assert.h"
-#include "hy_mem.h"
-#include "hy_thread_mutex.h"
-#include "hy_thread_cond.h"
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
+#include <hy_os/hy_thread_mutex.h>
+#include <hy_os/hy_thread_cond.h>
 
 #include "hy_package_list.h"
 

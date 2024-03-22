@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-#include <hy_log/hy_type.h>
+#include <hy_os_type/hy_type.h>
 
 /**
  * @brief json文件句柄
@@ -175,6 +175,7 @@ hy_s32_t HyJsonArrayAdd(void *array, void *item);
  */
 char *HyJsonDump(void *root);
 
+#if 0
 /**
  * @brief 从文件中创建json
  *
@@ -190,6 +191,7 @@ HyJsonFile_s *HyJsonFileCreate(const char *file);
  * @param handle 句柄的地址（二级指针）
  */
 void HyJsonFileDestroy(HyJsonFile_s **handle_pp);
+#endif
 
 #if (HY_JSON_USE_TYPE == 1)
 /**

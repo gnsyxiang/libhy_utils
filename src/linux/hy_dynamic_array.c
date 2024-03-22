@@ -23,8 +23,9 @@
 #include <string.h>
 
 #include "hy_dynamic_array.h"
-#include "hy_assert.h"
-#include "hy_mem.h"
+
+#include <hy_os/hy_assert.h>
+#include <hy_os/hy_mem.h>
 
 /**
  * @brief 动态数组

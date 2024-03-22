@@ -38,7 +38,7 @@ _ldadd_com      =
 # ---------------------
 _no_error_com   +=
 
-_define_com     += -D_GNU_SOURCE
+_define_com     +=
 
 _include_com    += \
                    -I$(top_srcdir)/include/$(run_os) \

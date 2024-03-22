@@ -58,16 +58,16 @@ _cxxflags_com   +=
 _ldflags_com    +=
 
 _ldadd_com      += \
-                   $(top_builddir)/src/lib@project_name@.la \
+                   $(top_builddir)/src/lib$(project_name).la \
                    $(ldadd_com)
 
-bin_PROGRAMS                += hy_thread_demo
-hy_thread_demo_SOURCES      = $(_sources_com) hy_thread_demo.c
-hy_thread_demo_CPPFLAGS     = $(_cppflags_com)
-hy_thread_demo_CFLAGS       = $(_cflags_com)
-hy_thread_demo_CXXFLAGS     = $(_cxxflags_com)
-hy_thread_demo_LDFLAGS      = $(_ldflags_com)
-hy_thread_demo_LDADD        = $(_ldadd_com)
+if COMPILE_LIBHY_OS
+_ldadd_com      += $(HY_OS_LIBS)
+endif
+
+if COMPILE_LIBHY_OS_TYPE
+_ldadd_com      += $(HY_OS_TYPE_LIBS)
+endif
 
 bin_PROGRAMS                    += hy_thread_pool_demo
 hy_thread_pool_demo_SOURCES    = $(_sources_com) hy_thread_pool_demo.c

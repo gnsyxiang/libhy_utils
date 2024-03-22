@@ -38,7 +38,7 @@ _ldadd_com      =
 # ---------------------
 _no_error_com   +=
 
-_define_com     += -D_GNU_SOURCE
+_define_com     +=
 
 _include_com    += \
                    -I$(top_srcdir)/include/$(run_os)/fifo \
@@ -49,12 +49,8 @@ _include_com    += \
 
 _sources_com    += \
                    queue.c \
-                   hy_thread.c \
-                   hy_thread_cond.c \
-                   hy_thread_mutex.c \
                    hy_thread_pool.c \
-                   hy_thread_pool_dynamic.c \
-                   hy_thread_sem.c
+                   hy_thread_pool_dynamic.c
 
 _cppflags_com   += \
                    $(_no_error_com) \
