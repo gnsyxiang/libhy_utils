@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include<stdlib.h>
 
-#include "hy_time.h"
+#include <hy_os/hy_time.h>
 
 #include "hy_math.h"
 
