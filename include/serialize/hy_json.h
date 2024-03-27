@@ -26,6 +26,7 @@ extern "C" {
 
 #include <hy_os_type/hy_type.h>
 
+#if 0
 /**
  * @brief json文件句柄
  *
@@ -35,6 +36,7 @@ typedef struct {
     const char  *file;          ///< 文件路径
     hy_s32_t    save_flag;      ///< 是否保存到文件，1为保存，0为不保存
 } HyJsonFile_s;
+#endif
 
 /**
  * @brief 提供两种解析json的方法
@@ -47,20 +49,11 @@ typedef struct {
 #define HY_JSON_USE_TYPE   (1)
 
 /**
- * @brief 从buf中创建json
+ * @brief 销毁json
  *
- * @param buf json字符串
- *
- * @return 成功返回root节点，失败返回NULL
+ * @param root json节点
  */
-void *HyJsonCreateFromBuf(const char *buf);
-
-/**
- * @brief 销毁从buf中创建的json
- *
- * @param root root根节点
- */
-void HyJsonDestroyFromBuf(void *root);
+void HyJsonDestroy(void *root);
 
 /**
  * @brief 创建json节点
@@ -70,11 +63,39 @@ void HyJsonDestroyFromBuf(void *root);
 void *HyJsonCreate(void);
 
 /**
- * @brief 销毁json
+ * @brief 从buf中创建json
  *
- * @param root json节点
+ * @param buf json字符串
+ *
+ * @return 成功返回root节点，失败返回NULL
  */
-void HyJsonDestroy(void *root);
+void *HyJsonCreateFromBuf(const char *buf);
+
+/**
+ * @brief 从文件中创建json
+ *
+ * @param file 文件的路径
+ *
+ * @return 成功返回root节点，失败返回NULL
+ */
+void *HyJsonCreateFromFile(const char *file);
+
+/**
+ * @brief 创建json数组节点
+ *
+ * @return 成功返回json节点，失败返回NULL
+ */
+void *HyJsonArrayNew(void);
+
+/**
+ * @brief 向json数组加入元素
+ *
+ * @param array json数组
+ * @param item json元素
+ *
+ * @return 成功返回0，失败返回-1
+ */
+hy_s32_t HyJsonArrayAdd(void *array, void *item);
 
 /**
  * @brief 从整数创建json节点
@@ -148,23 +169,6 @@ hy_s32_t HyJsonAddStr(void *root, const char *field, const char *val);
 hy_s32_t HyJsonAddObject(void *root, const char *field, void *item);
 
 /**
- * @brief 创建json数组节点
- *
- * @return 成功返回json节点，失败返回NULL
- */
-void *HyJsonArrayNew(void);
-
-/**
- * @brief 向json数组加入元素
- *
- * @param array json数组
- * @param item json元素
- *
- * @return 成功返回0，失败返回-1
- */
-hy_s32_t HyJsonArrayAdd(void *array, void *item);
-
-/**
  * @brief 打印root中的信息
  *
  * @param root root根节点
@@ -174,24 +178,6 @@ hy_s32_t HyJsonArrayAdd(void *array, void *item);
  * @note 成功返回内容后，需要用户释放内容的空间
  */
 char *HyJsonDump(void *root);
-
-#if 0
-/**
- * @brief 从文件中创建json
- *
- * @param file 文件路径
- *
- * @return 成功返回句柄，失败返回NULL
- */
-HyJsonFile_s *HyJsonFileCreate(const char *file);
-
-/**
- * @brief 销毁从文件中创建json
- *
- * @param handle 句柄的地址（二级指针）
- */
-void HyJsonFileDestroy(HyJsonFile_s **handle_pp);
-#endif
 
 #if (HY_JSON_USE_TYPE == 1)
 /**
@@ -317,9 +303,7 @@ hy_s32_t HyJsonSetItemStr_va(const char *val, void *root, hy_s32_t n, ...);
 #define HyJsonSetItemStr(val, root, x...) \
     HyJsonSetItemStr_va(val, root, comac_argc(x), x)
 
-#endif
-
-#if (HY_JSON_USE_TYPE == 2)
+#elif (HY_JSON_USE_TYPE == 2)
 
 /**
  * @brief 获取item中的int值
@@ -360,6 +344,24 @@ double HyJsonGetItemReal2(double err_val, void *root,
 const char *HyJsonGetItemStr2(const char *err_val,
                               void *root, char *fmt, hy_u32_t fmt_len);
 
+#endif
+
+#if 0
+/**
+ * @brief 从文件中创建json
+ *
+ * @param file 文件路径
+ *
+ * @return 成功返回句柄，失败返回NULL
+ */
+HyJsonFile_s *HyJsonFileCreate(const char *file);
+
+/**
+ * @brief 销毁从文件中创建json
+ *
+ * @param handle 句柄的地址（二级指针）
+ */
+void HyJsonFileDestroy(HyJsonFile_s **handle_pp);
 #endif
 
 #ifdef __cplusplus
